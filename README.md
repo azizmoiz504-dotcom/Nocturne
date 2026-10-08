@@ -1,115 +1,134 @@
-# Nocturne — a redesign prototype for AQM Oilfield
+# Fakhri Tools & Workshop Materials Trading LLC: website
 
-A cinematic, fully-working prototype of a new website for **AQM Oilfield Equipments Trading F.Z.C** (Ajman Free Zone, UAE), built from a full audit of [aqmoilfield.com](https://aqmoilfield.com). Every page, product, document and piece of copy on the live site is carried over, and the site is rebuilt around one idea.
+A phone-first catalogue site for the Fakhri Tools trade counter in Al Quoz Industrial Area 3, Dubai. It is built to feel like a hardware store, not a software product: white shelves, a big search bar, category aisles, a ref number on every product, and a quote list you can read out over the phone.
 
-![Hero — exploded flange joint over a drafting overlay](docs/screens/01-hero-exploded.jpg)
+| Phone | | | |
+|---|---|---|---|
+| ![Home](docs/screens/01-home-phone.jpg) | ![Catalogue](docs/screens/02-catalogue-phone.jpg) | ![Product](docs/screens/03-product-phone.jpg) | ![Quote list](docs/screens/04-quote-list-phone.jpg) |
 
-## The idea
+![Home on desktop](docs/screens/05-home-desktop.jpg)
 
-**The Q in AQM is a flange.** The original logo draws its Q as a flange ring with bolt holes. A flange *joins things under pressure*, and that is also what AQM does as a business: it connects manufacturers in seven countries to projects across the UAE, GCC and Africa.
-
-So the site opens on a weld-neck flange joint, rendered live in 3D. As you scroll it assembles: the flanges close on a spiral-wound gasket, eight studs slide through, and the nuts run down in the real **1-5-3-7-2-6-4-8 star torque sequence**, each flashing amber as it seats. The HUD tracks the bolt-up. Then the camera swings onto the axis and flies down the bore, *into the line* and into the rest of the site.
-
-**Nocturne** is the visual mood: oil & gas at blue hour. The palette pairs night navy and the brushed chrome of AQM's logo with one warm accent, the amber of refinery light. The reference is the live site's own photography, which is blue-hour industrial with a sodium-orange glow.
+## Shop details used on the site
 
 | | |
 |---|---|
-| ![](docs/screens/02-hero-bolted.jpg) | ![](docs/screens/03-hero-bore.jpg) |
-| ![](docs/screens/04-range-pipeline.jpg) | ![](docs/screens/05-supply-globe.jpg) |
-| ![](docs/screens/06-industries.jpg) | ![](docs/screens/12-schedule-explorer.jpg) |
-| ![](docs/screens/09-catalogue.jpg) | ![](docs/screens/10-product-detail.jpg) |
-| ![](docs/screens/13-contact-map.jpg) | ![](docs/screens/17-mobile.jpg) |
+| Name | Fakhri Tools & Workshop Materials Trading LLC |
+| Address | Wh #8, 8th Street, Al Quoz Industrial Area 3, Al Quoz, Dubai, UAE |
+| Phone | +971 4 285 0135 |
+| Hours | Monday to Saturday 7:30am to 6:00pm, Sunday closed |
 
-## Signature moments
+All of these live in one place, `SITE` in `tools/build-data.py`. The site shows a live **Open now / Closed** badge, a "today" marker in the hours table and the current Dubai time (GST, UTC+4), so it is correct for visitors in any time zone.
 
-| Moment | What it does |
+## What changed from the AQM prototype
+
+- **Rebrand.** Every AQM name, logo, team photo, partner logo, industry page and download is gone. The Fakhri Tools logo was traced from the supplied JPG into crisp SVGs (`tools/vectorize-logo.py`): a horizontal lockup for the header, a white version for the footer, the stacked logo, the emblem, and favicons.
+- **Hardware look instead of SaaS.** The site is now light, with the logo's red `#b91a20` and navy `#084767`, condensed uppercase headings and a dense product grid. The home page has a pegboard of products hanging on hooks and a tape-measure strip. The dark 3D hero, globe and smooth-scroll library are gone. The page JS is now 28 KB of plain JavaScript (no GSAP, Lenis or Three.js).
+- **Phone first.**
+  - A fixed bottom bar with Call, Directions, Quote and Products.
+  - The search bar stays pinned while the logo row slides away on scroll.
+  - On the catalogue page, the category chips and catalogue search stick under the header.
+  - Tap targets are at least 44px and there is no sideways scrolling at 320px.
+  - On phones, the map zooms in on the shop.
+- **Ordering flow that fits a trade counter.** There is no checkout:
+  1. Customers tap **Add to quote** on any product and set quantities.
+  2. They then either call and read out the ref numbers, show the list at the counter, or copy it.
+  3. The contact form turns their details plus the quote list into a ready-to-send enquiry. Nothing is sent to a server.
+- **Errors fixed.**
+  - Product pages with many range photos (for example the 9-item Class 150 fittings range) stretched the page sideways on phones; fixed.
+  - The phone header no longer jitters while scrolling.
+  - The "Added" message no longer covers the open quote list.
+  - All 91 pages have been checked for broken links, console errors and sideways scrolling.
+
+## Products: what was taken from mabrook-uae.com
+
+The brief was "take the products from mabrook-uae.com; if they are already there, don't do anything". The existing catalogue had 75 product lines, and a Mabrook item counts as already there when an existing line covers the same material and product type. mabrook-uae.com blocks automated access (BitNinja captcha), so the product pages were read from the Internet Archive's 22 June 2024 snapshots, and the photos were fetched directly from Mabrook.
+
+**10 new lines added** (marked with their category ref):
+
+| Ref | New line | From Mabrook |
+|---|---|---|
+| 01.11 | SS Decorative & Structural Tubes | Structural steel: SS Tubes |
+| 03.06 | SS Threaded Fittings Class 150 | 9 items: elbow, tee, socket, union, hex nipple, cap, plug, reducer bush, reducer socket (all 9 photos in the gallery) |
+| 03.07 | Long Barrel Nipples (GI, SS & MS) | Barrel nipples: GI, SS, MS |
+| 06.07 | Butterfly Valves (CI & SS) | Valves: CI and SS butterfly valves |
+| 06.08 | Safety Valves | Valves: safety valves |
+| 06.09 | Y-Strainers | Valves: CI Y-strainers |
+| 09.06 | Spiral Wound Gaskets | Gaskets: spiral wound |
+| 10.05 | SS Angles, Channels & Flat Bars | Structural steel: SS channels |
+| 10.06 | SS Round Bars | Structural steel: SS round bars |
+| 10.07 | GI Sheets | Structural steel: GI sheets |
+
+**Already covered, so left alone:**
+
+| Mabrook item | Existing line |
 |---|---|
-| **Pressure-gauge preloader** | A 0–100 bar gauge sweeps to full scale with a needle overshoot. Shown once per session. |
-| **Flange-joint hero** | A procedural Three.js weld-neck joint: machined serrations on the raised face, a spiral-wound gasket, threaded studs, heavy-hex nuts. It assembles on scroll, then the camera dollies through the bore. An engineering drawing (front view, section A–A, dimension lines) sketches itself over it. |
-| **Gate-valve page transitions** | Two gates close over the page with an amber seam and the AQM mark, then open on the next page. |
-| **The range as a pipeline** | The 12 product families scroll sideways on a live pipe with flange joints between cards. Category renders float on the night palette, with parallax inside each card. |
-| **Night-globe supply lines** | 4,500 land dots (Natural Earth data). Amber arcs run in from Germany, the UK, India, China, Taiwan, Malaysia and Singapore to Ajman, then blue arcs run out to the GCC and Africa. The camera moves with the copy. |
-| **Industries** | Six sectors, one scroll step each, with full-bleed photography crossfading. |
-| **Engineer's desk** | An interactive **pipe-schedule explorer** (NPS ½″–24″, SCH 40/80/160/XXS) with a live cross-section, OD/WT/ID and kg/m. |
-| **Enquiry (RFQ) builder** | Add products from anywhere and set quantities. The list goes out as a single **email, WhatsApp message or form** with everything pre-filled. |
-| **Live office status** | "Open now · closes 6:30 PM", computed in Ajman time (GST, UTC+4), plus a local clock and today highlighted in the hours table. |
-| **Custom UAE map** | A coastline drawn from Natural Earth data, with the Ajman Free Zone pin pulsing. |
-| **Logo wall** | 16 partner logos normalised into white silhouettes. On hover, each reveals its true colours on its native ground. |
+| Carbon steel pipes | CS/MS Seamless & Welded Pipes |
+| Galvanized steel pipes | GI Pipes |
+| Stainless steel pipes (YCInox) | SS Seamless, ERW, EFW, LSAW & HFW Pipes |
+| MS butt-weld fittings | CS Butt-Welded Seamless Fittings |
+| SS butt-weld fittings | SS Butt-Welded Seamless and ERW Fittings |
+| MS flanges | CS Flanges |
+| SS flanges | SS Flanges |
+| GI threaded fittings | GI Threaded Fittings |
+| MI threaded fittings | MI Fittings |
+| MS 1000 PSI fittings | Low Pressure 1000 PSI Fittings |
+| MS 3000 PSI fittings | High Pressure 2000, 3000 & 6000 PSI Fittings |
+| Camlock couplers and adapters (parts A to F, DC, DP) | the four camlock lines |
+| Grooved fittings | Grooved Firefighting Couplings |
+| Expansion joints and flexible connectors | Universal Assembly & Flexible Joints, Rubber Flexible Connector |
+| Rubber, green and red gaskets | the cut gasket and sheet lines |
+| Ball, check, gate and globe valves | Flange End Valves, Threaded & Socket-Welded Valves |
+| MS channels and beams | Universal Beams & Channels |
+| Pressure gauges | Pressure Gauges |
 
-## Coverage: everything on the live site, and where it went
+Not added: **Black Metallic Gaskets** (unclear whether it means ring-type joints or spiral wound; easy to add once confirmed). Mabrook's "Machines", "Industry solutions" and "Our brands" pages are company content rather than products.
 
-| Live site | Prototype |
+The catalogue is now 85 lines in 12 categories. New photos have Mabrook's grey caption bar cropped off and are padded to a square on white.
+
+## Please check before going live
+
+1. **Email and WhatsApp.** None were supplied, so the quote list and enquiry form offer **Call** and **Copy**. Add `email` and/or `whatsapp` (digits only, for example `971501234567`) to `SITE` in `tools/build-data.py` and rebuild: **Email list** and **Send on WhatsApp** buttons then appear automatically.
+2. **Map pin.** The pin is placed at Al Quoz Industrial Area 3 from the address, not from GPS. The **Get directions** button searches Google Maps for the shop name. If you have a Google Maps share link for the warehouse, put it in `SITE.maps`.
+3. **Product text and photos.** The original 75 lines still use the descriptions and photos from the earlier prototype (sourced from aqmoilfield.com). They read as generic catalogue copy, but replace any photo or claim that doesn't match what Fakhri Tools stocks.
+4. **Brands and group.** Mabrook lists brands (Welham Mass, Bossini, Bothwell, Froch, YCInox, Jazeera, SA Brand, TA Chen, Surya) and says it is part of Fakhri Group. Neither is claimed on this site. Say the word if they should be.
+5. **Legal page.** Terms, privacy and cookie sections are placeholders.
+
+## Pages
+
+| Page | What it does |
 |---|---|
-| Home hero: "Trusted Supplier of Oilfield & Industrial Equipment in UAE", intro, *View Products* / *Contact Us* | Home → hero ("Built for pressure."), lead and both CTAs. The original phrase is kept in the page title/description for SEO. |
-| Who we are | Home (01) word-by-word scroll reveal, plus figures |
-| 12 product-range cards | Home (02) pipeline, and a category header on each catalogue group |
-| Reliable Industrial Supply Partner + 16 logos | Home (06) / About (09): marquee and logo wall |
-| Industries We Serve (6) | Home (04) pinned sequence |
-| Let's start talking (form) | Home (08), Contact (01) |
-| Why Choose AQM (4 pillars) + tagline | Home (05) cards and the pledge quote |
-| About: Introduction & About text | About (01) |
-| About: sourcing countries, markets | About (02) supply-flow diagram, Home (03) globe |
-| About: sectors list | About (03) |
-| About: Objectives, Vision, Mission, Values | About (04)–(07) |
-| About: team (4) | About (08) |
-| Products: 75 products over 5 paginated pages | One filterable, searchable catalogue + **75 static product pages** with related items, prev/next and technical documents |
-| Downloads: brochure + 27 charts (PDF viewers that fail to load on the live site) | Technical library: featured 3D brochure, filterable index of all 28 PDFs (linked to the live files), schedule explorer |
-| Contact: phone, email, address, socials, hours, form | Contact: four channel cards, form + hours, map |
-| Footer: about, products, contact, address, hours, legal | Footer: all of it, plus live status, Ajman clock and back-to-top |
-| WhatsApp button | Floating WhatsApp button (+ WhatsApp actions throughout) |
-
-## Things I fixed or flagged on the live site
-
-- **Downloads are broken.** All 28 embedded PDF viewers show "Error loading PDF". The prototype links straight to the files.
-- **A dead link on every page.** The footer's "Threaded Fittings" points to `/product-category/threaded-fittings/`, which returns 404. The category is `threaded-forged-fittings`.
-- **Typos in product and category names**, corrected: *Needal → Needle*, *Vaccum → Vacuum*, *Baurer → Bauer*, *Threaed → Threaded*, *Socked-welded → Socket-welded*, *Vavles → Valves*, *Seawage → Sewage*, *olifield / Ollfield / certifiod*.
-- **Counters not carried over.** About animates to *14K+ happy clients, 21K+ projects, 471+ expert team, 4.8 rating*. These look like theme defaults (the page shows a team of four), so the prototype uses verifiable figures instead: 12 families, 75+ lines, 16 partners, 7 sourcing countries, 3 regions.
-- **Social icons have no URLs** and **legal footer items have no pages.** The prototype has placeholders (`legal.html`) for AQM to fill.
-
-## Open questions for AQM
-
-1. **Real counters?** If AQM has genuine client and project numbers, they slot into the figures rows.
-2. **Photography.** The two About images are AI-generated (`Gemini_Generated_Image_*` on the live site). Real yard and office photos would strengthen trust.
-3. **Social profile URLs** and **legal text** (terms, trademark, cookies, privacy).
-4. **Form backend.** In the prototype the form validates, then prepares the message for email or WhatsApp. At launch, point `[data-form]` at a real endpoint (or the existing Elementor/WordPress handler).
-5. **Logo.** The header uses a vector redraw of the AQM monogram (flange-Q, chrome gradient). The original raster logo still appears on the brochure cover. Confirm, or supply a vector master.
-6. **HDPE Flanges** reuses the SS Flanges photo on the live site, so it does here too.
+| `index.html` | Pegboard hero, 12 category aisles, featured products, how ordering works, pipe chart teaser, visit block with live hours and map |
+| `products.html` | All 85 lines grouped by category. Sticky chip filters on phones and a sidebar on desktop, instant search, deep links such as `products.html#valves` |
+| `products/<slug>.html` | 85 product pages. Each has a photo gallery with zoom, a specs table, quantity and Add to quote, a call box, related items, and previous/next links |
+| `pipe-chart.html` | Interactive pipe schedule explorer (½″ to 24″, SCH 40 / 80 / 160 / XXS) plus the full table |
+| `contact.html` | Call, visit and hours cards, an enquiry builder that attaches the quote list, and the map |
+| `about.html` | About the shop, the full range, ordering steps, visit block |
+| `legal.html` | Placeholders |
 
 ## Run it
 
 ```bash
 npm install
-npm run dev          # builds, then serves on http://localhost:5173
+npm run build   # CSS, JS and all 91 pages
+npm run serve   # http://localhost:5173
 ```
 
-The built site is committed, so you can also just open `index.html`. Everything works from `file://`: scripts are bundled as classic IIFEs and fonts are inlined.
+The built site is plain static files and also works when opened straight from disk (`index.html`).
 
-```
-index.html  about.html  products.html  downloads.html  contact.html  legal.html
-products/<slug>.html        75 generated product pages
-assets/css|js|img           built output (committed)
-src/templates/*.js          page templates (rendered to static HTML at build time)
-src/js/*                    client: smooth scroll, motion, transitions, RFQ, globe, page logic
-src/hero.js                 the Three.js flange joint
-src/css/*.css               design system: tokens, chrome, home, pages
-src/data.js                 generated content (catalogue, partners, downloads, globe dots, UAE map, pipe data)
-tools/                      fetch → process images → build data → build pages
-```
-
-**Rebuild from the live site** (needs Python 3 with Pillow, numpy and scipy):
+To rebuild the catalogue from source (needs Python 3 with Pillow, numpy, scipy and potracer):
 
 ```bash
-npm run fetch:source    # catalogue via the WooCommerce Store API, imagery, Natural Earth data → .cache/
-npm run build:images    # cut-outs, logo silhouettes, webp encoding → assets/img
-npm run build:data      # → src/data.js
-npm run build           # CSS + JS + 81 static pages
+npm run fetch:source   # Mabrook photos and map data into .cache/source
+npm run build:logo     # trace the logo into SVGs
+npm run build:images   # crop and square product photos, build category tiles
+npm run build:data     # write src/data.js from tools/catalogue/*.json
+npm run build
 ```
 
-## Craft notes
-
-- **Static and fast.** No framework. Pages are pre-rendered for SEO and work without JS. Client JS only adds motion and behaviour, and the 3D bundle loads on the home page only.
-- **Motion**: GSAP + ScrollTrigger + SplitText, with Lenis smooth scroll. Hero and globe progress use time-based easing with a capped lag, so they never trail the copy.
-- **Adaptive 3D**: bloom and resolution drop automatically on slow devices, and rendering pauses when the hero is off-screen or the tab is hidden. If WebGL is unavailable, a still render is shown instead.
-- **Accessible**: skip link, focus styles, ARIA on menus, drawer and toolbars, keyboard `/` to search, Escape closes overlays. `prefers-reduced-motion` freezes the hero on the assembled joint, removes pinning and scrubbing, and shows all content immediately.
-- **Typography**: Archivo (variable width; expanded for display), Instrument Serif italic, Geist, Geist Mono. All are SIL OFL and self-hosted.
-- **Credits**: three.js (MIT), GSAP (free "no charge" license), Lenis (MIT), Natural Earth via world-atlas (public domain). Product, team, partner and site imagery belongs to AQM Oilfield and the respective manufacturers.
+- Catalogue sources:
+  - `tools/catalogue/base.json`: the 75 original lines
+  - `tools/catalogue/additions.json`: the 10 Mabrook lines, with specs and gallery items
+  - `tools/catalogue/categories.json`: names, order and blurbs
+- Page templates are in `src/templates/`.
+- Styles are in `src/css/`: `base.css` covers tokens, header, footer, drawer and the bottom bar; `components.css` covers cards and blocks; `pages.css` covers page layouts.
+- Browser code is in `src/js/`.

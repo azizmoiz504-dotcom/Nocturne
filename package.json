@@ -1,25 +1,23 @@
 {
-  "name": "aqm-nocturne",
-  "version": "0.1.0",
+  "name": "fakhri-tools",
+  "version": "0.2.0",
   "private": true,
-  "description": "Nocturne \u2014 a cinematic redesign prototype for AQM Oilfield Equipments Trading F.Z.C",
+  "description": "Fakhri Tools & Workshop Materials Trading LLC: catalogue website (static, phone-first)",
   "scripts": {
     "fetch:source": "bash tools/fetch-source.sh .cache/source",
+    "build:logo": "python3 tools/vectorize-logo.py tools/catalogue/fakhri-logo.jpg assets/img/brand",
     "build:images": "python3 tools/process-images.py .cache/source assets/img",
     "build:data": "python3 tools/build-data.py .cache/source",
     "build:css": "esbuild src/css/main.css --bundle --minify --loader:.woff2=dataurl --outfile=assets/css/main.css",
-    "build:js": "esbuild src/app.js src/hero.js --bundle --minify --format=iife --target=es2019 --outdir=assets/js --legal-comments=none",
+    "build:js": "esbuild src/app.js --bundle --minify --format=iife --target=es2019 --outfile=assets/js/app.js --legal-comments=none",
     "build:pages": "node tools/build-pages.mjs",
     "build": "npm run build:css && npm run build:js && npm run build:pages",
-    "watch": "esbuild src/app.js src/hero.js --bundle --format=iife --target=es2019 --outdir=assets/js --watch",
+    "watch": "esbuild src/app.js --bundle --format=iife --target=es2019 --outfile=assets/js/app.js --watch",
     "serve": "http-server . -p 5173 -c-1 -s",
     "dev": "npm run build && npm run serve"
   },
   "devDependencies": {
     "esbuild": "0.24.0",
-    "gsap": "3.13.0",
-    "lenis": "1.1.20",
-    "three": "0.170.0",
     "http-server": "14.1.1"
   },
   "type": "module"

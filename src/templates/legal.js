@@ -1,30 +1,23 @@
 import { SITE } from '../data.js';
-import { page, pageHero, esc } from './layout.js';
+import { page, pageHead, esc } from './layout.js';
 
-const SECTIONS = [
-  ['terms', 'Terms of use'],
-  ['trademark', 'Trademark'],
-  ['cookies', 'Cookie policy'],
-  ['privacy', 'Privacy policy'],
-];
+const SECTIONS = [['terms', 'Terms of use'], ['privacy', 'Privacy policy'], ['cookies', 'Cookie policy']];
 
 export default function legal() {
   const body = `
-${pageHero({ eyebrowText: 'Legal', title: 'Policies &amp; <em>terms.</em>', crumbs: [['Legal']], cls: 'phero--short' })}
-<section class="legal">
-  <div class="wrap legal__grid">
-    <nav class="legal__toc" aria-label="On this page">
-      ${SECTIONS.map(([id, t], i) => `<a href="#${id}"><span>0${i + 1}</span>${esc(t)}</a>`).join('')}
-    </nav>
+${pageHead({ title: 'Legal', crumbs: [['Legal']] })}
+<section class="sec sec--tight">
+  <div class="wrap legal">
+    <nav class="legal__toc" aria-label="On this page">${SECTIONS.map(([id, t]) => `<a href="#${id}">${esc(t)}</a>`).join('')}</nav>
     <div class="legal__body">
-      ${SECTIONS.map(([id, t], i) => `
+      ${SECTIONS.map(([id, t]) => `
       <article class="legal__sec" id="${id}">
-        <p class="legal__n">0${i + 1}</p>
         <h2>${esc(t)}</h2>
-        <p class="legal__todo">Placeholder — the live site lists “${esc(t)}” in its footer but does not publish the text. ${esc(SITE.name)} to supply final wording before launch.</p>
+        <p class="legal__todo">Placeholder: ${esc(SITE.name)} to supply the final wording before launch.</p>
       </article>`).join('')}
+      <p class="note">This site does not store your quote list or enquiry on a server. Your quote list is saved only in your own browser so it survives a page reload.</p>
     </div>
   </div>
 </section>`;
-  return page({ id: 'legal', title: 'Legal — AQM Oilfield', desc: 'Terms of use, trademark, cookie and privacy policies.', body });
+  return page({ id: 'legal', title: 'Legal | Fakhri Tools', desc: 'Terms of use, privacy and cookie policy.', body });
 }

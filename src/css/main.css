@@ -1,5 +1,4 @@
 @import './fonts.css';
 @import './base.css';
-@import './chrome.css';
-@import './home.css';
+@import './components.css';
 @import './pages.css';

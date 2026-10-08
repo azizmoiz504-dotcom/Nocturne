@@ -1,173 +1,250 @@
-import { gsap, html, $, $$, onScroll, scrollTo, stopScroll, startScroll, lenis, finePointer, reduced } from './env.js';
+// Header behaviour, mobile menu, product search, copy buttons, tape and reveals.
+import { SEARCH } from '../data.js';
+import { $, $$, BASE, esc, norm, session, copyText, toast, dialog, reduced } from './util.js';
 
-// ---------------------------------------------------------------------------
-// Header: glass on scroll, hides on the way down, returns on the way up.
-// ---------------------------------------------------------------------------
 export function initHeader() {
   const hdr = $('[data-hdr]');
-  const bar = $('[data-progress]');
   if (!hdr) return;
-  let hidden = false;
-  let acc = 0;
-  const set = (y, dir, dy) => {
-    hdr.classList.toggle('is-scrolled', y > 30);
-    acc = Math.sign(dy) === Math.sign(acc) ? acc + dy : dy;
-    const shouldHide = y > 240 && dir > 0 && acc > 40 && !html.classList.contains('menu-open');
-    const shouldShow = dir < 0 && acc < -24;
-    if (shouldHide && !hidden) { hidden = true; hdr.classList.add('is-hidden'); }
-    else if ((shouldShow || y < 120) && hidden) { hidden = false; hdr.classList.remove('is-hidden'); }
-    html.classList.toggle('hdr-shown', !hidden && y > 30);
-    const max = document.documentElement.scrollHeight - innerHeight;
-    if (bar) bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+  const root = document.documentElement;
+  const search = $('.search', hdr);
+  const setH = () => {
+    root.style.setProperty('--hdr-h', `${hdr.offsetHeight}px`);
+    root.style.setProperty('--hdr-row', `${Math.max(0, search.offsetTop - 8)}px`);
   };
+  setH();
+  if ('ResizeObserver' in window) new ResizeObserver(setH).observe(hdr);
+  else addEventListener('resize', setH);
+
   let lastY = scrollY;
-  onScroll((y) => { const dy = y - lastY; set(y, Math.sign(dy), dy); lastY = y; });
-  set(scrollY, 0, 0);
-}
-
-// ---------------------------------------------------------------------------
-// Mobile menu
-// ---------------------------------------------------------------------------
-export function initMenu() {
-  const btn = $('[data-menu-toggle]');
-  const menu = $('[data-menu]');
-  if (!btn || !menu) return;
-  const set = (open) => {
-    html.classList.toggle('menu-open', open);
-    btn.setAttribute('aria-expanded', open);
-    menu.setAttribute('aria-hidden', !open);
-    open ? stopScroll() : startScroll();
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const y = scrollY;
+    hdr.classList.toggle('is-stuck', hdr.getBoundingClientRect().top <= 0 && y > 0);
+    // On phones the search row folds away while scrolling down and returns on the way up.
+    const typing = hdr.contains(document.activeElement) && document.activeElement.matches('input');
+    if (!typing && Math.abs(y - lastY) > 6) {
+      const compact = y > lastY && y > 260;
+      hdr.classList.toggle('is-compact', compact);
+      root.classList.toggle('hdr-compact', compact);
+      lastY = y;
+    }
   };
-  btn.addEventListener('click', () => set(!html.classList.contains('menu-open')));
-  $$('a', menu).forEach((a) => a.addEventListener('click', () => set(false)));
-  addEventListener('keydown', (e) => e.key === 'Escape' && html.classList.contains('menu-open') && set(false));
-}
-
-// ---------------------------------------------------------------------------
-// Anchors, back-to-top, placeholder socials
-// ---------------------------------------------------------------------------
-export function initAnchors(toast) {
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
-    const href = a.getAttribute('href');
-    if (a.hasAttribute('data-social')) {
-      e.preventDefault();
-      toast('Social profile links to be added by AQM');
-      return;
+  addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
     }
-    const url = new URL(a.href, location.href);
-    if (url.hash && url.pathname === location.pathname && href !== '#') {
-      const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
-      if (target) {
-        e.preventDefault();
-        history.replaceState(null, '', url.hash);
-        scrollTo(target, { offset: -90 });
-      }
-    }
-  });
-  $('[data-totop]')?.addEventListener('click', () => scrollTo(0, { duration: 2 }));
-}
-
-// ---------------------------------------------------------------------------
-// Toast
-// ---------------------------------------------------------------------------
-export function createToast() {
-  const el = $('[data-toast]');
-  let t;
-  return (msg, action) => {
-    if (!el) return;
-    el.innerHTML = '';
-    el.append(document.createTextNode(msg));
-    if (action) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = action.label;
-      b.addEventListener('click', () => { action.fn(); el.classList.remove('is-on'); });
-      el.append(b);
-    }
-    el.classList.add('is-on');
-    clearTimeout(t);
-    t = setTimeout(() => el.classList.remove('is-on'), 3600);
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Cursor + magnetic buttons (fine pointers only)
-// ---------------------------------------------------------------------------
-export function initCursor() {
-  if (!finePointer || reduced) return;
-  const c = $('[data-cursor-el]');
-  if (!c) return;
-  html.classList.add('has-cursor');
-  const ring = $('.cursor__ring', c), dot = $('.cursor__dot', c), label = $('[data-cursor-label]', c);
-  const rx = gsap.quickTo([ring, label], 'x', { duration: 0.55, ease: 'power3' });
-  const ry = gsap.quickTo([ring, label], 'y', { duration: 0.55, ease: 'power3' });
-  const dx = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power3' });
-  const dy = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power3' });
-  gsap.set(c, { autoAlpha: 0 });
-  addEventListener('pointermove', (e) => {
-    if (!seen) { seen = true; gsap.set([ring, label, dot], { x: e.clientX, y: e.clientY }); gsap.to(c, { autoAlpha: 1, duration: 0.4 }); }
-    rx(e.clientX); ry(e.clientY); dx(e.clientX); dy(e.clientY);
   }, { passive: true });
-  let seen = false;
-  document.addEventListener('pointerleave', () => gsap.to(c, { autoAlpha: 0, duration: 0.3 }));
-  document.addEventListener('pointerenter', () => seen && gsap.to(c, { autoAlpha: 1, duration: 0.3 }));
-  document.addEventListener('pointerover', (e) => {
-    const t = e.target.closest('[data-cursor], a, button, label, input, textarea');
-    const lab = t?.closest('[data-cursor]')?.dataset.cursor;
-    c.classList.toggle('is-label', !!lab);
-    c.classList.toggle('is-hover', !!t && !lab && !t.matches('input, textarea'));
-    if (lab) label.textContent = lab;
+  update();
+}
+
+export function initMenu() {
+  const el = $('[data-menu]');
+  const btn = $('[data-menu-open]');
+  if (!el || !btn) return;
+  const d = dialog(el, '[data-menu-close]', {
+    onOpen: () => btn.setAttribute('aria-expanded', 'true'),
+    onClose: () => btn.setAttribute('aria-expanded', 'false'),
+  });
+  btn.addEventListener('click', d.open);
+  // Category links on the products page filter in place; close the menu so the result is visible.
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('a[href*="#"]')) d.close();
   });
 }
 
-export function initMagnetic() {
-  if (!finePointer || reduced) return;
-  $$('[data-magnetic]').forEach((el) => {
-    const xTo = gsap.quickTo(el, 'x', { duration: 0.8, ease: 'elastic.out(1, 0.4)' });
-    const yTo = gsap.quickTo(el, 'y', { duration: 0.8, ease: 'elastic.out(1, 0.4)' });
-    el.addEventListener('pointermove', (e) => {
-      const r = el.getBoundingClientRect();
-      xTo((e.clientX - (r.left + r.width / 2)) * 0.22);
-      yTo((e.clientY - (r.top + r.height / 2)) * 0.32);
-    });
-    el.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
-  });
-}
+// Header search: instant suggestions from the catalogue index, Enter opens the filtered catalogue.
+const INDEX = SEARCH.map(([slug, name, cat, ref]) => ({ slug, name, cat, ref, hay: norm(`${name} ${cat} ${ref} ${slug.replace(/-/g, ' ')}`) }));
 
-// ---------------------------------------------------------------------------
-// Live office status — Ajman runs on Gulf Standard Time (UTC+4), Mon–Sat 8:00–18:30.
-// ---------------------------------------------------------------------------
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const fmt = (h, m) => `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
-
-export function officeState(now = new Date()) {
-  const t = new Date(now.getTime() + (now.getTimezoneOffset() + 240) * 60000);
-  const d = t.getDay(), mins = t.getHours() * 60 + t.getMinutes();
-  const workday = d >= 1 && d <= 6;
-  const open = workday && mins >= 480 && mins < 1110;
-  let text;
-  if (open) text = `Open now · closes ${fmt(18, 30)}`;
-  else if (workday && mins < 480) text = `Closed · opens today ${fmt(8, 0)}`;
-  else {
-    const next = d === 6 || d === 0 ? 1 : d + 1;
-    text = `Closed · opens ${next === (d + 1) % 7 ? 'tomorrow' : DAYS[next]} ${fmt(8, 0)}`;
+function highlight(name, toks) {
+  const low = name.toLowerCase();
+  const marks = new Array(name.length).fill(false);
+  for (const t of toks) {
+    let i = low.indexOf(t);
+    while (t && i !== -1) {
+      for (let k = i; k < i + t.length; k++) marks[k] = true;
+      i = low.indexOf(t, i + t.length);
+    }
   }
-  return { open, text, day: d, clock: fmt(t.getHours(), t.getMinutes()) };
+  let out = '';
+  let open = false;
+  for (let k = 0; k < name.length; k++) {
+    if (marks[k] !== open) {
+      out += open ? '</mark>' : '<mark>';
+      open = marks[k];
+    }
+    out += esc(name[k]);
+  }
+  return out + (open ? '</mark>' : '');
 }
 
-export function initStatus() {
-  const tick = () => {
-    const s = officeState();
-    $$('[data-status]').forEach((el) => {
-      el.classList.toggle('is-open', s.open);
-      el.classList.toggle('is-closed', !s.open);
-      el.querySelector('span').textContent = s.text;
-    });
-    $$('[data-clock]').forEach((el) => (el.textContent = s.clock));
-    $$('[data-hours] [data-day]').forEach((el) => el.classList.toggle('is-today', +el.dataset.day === s.day));
+export function findProducts(q) {
+  const toks = norm(q).split(' ').filter(Boolean);
+  if (!toks.length) return { toks, hits: [] };
+  const hits = INDEX.filter((p) => toks.every((t) => p.hay.includes(t)))
+    .map((p) => {
+      const n = p.name.toLowerCase();
+      const i = n.indexOf(toks[0]);
+      return { p, score: (i === 0 ? 0 : i > 0 ? 1 : 2) * 100 + p.name.length };
+    })
+    .sort((a, b) => a.score - b.score)
+    .map((x) => x.p);
+  return { toks, hits };
+}
+
+export function initSearch() {
+  const form = $('form[data-search]');
+  if (!form) return;
+  const input = $('[data-search-input]', form);
+  const pop = $('[data-search-pop]', form);
+  let active = -1;
+
+  const items = () => $$('.sugg', pop);
+  const close = () => {
+    pop.hidden = true;
+    active = -1;
+    input.setAttribute('aria-expanded', 'false');
   };
-  tick();
-  setInterval(tick, 20000);
+  const setActive = (i) => {
+    const list = items();
+    active = (i + list.length) % list.length;
+    list.forEach((el, k) => el.classList.toggle('is-on', k === active));
+    list[active] && list[active].scrollIntoView({ block: 'nearest' });
+  };
+
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  pop.id = 'search-pop';
+  pop.setAttribute('role', 'listbox');
+  input.setAttribute('aria-controls', pop.id);
+
+  function render() {
+    const q = input.value.trim();
+    if (!q) return close();
+    const { toks, hits } = findProducts(q);
+    const top = hits.slice(0, 6);
+    pop.innerHTML = top.length
+      ? top
+          .map((p) => `<a class="sugg" role="option" href="${BASE}products/${p.slug}.html"><span class="sugg__ref">${p.ref}</span><span class="sugg__name">${highlight(p.name, toks)}</span><span class="sugg__cat">${esc(p.cat)}</span></a>`)
+          .join('') +
+        `<a class="sugg sugg--all" role="option" href="${BASE}products.html" data-sugg-all><span>${hits.length > top.length ? `See all ${hits.length} results` : 'Show in catalogue'}</span><span aria-hidden="true">→</span></a>`
+      : `<p class="sugg__none">No product called “${esc(q)}”. Try a shorter word, or call us: we can usually source it.</p>`;
+    pop.hidden = false;
+    active = -1;
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  function go(q) {
+    close();
+    input.blur();
+    if (document.body.dataset.page === 'products') {
+      dispatchEvent(new CustomEvent('ft:search', { detail: q }));
+    } else {
+      session.set('ft-q', q);
+      location.href = `${BASE}products.html`;
+    }
+  }
+
+  input.addEventListener('input', render);
+  input.addEventListener('focus', () => input.value.trim() && render());
+  input.addEventListener('keydown', (e) => {
+    if (pop.hidden) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive(active + 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive(active - 1);
+    } else if (e.key === 'Escape') {
+      close();
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault();
+      items()[active].click();
+    }
+  });
+  pop.addEventListener('click', (e) => {
+    if (e.target.closest('[data-sugg-all]')) {
+      e.preventDefault();
+      go(input.value.trim());
+    }
+  });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (q) go(q);
+    else input.focus();
+  });
+  form.addEventListener('focusout', (e) => {
+    if (!form.contains(e.relatedTarget)) setTimeout(close, 120);
+  });
+}
+
+export function initCopy() {
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-copy]');
+    if (!b) return;
+    const ok = await copyText(b.dataset.copy);
+    toast(ok ? `Copied: ${b.dataset.copy}` : 'Copy failed: select the text and copy it manually');
+  });
+}
+
+// The tape measure slides a little as the page scrolls.
+export function initTape() {
+  const tracks = $$('.tape__track');
+  if (!tracks.length || reduced()) return;
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    for (const t of tracks) {
+      const max = t.offsetWidth - t.parentElement.offsetWidth;
+      t.style.transform = `translate3d(${-Math.min(max, scrollY * 0.35)}px,0,0)`;
+    }
+  };
+  addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+}
+
+// Gentle reveal for section furniture; content is visible without JS or with reduced motion.
+export function initReveal() {
+  if (reduced() || !('IntersectionObserver' in window)) return;
+  const els = $$('.sec__head, .ct, .step, .stock li, .rcard, .visit__map, .band__table');
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      en.target.classList.add('is-in');
+      io.unobserve(en.target);
+    }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  const vh = innerHeight;
+  els.forEach((el, i) => {
+    if (el.getBoundingClientRect().top < vh) return; // already on screen: leave alone
+    el.classList.add('rv');
+    el.style.transitionDelay = `${(i % 4) * 50}ms`;
+    io.observe(el);
+  });
+}
+
+// On phones the store map zooms in around the pin so labels stay readable.
+export function initMap() {
+  const maps = $$('svg[data-map]');
+  if (!maps.length) return;
+  const fit = () => {
+    for (const svg of maps) {
+      const [w, h, x, y] = svg.dataset.map.split(' ').map(Number);
+      const narrow = svg.parentElement.clientWidth < 600;
+      const cw = 560;
+      const ch = 470;
+      const x0 = Math.max(0, Math.min(w - cw, x - cw * 0.28));
+      const y0 = Math.max(0, Math.min(h - ch, y - ch * 0.55));
+      svg.setAttribute('viewBox', narrow ? `${x0} ${y0} ${cw} ${ch}` : `0 0 ${w} ${h}`);
+    }
+  };
+  fit();
+  addEventListener('resize', fit);
 }

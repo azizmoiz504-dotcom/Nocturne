@@ -1,10 +1,11 @@
-import { SITE, CATEGORIES, PRODUCTS, DOWNLOADS } from '../data.js';
+import { SITE, PRODUCTS } from '../data.js';
 import { I } from './icons.js';
-import { page, esc, eyebrow, btn, roll } from './layout.js';
-import { productCard } from './shared.js';
+import { page, esc, btn } from './layout.js';
+import { productCard, addButton, catOf } from './shared.js';
 
-// "At a glance" facts — pulled only from the product's own description, never invented.
+// Specs for the original catalogue lines are read from their own descriptions, never invented.
 export function facts(p) {
+  if (p.specs) return p.specs;
   const d = p.desc;
   const out = [];
   let m = d.match(/sizes? from ([^\s,]+(?: ?mm)?) to ([^\s,]+(?: ?mm)?)/i);
@@ -21,96 +22,79 @@ export function facts(p) {
   return out;
 }
 
-const DOCS_FOR = {
-  flanges: ['class-150', 'class-300', 'pn16', 'jis-10k'],
-  'pipe-tubings': ['schedule-chart', 'sch-40', 'sch-80'],
-  'butt-welded-fittings': ['schedule-chart', 'sch-40', 'sch-80'],
-  'threaded-forged-fittings': ['schedule-chart', 'sch-80', 'sch-160'],
-  valves: ['class-150', 'pn16'],
-  'gaskets-sheets': ['class-150', 'pn16'],
-};
-
 export default function product(p) {
   const b = '../';
-  const cat = CATEGORIES.find((c) => c.slug === p.cat);
+  const c = catOf(p.cat);
   const siblings = PRODUCTS.filter((x) => x.cat === p.cat);
   const idx = PRODUCTS.indexOf(p);
   const prev = PRODUCTS[(idx - 1 + PRODUCTS.length) % PRODUCTS.length];
   const next = PRODUCTS[(idx + 1) % PRODUCTS.length];
-  const code = `${String(cat.n).padStart(2, '0')}.${String(siblings.indexOf(p) + 1).padStart(2, '0')}`;
-  const f = facts(p);
-  const docs = ['brochure', ...(DOCS_FOR[p.cat] || [])].map((id) => DOWNLOADS.find((d) => d.id === id));
   const related = siblings.filter((x) => x !== p).slice(0, 4);
-  const wa = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hello AQM, I'd like a quotation for: ${p.name} (${cat.name}).`)}`;
-  const mail = `mailto:${SITE.email}?subject=${encodeURIComponent(`Enquiry — ${p.name}`)}&body=${encodeURIComponent(`Hello AQM team,\n\nI'd like a quotation for: ${p.name} (${cat.name}).\n\nSize / rating / material:\nQuantity:\nDelivery location:\n\nThank you.`)}`;
+  const f = facts(p);
+  const gallery = p.range && p.range.length > 1;
 
   const body = `
 <section class="pdp" data-pdp>
   <div class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="${b}index.html">Home</a><i>/</i><a href="${b}products.html">Products</a><i>/</i><a href="${b}products.html#${cat.slug}">${esc(cat.name)}</a><i>/</i><span aria-current="page">${esc(p.name)}</span>
+      <a href="${b}index.html">Home</a><i aria-hidden="true">/</i><a href="${b}products.html">Products</a><i aria-hidden="true">/</i><a href="${b}products.html#${c.slug}">${esc(c.name)}</a><i aria-hidden="true">/</i><span aria-current="page">${esc(p.name)}</span>
     </nav>
     <div class="pdp__grid">
       <div class="pdp__media">
-        <div class="pdp__frame" data-zoom>
-          <img src="${b}${p.img}" alt="${esc(p.name)}" fetchpriority="high" data-zoom-img>
-          <span class="pdp__code">No. ${code}</span>
-          <span class="pdp__hint">${I.search}Hover to inspect</span>
-        </div>
+        <figure class="pdp__frame" data-zoom>
+          <img src="${b}${p.img}" alt="${esc(p.name)}" width="600" height="600" fetchpriority="high" data-main-img>
+          <figcaption class="pdp__cap" data-main-cap>${gallery ? esc(p.range[0].name) : ''}</figcaption>
+        </figure>
+        ${gallery ? `
+        <div class="thumbs" role="group" aria-label="Items in this range" data-thumbs>
+          ${p.range.map((r, i) => `<button class="thumb${i === 0 ? ' is-on' : ''}" type="button" data-src="${b}${r.img}" data-cap="${esc(r.name)}" aria-pressed="${i === 0}"><img src="${b}${r.img}" alt="" width="96" height="96" loading="lazy"><span>${esc(r.name)}</span></button>`).join('')}
+        </div>` : ''}
       </div>
       <div class="pdp__info">
-        ${eyebrow(String(cat.n).padStart(2, '0'), cat.name)}
-        <h1 class="pdp__title" data-split="chars">${esc(p.name)}</h1>
-        <p class="pdp__desc" data-reveal>${esc(p.desc || 'Full specifications available on request — contact our sales team for sizes, ratings and materials.')}</p>
-        <dl class="glance" data-stagger>
-          <div><dt>Family</dt><dd><a href="${b}products.html#${cat.slug}">${esc(cat.name)}</a></dd></div>
-          ${f.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}
-          <div><dt>Standards</dt><dd>As per international standards — confirm on enquiry</dd></div>
-        </dl>
-        <div class="pdp__buy" data-reveal>
+        <a class="pdp__cat" href="${b}products.html#${c.slug}">${esc(c.name)}</a>
+        <h1 class="pdp__t">${esc(p.name)}</h1>
+        <p class="pdp__ref">Ref <b>${p.ref}</b> <span>Quote this ref when you call</span></p>
+        <p class="pdp__desc">${esc(p.desc)}</p>
+        ${f.length ? `<table class="specs"><caption class="sr">Specifications</caption><tbody>${f.map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table>` : ''}
+        <div class="buy">
           <div class="qty" data-qty>
             <button type="button" data-qty-dec aria-label="Decrease quantity">${I.minus}</button>
-            <input type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity" data-qty-input>
+            <input id="qty" type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity" data-qty-input>
             <button type="button" data-qty-inc aria-label="Increase quantity">${I.plus}</button>
           </div>
-          <button class="btn btn--solid pdp__add" type="button" data-rfq-add data-with-qty data-slug="${p.slug}" data-name="${esc(p.name)}" data-cat="${esc(cat.name)}" data-img="${p.img}" data-magnetic>
-            <span class="btn__fill"></span>${roll('Add to enquiry')}<span class="btn__icon">${I.plus}</span>
-          </button>
+          ${addButton(p, { cls: 'btn btn--red buy__add', withQty: true })}
         </div>
-        <div class="pdp__ask" data-reveal>
-          <a class="channel channel--sm" href="${wa}" target="_blank" rel="noopener"><span class="channel__icon">${I.whatsapp}</span><span><small>Quick question?</small>Ask on WhatsApp</span>${I.arrowUR}</a>
-          <a class="channel channel--sm" href="${mail}"><span class="channel__icon">${I.mail}</span><span><small>Prefer email?</small>${esc(SITE.email)}</span>${I.arrowUR}</a>
+        <div class="callbox">
+          ${I.phone}
+          <div><p>Order or check stock</p><a href="tel:${SITE.tel}">${esc(SITE.phone)}</a><small>Mon–Sat 7:30am – 6:00pm</small></div>
+          <button class="btn btn--line btn--sm" type="button" data-copy="${esc(SITE.phone)}">${I.copy}<span>Copy</span></button>
         </div>
-        <div class="pdp__docs" data-reveal>
-          <p class="pdp__docs-h">Technical documents</p>
-          <ul>${docs.map((d) => `<li><a href="${d.url}" target="_blank" rel="noopener">${I.file}<span>${esc(d.title)}</span><small>${esc(d.std)} · PDF</small>${I.arrowUR}</a></li>`).join('')}</ul>
-        </div>
+        <p class="pdp__note">Sizes, ratings and grades depend on current stock. We confirm them with you before you collect.</p>
       </div>
     </div>
   </div>
 </section>
 
 ${related.length ? `
-<section class="related">
+<section class="sec sec--grey">
   <div class="wrap">
-    <div class="related__head">
-      ${eyebrow('+', `More in ${cat.name}`)}
-      ${btn(`${b}products.html#${cat.slug}`, `All ${cat.name.toLowerCase()}`, { variant: 'ghost' })}
+    <div class="sec__head">
+      <div><p class="label">Same category</p><h2 class="h2">More ${esc(c.name.toLowerCase())}</h2></div>
+      ${btn(`${b}products.html#${c.slug}`, `All ${c.count} lines`, { kind: 'line' })}
     </div>
-    <div class="pgrid pgrid--4">${related.map((x) => productCard(x, b)).join('')}</div>
+    <div class="rail">${related.map((x) => productCard(x, b)).join('')}</div>
   </div>
 </section>` : ''}
 
-<nav class="pnav wrap" aria-label="Product navigation">
-  <a class="pnav__link" href="${b}products/${prev.slug}.html"><small>${I.arrow} Previous</small><b>${esc(prev.name)}</b></a>
-  <a class="pnav__link pnav__link--next" href="${b}products/${next.slug}.html"><small>Next ${I.arrow}</small><b>${esc(next.name)}</b></a>
-</nav>
-`;
+<nav class="pnav wrap" aria-label="Previous and next product">
+  <a href="${b}products/${prev.slug}.html">${I.arrowL}<span><small>Previous</small>${esc(prev.name)}</span></a>
+  <a href="${b}products/${next.slug}.html"><span><small>Next</small>${esc(next.name)}</span>${I.arrow}</a>
+</nav>`;
   return page({
     id: 'product',
     base: b,
-    title: `${p.name} — ${cat.name} | AQM Oilfield`,
-    desc: (p.desc || `${p.name} from AQM Oilfield Equipments Trading F.Z.C.`).slice(0, 158),
+    title: `${p.name} | Fakhri Tools`,
+    desc: p.desc.slice(0, 158),
     body,
   });
 }

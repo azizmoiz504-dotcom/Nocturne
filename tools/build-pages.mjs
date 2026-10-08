@@ -7,7 +7,7 @@ import home from '../src/templates/home.js';
 import about from '../src/templates/about.js';
 import products from '../src/templates/products.js';
 import product from '../src/templates/product.js';
-import downloads from '../src/templates/downloads.js';
+import pipeChart from '../src/templates/pipe-chart.js';
 import contact from '../src/templates/contact.js';
 import legal from '../src/templates/legal.js';
 
@@ -21,7 +21,7 @@ const out = (file, html) => {
 out('index.html', home());
 out('about.html', about());
 out('products.html', products());
-out('downloads.html', downloads());
+out('pipe-chart.html', pipeChart());
 out('contact.html', contact());
 out('legal.html', legal());
 rmSync(join(root, 'products'), { recursive: true, force: true });
