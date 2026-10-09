@@ -11,6 +11,7 @@ import pipeChart from '../src/templates/pipe-chart.js';
 import contact from '../src/templates/contact.js';
 import legal from '../src/templates/legal.js';
 import notFound from '../src/templates/not-found.js';
+import aq3 from '../src/templates/aq3.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = (file, html) => {
@@ -28,6 +29,8 @@ out('legal.html', legal());
 rmSync(join(root, 'products'), { recursive: true, force: true });
 for (const p of PRODUCTS) out(`products/${p.slug}.html`, product(p));
 out('404.html', notFound());
+// Campaign landing page: noindex, so it stays out of the sitemap.
+out('aq3.html', aq3());
 
 // Search engines: every indexable page goes in the sitemap. Legal, 404 and UNLISTED products are noindex, so they stay out.
 const indexable = ['', 'products.html', 'pipe-chart.html', 'about.html', 'contact.html', ...PRODUCTS.filter((p) => !UNLISTED.has(p.slug)).map((p) => `products/${p.slug}.html`)];
@@ -41,4 +44,4 @@ Allow: /
 
 Sitemap: ${SITE.url}sitemap.xml
 `);
-console.log(`pages: 6 + ${PRODUCTS.length} product pages + 404, sitemap (${indexable.length} URLs), robots.txt`);
+console.log(`pages: 6 + ${PRODUCTS.length} product pages + 404 + aq3, sitemap (${indexable.length} URLs), robots.txt`);

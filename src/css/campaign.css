@@ -1,0 +1,7 @@
+/* ==========================================================================
+   Campaign landing page (aq3.html) and offer banner
+   ========================================================================== */
+.offer { background: var(--red); color: #fff; }
+.offer p { padding: 10px 0; font-weight: 700; text-align: center; }
+[data-page='aq3'] .phead__t span { display: block; color: var(--red); }
+[data-page='aq3'] .about__ctas { margin-top: 20px; }
