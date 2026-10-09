@@ -18,9 +18,10 @@ What was changed for search, why, and what to check next. Newest first. The full
 | Titles name the product plus Dubai or Al Quoz; product meta descriptions cut at a word and end with the phone | Titles are the strongest on-page signal, and the old ones named no place |
 | `sitemap.xml` (90 URLs) and `robots.txt` from `tools/build-pages.mjs` | Helps Google find every page. Note: robots.txt only counts at the root of a domain, so it starts working once the site moves to its own domain |
 | Legal page `noindex, follow`; branded `404.html` (`noindex`) | The legal page is placeholder text. The 404 page keeps lost visitors |
+| Asbestos Cut Gaskets & Sheets: `noindex`, left out of the sitemap (`UNLISTED` in `src/templates/product.js`) | Asbestos products are restricted in the UAE (inferred, not yet checked). Kept off Google until the owner confirms the line |
 | Nine product URLs fixed (`needal-valves` → `needle-valves`, etc.) | Clean URLs. Free to change now, because nothing is indexed yet |
 | Fonts served as files instead of inside the CSS (198 KB → 48 KB), main font preloaded | Faster first paint on phones (Largest Contentful Paint) |
-| `src/js/track.js`: `click_call`, `click_whatsapp`, `click_email`, `click_directions`, `add_to_quote`, `copy_quote_list`, `copy_enquiry`, `generate_lead` | Measures what turns into orders. Switched on by `SITE.ga4` |
+| `src/js/track.js`: `click_call`, `click_whatsapp`, `click_email`, `click_directions`, `add_to_quote`, `copy_quote_list`, `copy_enquiry`, `prepare_enquiry` | Measures what leads to orders. Switched on by `SITE.ga4`. `prepare_enquiry` is not a lead, because the form sends nothing to the shop yet |
 | `NOINDEX=1 npm run build` | Builds a preview copy that Google ignores |
 
 `assets/img/brand/logo-stacked.png` (600×600) and `share.png` (1200×630) were rendered once from the SVG logos in headless Chromium.

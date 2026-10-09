@@ -254,7 +254,8 @@ export function initContact() {
     if (wa && SITE.whatsapp) wa.href = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
     form.classList.add('is-done');
     done.hidden = false;
-    track('generate_lead', { method: 'enquiry_form', items: list.length });
+    // The form only prepares text; nothing reaches the shop until the visitor sends or calls, so this is not a lead.
+    track('prepare_enquiry', { items: list.length });
     form.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
   });
   $('[data-form-copy]', form).addEventListener('click', async () => {

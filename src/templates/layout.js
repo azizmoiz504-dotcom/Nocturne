@@ -215,6 +215,7 @@ function breadcrumbSchema(crumbs) {
 // GA4 loads only when SITE.ga4 is set. Click events are sent from src/js/track.js either way (no-op without it).
 function analytics() {
   if (!SITE.ga4) return '';
+  if (!/^G-[A-Z0-9]+$/.test(SITE.ga4)) throw new Error(`SITE.ga4 should look like G-XXXXXXXXXX, got ${SITE.ga4}`);
   return `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.ga4)}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.ga4)}');</script>
 `;
