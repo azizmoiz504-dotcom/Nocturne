@@ -1,10 +1,10 @@
 [
  {
-  "slug": "low-pressure-150-threaded-fittings-2",
+  "slug": "low-pressure-150-threaded-fittings",
   "name": "Low Pressure #150 Threaded Fittings",
   "cat": "threaded-forged-fittings",
   "desc": "Our Low Pressure #150 Threaded Fittings are available in various sizes as per international standards. We supply high-quality carbon steel and malleable iron fittings including elbows, tees, couplings, unions, reducers, and plugs designed for Class 150 pressure applications. Ideal for low-pressure water lines, HVAC, plumbing, firefighting, and general industrial piping systems, offering reliable threaded connections, corrosion resistance, and durable performance.",
-  "img": "assets/img/products/low-pressure-150-threaded-fittings-2.webp"
+  "img": "assets/img/products/low-pressure-150-threaded-fittings.webp"
  },
  {
   "slug": "copper-threaded-fittings",
@@ -126,11 +126,11 @@
   "img": "assets/img/products/universal-beams-channels.webp"
  },
  {
-  "slug": "ss-duplex-food-grade-pipes-2",
+  "slug": "ss-duplex-food-grade-pipes",
   "name": "SS Duplex & Food Grade Pipes",
   "cat": "pipe-tubings",
   "desc": "Our Stainless Steel Duplex & Food Grade Pipes are available in sizes from ½” to 24” with various schedules and wall thicknesses. We supply Duplex, Super Duplex, and hygienic grades such as 304/304L and 316/316L in seamless and welded types for food processing, dairy, beverage, pharmaceutical, marine, and chemical applications. Excellent corrosion resistance, high strength, and sanitary finish options available.",
-  "img": "assets/img/products/ss-duplex-food-grade-pipes-2.webp"
+  "img": "assets/img/products/ss-duplex-food-grade-pipes.webp"
  },
  {
   "slug": "high-pressure-pvc-pipes",
@@ -175,11 +175,11 @@
   "img": "assets/img/products/brass-tubes.webp"
  },
  {
-  "slug": "gi-pipes-threaed-plain-end",
+  "slug": "gi-pipes-threaded-plain-end",
   "name": "GI Pipes (Threaded & Plain End)",
   "cat": "pipe-tubings",
   "desc": "Our GI Pipes (Threaded & Plain End) are available in sizes from ½” to 12” with various wall thicknesses and standard lengths. We supply high-quality galvanized steel pipes with threaded ends, plain ends, and matching fittings for water supply, firefighting, fencing, HVAC, drainage, and general construction applications. Corrosion-resistant finish, durable performance, and ready stock available.",
-  "img": "assets/img/products/gi-pipes-threaed-plain-end.webp"
+  "img": "assets/img/products/gi-pipes-threaded-plain-end.webp"
  },
  {
   "slug": "ss-seamless-erw-efw-lsaw-hfw-pipes",
@@ -203,18 +203,18 @@
   "img": "assets/img/products/universal-assembly-flexible-joints.webp"
  },
  {
-  "slug": "rubber-flexible-connectos",
+  "slug": "rubber-flexible-connectors",
   "name": "Rubber Flexible Connector",
   "cat": "hoses-connectors-assemblies",
   "desc": "Our Rubber Flexible Connectors are available in various sizes, pressure ratings, and flange or threaded end connections as per international standards. We supply high-quality reinforced rubber expansion joints designed to absorb vibration, noise, thermal expansion, and misalignment in piping systems. Ideal for HVAC, water supply, pumping systems, marine, and industrial applications, offering excellent flexibility, durability, and reliable leak-proof performance.",
-  "img": "assets/img/products/rubber-flexible-connectos.webp"
+  "img": "assets/img/products/rubber-flexible-connectors.webp"
  },
  {
-  "slug": "comppsite-hose-assembly",
+  "slug": "composite-hose-assembly",
   "name": "Composite Hose & Assembly",
   "cat": "hoses-connectors-assemblies",
   "desc": "Our Composite Hoses & Assemblies are available in various sizes, lengths, and pressure ratings as per international standards. We supply high-quality multi-layer composite hoses designed for safe transfer of petroleum products, chemicals, solvents, and industrial fluids. Ideal for oil & gas, marine, tanker loading/unloading, and petrochemical applications, offering excellent flexibility, lightweight handling, chemical resistance, and reliable leak-proof performance.",
-  "img": "assets/img/products/comppsite-hose-assembly.webp"
+  "img": "assets/img/products/composite-hose-assembly.webp"
  },
  {
   "slug": "pneumatic-pu-hoses",
@@ -399,18 +399,18 @@
   "img": "assets/img/products/aluminum-camlocks.webp"
  },
  {
-  "slug": "gi-threaded-fittings-2",
+  "slug": "gi-threaded-fittings",
   "name": "GI Threaded Fittings",
   "cat": "gi-mi-fittings",
   "desc": "Our GI Threaded Fittings are available in various sizes and pressure ratings as per international standards. We supply high-quality galvanized malleable iron fittings including elbows, tees, couplings, sockets, reducers, and plugs. Ideal for water supply, firefighting, HVAC, plumbing, and general piping systems, offering corrosion resistance, strong threaded connections, durability, and reliable performance.",
-  "img": "assets/img/products/gi-threaded-fittings-2.webp"
+  "img": "assets/img/products/gi-threaded-fittings.webp"
  },
  {
-  "slug": "electro-galv-fittings-2",
+  "slug": "electro-galv-fittings",
   "name": "Electro Galv Fittings",
   "cat": "gi-mi-fittings",
   "desc": "Our Electro Galvanized (Electro Galv) Fittings are available in a wide range of sizes and configurations as per international standards. We supply high-quality malleable iron fittings including elbows, tees, couplings, sockets, reducers, and adapters with electro-galvanized coating for enhanced corrosion resistance. Ideal for plumbing, water supply, HVAC, firefighting, and general piping systems, offering durable, leak-proof, and reliable performance.",
-  "img": "assets/img/products/electro-galv-fittings-2.webp"
+  "img": "assets/img/products/electro-galv-fittings.webp"
  },
  {
   "slug": "mi-fittings",
@@ -490,11 +490,11 @@
   "img": "assets/img/products/snubbers.webp"
  },
  {
-  "slug": "needal-valves",
+  "slug": "needle-valves",
   "name": "Needle Valves",
   "cat": "gauges-instrumentations",
   "desc": "Our Needle Valves are available in various sizes, pressure ratings, and connection types as per international standards. We supply high-quality precision valves designed for fine flow control in instrumentation and process systems. Ideal for oil & gas, chemical, hydraulic, pneumatic, and industrial applications, offering accurate regulation, leak-proof performance, corrosion resistance, and reliable durability in high-pressure environments.",
-  "img": "assets/img/products/needal-valves.webp"
+  "img": "assets/img/products/needle-valves.webp"
  },
  {
   "slug": "compound-gauges",
@@ -504,11 +504,11 @@
   "img": "assets/img/products/compound-gauges.webp"
  },
  {
-  "slug": "vaccum-gauges",
+  "slug": "vacuum-gauges",
   "name": "Vacuum Gauges",
   "cat": "gauges-instrumentations",
   "desc": "Our Vacuum Gauges are available in various dial sizes, pressure ranges, and connection types as per international standards. We supply high-quality gauges designed for accurate measurement of vacuum pressure in gases and closed systems. Ideal for HVAC, refrigeration, laboratories, oil & gas, and industrial applications, offering reliable performance, precise readings, and durable construction for demanding operating conditions.",
-  "img": "assets/img/products/vaccum-gauges.webp"
+  "img": "assets/img/products/vacuum-gauges.webp"
  },
  {
   "slug": "temperature-gauges",
