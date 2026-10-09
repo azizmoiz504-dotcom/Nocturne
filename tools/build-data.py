@@ -28,6 +28,11 @@ SITE = {
     "maps": "https://www.google.com/maps/search/?api=1&query=Fakhri+Tools+%26+Workshop+Materials+Trading+LLC+Al+Quoz+Dubai",
     # Monday–Saturday 7:30am–6:00pm, Sunday closed (Gulf Standard Time, UTC+4)
     "hours": {"days": [1, 2, 3, 4, 5, 6], "open": [7, 30], "close": [18, 0]},
+    # Public address of the site, with a trailing slash. Canonical links, the sitemap and structured data use it.
+    # Change it to the shop's own domain (for example "https://www.example.ae/") once one is set up.
+    "url": "https://azizmoiz504-dotcom.github.io/Nocturne/",
+    # Google Analytics 4 measurement ID (for example "G-XXXXXXXXXX"). While empty, no analytics code is loaded.
+    "ga4": None,
 }
 
 # --------------------------------------------------------------------------------------

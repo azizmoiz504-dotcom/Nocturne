@@ -22,6 +22,9 @@ export function facts(p) {
   return out;
 }
 
+// Shorten at a word boundary for meta descriptions.
+const cut = (s, n) => (s.length <= n ? s : `${s.slice(0, s.lastIndexOf(' ', n)).replace(/[,;:.]$/, '')}…`);
+
 export default function product(p) {
   const b = '../';
   const c = catOf(p.cat);
@@ -93,8 +96,10 @@ ${related.length ? `
   return page({
     id: 'product',
     base: b,
-    title: `${p.name} | Fakhri Tools`,
-    desc: p.desc.slice(0, 158),
+    title: `${p.name} in Dubai | Fakhri Tools`.length <= 60 ? `${p.name} in Dubai | Fakhri Tools` : `${p.name} | Fakhri Tools`,
+    desc: `${cut(p.desc, 95)} Ask for a quote at our Al Quoz, Dubai counter: ${SITE.phone}.`,
+    path: `products/${p.slug}.html`,
+    crumbs: [['Products', 'products.html'], [p.name, `products/${p.slug}.html`]],
     body,
   });
 }

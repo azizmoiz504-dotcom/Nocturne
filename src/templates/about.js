@@ -1,6 +1,6 @@
 import { SITE, CATEGORIES, PRODUCTS } from '../data.js';
 import { I } from './icons.js';
-import { page, pageHead, esc, btn, label } from './layout.js';
+import { page, pageHead, esc, btn, label, storeSchema } from './layout.js';
 import { steps, visit } from './shared.js';
 
 export default function about() {
@@ -40,7 +40,10 @@ ${pageHead({ title: 'About Fakhri Tools', crumbs: [['About']] })}
 ${visit()}`;
   return page({
     id: 'about',
-    title: 'About | Fakhri Tools',
+    title: 'About Fakhri Tools | Workshop Materials, Al Quoz Dubai',
+    path: 'about.html',
+    crumbs: [['About', 'about.html']],
+    schema: [storeSchema()],
     desc: `${SITE.name}: pipes, fittings, flanges, valves and workshop materials from Al Quoz Industrial Area 3, Dubai.`,
     body,
   });
