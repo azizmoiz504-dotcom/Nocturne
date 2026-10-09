@@ -4,6 +4,7 @@ import { $, $$, norm, session, copyText, toast, reduced } from './util.js';
 import { getList, onChange, listText } from './quote.js';
 import { weight, toIn, ring } from './pipe.js';
 import { track } from './track.js';
+import { withCode } from './source.js';
 
 /* ---------- catalogue ---------- */
 export function initCatalogue() {
@@ -237,7 +238,7 @@ export function initContact() {
     }
     const v = (n) => field(n).value.trim();
     const list = getList();
-    const text = [
+    const text = withCode([
       `Enquiry for ${SITE.name}`,
       '',
       `Name: ${v('name')}`,
@@ -248,7 +249,7 @@ export function initContact() {
       list.length ? `\nQuote list (${list.length} ${list.length === 1 ? 'item' : 'items'}):\n${listText(list)}` : null,
     ]
       .filter((x) => x !== null)
-      .join('\n');
+      .join('\n'));
     msg.textContent = text;
     if (mail && SITE.email) mail.href = `mailto:${SITE.email}?subject=${encodeURIComponent(`Enquiry from ${v('name')}`)}&body=${encodeURIComponent(text)}`;
     if (wa && SITE.whatsapp) wa.href = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;

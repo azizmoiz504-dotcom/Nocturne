@@ -1,6 +1,7 @@
 // Quote list: saved in this browser only, shown in the drawer, sent by phone, copy or (optionally) email/WhatsApp.
 import { SITE } from '../data.js';
 import { $, $$, BASE, esc, local, copyText, toast, dialog } from './util.js';
+import { withCode } from './source.js';
 
 const KEY = 'ft-quote';
 const MAX = 9999;
@@ -60,7 +61,7 @@ export function initQuote() {
   }
 
   function links() {
-    const body = `Quote request for ${SITE.name}\n\n${listText()}`;
+    const body = withCode(`Quote request for ${SITE.name}\n\n${listText()}`);
     if (mail && SITE.email) mail.href = `mailto:${SITE.email}?subject=${encodeURIComponent('Quote request')}&body=${encodeURIComponent(body)}`;
     if (wa && SITE.whatsapp) wa.href = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(body)}`;
   }
@@ -144,7 +145,7 @@ export function initQuote() {
   });
 
   $('[data-quote-copy]', drawerEl).addEventListener('click', async () => {
-    const ok = await copyText(`Quote request for ${SITE.name}\n\n${listText()}`);
+    const ok = await copyText(withCode(`Quote request for ${SITE.name}\n\n${listText()}`));
     toast(ok ? 'Quote list copied' : 'Copy failed: select the list and copy it manually');
   });
   $('[data-quote-clear]', drawerEl).addEventListener('click', () => {
