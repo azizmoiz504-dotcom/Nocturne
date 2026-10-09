@@ -17,7 +17,7 @@ A phone-first catalogue site for the Fakhri Tools trade counter in Al Quoz Indus
 | Phone | +971 4 285 0135 |
 | Hours | Monday to Saturday 7:30am to 6:00pm, Sunday closed |
 
-All of these live in one place, `SITE` in `tools/build-data.py`. The site shows a live **Open now / Closed** badge, a "today" marker in the hours table and the current Dubai time (GST, UTC+4), so it is correct for visitors in any time zone.
+All of these live in one place, `SITE` in `tools/build-data.py`. `SITE.url` is the site's public address (canonical links, sitemap and structured data use it; change it when the shop gets its own domain) and `SITE.ga4` turns on Google Analytics. Search changes are recorded in [`docs/seo-log.md`](docs/seo-log.md). The site shows a live **Open now / Closed** badge, a "today" marker in the hours table and the current Dubai time (GST, UTC+4), so it is correct for visitors in any time zone.
 
 ## What changed from the AQM prototype
 
@@ -109,7 +109,8 @@ The catalogue is now 85 lines in 12 categories. New photos have Mabrook's grey c
 
 ```bash
 npm install
-npm run build   # CSS, JS and all 91 pages
+npm run build   # CSS, JS, all pages, sitemap.xml and robots.txt
+NOINDEX=1 npm run build   # same, but every page tells Google not to index it (for preview copies)
 npm run serve   # http://localhost:5173
 ```
 
