@@ -8,10 +8,10 @@ const bySlug = (s) => PRODUCTS.find((p) => p.slug === s);
 
 function hero() {
   const picks = [
-    { slug: 'cs-flanges', ref: '05.03', name: 'CS Flanges and Fittings', img: 'assets/img/home/flanges-fittings.webp' },
-    { slug: 'flange-end-valves', ref: '06.06', name: 'Gate Valves and Ball Valves', img: 'assets/img/home/gate-ball-valves.webp' },
-    { slug: 'cs-ms-seamless-welded-pipes', ref: '01.10', name: 'CS Pipes', img: 'assets/img/home/cs-pipes.webp' },
-    { slug: 'y-strainers', ref: '06.09', name: 'Check Valves and Strainers', img: 'assets/img/home/check-valves-strainers.webp' },
+    { slug: 'cs-ms-seamless-welded-pipes', ref: '01.10', name: 'CS Pipes and Fittings', img: 'assets/img/home/cs-pipes-fittings.webp' },
+    { slug: 'ss-seamless-erw-efw-lsaw-hfw-pipes', ref: '01.09', name: 'SS Pipes and Fittings', img: 'assets/img/home/ss-pipes-fittings.webp' },
+    { slug: 'gi-pipes-threaed-plain-end', ref: '01.08', name: 'GI Pipes and Fittings', img: 'assets/img/home/gi-pipes-fittings.webp' },
+    { slug: 'flange-end-valves', ref: '06.06', name: 'CS and SS Valves', img: 'assets/img/home/cs-ss-valves.webp' },
   ];
   return `
 <section class="hero">
