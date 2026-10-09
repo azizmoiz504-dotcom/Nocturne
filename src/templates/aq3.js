@@ -10,18 +10,18 @@ import { productCard, visit } from './shared.js';
 const bySlug = (s) => PRODUCTS.find((p) => p.slug === s);
 
 // Lines a maintenance team reaches for when something leaks, bursts or stops reading.
-const PICKS = ['hydraulic-hoses', 'rubber-air-hose', 'ss-camlocks', 'epdm-nbr-cut-gaskets-sheets', 'pressure-gauges', 'threaded-socked-welded-valves', 'y-strainers', 'gi-threaded-fittings'];
+const PICKS = ['rubber-air-hose', 'pneumatic-pu-hoses', 'ss-camlocks', 'epdm-nbr-cut-gaskets-sheets', 'pressure-gauges', 'threaded-socked-welded-valves', 'y-strainers', 'gi-threaded-fittings'];
 
 function ways() {
   const wa = SITE.whatsapp ? `https://wa.me/${SITE.whatsapp}` : '';
   const items = wa
     ? [
-        [I.list, 'Send the ref numbers', 'Every product on this site has a ref, like 08.07. Send the refs and quantities on WhatsApp, or build a quote list and tap <b>WhatsApp list</b>.'],
+        [I.list, 'Send the ref numbers', 'Every product on this site has a ref, like 12.09. Send the refs and quantities on WhatsApp, or build a quote list and tap <b>WhatsApp list</b>.'],
         [I.whatsapp, 'No ref? Send a photo', 'Photograph the broken part next to a tape or ruler and send it on WhatsApp. We match it from the counter.'],
         [I.phone, 'Or call the counter', `Call <a href="tel:${SITE.tel}">${esc(SITE.phone)}</a> and read out the refs. We confirm stock and price before you collect.`],
       ]
     : [
-        [I.list, 'Find the ref number', 'Every product on this site has a ref, like 08.07. Search for the part or browse the categories below.'],
+        [I.list, 'Find the ref number', 'Every product on this site has a ref, like 12.09. Search for the part or browse the categories below.'],
         [I.phone, 'Call and read out the refs', `Call <a href="tel:${SITE.tel}">${esc(SITE.phone)}</a> with the refs and quantities, or add them to a quote list and copy it.`],
         [I.check, 'We confirm before you come', 'We check availability, sizes and ratings against your list and confirm the price before you collect.'],
       ];
@@ -40,7 +40,7 @@ function ways() {
 export default function aq3() {
   const picks = PICKS.map(bySlug).filter(Boolean);
   const ctas = [
-    SITE.whatsapp ? btn(`https://wa.me/${SITE.whatsapp}`, 'WhatsApp the counter', { kind: 'red', icon: I.whatsapp, attrs: 'target="_blank" rel="noopener"' }) : '',
+    SITE.whatsapp ? btn(`https://wa.me/${SITE.whatsapp}`, 'WhatsApp the counter', { kind: 'red', icon: I.whatsapp, attrs: 'target="_blank" rel="noopener" data-wa-prefill' }) : '',
     btn(`tel:${SITE.tel}`, `Call ${SITE.phone}`, { kind: SITE.whatsapp ? 'navy' : 'red', icon: I.phone }),
     btn(SITE.maps, 'Get directions', { kind: 'line', icon: I.directions, attrs: 'target="_blank" rel="noopener"' }),
   ].join('');

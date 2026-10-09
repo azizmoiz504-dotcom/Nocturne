@@ -24,12 +24,18 @@ export function sourceCode() {
   return '';
 }
 
+// Staff look for the code in square brackets, the same as in the printed QR messages: "Code: [GADS]".
 export const withCode = (text) => {
   const c = sourceCode();
-  return c ? `${text}\n\nCode: ${c}` : text;
+  return c ? `${text}\n\nCode: [${c}]` : text;
 };
 
 export function initSource() {
   const c = sourceCode();
   if (c && typeof window.gtag === 'function') window.gtag('set', 'user_properties', { source_code: c });
+  // WhatsApp buttons marked data-wa-prefill open with the same greeting as the printed QR codes, plus the code.
+  for (const a of document.querySelectorAll('a[data-wa-prefill]')) {
+    const text = `Hi Fakhri Tools, Al Quoz${c ? ` [${c}]` : ''}. I need: `;
+    a.href = `${a.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+  }
 }
