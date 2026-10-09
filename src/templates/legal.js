@@ -19,5 +19,6 @@ ${pageHead({ title: 'Legal', crumbs: [['Legal']] })}
     </div>
   </div>
 </section>`;
-  return page({ id: 'legal', title: 'Legal | Fakhri Tools', desc: 'Terms of use, privacy and cookie policy.', body });
+  // Placeholder text: keep it out of Google until real terms are written.
+  return page({ id: 'legal', title: 'Legal | Fakhri Tools', desc: 'Terms of use, privacy and cookie policy.', path: 'legal.html', robots: 'noindex, follow', body });
 }

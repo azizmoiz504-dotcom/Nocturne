@@ -68,7 +68,9 @@ ${pageHead({ title: 'Pipe schedule chart', lead: 'Outside diameter, wall thickne
 </section>`;
   return page({
     id: 'pipe-chart',
-    title: 'Pipe Schedule Chart | Fakhri Tools',
+    title: 'Pipe Schedule Chart with Weights (SCH 40–XXS) | Fakhri Tools',
+    path: 'pipe-chart.html',
+    crumbs: [['Pipe chart', 'pipe-chart.html']],
     desc: 'Carbon steel pipe schedule chart, ½″ to 24″: outside diameter, wall thickness, inside diameter and weight per metre for SCH 40, 80, 160 and XXS.',
     body,
   });

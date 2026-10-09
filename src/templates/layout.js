@@ -164,8 +164,69 @@ function footer(b) {
 </footer>`;
 }
 
-export function page({ title, desc, id, body, base = '' }) {
+// Set NOINDEX=1 when building a preview copy that Google must not index.
+const NOINDEX = typeof process !== 'undefined' && process.env.NOINDEX === '1';
+export const abs = (path = '') => SITE.url + path;
+const jsonld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`;
+
+// The shop as Google should read it. Only facts shown on the site; no geo pin (ours is approximate).
+export function storeSchema() {
+  const [street, area] = SITE.address;
+  const [h0, m0] = SITE.hours.open;
+  const [h1, m1] = SITE.hours.close;
+  const t = (h, m) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HardwareStore',
+    '@id': `${abs()}#store`,
+    name: SITE.name,
+    alternateName: SITE.short,
+    url: abs(),
+    logo: abs('assets/img/brand/logo-stacked.png'),
+    image: abs('assets/img/brand/share.png'),
+    telephone: SITE.tel,
+    ...(SITE.email ? { email: SITE.email } : {}),
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: `${street}, ${area}`,
+      addressLocality: 'Dubai',
+      addressRegion: 'Dubai',
+      addressCountry: 'AE',
+    },
+    openingHoursSpecification: [{
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: SITE.hours.days.map((d) => day[d]),
+      opens: t(h0, m0),
+      closes: t(h1, m1),
+    }],
+  };
+}
+
+function breadcrumbSchema(crumbs) {
+  const items = [['Home', ''], ...crumbs];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: abs(path) })),
+  };
+}
+
+// GA4 loads only when SITE.ga4 is set. Click events are sent from src/js/track.js either way (no-op without it).
+function analytics() {
+  if (!SITE.ga4) return '';
+  if (!/^G-[A-Z0-9]+$/.test(SITE.ga4)) throw new Error(`SITE.ga4 should look like G-XXXXXXXXXX, got ${SITE.ga4}`);
+  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(SITE.ga4)}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(SITE.ga4)}');</script>
+`;
+}
+
+// path: this page's address relative to the site root ('' for home). crumbs: [name, path] pairs after Home.
+export function page({ title, desc, id, body, base = '', path = '', crumbs = null, robots = '', schema = [] }) {
   const b = base;
+  const url = abs(path);
+  const meta = NOINDEX ? 'noindex, nofollow' : robots;
+  const ld = [...schema, ...(crumbs ? [breadcrumbSchema(crumbs)] : [])];
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -173,15 +234,25 @@ export function page({ title, desc, id, body, base = '' }) {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
+${meta ? `<meta name="robots" content="${meta}">\n` : ''}<link rel="canonical" href="${url}">
 <meta name="theme-color" content="#084767">
+<meta property="og:site_name" content="${esc(SITE.short)}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${abs('assets/img/brand/share.png')}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(SITE.name)}, Al Quoz Industrial Area 3, Dubai">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="${b}assets/img/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="${b}assets/img/brand/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="${b}assets/img/brand/favicon-180.png">
+<link rel="preload" href="${b}assets/css/Archivo.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${b}assets/css/main.css">
 <script>document.documentElement.classList.add('js')</script>
+${analytics()}${ld.map(jsonld).join('\n')}
 </head>
 <body data-page="${id}" data-base="${b}">
 <a class="skip" href="#main">Skip to content</a>

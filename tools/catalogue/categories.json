@@ -34,5 +34,5 @@
    "tile": {"compose": ["rubber-insulations", "glass-wool-insulations"]}},
   {"slug": "gauges-instrumentations", "name": "Gauges & Instrumentation", "short": "Gauges",
    "blurb": "Pressure, vacuum, compound and temperature gauges, with syphons, snubbers, needle and cock valves, and glycerine.",
-   "tile": {"compose": ["pressure-gauges", "needal-valves"]}}
+   "tile": {"compose": ["pressure-gauges", "needle-valves"]}}
 ]

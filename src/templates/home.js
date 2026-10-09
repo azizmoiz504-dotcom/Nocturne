@@ -1,6 +1,6 @@
 import { SITE, CATEGORIES, PRODUCTS, PIPE } from '../data.js';
 import { I } from './icons.js';
-import { page, esc, btn, label, status } from './layout.js';
+import { page, esc, btn, label, status, storeSchema, abs } from './layout.js';
 import { productCard, categoryTile, tape, steps, visit } from './shared.js';
 import { weight } from '../js/pipe.js';
 
@@ -104,8 +104,10 @@ function pipeBand() {
 export default function home() {
   return page({
     id: 'home',
-    title: 'Fakhri Tools & Workshop Materials Trading LLC | Al Quoz, Dubai',
-    desc: `Pipes, fittings, flanges, valves, hoses, gaskets, structural steel and gauges: ${PRODUCTS.length} product lines at our counter in Al Quoz Industrial Area 3, Dubai. Call +971 4 285 0135.`,
+    title: 'Fakhri Tools Al Quoz | Pipes, Fittings & Valves in Dubai',
+    path: '',
+    schema: [storeSchema(), { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.short, alternateName: SITE.name, url: abs() }],
+    desc: `Pipes, fittings, flanges, valves, hoses, gaskets, steel and gauges at our counter in Al Quoz Industrial Area 3, Dubai. Call ${SITE.phone} for a quote.`,
     body: `${hero()}${categories()}${featured()}${howTo()}${pipeBand()}${visit()}`,
   });
 }

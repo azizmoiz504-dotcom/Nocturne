@@ -59,8 +59,10 @@ ${pageHead({ title: 'Products', lead: `${PRODUCTS.length} product lines in ${CAT
 </div>`;
   return page({
     id: 'products',
-    title: 'Products | Fakhri Tools',
-    desc: `${PRODUCTS.length} product lines: pipes, butt-weld and threaded fittings, GI and MI fittings, flanges, valves, camlocks, hoses, gaskets, structural steel, insulation and gauges.`,
+    title: 'Pipes, Fittings, Valves & Hoses Catalogue | Fakhri Tools',
+    path: 'products.html',
+    crumbs: [['Products', 'products.html']],
+    desc: `Pipes, butt-weld and threaded fittings, GI and MI fittings, flanges, valves, camlocks, hoses, gaskets, steel and gauges. Quotes from Al Quoz, Dubai.`,
     body,
   });
 }

@@ -3,6 +3,7 @@ import { initHeader, initMenu, initSearch, initCopy, initTape, initReveal, initM
 import { initHours } from './js/hours.js';
 import { initQuote } from './js/quote.js';
 import { initCatalogue, initProduct, initContact, initPipe } from './js/pages.js';
+import { initTrack } from './js/track.js';
 
 const run = (f) => {
   try {
@@ -12,4 +13,4 @@ const run = (f) => {
   }
 };
 
-[initHours, initHeader, initMenu, initSearch, initCopy, initQuote, initCatalogue, initProduct, initContact, initPipe, initMap, initTape, initReveal].forEach(run);
+[initTrack, initHours, initHeader, initMenu, initSearch, initCopy, initQuote, initCatalogue, initProduct, initContact, initPipe, initMap, initTape, initReveal].forEach(run);

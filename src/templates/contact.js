@@ -1,6 +1,6 @@
 import { SITE } from '../data.js';
 import { I } from './icons.js';
-import { page, pageHead, esc, btn, label, hoursTable, status } from './layout.js';
+import { page, pageHead, esc, btn, label, hoursTable, status, storeSchema } from './layout.js';
 import { storeMap } from './shared.js';
 
 function form() {
@@ -100,7 +100,10 @@ ${pageHead({ title: 'Contact &amp; visit', lead: 'Call the counter, visit us in 
 </section>`;
   return page({
     id: 'contact',
-    title: 'Contact & Visit | Fakhri Tools',
+    title: 'Contact & Directions | Fakhri Tools, Al Quoz Dubai',
+    path: 'contact.html',
+    crumbs: [['Contact', 'contact.html']],
+    schema: [storeSchema()],
     desc: `Call ${SITE.phone} or visit Wh #8, 8th Street, Al Quoz Industrial Area 3, Dubai. Open Monday to Saturday, 7:30am to 6:00pm.`,
     body,
   });
