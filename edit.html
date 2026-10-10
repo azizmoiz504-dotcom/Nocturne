@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Product Editor</title>
+<style>
+  :root { --ink:#0d1b26; --red:#c41e24; --line:#d9dee3; --bg:#eef1f4; --muted:#5c6b78; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:12px 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  header h1 { font-size:17px; margin:0 12px 0 0; }
+  select, button, input { font:inherit; }
+  header select { padding:7px 10px; border-radius:8px; border:0; max-width:100%; }
+  .btn { border:0; border-radius:999px; padding:8px 14px; cursor:pointer; background:#fff; color:var(--ink); font-weight:600; }
+  .btn.red { background:var(--red); color:#fff; }
+  .btn.ghost { background:transparent; color:inherit; border:1px solid currentColor; }
+  .spacer { flex:1; }
+  .help { background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; color:var(--muted); font-size:14px; }
+  .help b { color:var(--ink); }
+  .cover { display:flex; align-items:center; gap:14px; padding:14px 16px 0; }
+  .cover img { width:84px; height:84px; object-fit:contain; background:#fff; border-radius:50%; border:3px solid var(--red); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:14px; padding:14px 16px 90px; }
+  .card { background:#fff; border:2px solid transparent; border-radius:14px; padding:10px; display:flex; flex-direction:column; gap:6px; cursor:grab; position:relative; }
+  .card.sel { border-color:var(--red); }
+  .card.dragging { opacity:.4; }
+  .card.over { box-shadow:0 0 0 3px var(--red) inset; }
+  .num, .star { z-index:2; }
+  .num { position:absolute; top:14px; left:16px; font-size:12px; color:var(--muted); font-weight:700; }
+  .star { position:absolute; top:12px; right:14px; font-size:12px; background:var(--red); color:#fff; padding:2px 8px; border-radius:99px; }
+  .img { height:150px; background:#f3f5f7; border-radius:10px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .img img { max-width:90%; max-height:90%; object-fit:contain; pointer-events:none; }
+  .img.drop { outline:3px dashed var(--red); outline-offset:-6px; }
+  .img .hint { position:absolute; bottom:6px; background:rgba(255,255,255,.85); padding:0 6px; border-radius:6px; font-size:11px; color:var(--muted); }
+  label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .card input { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:8px; }
+  .row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .row button { flex:1; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:#f7f8fa; cursor:pointer; font-size:13px; }
+  .row button:hover { background:#e8ecf0; }
+  .row .del { color:var(--red); }
+  .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  .toast.on { opacity:1; }
+  .count { font-size:13px; opacity:.8; }
+  @media (max-width:600px) { header h1 { width:100%; } .grid { grid-template-columns:1fr 1fr; gap:10px; padding:10px 10px 90px; } .img { height:110px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Fakhri Tools · Product Editor</h1>
+  <select id="cat" aria-label="Category"></select>
+  <span class="count" id="count"></span>
+  <span class="spacer"></span>
+  <button class="btn ghost" id="undo">Undo</button>
+  <button class="btn ghost" id="reset">Start over</button>
+  <button class="btn red" id="save">Save changes file</button>
+</header>
+<div class="help">
+  <b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a card's picture, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
+  <b>Copy</b> makes a second card with the same details. Type straight into the boxes to change names, specs or sizes.
+  When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done".
+  Your work is kept in this browser if you close the page.
+</div>
+<div class="cover"><img id="coverImg" alt=""><div><b>Main photo for this category</b><br><span class="count">Press "Make main photo" on any card to change it.</span></div></div>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script>
+(() => {
+  const KEY = 'ft-editor-v1';
+  const IMG = window.FT_IMG || '';
+  const fresh = () => ({ cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(it => [it[0], it[1].slice(), it[2], it[3]]) })), images: {} });
+  let state, history = [], sel = -1, clip = null;
+  try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!state || !state.cats) state = fresh();
+  let ci = 0;
+  const $ = s => document.querySelector(s);
+  const cat = () => state.cats[ci];
+  const src = p => !p ? '' : p.startsWith('new:') ? state.images[p] : IMG + p;
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Browser storage full: press Save changes file now'); } };
+  const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
+  const change = fn => { snap(); fn(); persist(); render(); };
+
+  const selEl = $('#cat');
+  state.cats.forEach((c, i) => selEl.add(new Option(c.name, i)));
+  selEl.onchange = () => { ci = +selEl.value; sel = -1; render(); };
+
+  function render() {
+    const c = cat();
+    $('#count').textContent = c.items.length + ' products';
+    $('#coverImg').src = src(c.cover);
+    const g = $('#grid'); g.innerHTML = '';
+    c.items.forEach((it, i) => {
+      const d = document.createElement('div');
+      d.className = 'card' + (i === sel ? ' sel' : ''); d.draggable = true; d.dataset.i = i;
+      d.innerHTML =
+        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
+        '<div class="img"><img alt=""><span class="hint">drop or paste a photo</span></div>' +
+        '<label>Name</label><input data-f="0">' +
+        '<label>Specs (comma between each)</label><input data-f="1">' +
+        '<label>Size range</label><input data-f="2">' +
+        '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
+        '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>';
+      d.querySelector('img').src = src(it[3]);
+      const ins = d.querySelectorAll('input');
+      ins[0].value = it[0]; ins[1].value = it[1].join(', '); ins[2].value = it[2];
+      g.appendChild(d);
+    });
+  }
+
+  const grid = $('#grid');
+  grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input')) snap(); });
+  grid.addEventListener('input', e => {
+    const f = e.target.dataset.f; if (f === undefined) return;
+    const it = cat().items[+e.target.closest('.card').dataset.i];
+    it[+f] = f === '1' ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : e.target.value;
+    persist();
+  });
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.card'); if (!card) return;
+    const i = +card.dataset.i, items = cat().items, a = e.target.dataset.a;
+    if (!a) { if (!e.target.matches('input')) select(i, true); return; }
+    if (a === 'up' && i > 0) change(() => { items.splice(i - 1, 0, items.splice(i, 1)[0]); sel = i - 1; });
+    if (a === 'down' && i < items.length - 1) change(() => { items.splice(i + 1, 0, items.splice(i, 1)[0]); sel = i + 1; });
+    if (a === 'copy') { change(() => { items.splice(i + 1, 0, JSON.parse(JSON.stringify(items[i]))); sel = i + 1; }); toast('Copied. Change the new card’s name and photo.'); }
+    if (a === 'cover') { change(() => { cat().cover = items[i][3]; }); toast('Main photo changed'); }
+    if (a === 'pick') pickFile(i);
+    if (a === 'del' && confirm('Delete "' + items[i][0] + '"?')) change(() => { items.splice(i, 1); sel = -1; });
+  });
+  function select(i, rerender) { sel = i; if (rerender) render(); else document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); }
+
+  // Drag to reorder
+  let from = -1;
+  grid.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c || e.target.matches('input')) return; from = +c.dataset.i; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'card'); });
+  grid.addEventListener('dragend', () => { from = -1; document.querySelectorAll('.dragging,.over,.drop').forEach(x => x.classList.remove('dragging', 'over', 'drop')); });
+  grid.addEventListener('dragover', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    document.querySelectorAll('.over,.drop').forEach(x => x.classList.remove('over', 'drop'));
+    if (from < 0) c.querySelector('.img').classList.add('drop'); else c.classList.add('over');
+  });
+  grid.addEventListener('drop', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    const to = +c.dataset.i;
+    if (from < 0) { const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) setPhoto(to, f); else toast('That was not a photo'); return; }
+    if (from !== to) { const fr = from; change(() => { const items = cat().items; items.splice(to, 0, items.splice(fr, 1)[0]); sel = to; }); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => e.preventDefault());
+
+  // Photos: drop, paste or choose; shrunk to 800px so the changes file stays small
+  function pickFile(i) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = () => inp.files[0] && setPhoto(i, inp.files[0]); inp.click(); }
+  function setPhoto(i, file) {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const s = Math.min(1, 800 / Math.max(im.width, im.height));
+        const cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+        const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+        const id = 'new:' + cat().slug + '-' + Date.now().toString(36);
+        change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
+        toast('Photo changed');
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  }
+  document.addEventListener('paste', e => {
+    const f = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/'));
+    if (f) { e.preventDefault(); if (sel < 0) return toast('Click a card first, then paste'); setPhoto(sel, f.getAsFile()); return; }
+    if (!e.target.matches('input') && clip) { e.preventDefault(); change(() => { const at = sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
+  });
+  document.addEventListener('copy', e => { if (e.target.matches('input') || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+
+  $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); render(); };
+  $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; render(); } };
+  $('#save').onclick = () => {
+    const used = new Set(state.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
+    const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+    a.download = 'fakhri-product-changes.json'; a.click();
+    toast('Saved to Downloads as fakhri-product-changes.json');
+  };
+  render();
+})();
+</script>
+</body>
+</html>

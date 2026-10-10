@@ -3,6 +3,8 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const CATS = window.FT_CATS, FAMS = window.FT_FAMILIES, IMG = window.FT_IMG || '', CFG = window.FT_CONFIG;
+  // Category photos: the cover first, then each product's own photo.
+  CATS.forEach(c => { c.imgs = [...new Set([c.cover || c.items[0][3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const pad = n => String(n).padStart(2, '0');
@@ -102,7 +104,7 @@
     const c = catBySlug(slug);
     if (!c || !c.items[+i]) return null;
     const it = c.items[+i];
-    return { id: slug + ':' + (+i), c, i: +i, name: it[0], chips: it[1], size: it[2], img: c.imgs[+i] ? IMG + c.imgs[+i] : '' };
+    return { id: slug + ':' + (+i), c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '' };
   }
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
   const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|stainless/i], ['Carbon steel', /\bC\.S\b/], ['Cast iron', /\bC\.I\b/i], ['Galvanised', /\bG\.I\b/], ['Mild steel', /\bM\.S\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
