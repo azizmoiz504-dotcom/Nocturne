@@ -1394,3 +1394,14 @@ body.has-quote .fabs{bottom:14px}
 @media (max-width:370px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:29px}}
 @media (max-width:335px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:24px}}
 .footer__cats #footCats a{display:block;text-align:left;color:var(--steel-2);font-size:19px;padding:4px 0;break-inside:avoid}.footer__cats #footCats a:hover{color:#fff}
+
+/* audit fixes */
+@media (max-width:1100px){.kat-side{overflow-y:auto;overscroll-behavior:contain}.kat-side__body{flex-shrink:0}}
+.kc__add{min-width:0}
+.mega{visibility:hidden;transition:clip-path .7s var(--ease),visibility 0s linear .7s}
+.nav.is-mega .mega{visibility:visible;transition:clip-path .7s var(--ease),visibility 0s}
+.mmenu{visibility:hidden;transition:clip-path .8s var(--ease),visibility 0s linear .8s}
+.is-menu .mmenu{visibility:visible;transition:clip-path .8s var(--ease),visibility 0s}
+@media (max-width:380px){.nav__util-in > a:first-child{display:none}}
+@media (max-width:560px){.toast{white-space:normal;border-radius:16px;width:max-content;max-width:calc(100vw - 28px);line-height:1.35;text-overflow:clip}}
+@media (max-width:420px){.lbl__x{display:none}}

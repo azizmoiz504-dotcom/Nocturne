@@ -130,7 +130,7 @@
     </nav>
     <a class="nav__call" href="tel:+97142850135" aria-label="Call +971 4 285 0135"><svg><use href="#phone"/></svg></a>
     <button class="rfq-btn" id="rfqBtn" data-cursor="Quote"><span>Get a quote</span><b id="rfqCount">0</b></button>
-    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="mmenu"><span></span><span></span></button>
   </div>
   <div class="mega" id="mega">
     <div class="wrap mega__in" id="megaIn"></div>
@@ -204,7 +204,7 @@
       <dl class="intro__facts" data-reveal>
         <div><dt class="mono">Who we serve</dt><dd>Workshops, contractors, MEP firms, maintenance teams, garages and walk-in customers.</dd></div>
         <div><dt class="mono">What we stock</dt><dd>CS, SS and GI pipes and fittings, PVC, PPR and HDPE pipes, copper and brass tubes, flanges, threaded and butt-weld fittings, valves, Y-strainers, camlocks, couplings, hoses, gaskets and gauges.</dd></div>
-        <a href="#catalogue" data-scroll class="link-arrow mono">See the products <svg><use href="#arrow"/></svg></a>
+        <div><a href="#catalogue" data-scroll class="link-arrow mono">See the products <svg><use href="#arrow"/></svg></a></div>
       </dl>
     </div>
     <ul class="proofs" data-reveal>
@@ -378,7 +378,7 @@
       </ul>
     </div>
 
-    <div class="kat-rail" id="katRail" role="list" aria-label="Shop by category"></div>
+    <div class="kat-rail" id="katRail" aria-label="Shop by category"></div>
 
     <div class="kat">
       <aside class="kat-side" id="katSide" aria-label="Filter products" data-lenis-prevent>

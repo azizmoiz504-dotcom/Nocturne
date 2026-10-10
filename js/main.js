@@ -91,7 +91,7 @@
   function scrollToEl(target) {
     const el = typeof target === 'string' ? (target === '#top' ? 0 : $(target)) : target;
     if (el === null || el === undefined) return;
-    if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4) });
+    if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4), force: true });   // force: works even while an overlay is still closing
     else if (el === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     else el.scrollIntoView({ behavior: 'smooth' });
   }
@@ -102,7 +102,8 @@
   // a quote line is "slug:index|size" — the part after | is the size the customer picked
   function itemOf(key) {
     const k = String(key), bar = k.indexOf('|');
-    const [slug, i] = (bar < 0 ? k : k.slice(0, bar)).split(':');
+    let [slug, i] = (bar < 0 ? k : k.slice(0, bar)).split(':');
+    if (slug === 'gaskets-caf-canf-sheets') slug = 'gaskets-sheets';   // old name, still in some saved quotes
     const c = catBySlug(slug);
     if (!c || !c.items[+i]) return null;
     const it = c.items[+i], id = slug + ':' + (+i);
@@ -163,7 +164,7 @@
   function sizeWords(o, pick) {
     if (pick === null || pick === undefined) return o.size;
     const [base, len] = pick.split(' · ');
-    const b = base === '?' ? 'size to confirm' + (o.size ? ', range ' + o.size.split(' · ')[0] : '') : base;
+    const b = base === '?' ? 'size to confirm' + (o.size ? ', range ' + o.size.split(' · ')[0] : '') : base.replace(/\?/g, 'size to confirm');
     return [b, len ? 'length ' + len : ''].filter(Boolean).join(', ');
   }
   // the controls (dropdowns / boxes) for one product; cur = a size already chosen
@@ -175,7 +176,7 @@
       opts.map(v => opt(v, v === val)).join('') + opt('?', val === '?', 'Not sure, ask me') + '</select>';
     let h = '';
     if (sp.t === 'one') h = '<span class="pk__one">' + esc(sp.v) + '</span>';
-    else if (sp.t === 'sel') h = sel('a', sp.opts, base, sp.ph ? (innerWidth < 600 ? 'Choose (' + sp.ph.replace(' – ', '–') + ')' : 'Choose size (' + sp.ph + ')') : 'Choose size', 'Size');
+    else if (sp.t === 'sel') h = sel('a', sp.opts, base, sp.ph ? (innerWidth < 600 ? sp.ph.replace(' – ', '–') : 'Choose size (' + sp.ph + ')') : 'Choose size', 'Size');
     else if (sp.t === 'pair') {
       const [a, b] = base && base !== '?' ? base.split(' × ') : [base === '?' ? '?' : '', base === '?' ? '?' : ''];
       h = '<span class="pk__pair">' + (sp.L.length === 1 ? '<span class="pk__one">' + esc(sp.L[0]) + '</span>' : sel('a', sp.L, a, sp.lt ? 'Big end' : 'Choose', sp.lt ? 'Big end size' : 'First size')) + '<i>×</i>' + sel('b', sp.S, b, sp.lt ? 'Small end' : 'Choose', sp.lt ? 'Small end size' : 'Second size') + '</span>';
@@ -201,7 +202,7 @@
     else if (sp.t === 'pair') {
       const a = sp.L.length === 1 ? sp.L[0] : g('a'), b = g('b');
       if (!a || !b) return { ok: false };
-      v = a === '?' || b === '?' ? '?' : a + ' × ' + b;
+      v = a === '?' && b === '?' ? '?' : a + ' × ' + b;   // one end can stay 'not sure'
     } else v = g('t').replace(/[|·]/g, ' ').trim() || (o.size ? '?' : '');
     const len = g('len').replace(/[|·]/g, ' ').trim();
     if (len) v = (v || '?') + ' · ' + len;
@@ -290,7 +291,7 @@
   function paintAdd(b) {
     const on = addState(b);
     b.classList.toggle('is-added', on);
-    const l = $('.lbl', b); if (l) l.textContent = on ? 'Added' : 'Add to quote';
+    const l = $('.lbl', b); if (l) l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>';
   }
   function syncRfq(bump) {
     const n = rfq.size;
@@ -352,6 +353,18 @@
   $('#rfqClear').addEventListener('click', () => { rfq.clear(); saveRfq(); syncRfq(true); });
 
 
+  // page scrolling comes back only when no overlay, menu or filter sheet is still open
+  function unlock() {
+    if (!lenis) return;
+    const b = document.body.classList;
+    if ($('#qv').classList.contains('is-open') || $('#qs').classList.contains('is-open') || $('#showroom').classList.contains('is-open') || b.contains('is-menu') || b.contains('is-filtering') || b.contains('is-loading')) return;
+    lenis.start();
+  }
+  // dialogs: focus moves into them and goes back to the button that opened them
+  const focusBack = new Map();
+  function focusIn(box, sel) { if (!focusBack.has(box)) focusBack.set(box, document.activeElement); const el = $(sel, box); if (el) setTimeout(() => el.focus({ preventScroll: true }), 60); }
+  function focusOut(box) { const el = focusBack.get(box); focusBack.delete(box); if (el && el.focus && document.contains(el)) el.focus({ preventScroll: true }); }
+
   /* ================= Quote review sheet ================= */
   const qs = $('#qs');
   function renderSheet() {
@@ -370,19 +383,21 @@
     $('.qs__foot').hidden = n === 0;
   }
   function openSheet() {
+    closeMenu();
     renderSheet();
     qs.classList.add('is-open'); qs.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    focusIn(qs, '.qv__close');
     gsap.fromTo('.qs__row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.04, delay: 0.15 });
   }
   function closeSheet() {
     if (!qs.classList.contains('is-open')) return;
     qs.classList.remove('is-open'); qs.setAttribute('aria-hidden', 'true');
-    if (!sr.classList.contains('is-open')) lenis && lenis.start();
+    unlock(); focusOut(qs);
   }
   $$('[data-qs-close]', qs).forEach(b => b.addEventListener('click', closeSheet));
   $('#qsList').addEventListener('click', e => {
-    if (e.target.closest('#qsBrowse')) { closeSheet(); hardCloseShowroom(); scrollToEl('#catalogue'); return; }
+    if (e.target.closest('#qsBrowse')) { afterShowroom(() => scrollToEl('#catalogue')); return; }
     const row = e.target.closest('.qs__row'); if (!row) return;
     const id = row.dataset.id;
     const step = e.target.closest('[data-q]');
@@ -392,7 +407,9 @@
   $('#qsList').addEventListener('change', e => {
     const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value);
   });
-  $('#qsForm').addEventListener('click', () => { closeSheet(); hardCloseShowroom(); setTimeout(() => scrollToEl('#contact'), 80); });
+  // if a showroom was open, scroll once it has finished closing (the page underneath is measured then)
+  const afterShowroom = fn => { const was = sr.classList.contains('is-open'); closeSheet(); hardCloseShowroom(); setTimeout(fn, was && !reduce ? 950 : 80); };
+  $('#qsForm').addEventListener('click', () => afterShowroom(() => scrollToEl('#contact')));
   $('#qbarOpen').addEventListener('click', openSheet);
   $('#rfqBtn').addEventListener('click', openSheet);
 
@@ -437,13 +454,14 @@
     fillQV(key);
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
     gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
   function closeQV() {
     if (!qv.classList.contains('is-open')) return;
     qv.classList.remove('is-open'); qv.setAttribute('aria-hidden', 'true'); qvId = null;
-    if (!sr.classList.contains('is-open') && !qs.classList.contains('is-open')) lenis && lenis.start();
+    unlock(); focusOut(qv);
   }
   function stepQV(d) { const o = itemOf(qvId); if (o) openQV(o.c.slug + ':' + ((o.i + d + o.c.items.length) % o.c.items.length)); }
   $$('[data-qv-close]', qv).forEach(b => b.addEventListener('click', closeQV));
@@ -471,26 +489,26 @@
       '<button class="prow__img" data-qv="' + o.id + '">' + imgTag(o.img) + '</button>' +
       '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + c.name + '</span>' : '') + '<h4>' + o.name + '</h4>' +
       (o.size ? '<div class="prow__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
-      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button>' +
+      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
       '</div>';
   }
   function cardHTML(c, i) {
     const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = materialOf(o.name);
-    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + o.chips.join('|') + '">' +
+    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
       '<button class="pc__media" data-qv="' + o.id + '" data-cursor="View"><span class="pc__no mono">' + pad(i + 1) + '</span>' +
       (mat ? '<span class="pc__mat mono">' + mat + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
       '<div class="pc__body"><h4>' + o.name + '</h4>' + (o.size ? '<div class="pc__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
       '<div class="pc__foot"><button class="pc__quick mono" data-qv="' + o.id + '">Quick view</button>' +
-      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button></div>' +
+      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button></div>' +
       '</article>';
   }
 
   /* ================= Category showroom (full screen) ================= */
   const sr = $('#showroom'), srScroll = $('#srScroll'), srContent = $('#srContent');
   const RELATED = {
-    valves: ['gaskets-caf-canf-sheets', 'ss-ms-flanges-forging-casting', 'ss-forged-low-pressure-bw-fittings', 'instrumentation-fittings-pressure-gas'],
-    couplings: ['gaskets-caf-canf-sheets', 'quick-couplings', 'chicago-couplings-fittings', 'hammer-union'],
-    fittings: ['ss-ms-flanges-forging-casting', 'gaskets-caf-canf-sheets', 'ball-valves', 'gate-valves'],
+    valves: ['gaskets-sheets', 'ss-ms-flanges-forging-casting', 'ss-forged-low-pressure-bw-fittings', 'instrumentation-fittings-pressure-gas'],
+    couplings: ['gaskets-sheets', 'quick-couplings', 'chicago-couplings-fittings', 'hammer-union'],
+    fittings: ['ss-ms-flanges-forging-casting', 'gaskets-sheets', 'ball-valves', 'gate-valves'],
     sealing: ['ss-ms-flanges-forging-casting', 'ball-valves', 'gate-valves', 'instrumentation-fittings-pressure-gas']
   };
   let srIdx = -1;
@@ -508,7 +526,7 @@
     const specs = [...specCount].sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 10);
     const next = CATS[(idx + 1) % CATS.length];
     const related = RELATED[c.fam].filter(s => s !== c.slug).slice(0, 3).map(catBySlug);
-    const fchips = (key, list) => '<button class="chip is-on" data-f="' + key + '" data-v="all">All</button>' + list.map(v => '<button class="chip" data-f="' + key + '" data-v="' + v + '">' + v + '</button>').join('');
+    const fchips = (key, list) => '<button class="chip is-on" data-f="' + key + '" data-v="all">All</button>' + list.map(v => '<button class="chip" data-f="' + key + '" data-v="' + esc(v) + '">' + esc(v) + '</button>').join('');
 
     srContent.innerHTML =
       '<header class="sr__hero">' +
@@ -630,7 +648,7 @@
       sr.style.clipPath = ''; document.body.classList.remove('is-shop');
       srIdx = -1;
       if (/^#products\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
-      if (!qs.classList.contains('is-open')) lenis && lenis.start();
+      unlock();
     };
     if (reduce) return finish();
     gsap.fromTo(sr, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: 'inset(0px 0px ' + innerHeight + 'px 0px round 0px)', duration: 0.8, ease: 'expo.inOut', onComplete: finish });
@@ -641,8 +659,9 @@
   }
   function hardCloseShowroom() {
     if (!sr.classList.contains('is-open')) return;
-    if (history.state && history.state.sr) history.replaceState(null, '', location.pathname + location.search);
-    doCloseShowroom();
+    // going back removes the showroom's own history step (popstate then closes it)
+    if (history.state && history.state.sr) history.back();
+    else doCloseShowroom();
   }
   const closeDrawer = hardCloseShowroom;
   window.addEventListener('popstate', () => {
@@ -662,7 +681,7 @@
     closeMega(); closeMenu();
   }
   document.addEventListener('keydown', e => {
-    if (!qv.classList.contains('is-open')) return;
+    if (!qv.classList.contains('is-open') || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.key === 'ArrowRight') stepQV(1);
     if (e.key === 'ArrowLeft') stepQV(-1);
   });
@@ -691,17 +710,19 @@
   $('#megaN').textContent = CATS.length;
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
   function closeMega() { nav.classList.remove('is-mega'); megaBtn.setAttribute('aria-expanded', 'false'); }
-  megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') ? closeMega() : openMega());
+  // with a mouse the menu opens on hover and closes when the pointer leaves, so a click only opens it
+  megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') && !fine ? closeMega() : openMega());
   if (fine) {
     megaBtn.addEventListener('mouseenter', openMega);
     nav.addEventListener('mouseleave', closeMega);
   }
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); lenis && lenis.start(); } }
+  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
-    lenis && (on ? lenis.stop() : lenis.start());
+    $('#burger').setAttribute('aria-expanded', String(on));
+    if (on) lenis && lenis.stop(); else unlock();
   });
 
   document.addEventListener('keydown', e => {
@@ -744,8 +765,8 @@
   const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
 
   // category rail with photos
-  $('#katRail').innerHTML = '<button class="kr is-on" data-pick="" role="listitem"><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
-    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '" role="listitem"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
+  $('#katRail').innerHTML = '<button class="kr is-on" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
+    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
     kf.cats.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
@@ -778,17 +799,17 @@
     const [head, ...rest] = base.split(', ');
     return '<span class="kc__np"><b>' + esc(head) + '</b>' + (rest.length ? '<em>' + esc(rest.join(', ')) + '</em>' : '') + '<span class="mono">Photo on WhatsApp</span></span>';
   }
-  function kcardHTML(o) {
+  function kcardHTML(o, cur) {
     const one = fixedSize(o), on = one && rfq.has(keyOf(o, sizeSpec(o).v));
     return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
         (o.mat !== 'Other' ? '<span class="kc__mat mono">' + (o.mats.length > 1 ? 'Carbon & stainless' : o.mat) + '</span>' : '') + (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
-        (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o)) +
+        (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
         (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
       '</div>' +
-      '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button>' +
+      '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
         '<a class="kc__wa" href="#" data-wa-link data-wa-msg="' + esc(waPrice(o)) + '" aria-label="Ask the price of ' + esc(o.name) + ' on WhatsApp" title="Ask the price on WhatsApp"><svg><use href="#wa"/></svg></a></div>' +
       '</article>';
   }
@@ -802,7 +823,14 @@
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
     const shown = hits.slice(0, kf.limit);
-    let html = shown.map(kcardHTML);
+    // sizes already picked on cards survive "Show more", filters, sort and search
+    const keep = new Map();
+    $$('[data-pick-root]', kGrid).forEach(r => {
+      if (!$$('[data-pk]', r).some(el => el.value)) return;
+      const o = itemOf(r.dataset.pickRoot), p = o && readPick(r, o);
+      if (p && p.ok) keep.set(o.id, p.v);
+    });
+    let html = shown.map(o => kcardHTML(o, keep.get(o.id)));
     if (shown.length >= 7) html.splice(7, 0, promoHTML());
     kGrid.innerHTML = hits.length ? html.join('') :
       '<div class="kat-empty"><b>Nothing matches that yet.</b><p>Clear a filter, or send us a photo of the part on WhatsApp and we’ll check our stock.</p>' +
@@ -826,6 +854,11 @@
     const nf = kf.cats.size + kf.mats.size + kf.specs.size;
     const fn = $('#katFilterN'); fn.hidden = !nf; fn.textContent = nf;
     $$('.kr', $('#katRail')).forEach(b => b.classList.toggle('is-on', kf.cats.size ? kf.cats.size === 1 && kf.cats.has(b.dataset.pick) : !b.dataset.pick));
+    keep.forEach((v, id) => {
+      const r = $('[data-pick-root="' + id + '"]', kGrid); if (!r) return;
+      const o = itemOf(id); tidyPair(r, o); $$('[data-add]', r).forEach(paintAdd);
+      const wa = $('[data-wa-msg]', r); if (wa) wa.dataset.waMsg = waPrice(o, v);
+    });
     applyLinks(kGrid); applyLinks($('#katMore'));
     if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
@@ -834,8 +867,11 @@
 
   $('#katFacets').addEventListener('change', e => {
     const t = e.target; if (!t.dataset.g) return;
-    kf[t.dataset.g][t.checked ? 'add' : 'delete'](t.value);
+    const had = document.activeElement === t, g = t.dataset.g, val = t.value;
+    kf[g][t.checked ? 'add' : 'delete'](val);
     kf.limit = PAGE; renderKat(true);
+    // keyboard users keep their place in the filter list
+    if (had) { const el = $$('#katFacets input[data-g="' + g + '"]').find(x => x.value === val); if (el) el.focus({ preventScroll: true }); }
   });
   $('#katFacets').addEventListener('click', e => {
     const b = e.target.closest('[data-spec]'); if (!b) return;
@@ -866,7 +902,7 @@
   addEventListener('resize', fitSide);
 
   // phones: filters slide up as a sheet
-  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); lenis && (on ? lenis.stop() : lenis.start()); };
+  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
   $('#katFilterBtn').addEventListener('click', () => kOpen(true));
   $('#katSideClose').addEventListener('click', () => kOpen(false));
   $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });

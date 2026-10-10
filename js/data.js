@@ -177,17 +177,17 @@ window.FT_CATS = [
       ['S.S Pipe & Tubing', ['316L', '304L', 'SMLS', 'ERW', 'SCH10', 'SCH40', 'SCH80'], '⅛" – 12" · 6 m', 'ss-forged-low-pressure-bw-fittings/edit-mv2idq23.jpg'],
       ['S.S Long & Close Pipe Nipple', ['A182 316L', 'ERW', 'SMLS', 'SCH10', 'SCH40', 'SCH80'], '¼" – 4" × 6"', 'ss-forged-low-pressure-bw-fittings/edit-mv2iflxi.jpg']
     ] },
-  { slug: 'gaskets-caf-canf-sheets', name: 'Gaskets & CAF / CNAF Sheets', fam: 'sealing',
-    desc: 'CAF, CNAF, neoprene, spiral wound and RTJ — plus gland packing and coupling washers.',
-    cover: 'gaskets-caf-canf-sheets/edit-mv2ivzmn.jpg',
+  { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
+    desc: 'Non-asbestos CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
+    cover: 'gaskets-sheets/edit-mv2ivzmn.jpg',
     items: [
-      ['CAF / CNAF Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-caf-canf-sheets/edit-mv2ivzmn.jpg'],
-      ['CAF, CNAF & Metallic Gasket Sheet', ['1 – 6 MM'], '1.5 m × 1.5 m', 'gaskets-caf-canf-sheets/edit-mv2ipd6e.jpg'],
-      ['Neoprene Rubber Sheet', ['1 – 16 MM'], '1.2 m × 10 m', 'gaskets-caf-canf-sheets/3.jpg'],
-      ['Spiral Wound Gasket', ['GRAPHITE', 'CAF', 'PTFE', 'CL150–CL1500'], '½" – 24"', 'gaskets-caf-canf-sheets/edit-mv2iklux.jpg'],
-      ['Graphited Gland Packing', [], '6 mm – 25 mm', 'gaskets-caf-canf-sheets/edit-mv2ilfvs.jpg'],
-      ['Rubber Washers for Chicago, Camlock, Storz, Bauer & Miller', [], '', 'gaskets-caf-canf-sheets/edit-mv2iob1d.jpg'],
-      ['RTJ Ring Gaskets', ['STAINLESS', 'SOFT IRON'], '', 'gaskets-caf-canf-sheets/7.jpg']
+      ['CNAF & Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-sheets/edit-mv2ivzmn.jpg'],
+      ['CNAF & Metallic Gasket Sheet', ['1 – 6 MM'], '1.5 m × 1.5 m', 'gaskets-sheets/edit-mv2ipd6e.jpg'],
+      ['Neoprene Rubber Sheet', ['1 – 16 MM'], '1.2 m × 10 m', 'gaskets-sheets/3.jpg'],
+      ['Spiral Wound Gasket', ['GRAPHITE', 'PTFE', 'CL150–CL1500'], '½" – 24"', 'gaskets-sheets/edit-mv2iklux.jpg'],
+      ['Graphited Gland Packing', [], '6 mm – 25 mm', 'gaskets-sheets/edit-mv2ilfvs.jpg'],
+      ['Rubber Washers for Chicago, Camlock, Storz, Bauer & Miller', [], '', 'gaskets-sheets/edit-mv2iob1d.jpg'],
+      ['RTJ Ring Gaskets', ['STAINLESS', 'SOFT IRON'], '', 'gaskets-sheets/7.jpg']
     ] },
   { slug: 'ss-ms-flanges-forging-casting', name: 'S.S & M.S Flanges', fam: 'fittings',
     desc: 'S.S A182 316L and M.S A105 flanges — forged or cast, SORF, WNRF, blind and screwed.',
