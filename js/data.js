@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (18 categories, 124 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (18 categories, 130 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -157,6 +157,12 @@ window.FT_CATS = [
       ['M.S Forged Pipe Fitting', ['A105', '2000#', '3000#', '6000#', 'NPT', 'SW'], '⅛" – 4"', 'ms-forged-low-pressure-bw-fittings/edit-mv2hmxve.jpg'],
       ['M.S Pipe & Tubing, SMLS & ERW', ['SCH STD', 'SCH40', 'SCH80', 'SCH160', 'XS', 'XXS'], '¼" – 24" · 6 m / DRL', 'ms-forged-low-pressure-bw-fittings/edit-mv2hrkkh.jpg'],
       ['M.S B/W Pipe Fitting, SMLS', ['WPB', 'SCH40', 'SCH80', 'SCH160'], '¼" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv2hv11p.jpg'],
+      ['M.S B/W Elbow, 45° & 90°', ['45°', '90°', 'SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/bw-elbow.jpg'],
+      ['M.S B/W Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/bw-tee.jpg'],
+      ['M.S B/W Reducer Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', ''],
+      ['M.S B/W End Cap', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/bw-end-cap.jpg'],
+      ['M.S B/W Concentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/bw-conc-reducer.jpg'],
+      ['M.S B/W Eccentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/bw-ecc-reducer.jpg'],
       ['M.S Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv2i2wsu.jpg'],
       ['M.S Long & Close Nipple', ['A105', 'SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 6" × 8"', 'ms-forged-low-pressure-bw-fittings/edit-mv2i4e9k.jpg']
     ] },

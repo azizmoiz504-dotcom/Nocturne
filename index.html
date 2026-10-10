@@ -343,23 +343,54 @@
 <!-- ============ CATALOGUE ============ -->
 <section class="catalogue" id="catalogue">
   <div class="wrap">
-    <div class="cat-head">
+    <div class="kat-head">
       <div>
         <div class="sec-head"><span class="sec-num">04</span><span class="mono">The catalogue</span></div>
-        <h2 class="h2" data-split>124 products.<br>18 categories.<br><span class="red">One roof.</span></h2>
+        <h2 class="h2" data-split>130 products.<br>18 categories.<br><span class="red">One roof.</span></h2>
       </div>
-      <div class="cat-tools" data-reveal>
-        <label class="search">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          <input id="search" type="search" autocomplete="off" placeholder='Search — try "camlock", "CL150" or "316L"'>
-          <kbd class="mono">/</kbd>
-        </label>
-        <div class="chips" id="famChips"></div>
+      <ul class="kat-promise" data-reveal>
+        <li><svg><use href="#wa"/></svg><div><b>Message tonight, priced by 7:30am</b><span>Send your list on WhatsApp after hours and the price is waiting when we open.</span></div></li>
+        <li><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/></svg><div><b>Delivered anywhere in the UAE</b><span>On orders from AED 5,000.</span></div></li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12h16M7 8v8M11 8v8M15 8v8M19 9v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><div><b>Threaded and crimped at the counter</b><span>Pipe threading, hose cut to length, hydraulic hose crimping.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="kat-rail" id="katRail" role="list" aria-label="Shop by category"></div>
+
+    <div class="kat">
+      <aside class="kat-side" id="katSide" aria-label="Filter products" data-lenis-prevent>
+        <div class="kat-side__head"><b>Filter</b><button class="kat-side__close" id="katSideClose" aria-label="Close filters"><span></span><span></span></button></div>
+        <div class="kat-side__body" id="katFacets"></div>
+        <div class="kat-side__foot"><button class="kat-reset mono" id="katReset">Clear all</button><button class="btn btn--red kat-side__apply" id="katApply">Show <span id="katApplyN">124</span> products</button></div>
+        <a class="kat-help" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I can't find a part on your website. I'll send a photo of it.">
+          <svg><use href="#wa"/></svg>
+          <b>Can't find your part?</b>
+          <span>Send a photo of it or its nameplate on WhatsApp and we'll tell you if we have it.</span>
+        </a>
+      </aside>
+
+      <div class="kat-main">
+        <div class="kat-bar">
+          <label class="search kat-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input id="search" type="search" autocomplete="off" placeholder='Search 124 products: try "camlock", "CL150" or "316L"'>
+            <kbd class="mono">/</kbd>
+          </label>
+          <div class="kat-bar__row">
+            <button class="kat-filter-btn" id="katFilterBtn"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Filters <span id="katFilterN" hidden></span></button>
+            <span class="kat-count mono" id="katCount" aria-live="polite"></span>
+            <label class="kat-sort"><span class="mono">Sort</span>
+              <select id="katSort"><option value="rec">Recommended</option><option value="az">Name A to Z</option><option value="za">Name Z to A</option></select>
+            </label>
+          </div>
+          <div class="kat-active" id="katActive"></div>
+        </div>
+        <div class="kat-grid" id="katGrid"></div>
+        <div class="kat-more" id="katMore"></div>
       </div>
     </div>
-    <div class="cat-grid" id="catGrid"></div>
-    <div class="cat-results" id="catResults" hidden></div>
   </div>
+  <div class="kat-scrim" id="katScrim"></div>
 </section>
 
 <!-- ============ BRANDS ============ -->
