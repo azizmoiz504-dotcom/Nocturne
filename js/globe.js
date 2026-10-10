@@ -54,7 +54,7 @@
         const eq = d3.geoEquirectangular().scale(OW / (2 * Math.PI)).translate([OW / 2, OH / 2]);
         ox.fillStyle = '#000'; ox.beginPath(); d3.geoPath(eq, ox)(land); ox.fill();
         const data = ox.getImageData(0, 0, OW, OH).data;
-        const step = innerWidth < 900 ? 1.45 : 1.2;
+        const step = innerWidth < 900 ? 1.8 : 1.2;
         for (let lat = -58; lat <= 80; lat += step) {
           const ls = step / Math.max(0.2, Math.cos(lat * Math.PI / 180));
           for (let lon = -180; lon < 180; lon += ls) {
@@ -72,9 +72,13 @@
 
     new IntersectionObserver(es => { inView = es[0].isIntersecting; }, { rootMargin: '100px' }).observe(canvas);
 
+    // phones and tablets redraw the globe at 30 frames a second so scrolling stays smooth
+    const minGap = matchMedia('(hover: none), (max-width: 900px)').matches ? 33 : 0;
+    let lastDraw = 0;
     function draw(now) {
       requestAnimationFrame(draw);
-      if (!inView || !W) return;
+      if (!inView || !W || now - lastDraw < minGap) return;
+      lastDraw = now;
       const t = now / 1000;
       if (!dragging && now - idleAt > 2500) {
         const base = -PIN[0] + 8 + Math.sin(t * 0.12) * 14;

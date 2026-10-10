@@ -684,7 +684,8 @@
     '<div><h6>' + f.name + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
       '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
-  $('#footCats').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + c.name + '</button>').join('');
+  // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html">' + c.name + '</a>').join('') + '<a href="products/index.html"><b>All product pages</b></a>';
 
   const megaBtn = $('#megaBtn');
   $('#megaN').textContent = CATS.length;
@@ -873,14 +874,36 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && kSide.classList.contains('is-open')) kOpen(false); });
   renderKat(false);
 
-  /* ---------------- Oilfield brands ---------------- */
+  /* ---------------- Business details for search engines (facts from the owner's form) ---------------- */
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'HardwareStore',
+    name: 'Fakhri Tools & Workshop Materials Trading LLC',
+    image: new URL('assets/share.jpg', location.href).href,
+    logo: new URL('assets/logo-stacked.png', location.href).href,
+    telephone: '+97142850135',
+    address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
+    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '07:30', closes: '18:00' }],
+    knowsLanguage: ['en', 'hi', 'ur', 'ar'],
+    paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque',
+    areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
+    hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves', itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name })) }
+  });
+  document.head.appendChild(ld);
+
+  /* ---------------- Brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
     '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
       '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" decoding="async">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
-      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Oilfield brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
-    '</button>').join('');
+      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
+    '</button>').join('') +
+    '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
+      '<span class="btile__mark"><span class="btile__word is-long">Ask for your brand</span></span>' +
+      '<span class="btile__foot"><span class="mono">On WhatsApp</span><b>Ask now <svg><use href="#arrow"/></svg></b></span></a>';
+  applyLinks($('#brandsGrid'));
   $('#brandsGrid').addEventListener('click', e => {
     const t = e.target.closest('[data-brand]'); if (!t) return;
     const msg = $('#fMsg');

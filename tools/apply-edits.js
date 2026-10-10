@@ -43,3 +43,5 @@ out += src.slice(src.indexOf('/* Oilfield brands'));
 fs.writeFileSync('js/data.js', out);
 fs.writeFileSync('index.html', fs.readFileSync('index.html', 'utf8').replace(/\d+ products\.<br>\d+ categories\./, total + ' products.<br>' + W.FT_CATS.length + ' categories.'));
 console.log('Applied:', total, 'products,', Object.keys(saved).length, 'new photos');
+// keep the per-category product pages in step with the catalogue
+require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'build-pages.js')], { stdio: 'inherit' });

@@ -381,5 +381,14 @@ window.FT_BRANDS = [
   { name: 'S.A. Brand', logo: 'assets/brands/sa-brand.png' },
   { name: 'Mega', logo: 'assets/brands/mega.png' },
   { name: 'Both-Well', logo: 'assets/brands/both-well.png' },
-  { name: 'Lintas', logo: 'assets/brands/lintas.png' }
+  { name: 'Lintas', logo: 'assets/brands/lintas.png' },
+  // from mabrook-uae.com/our-brands (group company); logos still to come, shown as name tiles
+  { name: 'Bossini' },
+  { name: 'Froch' },
+  { name: 'Jazeera Steel' },
+  { name: 'TA Chen' },
+  { name: 'Surya' },
+  { name: 'Pegler' },
+  { name: 'SPI' },
+  { name: '100 Tong' }
 ];

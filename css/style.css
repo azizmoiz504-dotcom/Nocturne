@@ -1378,3 +1378,19 @@ body.has-quote .fabs{bottom:14px}
 @media (max-width:1100px){.proofs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:860px){.intro__grid{grid-template-columns:1fr}.intro__facts{border-left:0;padding-left:0;border-top:1px solid var(--line-2);padding-top:26px}}
 @media (max-width:560px){.proofs{grid-template-columns:1fr;gap:12px}.proofs li{padding:20px 18px}.intro__facts dd{font-size:19px}}
+.btile--ask{background:var(--red);color:#fff}
+.btile--ask .btile__no,.btile--ask .btile__foot .mono{color:rgba(255,255,255,.8)}
+.btile--ask .btile__word,.btile--ask:hover .btile__word{color:#fff}
+.btile--ask .btile__foot{border-top-color:rgba(255,255,255,.25)}
+.btile--ask .btile__foot b{color:#fff}
+.btile--ask::before{background:#fff}
+
+/* smoother scrolling: no full-screen grain layer on phones and tablets, no blend modes on white photo circles */
+@media (max-width:900px),(hover:none){.grain{display:none}}
+.kr__img img,.qbar__thumbs img,.qs__img img{mix-blend-mode:normal}
+.qbar__thumbs i{background:#fff}
+@media (min-width:561px) and (max-width:1100px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:46px}.nav .nav__bar{gap:14px}}
+@media (max-width:560px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:33px}}
+@media (max-width:370px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:29px}}
+@media (max-width:335px){.brand__plate img,.nav.is-scrolled .brand__plate img{height:24px}}
+.footer__cats #footCats a{display:block;text-align:left;color:var(--steel-2);font-size:19px;padding:4px 0;break-inside:avoid}.footer__cats #footCats a:hover{color:#fff}
