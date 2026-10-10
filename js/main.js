@@ -106,6 +106,7 @@
     const it = c.items[+i];
     return { id: slug + ':' + (+i), c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '' };
   }
+  const coverOf = c => c.imgs[0] ? IMG + c.imgs[0] : '';
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
   const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|stainless/i], ['Carbon steel', /\bC\.S\b/], ['Cast iron', /\bC\.I\b/i], ['Galvanised', /\bG\.I\b/], ['Mild steel', /\bM\.S\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
   function materialOf(name) {
@@ -351,19 +352,19 @@
     srContent.innerHTML =
       '<header class="sr__hero">' +
         '<div class="sr__copy">' +
-          '<div class="sr__crumbs mono"><button data-sr-close>Catalogue</button><i>/</i><span>' + famName(c.fam) + '</span><i>/</i><b>' + pad(idx + 1) + ' of 18</b></div>' +
+          '<div class="sr__crumbs mono"><button data-sr-close>Catalogue</button><i>/</i><span>' + famName(c.fam) + '</span><i>/</i><b>' + pad(idx + 1) + ' of ' + CATS.length + '</b></div>' +
           '<h2 class="sr__title">' + c.name + '</h2>' +
           '<p class="sr__desc">' + c.desc + '</p>' +
           '<div class="sr__facts"><div><b>' + pad(c.items.length) + '</b><small class="mono">Products</small></div>' +
             '<div><b>' + pad(Math.max(1, mats.length)) + '</b><small class="mono">Materials</small></div>' +
             '<div><b>' + pad(specCount.size) + '</b><small class="mono">Specs & ratings</small></div></div>' +
-          '<div class="sr__ctas" data-fly><img class="sr__flysrc" src="' + IMG + c.imgs[0] + '" alt="" >' +
+          '<div class="sr__ctas" data-fly><img class="sr__flysrc" src="' + coverOf(c) + '" alt="" >' +
             '<button class="btn btn--red magnetic" data-addall>Quote the full range <svg><use href="#arrow"/></svg></button>' +
             '<a class="btn btn--ghost magnetic" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I would like a quote for your ' + c.name + '."><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div>' +
         '</div>' +
         '<div class="sr__stage">' +
           '<div class="sr__orb"><svg class="sr__ring" viewBox="0 0 200 200"><defs><path id="srRing" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#srRing">Fakhri Tools · Al Quoz Industrial Area 3 · Dubai · Get a quote · Call · WhatsApp ·</textPath></text></svg>' +
-          '<div class="sr__plate" id="srPlate">' + imgTag(IMG + c.imgs[0], c.name) + '</div></div>' +
+          '<div class="sr__plate" id="srPlate">' + imgTag(coverOf(c), c.name) + '</div></div>' +
           '<div class="sr__thumbs">' + c.imgs.slice(0, 6).map((im, i) => '<button class="' + (i ? '' : 'is-on') + '" data-feat="' + i + '" aria-label="Show product ' + (i + 1) + '">' + imgTag(IMG + im) + '</button>').join('') + '</div>' +
         '</div>' +
       '</header>' +
@@ -375,9 +376,9 @@
       '</div>' +
       '<div class="sr__grid" id="srGrid">' + c.items.map((_, i) => cardHTML(c, i)).join('') + '</div>' +
       '<section class="sr__related"><div class="sr__rel-head"><span class="mono">Complete the line</span><h3>Everything that goes with ' + c.name.toLowerCase().replace(/ — .*/, '') + '.</h3><p>Gaskets, flanges, fittings and instruments — ask for them all in one quote.</p></div>' +
-        '<div class="sr__rel-grid">' + related.map(r => '<button class="rel" data-cat="' + r.slug + '"><span class="rel__img">' + imgTag(IMG + r.imgs[0], r.name) + '</span><span class="mono">' + pad(r.items.length) + ' products</span><b>' + r.name + '</b><i><svg><use href="#arrow"/></svg></i></button>').join('') + '</div>' +
+        '<div class="sr__rel-grid">' + related.map(r => '<button class="rel" data-cat="' + r.slug + '"><span class="rel__img">' + imgTag(coverOf(r), r.name) + '</span><span class="mono">' + pad(r.items.length) + ' products</span><b>' + r.name + '</b><i><svg><use href="#arrow"/></svg></i></button>').join('') + '</div>' +
       '</section>' +
-      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + next.name + '</b><span class="sr__next-img">' + imgTag(IMG + next.imgs[0], next.name) + '</span></button>';
+      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + next.name + '</b><span class="sr__next-img">' + imgTag(coverOf(next), next.name) + '</span></button>';
 
     applyLinks(srContent);
     $$('#srTabs button').forEach(b => b.classList.toggle('is-on', b.dataset.cat === c.slug));
@@ -552,6 +553,7 @@
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = materialOf(o.name) || 'Other';
+    o.mats = /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = (o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam)).toLowerCase();
     o.rank = ALL.length;
     ALL.push(o);
@@ -572,7 +574,7 @@
   // what passes every filter except the one named in `skip` (so each group shows honest counts)
   function pass(o, skip) {
     if (skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
-    if (skip !== 'mats' && kf.mats.size && !kf.mats.has(o.mat)) return false;
+    if (skip !== 'mats' && kf.mats.size && !o.mats.some(m => kf.mats.has(m))) return false;
     if (skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
     if (kf.q) { const toks = kf.q.split(/\s+/); if (!toks.every(t => o.hay.includes(t))) return false; }
     return true;
@@ -581,7 +583,7 @@
 
   // category rail with photos
   $('#katRail').innerHTML = '<button class="kr is-on" data-pick="" role="listitem"><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
-    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '" role="listitem"><span class="kr__img">' + imgTag(IMG + c.imgs[0], '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
+    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '" role="listitem"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
     kf.cats.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
@@ -591,7 +593,7 @@
   });
 
   function facetsHTML() {
-    const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mat), sc = countBy('specs', o => o.chips);
+    const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mats), sc = countBy('specs', o => o.chips);
     const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
     let h = '';
     FAMS.forEach(f => {
@@ -601,17 +603,22 @@
         cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
     });
     h += '<details class="kgroup" open><summary>Material</summary><div class="kgroup__list">' +
-      MAT_ORDER.filter(m => ALL.some(o => o.mat === m)).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
+      MAT_ORDER.filter(m => ALL.some(o => o.mats.includes(m))).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
     h += '<details class="kgroup" open><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
       SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
     return h;
   }
 
+  function noPhoto(o) {
+    const base = o.name.replace(/^(C\.S & S\.S|G\.I|M\.S|S\.S|C\.I|Aluminium|Brass|PP|Clear)\s+/, '');
+    const [head, ...rest] = base.split(', ');
+    return '<span class="kc__np"><b>' + esc(head) + '</b>' + (rest.length ? '<em>' + esc(rest.join(', ')) + '</em>' : '') + '<span class="mono">Photo on WhatsApp</span></span>';
+  }
   function kcardHTML(o) {
     const on = rfq.has(o.id);
     return '<article class="kc" data-fly>' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
-        (o.mat !== 'Other' ? '<span class="kc__mat mono">' + o.mat + '</span>' : '') + imgTag(o.img, o.name) + '<span class="kc__peek mono">Quick view</span></button>' +
+        (o.mat !== 'Other' ? '<span class="kc__mat mono">' + (o.mats.length > 1 ? 'Carbon & stainless' : o.mat) + '</span>' : '') + (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
         (o.size ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : '') +
@@ -710,6 +717,8 @@
   });
 
   /* ---------------- Gauges ---------------- */
+  const gCats = $$('.gauge').find(g => /categories/i.test(g.dataset.label));
+  if (gCats) { gCats.dataset.value = CATS.length; gCats.dataset.scale = Math.ceil((CATS.length + 2) / 5) * 5; gCats.dataset.majors = gCats.dataset.scale / 5; }
   $$('.gauge').forEach((g, gi) => {
     const val = +g.dataset.value, scale = +g.dataset.scale, majors = +g.dataset.majors, isTime = g.dataset.type === 'time';
     const fill = val / scale;

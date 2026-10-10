@@ -19,10 +19,12 @@ for (const [id, url] of Object.entries(edits.images || {})) {
 const photo = p => saved[p] || p;
 const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.trim(); };
 for (const e of edits.cats) {
-  const c = W.FT_CATS.find(c => c.slug === e.slug);
+  let c = W.FT_CATS.find(c => c.slug === e.slug);
+  if (!c && e.name && e.fam && W.FT_FAMILIES.some(f => f.id === e.fam)) W.FT_CATS.push(c = { slug: e.slug, name: e.name, fam: e.fam, desc: e.desc || '' });
   if (!c) throw new Error('Unknown category ' + e.slug);
   c.items = e.items.map(it => [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]);
   c.cover = photo(e.cover);
+  if (!/^[a-z0-9-]+$/.test(c.slug)) throw new Error('Bad slug ' + c.slug);
   for (const p of [c.cover, ...c.items.map(it => it[3])]) if (p && !fs.existsSync(path.join('assets/products', p))) throw new Error('Missing photo ' + p);
 }
 
@@ -38,5 +40,5 @@ out += 'window.FT_CATS = [\n' + W.FT_CATS.map(c =>
   '    items: [\n' + c.items.map(it => '      [' + q(it[0]) + ', [' + it[1].map(q).join(', ') + '], ' + q(it[2]) + ', ' + q(it[3]) + ']').join(',\n') + '\n    ] }').join(',\n') + '\n];\n\n';
 out += src.slice(src.indexOf('/* Oilfield brands'));
 fs.writeFileSync('js/data.js', out);
-fs.writeFileSync('index.html', fs.readFileSync('index.html', 'utf8').replace(/\d+ products\.<br>/, total + ' products.<br>'));
+fs.writeFileSync('index.html', fs.readFileSync('index.html', 'utf8').replace(/\d+ products\.<br>\d+ categories\./, total + ' products.<br>' + W.FT_CATS.length + ' categories.'));
 console.log('Applied:', total, 'products,', Object.keys(saved).length, 'new photos');

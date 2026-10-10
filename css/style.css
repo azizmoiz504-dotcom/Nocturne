@@ -1279,3 +1279,9 @@ body.has-quote .fabs{bottom:14px}
   .kat-count{order:3;width:100%}
 }
 @media (prefers-reduced-motion:reduce){.kc,.kc__media img,.kr__img,.kr__img img,.kat-side{transition:none}}
+.kc__np{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px;padding:16% 12% 12%;background:linear-gradient(150deg,#f7f8fa 0%,#e6eaef 100%);text-align:left;overflow:hidden}
+.kc__np::after{content:"";position:absolute;right:-18%;bottom:-18%;width:70%;aspect-ratio:1;border-radius:50%;border:14px solid rgba(7,24,35,.05)}
+.kc__np b{font-family:var(--f-display);font-weight:700;font-size:clamp(24px,2.4vw,32px);line-height:.95;text-transform:uppercase;color:var(--paper-ink)}
+.kc__np em{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:clamp(18px,1.8vw,22px);line-height:1;text-transform:uppercase;color:var(--red)}
+.kc__np .mono{position:absolute;left:12%;bottom:10%;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1a9a4b}
+@media (max-width:600px){.kc__np{padding:14% 10% 10%}.kc__np b{font-size:20px}.kc__np em{font-size:16px}.kc__np .mono{font-size:10.5px}}
