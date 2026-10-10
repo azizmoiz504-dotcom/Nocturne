@@ -25,7 +25,7 @@
     const path = d3.geoPath(proj, ctx);
     const grat = d3.geoGraticule10();
     let W = 0, H = 0, R = 0, dpr = 1, inView = true, dragging = false, idleAt = 0;
-    const rot = [-PIN[0] + 18, -PIN[1] + 4, 0];
+    const rot = [-PIN[0] + 8, -PIN[1] + 2, 0];
     let dots = [];
     const buckets = Array.from({ length: 6 }, () => []);
 
@@ -54,7 +54,7 @@
         const eq = d3.geoEquirectangular().scale(OW / (2 * Math.PI)).translate([OW / 2, OH / 2]);
         ox.fillStyle = '#000'; ox.beginPath(); d3.geoPath(eq, ox)(land); ox.fill();
         const data = ox.getImageData(0, 0, OW, OH).data;
-        const step = innerWidth < 900 ? 1.9 : 1.55;
+        const step = innerWidth < 900 ? 1.45 : 1.2;
         for (let lat = -58; lat <= 80; lat += step) {
           const ls = step / Math.max(0.2, Math.cos(lat * Math.PI / 180));
           for (let lon = -180; lon < 180; lon += ls) {
@@ -77,9 +77,9 @@
       if (!inView || !W) return;
       const t = now / 1000;
       if (!dragging && now - idleAt > 2500) {
-        const base = -PIN[0] + 18 + Math.sin(t * 0.12) * 26;
+        const base = -PIN[0] + 8 + Math.sin(t * 0.12) * 14;
         rot[0] += (base - rot[0]) * 0.01;
-        rot[1] += (-PIN[1] + 4 - rot[1]) * 0.01;
+        rot[1] += (-PIN[1] + 2 - rot[1]) * 0.01;
       }
       proj.rotate(rot);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -96,7 +96,7 @@
       ctx.beginPath(); path(grat); ctx.strokeStyle = 'rgba(255,255,255,.045)'; ctx.lineWidth = 0.6; ctx.stroke();
 
       const cv = toXYZ(-rot[0], -rot[1]);
-      const ds = Math.max(1.1, R / 260);
+      const ds = Math.max(1.5, R / 210);
       // dots are batched into a few brightness bands: one fill per band instead of one per dot
       const BANDS = 6;
       for (let b = 0; b < BANDS; b++) buckets[b].length = 0;
@@ -108,7 +108,7 @@
       }
       for (let b = 0; b < BANDS; b++) {
         const list = buckets[b]; if (!list.length) continue;
-        ctx.fillStyle = 'rgba(196,203,214,' + (0.14 + (b + 0.5) / BANDS * 0.55).toFixed(3) + ')';
+        ctx.fillStyle = 'rgba(206,214,224,' + (0.28 + (b + 0.5) / BANDS * 0.62).toFixed(3) + ')';
         ctx.beginPath();
         for (let i = 0; i < list.length; i++) { const p = proj(list[i]); ctx.rect(p[0] - ds / 2, p[1] - ds / 2, ds, ds); }
         ctx.fill();
@@ -123,14 +123,20 @@
           ctx.strokeStyle = 'rgba(224,48,58,' + (1 - pr).toFixed(3) + ')'; ctx.lineWidth = 1.5;
           ctx.beginPath(); ctx.arc(o[0], o[1], 4 + pr * 34, 0, Math.PI * 2); ctx.stroke();
         }
+        // label goes to whichever side has room, so it is never cut off at the canvas edge
+        ctx.font = '600 15px "Barlow Semi Condensed", sans-serif';
+        const lw = Math.max(ctx.measureText('FAKHRI TOOLS').width, 110);
+        const dir = o[0] + 64 + lw > W - 6 ? -1 : 1;
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(o[0] + 26, o[1] - 34); ctx.lineTo(o[0] + 60, o[1] - 34); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(o[0] + 26 * dir, o[1] - 34); ctx.lineTo(o[0] + 60 * dir, o[1] - 34); ctx.stroke();
         ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(o[0], o[1], 5, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#b91a20'; ctx.beginPath(); ctx.arc(o[0], o[1], 2.6, 0, Math.PI * 2); ctx.fill();
-        ctx.font = '600 15px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = '#fff';
-        ctx.fillText('FAKHRI TOOLS', o[0] + 64, o[1] - 40);
+        ctx.textAlign = dir > 0 ? 'left' : 'right';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('FAKHRI TOOLS', o[0] + 64 * dir, o[1] - 40);
         ctx.font = '500 13px "Barlow Semi Condensed", sans-serif'; ctx.fillStyle = 'rgba(196,203,214,.9)';
-        ctx.fillText('AL QUOZ · DUBAI', o[0] + 64, o[1] - 24);
+        ctx.fillText('AL QUOZ · DUBAI', o[0] + 64 * dir, o[1] - 24);
+        ctx.textAlign = 'left';
       }
     }
     requestAnimationFrame(draw);

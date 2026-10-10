@@ -506,7 +506,7 @@
         </div>
       </div>
       <form class="form" id="form" novalidate>
-        <p class="form__intro">Fill this in and send it to us on WhatsApp. Prefer to talk? Call <a href="tel:+97142850135">+971 4 285 0135</a>.</p>
+        <p class="form__intro">Fill this in and send it to us on WhatsApp or by email. Prefer to talk? Call <a href="tel:+97142850135">+971 4 285 0135</a>.</p>
         <div class="form__rfq" id="formRfq" hidden>
           <div class="form__rfq-head mono"><span>Items in your quote</span><button type="button" id="rfqClear">Clear</button></div>
           <ul id="rfqList"></ul>
@@ -514,15 +514,9 @@
         <div class="field"><input id="fName" name="name" required placeholder=" " autocomplete="name"><label for="fName">Full name</label></div>
         <div class="field-row">
           <div class="field"><input id="fMobile" name="mobile" type="tel" required placeholder=" " autocomplete="tel"><label for="fMobile">Mobile</label></div>
-          <div class="field"><input id="fCompany" name="company" placeholder=" " autocomplete="organization"><label for="fCompany">Company (optional)</label></div>
+          <div class="field"><input id="fEmail" name="email" type="email" placeholder=" " autocomplete="email"><label for="fEmail">Email (optional)</label></div>
         </div>
-        <div class="field field--select">
-          <select id="fCat" name="group">
-            <option value="">Choose a product group</option>
-            <option>Pipes</option><option>Fittings</option><option>Valves</option><option>Workshop Materials</option><option>Not sure / other</option>
-          </select>
-          <label for="fCat">Product group</label>
-        </div>
+        <div class="field"><input id="fCompany" name="company" placeholder=" " autocomplete="organization"><label for="fCompany">Company (optional)</label></div>
         <div class="field"><textarea id="fMsg" name="message" rows="4" placeholder=" "></textarea><label for="fMsg">What do you need? Item, size, quantity…</label></div>
         <div class="form__actions">
           <button class="btn btn--red magnetic" type="submit" data-send="wa"><svg><use href="#wa"/></svg> Send on WhatsApp</button>
