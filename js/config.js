@@ -13,10 +13,10 @@ window.FT_CONFIG = {
   whatsappDigits: '971522767034',
 
   // [TO FILL] Email address, e.g. 'sales@yourdomain.ae'
-  email: '',
+  email: 'dxbsales@ftools.com',
 
   // [TO FILL] Your Google Maps link. Until it is filled in, this search link is used.
-  mapsUrl: '',
+  mapsUrl: 'https://share.google/QAoqso7RYy5niY0su',
   mapsSearchUrl: 'https://www.google.com/maps/search/?api=1&query=Fakhri+Tools+%26+Workshop+Materials+Trading+LLC+Al+Quoz+Dubai',
 
   // Opening hours (Dubai time). 1 = Monday … 6 = Saturday. Sunday closed.
