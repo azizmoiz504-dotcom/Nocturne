@@ -1069,3 +1069,10 @@ body.is-shop .fabs,body.is-menu .fabs{opacity:0;pointer-events:none}
 .qv__media img{inset:9%;width:82%;height:82%}
 .sr__plate,.rel__img{position:relative}
 .sr__plate img,.sr__next-img img{inset:16%;width:68%;height:68%}
+.fabs{right:14px;bottom:14px}
+body.has-quote .fabs{bottom:88px}
+@media (max-width:560px){.fabs{right:10px;bottom:10px}body.has-quote .fabs{bottom:86px}}
+.brand{flex-shrink:0}
+@media (max-width:1440px){.nav__links{display:none}.burger{display:block}.nav__call{margin-left:auto}}
+@media (min-width:1441px) and (max-width:1700px){.nav .nav__links a,.nav .nav__mega-btn{font-size:20px;padding:9px 8px}}
+@media (min-width:1701px){.nav .nav__links a,.nav .nav__mega-btn{font-size:21px;padding:9px 8px}}
