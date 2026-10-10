@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (18 categories, 130 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (28 categories, 217 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -54,7 +54,8 @@ window.FT_CATS = [
       ['C.S Wafer Type Check Valve', ['CL150'], '½" – 12"', 'check-valves/10.jpg'],
       ['C.S Check Valve', ['CL150', 'CL300', 'F/T'], '½" – 12"', 'check-valves/cs-check.jpg'],
       ['C.I Swing Check Valve', ['PN16', 'F/T'], '1" – 12"', 'check-valves/edit-mv2d1bik.jpg'],
-      ['S.S Swing Check Valve', ['CL150', 'F/T'], '1" – 12"', 'check-valves/13.jpg']
+      ['S.S Swing Check Valve', ['CL150', 'F/T'], '1" – 12"', 'check-valves/13.jpg'],
+      ['C.I Dual-Plate Check Valve, DI or S.S Disc', ['PN16'], '', '']
     ] },
   { slug: 'ball-valves', name: 'Ball Valves', fam: 'valves',
     desc: 'Quarter-turn shut-off from 600 to 3000 WOG — 1PC, 2PC and 3PC designs in bronze, brass, S.S, C.S and C.I.',
@@ -201,7 +202,8 @@ window.FT_CATS = [
       ['MS Flanges SWRF', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kgxw8.jpg'],
       ['MS Flanges WNRF', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kpmjk.jpg'],
       ['MS Flanges BLIND', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kpg3a.jpg'],
-      ['MS Flanges THREADED', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kq8gj.jpg']
+      ['MS Flanges THREADED', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kq8gj.jpg'],
+      ['C.S & S.S Lap-Joint Flange', ['CL150–CL600', 'PN10–PN40', '5K–20K'], '½" – 24"', '']
     ] },
   { slug: 'chicago-couplings-fittings', name: 'Chicago Couplings & Fittings', fam: 'couplings',
     desc: 'Galvanised claw couplings, king nipples, menders and bolt clamps for air and water hose.',
@@ -229,6 +231,141 @@ window.FT_CATS = [
     items: [
       ['Universal Pipe Joining Coupling', [], '2" – 24"', 'universal-couplings-flange-adapter/1.jpg'],
       ['Universal Flange Adapter', ['PN16'], '2" – 24"', 'universal-couplings-flange-adapter/2.jpg']
+    ] },
+  { slug: 'butt-weld-fittings', name: 'C.S & S.S Butt-Weld Fittings', fam: 'fittings',
+    desc: 'Seamless and welded butt-weld elbows, tees, reducers and caps to ASME B16.9, SCH 10 to SCH 160.',
+    cover: '',
+    items: [
+      ['C.S & S.S Butt-Weld Elbow, 45° Long Radius', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', ''],
+      ['C.S & S.S Butt-Weld Elbow, 90° Long Radius', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', ''],
+      ['C.S & S.S Butt-Weld Elbow, 90° Short Radius', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', ''],
+      ['C.S & S.S Butt-Weld Elbow, 180° Long Radius Return Bend', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', ''],
+      ['C.S & S.S Butt-Weld Tee, Equal', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', ''],
+      ['C.S & S.S Butt-Weld Tee, Reducing', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '¾" × ½" – 24" × 20"', ''],
+      ['C.S & S.S Butt-Weld Reducer, Concentric', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '¾" × ½" – 24" × 20"', ''],
+      ['C.S & S.S Butt-Weld Reducer, Eccentric', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '¾" × ½" – 24" × 20"', ''],
+      ['C.S & S.S Butt-Weld End Cap', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', '']
+    ] },
+  { slug: 'socket-weld-fittings', name: 'Socket-Weld Fittings', fam: 'fittings',
+    desc: 'Forged C.S and S.S socket-weld fittings to ASME B16.11, Class 1000 to 6000.',
+    cover: '',
+    items: [
+      ['C.S & S.S Socket-Weld Elbow, 45°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Elbow, 90°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Tee, Equal', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Tee, Reducing', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '⅜" × ¼" – 4" × 3"', ''],
+      ['C.S & S.S Socket-Weld Coupling, Full', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Coupling, Half', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Coupling, Reducing', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '⅜" × ¼" – 4" × 3"', ''],
+      ['C.S & S.S Socket-Weld Union', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Cross, Equal', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld End Cap', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Socket-Weld Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', '']
+    ] },
+  { slug: 'threaded-forged-fittings', name: 'Threaded Forged Fittings', fam: 'fittings',
+    desc: 'Forged C.S and S.S threaded fittings to ASME B16.11, Class 1000 to 6000.',
+    cover: '',
+    items: [
+      ['C.S & S.S Threaded Elbow, 45°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Elbow, 90°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Tee, Equal', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Tee, Reducing', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '⅜" × ¼" – 4" × 3"', ''],
+      ['C.S & S.S Threaded Coupling, Full', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Coupling, Half', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Coupling, Reducing Socket', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '⅜" × ¼" – 4" × 3"', ''],
+      ['C.S & S.S Threaded Union', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Cross, Equal', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded End Cap', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', ''],
+      ['C.S & S.S Threaded Bush, Reducing', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '⅜" × ¼" – 4" × 3"', '']
+    ] },
+  { slug: 'gi-pipe-fittings', name: 'G.I Pipe Fittings', fam: 'fittings',
+    desc: 'Galvanised malleable-iron threaded fittings, BSP or NPT, Class 150 and 300.',
+    cover: '',
+    items: [
+      ['G.I Elbow, 45°', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Elbow, 90°', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Tee, Equal', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Tee, Reducing', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Coupling, Socket', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Coupling, Reducing Socket', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.14'], '⅜" × ¼" – 6" × 4"', ''],
+      ['G.I Union', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Cross, Equal', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I End Cap', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', ''],
+      ['G.I Plug', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.14'], '½" – 6"', ''],
+      ['G.I Bush, Reducing', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.14'], '½" – 6"', ''],
+      ['G.I Nipple, Hex', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', '']
+    ] },
+  { slug: 'camlock-couplings', name: 'Camlock Couplings', fam: 'couplings',
+    desc: 'Cam and groove couplings by type: adapters, couplers, caps, plugs, doubles and reducers in aluminium, brass and PP.',
+    cover: '',
+    items: [
+      ['Aluminium Camlock Type A, Male Adapter × Female Thread', ['BSPT', 'NPT'], '½" – 6"', ''],
+      ['Aluminium Camlock Type B, Female Coupler × Male Thread', ['BSPT', 'NPT'], '½" – 6"', ''],
+      ['Aluminium Camlock Type C, Female Coupler × Hose Shank', [], '½" – 6"', ''],
+      ['Aluminium Camlock Type D, Female Coupler × Female Thread', ['BSPT', 'NPT'], '½" – 6"', ''],
+      ['Aluminium Camlock Type E, Male Adapter × Hose Shank', [], '½" – 6"', ''],
+      ['Aluminium Camlock Type F, Male Adapter × Male Thread', ['BSPT', 'NPT'], '½" – 6"', ''],
+      ['Aluminium Camlock Type DC, Dust Cap (fits Male Adapters)', [], '½" – 6"', ''],
+      ['Aluminium Camlock Type DP, Dust Plug (fits Female Couplers)', [], '½" – 6"', ''],
+      ['Aluminium Camlock Type AA, Double Adapter (Male × Male)', [], '1" – 4" × 3"', ''],
+      ['Aluminium Camlock Type DD, Double Coupler (Female × Female)', [], '1" – 4" × 3"', ''],
+      ['Aluminium Camlock Type DA, Female Coupler × Male Adapter', [], '2" × 1½" – 6" × 4"', ''],
+      ['Aluminium Camlock Type AR, Reducing Adapter', [], '3" × 2" – 3" × 4"', ''],
+      ['Aluminium Camlock Type DR, Reducing Coupler', [], '2" × 1½" – 3" × 2"', ''],
+      ['Aluminium API Tank Truck Adaptor', [], '6" × 4"', ''],
+      ['PP Camlock Type D, Female Coupler × Female Thread', [], '3"', ''],
+      ['PP Camlock Type DP, Dust Plug (fits Female Couplers)', [], '3"', ''],
+      ['Brass Camlock Type D, Female Coupler × Female Thread', [], '2"', '']
+    ] },
+  { slug: 'hoses', name: 'Industrial Hoses', fam: 'couplings',
+    desc: 'Composite hose assemblies with camlock or flanged ends, S.S braided hose and PVC suction hose.',
+    cover: '',
+    items: [
+      ['Composite Hose, Camlock Ends', ['M/F CAMLOCK'], '1½" – 4" · 2 – 30 m', ''],
+      ['Composite Hose, Flanged Ends', ['CL150', 'F/T'], '2" · 1 – 4.5 m', ''],
+      ['S.S Single-Braided Hose', ['SS316 TUBE', 'SS304 BRAID'], '3" · 5 m', ''],
+      ['Green PVC Suction Hose', [], '2½"', '']
+    ] },
+  { slug: 'brass-fittings-valves', name: 'Brass Fittings & Valves', fam: 'fittings',
+    desc: 'Brass and bronze threaded fittings, valves and accessories: air vents, tank connectors, float and solenoid valves, test points.',
+    cover: '',
+    items: [
+      ['Brass Air Release Valve', ['THREADED'], '1"', ''],
+      ['Brass Air Vent', ['THREADED'], '½", ¾", 1"', ''],
+      ['Brass Float Valve with PVC Ball', ['THREADED'], '2"', ''],
+      ['Brass Float Valve with Copper Ball', ['THREADED'], '4"', ''],
+      ['Brass Hex Nipple', ['THREADED'], '⅜", ½"', ''],
+      ['Brass Reducing Bush', ['THREADED'], '½" × ¼", ½" × ⅜", ¾" × ½", 1" × ¾"', ''],
+      ['Brass Round Bar', [], '50 mm × 1 ft', ''],
+      ['Brass Socket', ['THREADED'], '¼", ¾"', ''],
+      ['Brass Solenoid Valve', ['THREADED'], '¾", 1"', ''],
+      ['Brass Tank Connector', ['THREADED'], '½" – 4"', ''],
+      ['Brass Tee', ['THREADED'], '⅜", ½"', ''],
+      ['Brass Test Point', ['THREADED'], '¼", ½"', '']
+    ] },
+  { slug: 'foot-valves', name: 'Foot Valves', fam: 'valves',
+    desc: 'Brass net-type and cast iron foot valves, threaded or flanged PN16.',
+    cover: '',
+    items: [
+      ['Brass Foot Valve, Net Type', ['THREADED'], '½" – 4"', ''],
+      ['C.I Foot Valve', ['PN16', 'F/T'], '10"', ''],
+      ['C.I Foot Valve with Rubber Flap', ['NPT'], '4"', '']
+    ] },
+  { slug: 'cock-valves', name: 'Cock Valves', fam: 'valves',
+    desc: 'Brass and stainless steel drain cocks, tank level cocks and cock valves.',
+    cover: '',
+    items: [
+      ['Brass Drain Cock', ['THREADED'], '½"', ''],
+      ['Brass Tank Level Cock', ['THREADED'], '12 mm × ½" – 25 mm × 1"', ''],
+      ['S.S Cock Valve', ['THREADED'], '½" × 12 mm', ''],
+      ['S.S Cock Valve, Hex Type', ['THREADED'], '½"', '']
+    ] },
+  { slug: 'acrylic-tubes', name: 'Acrylic Tubes', fam: 'sealing',
+    desc: 'Clear acrylic tubes with 2 mm wall, for level gauges and sight glasses.',
+    cover: '',
+    items: [
+      ['Clear Acrylic Tube', ['2 MM WALL'], '8 mm – 75 mm', '']
     ] }
 ];
 
