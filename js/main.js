@@ -547,53 +547,150 @@
     }
   });
 
-  /* ---------------- Catalogue ---------------- */
-  const grid = $('#catGrid');
-  grid.innerHTML = CATS.map((c, i) => {
-    const feature = c.slug === 'ball-valves';
-    return '<button class="card' + (feature ? ' card--feature' : '') + '" data-cat="' + c.slug + '" data-fam="' + c.fam + '" data-cursor="Open">' +
-      '<div class="card__top mono"><span>' + pad(i + 1) + '</span><span class="card__count">' + pad(c.items.length) + ' items</span></div>' +
-      '<div class="card__img"><img data-ph src="' + IMG + c.imgs[0] + '" alt="' + c.name + '" decoding="async" fetchpriority="low" ></div>' +
-      '<h3>' + c.name + '</h3><p>' + c.desc + '</p>' +
-      '<span class="card__go"><svg><use href="#arrow"/></svg></span></button>';
-  }).join('');
-  $$('.card', grid).forEach(card => card.addEventListener('pointermove', e => {
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  /* ---------------- Catalogue: filters on the left, every product on the right ---------------- */
+  const ALL = [];
+  CATS.forEach(c => c.items.forEach((it, i) => {
+    const o = itemOf(c.slug + ':' + i);
+    o.mat = materialOf(o.name) || 'Other';
+    o.hay = (o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam)).toLowerCase();
+    o.rank = ALL.length;
+    ALL.push(o);
   }));
+  $('#search').placeholder = 'Search ' + ALL.length + ' products' + (innerWidth > 700 ? ': try "camlock", "CL150" or "316L"' : '');
+  const MAT_ORDER = ['Stainless', 'Carbon steel', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  const specFreq = new Map();
+  ALL.forEach(o => o.chips.forEach(s => specFreq.set(s, (specFreq.get(s) || 0) + 1)));
+  const SPECS = [...specFreq].filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]).slice(0, 16).map(([s]) => s);
+  const SPEC_LABEL = { 'F/T': 'Flanged (F/T)', SW: 'Socket weld (SW)', BW: 'Butt weld (BW)', NPT: 'NPT thread', BSPT: 'BSPT thread' };
+  const PAGE = 24;
+  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1.2 }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 96, behavior: 'smooth' }); };
+  const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
+  const kGrid = $('#katGrid'), kSide = $('#katSide');
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const waPrice = o => 'Hello Fakhri Tools, please send me a price for: ' + o.name + (o.size ? ' (' + o.size + ')' : '') + '. Quantity: ';
 
-  const chips = $('#famChips');
-  chips.innerHTML = '<button class="chip is-on" data-fam="all">All <small>18</small></button>' +
-    FAMS.map(f => '<button class="chip" data-fam="' + f.id + '">' + f.name + ' <small>' + pad(CATS.filter(c => c.fam === f.id).length) + '</small></button>').join('');
-  chips.addEventListener('click', e => {
-    const b = e.target.closest('.chip'); if (!b) return;
-    $$('.chip', chips).forEach(x => x.classList.toggle('is-on', x === b));
-    const fam = b.dataset.fam;
-    $('#search').value = ''; showResults('');
-    const cards = $$('.card', grid);
-    cards.forEach(c => { c.style.display = (fam === 'all' || c.dataset.fam === fam) ? '' : 'none'; });
-    gsap.fromTo(cards.filter(c => c.style.display !== 'none'), { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'expo.out', stagger: 0.04 });
-    ScrollTrigger.refresh();
+  // what passes every filter except the one named in `skip` (so each group shows honest counts)
+  function pass(o, skip) {
+    if (skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
+    if (skip !== 'mats' && kf.mats.size && !kf.mats.has(o.mat)) return false;
+    if (skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
+    if (kf.q) { const toks = kf.q.split(/\s+/); if (!toks.every(t => o.hay.includes(t))) return false; }
+    return true;
+  }
+  const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
+
+  // category rail with photos
+  $('#katRail').innerHTML = '<button class="kr is-on" data-pick="" role="listitem"><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
+    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '" role="listitem"><span class="kr__img">' + imgTag(IMG + c.imgs[0], '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
+  $('#katRail').addEventListener('click', e => {
+    const b = e.target.closest('[data-pick]'); if (!b) return;
+    kf.cats.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
+    kf.limit = PAGE; renderKat(true);
+    const top = $('.kat-main').getBoundingClientRect().top;
+    if (top < 0 || top > innerHeight * 0.6) scrollKat();
   });
 
-  const results = $('#catResults');
-  function showResults(q) {
-    q = q.trim().toLowerCase();
-    if (q.length < 2) { results.hidden = true; grid.hidden = false; ScrollTrigger.refresh(); return; }
-    const toks = q.split(/\s+/);
-    const hits = [];
-    CATS.forEach(c => c.items.forEach((it, i) => {
-      const hay = (it[0] + ' ' + it[1].join(' ') + ' ' + it[2] + ' ' + c.name).toLowerCase();
-      if (toks.every(t => hay.includes(t))) hits.push([c, i]);
-    }));
-    grid.hidden = true; results.hidden = false;
-    const safe = q.replace(/[<>&"]/g, '');
-    results.innerHTML = '<div class="res-head mono"><span>' + hits.length + ' result' + (hits.length === 1 ? '' : 's') + ' for “' + safe + '”</span><span>Across 18 categories</span></div>' +
-      (hits.length ? hits.map(h => rowHTML(h[0], h[1], true)).join('') : '<div class="res-empty">Nothing matched — try a material (S.S, C.I, brass), a rating (PN16, 3000#) or a connection (NPT, flanged).</div>');
+  function facetsHTML() {
+    const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mat), sc = countBy('specs', o => o.chips);
+    const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
+    let h = '';
+    FAMS.forEach(f => {
+      const cs = CATS.filter(c => c.fam === f.id);
+      const open = cs.some(c => kf.cats.has(c.slug)) || !kf.cats.size;
+      h += '<details class="kgroup"' + (open ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
+        cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
+    });
+    h += '<details class="kgroup" open><summary>Material</summary><div class="kgroup__list">' +
+      MAT_ORDER.filter(m => ALL.some(o => o.mat === m)).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
+    h += '<details class="kgroup" open><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
+      SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
+    return h;
+  }
+
+  function kcardHTML(o) {
+    const on = rfq.has(o.id);
+    return '<article class="kc" data-fly>' +
+      '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
+        (o.mat !== 'Other' ? '<span class="kc__mat mono">' + o.mat + '</span>' : '') + imgTag(o.img, o.name) + '<span class="kc__peek mono">Quick view</span></button>' +
+      '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
+        '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
+        (o.size ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : '') +
+        (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
+      '</div>' +
+      '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button>' +
+        '<a class="kc__wa" href="#" data-wa-link data-wa-msg="' + esc(waPrice(o)) + '" aria-label="Ask the price of ' + esc(o.name) + ' on WhatsApp" title="Ask the price on WhatsApp"><svg><use href="#wa"/></svg></a></div>' +
+      '</article>';
+  }
+  const promoHTML = () => '<aside class="kc kc--promo"><span class="mono">Trade counter · Al Quoz</span><b>Message tonight.<br>Priced by 7:30am.</b>' +
+    '<p>Send your list or a photo on WhatsApp. We reply with prices before the counter opens.</p>' +
+    '<a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, please price this list for me:"><svg><use href="#wa"/></svg> Send my list</a></aside>';
+
+  let kFirst = true;
+  function renderKat(animate) {
+    const hits = ALL.filter(o => pass(o));
+    if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
+    else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
+    const shown = hits.slice(0, kf.limit);
+    let html = shown.map(kcardHTML);
+    if (shown.length >= 7) html.splice(7, 0, promoHTML());
+    kGrid.innerHTML = hits.length ? html.join('') :
+      '<div class="kat-empty"><b>Nothing matches that yet.</b><p>Clear a filter, or send us a photo of the part on WhatsApp and we’ll check our stock.</p>' +
+      '<div class="kat-empty__btns"><button class="btn btn--ghost-dk" data-kclear>Clear filters</button><a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I’m looking for: "><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div></div>';
+    $('#katCount').textContent = hits.length === ALL.length ? 'All ' + ALL.length + ' products' : hits.length + ' of ' + ALL.length + ' products';
+    $('#katApplyN').textContent = hits.length;
+    $('#katMore').innerHTML = hits.length > shown.length ?
+      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more products</button>' :
+      (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
+    $('#katFacets').innerHTML = facetsHTML();
+    // active filter pills
+    const pills = [];
+    kf.cats.forEach(s => pills.push(['cats', s, catBySlug(s).name]));
+    kf.mats.forEach(m => pills.push(['mats', m, m]));
+    kf.specs.forEach(s => pills.push(['specs', s, SPEC_LABEL[s] || s]));
+    if (kf.q) pills.push(['q', '', '“' + kf.q + '”']);
+    const one = kf.cats.size === 1 ? catBySlug([...kf.cats][0]) : null;
+    $('#katActive').innerHTML = pills.map(p => '<button class="kpill" data-pg="' + p[0] + '" data-pv="' + esc(p[1]) + '">' + esc(p[2]) + '<span aria-hidden="true">×</span></button>').join('') +
+      (pills.length > 1 ? '<button class="kpill kpill--clear mono" data-kclear>Clear all</button>' : '') +
+      (one ? '<button class="kpill kpill--open" data-cat="' + one.slug + '">Open the ' + one.name + ' showroom <svg><use href="#arrow"/></svg></button>' : '');
+    const nf = kf.cats.size + kf.mats.size + kf.specs.size;
+    const fn = $('#katFilterN'); fn.hidden = !nf; fn.textContent = nf;
+    $$('.kr', $('#katRail')).forEach(b => b.classList.toggle('is-on', kf.cats.size ? kf.cats.size === 1 && kf.cats.has(b.dataset.pick) : !b.dataset.pick));
+    applyLinks(kGrid); applyLinks($('#katMore'));
+    if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
+    kFirst = false;
     ScrollTrigger.refresh();
   }
-  $('#search').addEventListener('input', e => showResults(e.target.value));
+
+  $('#katFacets').addEventListener('change', e => {
+    const t = e.target; if (!t.dataset.g) return;
+    kf[t.dataset.g][t.checked ? 'add' : 'delete'](t.value);
+    kf.limit = PAGE; renderKat(true);
+  });
+  $('#katFacets').addEventListener('click', e => {
+    const b = e.target.closest('[data-spec]'); if (!b) return;
+    const s = b.dataset.spec; kf.specs.has(s) ? kf.specs.delete(s) : kf.specs.add(s);
+    kf.limit = PAGE; renderKat(true);
+  });
+  function clearKat() { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE; renderKat(true); }
+  $('#katReset').addEventListener('click', clearKat);
+  $('#catalogue').addEventListener('click', e => {
+    if (e.target.closest('[data-kclear]')) return clearKat();
+    if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
+    const p = e.target.closest('[data-pg]');
+    if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); }
+  });
+  let kT;
+  $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = e.target.value.trim().toLowerCase().replace(/[<>&"]/g, ''); kf.limit = PAGE; renderKat(true); }, 140); });
+  $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
+
+  // phones: filters slide up as a sheet
+  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); lenis && (on ? lenis.stop() : lenis.start()); };
+  $('#katFilterBtn').addEventListener('click', () => kOpen(true));
+  $('#katSideClose').addEventListener('click', () => kOpen(false));
+  $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });
+  $('#katScrim').addEventListener('click', () => kOpen(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && kSide.classList.contains('is-open')) kOpen(false); });
+  renderKat(false);
 
   /* ---------------- Oilfield brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
@@ -836,8 +933,8 @@
 
     gsap.set('.btile', { opacity: 0, y: 50 });
     ScrollTrigger.batch('.btile', { start: 'top 92%', once: true, onEnter: b => gsap.to(b, { opacity: 1, y: 0, duration: 1, ease: 'expo.out', stagger: 0.06 }) });
-    gsap.set('.card', { opacity: 0, y: 70 });
-    ScrollTrigger.batch('.card', { start: 'top 94%', once: true, onEnter: b => gsap.to(b, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06 }) });
+    gsap.set('.kr', { opacity: 0, x: 40 });
+    ScrollTrigger.batch('.kr', { start: 'top 96%', once: true, onEnter: b => gsap.to(b, { opacity: 1, x: 0, duration: 0.9, ease: 'expo.out', stagger: 0.04 }) });
 
     const mm = gsap.matchMedia();
     const artEls = $$('.sector__art *').filter(e => e.tagName !== 'g');

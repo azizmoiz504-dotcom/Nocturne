@@ -23,7 +23,7 @@ for (const e of edits.cats) {
   if (!c) throw new Error('Unknown category ' + e.slug);
   c.items = e.items.map(it => [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]);
   c.cover = photo(e.cover);
-  for (const p of [c.cover, ...c.items.map(it => it[3])]) if (!fs.existsSync(path.join('assets/products', p))) throw new Error('Missing photo ' + p);
+  for (const p of [c.cover, ...c.items.map(it => it[3])]) if (p && !fs.existsSync(path.join('assets/products', p))) throw new Error('Missing photo ' + p);
 }
 
 const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
