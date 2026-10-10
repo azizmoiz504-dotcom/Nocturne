@@ -32,6 +32,9 @@
   .img { height:150px; background:#f3f5f7; border-radius:10px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
   .img img { max-width:90%; max-height:90%; object-fit:contain; pointer-events:none; }
   .img.drop { outline:3px dashed var(--red); outline-offset:-6px; }
+  .img.empty { background:repeating-linear-gradient(45deg,#f3f5f7 0 10px,#eceff3 10px 20px); }
+  .img.empty img { display:none; }
+  .img.empty .hint { position:static; background:none; font-size:13px; font-weight:600; text-align:center; padding:6px 10px; }
   .img .hint { position:absolute; bottom:6px; background:rgba(255,255,255,.85); padding:0 6px; border-radius:6px; font-size:11px; color:var(--muted); }
   label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
   .card input { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:8px; }
@@ -70,10 +73,34 @@
 (() => {
   const KEY = 'ft-editor-v1';
   const IMG = window.FT_IMG || '';
-  const fresh = () => ({ cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(it => [it[0], it[1].slice(), it[2], it[3]]) })), images: {} });
-  let state, history = [], sel = -1, clip = null;
+  // a fingerprint of the website's product list, so the editor notices when Claude adds products
+  const VER = (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(window.FT_CATS));
+  const keyOf = (slug, it) => slug + '|' + it[0];
+  const siteKeys = () => window.FT_CATS.flatMap(c => c.items.map(it => keyOf(c.slug, it)));
+  const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(it => [it[0], it[1].slice(), it[2], it[3]]) })), images: {} });
+  let state, history = [], sel = -1, clip = null, added = 0;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!state || !state.cats) state = fresh();
+  else if (state.ver !== VER) {
+    if (state.ver && !state.dirty) state = fresh();   // nothing unsaved here: just load the new website list
+    else {
+      // keep the owner's unsaved work and add whatever the website gained since they started
+      const base = new Set(state.base || []);
+      window.FT_CATS.forEach((c, at) => {
+        let mine = state.cats.find(x => x.slug === c.slug);
+        const isNew = !mine;
+        if (!mine) { mine = { slug: c.slug, name: c.name, cover: c.cover, items: [] }; state.cats.splice(Math.min(at, state.cats.length), 0, mine); }
+        c.items.forEach(it => {
+          if (base.has(keyOf(c.slug, it)) || mine.items.some(x => x[0] === it[0])) return;
+          // copies saved before this check existed: only bring in the photo-less cards from the product guide, so renamed cards don't come back twice
+          if (!state.base && !isNew && it[3]) return;
+          mine.items.push([it[0], it[1].slice(), it[2], it[3]]); added++;
+        });
+      });
+      state.ver = VER; state.base = siteKeys();
+    }
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
   let ci = 0;
   const $ = s => document.querySelector(s);
   const cat = () => state.cats[ci];
@@ -81,29 +108,36 @@
   const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Browser storage full: press Save changes file now'); } };
   const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
-  const change = fn => { snap(); fn(); persist(); render(); };
+  const change = fn => { snap(); fn(); state.dirty = true; persist(); render(); };
 
   const selEl = $('#cat');
-  state.cats.forEach((c, i) => selEl.add(new Option(c.name, i)));
+  function fillCats() {
+    if (ci >= state.cats.length) ci = 0;
+    selEl.innerHTML = '';
+    state.cats.forEach((c, i) => selEl.add(new Option(c.name + ' (' + c.items.length + ')', i)));
+    selEl.value = ci;
+  }
   selEl.onchange = () => { ci = +selEl.value; sel = -1; render(); };
 
   function render() {
     const c = cat();
     $('#count').textContent = c.items.length + ' products';
-    $('#coverImg').src = src(c.cover);
+    if (selEl.options[ci]) selEl.options[ci].text = c.name + ' (' + c.items.length + ')';
+    $('#coverImg').style.visibility = c.cover ? '' : 'hidden'; if (c.cover) $('#coverImg').src = src(c.cover);
     const g = $('#grid'); g.innerHTML = '';
     c.items.forEach((it, i) => {
       const d = document.createElement('div');
       d.className = 'card' + (i === sel ? ' sel' : ''); d.draggable = true; d.dataset.i = i;
       d.innerHTML =
-        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
+        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] && it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
         '<div class="img"><img alt=""><span class="hint">drop or paste a photo</span></div>' +
         '<label>Name</label><input data-f="0">' +
         '<label>Specs (comma between each)</label><input data-f="1">' +
         '<label>Size range</label><input data-f="2">' +
         '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
         '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>';
-      d.querySelector('img').src = src(it[3]);
+      if (it[3]) d.querySelector('img').src = src(it[3]);
+      else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
       const ins = d.querySelectorAll('input');
       ins[0].value = it[0]; ins[1].value = it[1].join(', '); ins[2].value = it[2];
       g.appendChild(d);
@@ -116,7 +150,7 @@
     const f = e.target.dataset.f; if (f === undefined) return;
     const it = cat().items[+e.target.closest('.card').dataset.i];
     it[+f] = f === '1' ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : e.target.value;
-    persist();
+    state.dirty = true; persist();
   });
   grid.addEventListener('click', e => {
     const card = e.target.closest('.card'); if (!card) return;
@@ -176,17 +210,20 @@
   });
   document.addEventListener('copy', e => { if (e.target.matches('input') || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
 
-  $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); render(); };
-  $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; render(); } };
+  $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
+  $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
   $('#save').onclick = () => {
     const used = new Set(state.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
     const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
     a.download = 'fakhri-product-changes.json'; a.click();
+    state.dirty = false; persist();
     toast('Saved to Downloads as fakhri-product-changes.json');
   };
+  fillCats();
   render();
+  if (added) setTimeout(() => toast(added + ' new products from the website were added to your list'), 400);
 })();
 </script>
 </body>

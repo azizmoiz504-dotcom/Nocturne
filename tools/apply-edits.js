@@ -13,6 +13,7 @@ for (const [id, url] of Object.entries(edits.images || {})) {
   const m = /^new:([a-z0-9-]+)-([a-z0-9]+)$/.exec(id), d = /^data:image\/jpeg;base64,(.+)$/.exec(url);
   if (!m || !d || !W.FT_CATS.some(c => c.slug === m[1])) throw new Error('Bad photo ' + id);
   const rel = m[1] + '/edit-' + m[2] + '.jpg';
+  fs.mkdirSync(path.join('assets/products', m[1]), { recursive: true });
   fs.writeFileSync(path.join('assets/products', rel), Buffer.from(d[1], 'base64'));
   saved[id] = rel;
 }
