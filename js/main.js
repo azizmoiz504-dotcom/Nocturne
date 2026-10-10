@@ -687,6 +687,7 @@
   $('#footCats').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + c.name + '</button>').join('');
 
   const megaBtn = $('#megaBtn');
+  $('#megaN').textContent = CATS.length;
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
   function closeMega() { nav.classList.remove('is-mega'); megaBtn.setAttribute('aria-expanded', 'false'); }
   megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') ? closeMega() : openMega());
@@ -1156,15 +1157,7 @@
       }
     });
 
-    const cards = $$('.why__card');
-    cards.forEach(c => { const sh = document.createElement('i'); sh.className = 'why__shade'; c.appendChild(sh); });
-    cards.forEach((card, i) => {
-      if (i === cards.length - 1) return;
-      gsap.to(card, { scale: 0.9 + i * 0.025, ease: 'none',
-        scrollTrigger: { trigger: cards[i + 1], start: 'top 85%', end: 'top 25%', scrub: true } });
-      gsap.to($('.why__shade', card), { opacity: 0.5, ease: 'none',
-        scrollTrigger: { trigger: cards[i + 1], start: 'top 85%', end: 'top 25%', scrub: true } });
-    });
+    gsap.from('.why__card', { y: 50, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.why__cards', start: 'top 85%' } });
 
     gsap.fromTo('.pipe__fill', { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.timeline', start: 'top 65%', end: 'bottom 65%', scrub: true } });
     $$('.ms').forEach(m => ScrollTrigger.create({ trigger: m, start: 'top 65%', onEnter: () => m.classList.add('is-on'), onLeaveBack: () => m.classList.remove('is-on') }));
