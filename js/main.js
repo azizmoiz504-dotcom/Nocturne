@@ -726,7 +726,7 @@
     const v = id => $(id).value.trim();
     const lines = ['Hello Fakhri Tools, I would like a quote.', '', 'Name: ' + v('#fName'), 'Mobile: ' + v('#fMobile')];
     if (v('#fCompany')) lines.push('Company: ' + v('#fCompany'));
-    if (v('#fCat')) lines.push('Product group: ' + v('#fCat'));
+    if (v('#fEmail')) lines.push('Email: ' + v('#fEmail'));
     if (v('#fMsg')) lines.push('', v('#fMsg'));
     if (rfq.size) lines.push('', 'Items:', ...[...rfq].map(([id, q]) => lineText(itemOf(id), q)));
     return lines.join('\n');
@@ -849,7 +849,7 @@
       });
       $$('.sector:not(.sector--intro)').forEach(p => {
         const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g');
-        gsap.to(els, { strokeDashoffset: 0, ease: 'none', stagger: 0.015, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 90%', end: 'left 20%', scrub: true } });
+        gsap.to(els, { strokeDashoffset: 0, ease: 'none', stagger: 0.015, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 100%', end: 'left 60%', scrub: true } });
         gsap.from($$('h3, p, .tags', p), { y: 50, opacity: 0, stagger: 0.08, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 62%' } });
         gsap.fromTo($('.sector__num', p), { x: 160 }, { x: -80, ease: 'none', scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left right', end: 'right left', scrub: true } });
       });
@@ -857,7 +857,7 @@
     mm.add('(max-width: 899px)', () => {
       $$('.sector:not(.sector--intro)').forEach(p => {
         const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g');
-        gsap.to(els, { strokeDashoffset: 0, ease: 'none', stagger: 0.015, scrollTrigger: { trigger: $('.sector__art', p), start: 'top 90%', end: 'bottom 50%', scrub: true } });
+        gsap.to(els, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.out', stagger: 0.01, scrollTrigger: { trigger: $('.sector__art', p), start: 'top 92%', once: true } });
       });
     });
 
