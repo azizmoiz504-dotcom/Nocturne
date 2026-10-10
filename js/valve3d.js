@@ -166,7 +166,7 @@
     const gk = part([s * 1.1, 0, 0]);
     gk.add(alongX(ring(0.6, 0.86, 0.028, M.gasket), s * 1.745));
     gk.add(alongX(ring(0.86, 1.0, 0.022, M.steel), s * 1.745));
-    if (s > 0) anchor(gk, [s * 1.745, 0.93, 0], 'Gasket', 'Seals the joint', 'gaskets-caf-canf-sheets');
+    if (s > 0) anchor(gk, [s * 1.745, 0.93, 0], 'Gasket', 'Seals the joint', 'gaskets-sheets');
 
     const cf = part([s * 2.2, 0, 0]);
     cf.add(alongX(cyl(1.08, 1.08, 0.2, M.forged, 72), s * 1.87));
@@ -298,7 +298,10 @@
       anchors.forEach(a => {
         a.o.getWorldPosition(v); v.project(camera);
         const x = (v.x * 0.5 + 0.5) * W, y = (-v.y * 0.5 + 0.5) * H;
-        const left = mobile ? x > W * 0.5 : x < W * 0.62;
+        let left = mobile ? x > W * 0.5 : x < W * 0.62;
+        // never let a label run off either edge of the screen
+        const lw = a.w || (a.w = a.el.offsetWidth);
+        if (!left && x + lw > W - 16) left = true; else if (left && x - lw < 16) left = false;
         a.el.classList.toggle('is-left', left);
         a.el.style.transform = 'translate(' + (left ? 'calc(' + x + 'px - 100%)' : x + 'px') + ',' + y + 'px) translateY(-50%)';
       });

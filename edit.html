@@ -85,6 +85,11 @@
     if (state.ver && !state.dirty) state = fresh();   // nothing unsaved here: just load the new website list
     else {
       // keep the owner's unsaved work and add whatever the website gained since they started
+      // the gasket category was renamed (no "CAF" anywhere on the site): move unsaved work across
+      const REN = [['gaskets-caf-canf-sheets', 'gaskets-sheets'], ['CAF / CNAF Rubber Gasket, Ring & Full Face', 'CNAF & Rubber Gasket, Ring & Full Face'], ['CAF, CNAF & Metallic Gasket Sheet', 'CNAF & Metallic Gasket Sheet'], ['Gaskets & CAF / CNAF Sheets', 'Gaskets & CNAF Sheets']];
+      const ren = v => typeof v === 'string' ? REN.reduce((s, [a, b]) => s.split(a).join(b), v) : v;
+      state.cats.forEach(x => { x.slug = ren(x.slug); x.name = ren(x.name); x.cover = ren(x.cover); x.items = x.items.map(it => [ren(it[0]), it[1].filter(t => t !== 'CAF'), it[2], ren(it[3])]); });
+      state.base = (state.base || []).map(ren);
       const base = new Set(state.base || []);
       window.FT_CATS.forEach((c, at) => {
         let mine = state.cats.find(x => x.slug === c.slug);

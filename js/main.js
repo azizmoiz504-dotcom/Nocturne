@@ -91,7 +91,7 @@
   function scrollToEl(target) {
     const el = typeof target === 'string' ? (target === '#top' ? 0 : $(target)) : target;
     if (el === null || el === undefined) return;
-    if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4) });
+    if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4), force: true });   // force: works even while an overlay is still closing
     else if (el === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     else el.scrollIntoView({ behavior: 'smooth' });
   }
@@ -99,12 +99,15 @@
   /* ================= Shop: helpers ================= */
   const catBySlug = s => CATS.find(c => c.slug === s);
   const famName = id => FAMS.find(f => f.id === id).name;
-  function itemOf(id) {
-    const [slug, i] = String(id).split(':');
+  // a quote line is "slug:index|size" — the part after | is the size the customer picked
+  function itemOf(key) {
+    const k = String(key), bar = k.indexOf('|');
+    let [slug, i] = (bar < 0 ? k : k.slice(0, bar)).split(':');
+    if (slug === 'gaskets-caf-canf-sheets') slug = 'gaskets-sheets';   // old name, still in some saved quotes
     const c = catBySlug(slug);
     if (!c || !c.items[+i]) return null;
-    const it = c.items[+i];
-    return { id: slug + ':' + (+i), c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '' };
+    const it = c.items[+i], id = slug + ':' + (+i);
+    return { id, c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '', pick: bar < 0 ? null : k.slice(bar + 1) };
   }
   const coverOf = c => c.imgs[0] ? IMG + c.imgs[0] : '';
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
@@ -115,35 +118,147 @@
     return best;
   }
   const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + s + '</span>').join('') + '</div>' : '';
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
-  /* ================= Quote basket (id -> qty) ================= */
+  /* ================= Sizes: every product gets a proper size picker ================= */
+  // standard pipe sizes in order, so a range like ½" – 24" lists every size in between (2½" included)
+  const LADDER = ['⅛"', '¼"', '⅜"', '½"', '¾"', '1"', '1¼"', '1½"', '2"', '2½"', '3"', '3½"', '4"', '5"', '6"', '8"', '10"', '12"', '14"', '16"', '18"', '20"', '22"', '24"', '26"', '28"', '30"', '32"', '34"', '36"', '40"', '42"', '48"'];
+  const rung = t => LADDER.indexOf(t);
+  const IN = '(\\d*[⅛¼⅜½¾]?"|\\d+\\/\\d+")';
+  const RX_RANGE = new RegExp('^' + IN + ' – ' + IN + '$'), RX_PAIR = new RegExp('^' + IN + ' × ' + IN + ' – ' + IN + ' × ' + IN + '$'), RX_RANGEX = new RegExp('^' + IN + ' – ' + IN + ' × ' + IN + '$');
+  function ladder(a, b, fam) {
+    const i = rung(a), j = b === 'any' ? LADDER.length - 1 : rung(b);
+    if (i < 0 || j < i) return null;
+    // 3½" pipe sizes exist for pipe and fittings only
+    return LADDER.slice(i, j + 1).filter(t => t !== '3½"' || fam === 'fittings' || t === a || t === b);
+  }
+  const SPEC = new Map();
+  function sizeSpec(o) {
+    if (SPEC.has(o.id)) return SPEC.get(o.id);
+    let s = o.size || '', len = '', note = '', sp = null, m;
+    const dot = s.split(' · ');
+    if (dot.length > 1) { s = dot[0]; if (/–/.test(dot[1])) len = dot[1]; else note = dot[1]; }
+    if (!s) sp = { t: 'text', hint: '' };
+    else if (/ – any size$/.test(s)) { const l = ladder(s.split(' – ')[0], 'any', o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: l[0] + ' – ' + l[l.length - 1] }; }
+    else if ((m = s.match(RX_PAIR))) {
+      const L = ladder(m[1], m[3], o.c.fam), S = ladder(m[2], m[4], o.c.fam);
+      if (L && S) sp = { t: 'pair', L, S, lt: rung(m[1]) > rung(m[2]) && rung(m[3]) > rung(m[4]) };
+    }
+    else if ((m = s.match(RX_RANGEX))) {
+      const l = ladder(m[1], m[2], o.c.fam);
+      if (l && rung(m[3]) > -1 && rung(m[3]) < rung(m[2])) sp = { t: 'sel', opts: l.concat(m[2] + ' × ' + m[3]), ph: m[1] + ' – ' + m[2] };   // e.g. 1" – 4" plus the 4" × 3" reducer
+      else if (l) { sp = { t: 'sel', opts: l, ph: m[1] + ' – ' + m[2] }; len = 'up to ' + m[3]; }                                                // nipples: size, then length
+    }
+    else if ((m = s.match(RX_RANGE))) { const l = ladder(m[1], m[2], o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: m[1] + ' – ' + m[2] }; }
+    else if (/, | \/ /.test(s)) sp = { t: 'sel', opts: s.replace(/ bottom connection$/, '').split(/, | \/ /) };
+    else if (!/–|TO/.test(s)) sp = { t: 'one', v: s };
+    if (!sp) sp = { t: 'text', hint: s };
+    sp.len = len; sp.note = note;
+    SPEC.set(o.id, sp);
+    return sp;
+  }
+  // the size a product gets when the customer has not chosen yet ("?" = size to confirm)
+  const defaultPick = o => { const sp = sizeSpec(o); return sp.t === 'one' ? sp.v : (o.size ? '?' : ''); };
+  const fixedSize = o => { const sp = sizeSpec(o); return sp.t === 'one' && !sp.len; };
+  const needsPick = o => { const t = sizeSpec(o).t; return t === 'sel' || t === 'pair'; };
+  function sizeWords(o, pick) {
+    if (pick === null || pick === undefined) return o.size;
+    const [base, len] = pick.split(' · ');
+    const b = base === '?' ? 'size to confirm' + (o.size ? ', range ' + o.size.split(' · ')[0] : '') : base.replace(/\?/g, 'size to confirm');
+    return [b, len ? 'length ' + len : ''].filter(Boolean).join(', ');
+  }
+  // the controls (dropdowns / boxes) for one product; cur = a size already chosen
+  function pickerHTML(o, cur) {
+    const sp = sizeSpec(o);
+    const [base, len] = (cur || '').split(' · ');
+    const opt = (v, on, lab) => '<option value="' + esc(v) + '"' + (on ? ' selected' : '') + '>' + esc(lab || v) + '</option>';
+    const sel = (key, opts, val, ph, lab) => '<select data-pk="' + key + '" aria-label="' + lab + '">' + '<option value="" disabled' + (val ? '' : ' selected') + '>' + esc(ph) + '</option>' +
+      opts.map(v => opt(v, v === val)).join('') + opt('?', val === '?', 'Not sure, ask me') + '</select>';
+    let h = '';
+    if (sp.t === 'one') h = '<span class="pk__one">' + esc(sp.v) + '</span>';
+    else if (sp.t === 'sel') h = sel('a', sp.opts, base, sp.ph ? (innerWidth < 600 ? sp.ph.replace(' – ', '–') : 'Choose size (' + sp.ph + ')') : 'Choose size', 'Size');
+    else if (sp.t === 'pair') {
+      const [a, b] = base && base !== '?' ? base.split(' × ') : [base === '?' ? '?' : '', base === '?' ? '?' : ''];
+      h = '<span class="pk__pair">' + (sp.L.length === 1 ? '<span class="pk__one">' + esc(sp.L[0]) + '</span>' : sel('a', sp.L, a, sp.lt ? 'Big end' : 'Choose', sp.lt ? 'Big end size' : 'First size')) + '<i>×</i>' + sel('b', sp.S, b, sp.lt ? 'Small end' : 'Choose', sp.lt ? 'Small end size' : 'Second size') + '</span>';
+    } else h = '<input data-pk="t" type="text" maxlength="40" value="' + esc(base && base !== '?' ? base : '') + '" placeholder="' + esc(sp.hint ? 'Type size (' + sp.hint + ')' : 'Size, if you know it') + '" aria-label="Size">';
+    if (sp.len) h += '<input data-pk="len" type="text" maxlength="30" value="' + esc(len || '') + '" placeholder="Length (' + esc(sp.len) + ')" aria-label="Length">';
+    return '<div class="pk pk--' + sp.t + (sp.len ? ' pk--len' : '') + '"><span class="pk__lab mono">Size</span><div class="pk__ctl">' + h + '</div>' + (sp.note ? '<small class="pk__note">' + esc(sp.note) + '</small>' : '') + '</div>';
+  }
+  // keep "small end" smaller than "big end" on reducers
+  function tidyPair(root, o) {
+    const sp = sizeSpec(o); if (sp.t !== 'pair' || !sp.lt) return;
+    const a = $('[data-pk="a"]', root), b = $('[data-pk="b"]', root); if (!b) return;
+    const big = a ? a.value : sp.L[0];
+    const lim = big && big !== '?' ? rung(big) : 99;
+    $$('option', b).forEach(op => { if (op.value && op.value !== '?') op.disabled = rung(op.value) >= lim; });
+    if (b.value && b.value !== '?' && rung(b.value) >= lim) b.value = '';
+  }
+  // what the customer picked: {ok, v}; ok = false while a dropdown is still empty
+  function readPick(root, o) {
+    const sp = sizeSpec(o), g = k => { const el = root && $('[data-pk="' + k + '"]', root); return el ? el.value.trim() : ''; };
+    let v;
+    if (sp.t === 'one') v = sp.v;
+    else if (sp.t === 'sel') { v = g('a'); if (!v) return { ok: false }; }
+    else if (sp.t === 'pair') {
+      const a = sp.L.length === 1 ? sp.L[0] : g('a'), b = g('b');
+      if (!a || !b) return { ok: false };
+      v = a === '?' && b === '?' ? '?' : a + ' × ' + b;   // one end can stay 'not sure'
+    } else v = g('t').replace(/[|·]/g, ' ').trim() || (o.size ? '?' : '');
+    const len = g('len').replace(/[|·]/g, ' ').trim();
+    if (len) v = (v || '?') + ' · ' + len;
+    return { ok: true, v };
+  }
+  const keyOf = (o, v) => o.id + '|' + v;
+  function flagPick(root) {
+    const el = $$('select', root).find(x => !x.value) || $('select', root);
+    root.classList.remove('pk-err'); void root.offsetWidth; root.classList.add('pk-err');
+    if (el) el.focus({ preventScroll: true });
+    toast('Choose a size first');
+  }
+
+  /* ================= Quote basket (line key -> qty) ================= */
   const rfq = new Map();
-  try { (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q]) => { if (itemOf(k)) rfq.set(k, Math.max(1, +q || 1)); }); } catch (e) {}
+  try {
+    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q]) => {
+      const o = itemOf(k); if (!o) return;
+      rfq.set(o.pick === null ? keyOf(o, defaultPick(o)) : k, Math.max(1, +q || 1));
+    });
+  } catch (e) {}
   const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq])); } catch (e) {} };
-  const lineText = (o, q) => '• ' + o.name + (o.size ? ' (' + o.size + ')' : '') + ' × ' + q;
+  const hasAny = id => [...rfq.keys()].some(k => k.startsWith(id + '|'));
+  const sizeOfLine = o => { const w = sizeWords(o, o.pick); return w ? ' (' + w + ')' : ''; };
+  const lineText = (o, q) => '• ' + o.name + sizeOfLine(o) + ' × ' + q;
   function quoteMessage() {
     if (!rfq.size) return 'Hello Fakhri Tools, I would like a quote.';
-    return 'Hello Fakhri Tools, I would like a quote for:\n' + [...rfq].map(([id, q]) => lineText(itemOf(id), q)).join('\n');
+    return 'Hello Fakhri Tools, I would like a quote for:\n' + [...rfq].map(([k, q]) => lineText(itemOf(k), q)).join('\n');
   }
 
-  function setQty(id, q) {
+  function setQty(key, q) {
     q = Math.round(+q || 0);
-    if (q <= 0) rfq.delete(id); else rfq.set(id, Math.min(99999, q));
+    if (q <= 0) rfq.delete(key); else rfq.set(key, Math.min(99999, q));
     saveRfq(); syncRfq(false);
   }
-  function toggleRfq(id, srcEl) {
-    const o = itemOf(id); if (!o) return;
-    const added = !rfq.has(id);
-    if (added) rfq.set(id, 1); else rfq.delete(id);
+  // change the size of a line that is already in the quote (keeps its place in the list)
+  function reKey(oldKey, newKey) {
+    if (oldKey === newKey || !rfq.has(oldKey)) return;
+    const q = rfq.get(oldKey), next = new Map();
+    rfq.forEach((v, k) => { if (k === oldKey) next.set(newKey, (rfq.get(newKey) || 0) + q); else if (k !== newKey) next.set(k, v); });
+    rfq.clear(); next.forEach((v, k) => rfq.set(k, v));
+    saveRfq(); syncRfq(false);
+  }
+  function toggleRfq(key, srcEl) {
+    const o = itemOf(key); if (!o) return;
+    const added = !rfq.has(key);
+    if (added) rfq.set(key, 1); else rfq.delete(key);
     saveRfq(); syncRfq(true);
-    toast((added ? 'Added to quote — ' : 'Removed — ') + o.name);
+    toast((added ? 'Added to quote — ' : 'Removed — ') + o.name + sizeOfLine(o));
     if (added && srcEl) requestAnimationFrame(() => flyToBar(srcEl));
   }
   function addAll(c, srcEl) {
     let n = 0;
-    c.items.forEach((_, i) => { const id = c.slug + ':' + i; if (!rfq.has(id)) { rfq.set(id, 1); n++; } });
+    c.items.forEach((_, i) => { const o = itemOf(c.slug + ':' + i); if (!hasAny(o.id)) { rfq.set(keyOf(o, defaultPick(o)), 1); n++; } });
     saveRfq(); syncRfq(true);
-    toast(n ? 'Added ' + n + ' products from ' + c.name : 'The full ' + c.name + ' range is already in your quote');
+    toast(n ? 'Added ' + n + ' products from ' + c.name + ' — pick sizes in your quote' : 'The full ' + c.name + ' range is already in your quote');
     if (n && srcEl) requestAnimationFrame(() => flyToBar(srcEl));
   }
 
@@ -165,24 +280,33 @@
     });
   }
 
+  // state of an "Add to quote" button: on a card with a size picker it follows the picked size
+  function addState(b) {
+    const root = b.closest('[data-pick-root]'), o = itemOf(b.dataset.add);
+    if (!o) return false;
+    if (!root) return hasAny(o.id);
+    const p = readPick(root, o);
+    return p.ok && rfq.has(keyOf(o, p.v));
+  }
+  function paintAdd(b) {
+    const on = addState(b);
+    b.classList.toggle('is-added', on);
+    const l = $('.lbl', b); if (l) l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>';
+  }
   function syncRfq(bump) {
     const n = rfq.size;
     $('#rfqCount').textContent = n; $$('.js-rfq-n').forEach(e => { e.textContent = n; });
     if (bump) { const b = $('#rfqBtn'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
-    $$('[data-add]').forEach(b => {
-      const on = rfq.has(b.dataset.add);
-      b.classList.toggle('is-added', on);
-      const l = $('.lbl', b); if (l) l.textContent = on ? 'Added' : 'Add to quote';
-    });
+    $$('[data-add]').forEach(paintAdd);
     // contact form list
     $('#formRfq').hidden = n === 0;
     const list = $('#rfqList'); list.innerHTML = '';
-    rfq.forEach((q, id) => {
-      const o = itemOf(id);
+    rfq.forEach((q, k) => {
+      const o = itemOf(k);
       const li = document.createElement('li');
       li.innerHTML = '<span></span><button type="button" aria-label="Remove">×</button>';
-      li.firstChild.textContent = o.name + (o.size ? ' (' + o.size + ')' : '') + ' × ' + q;
-      li.lastChild.addEventListener('click', () => setQty(id, 0));
+      li.firstChild.textContent = o.name + sizeOfLine(o) + ' × ' + q;
+      li.lastChild.addEventListener('click', () => setQty(k, 0));
       list.appendChild(li);
     });
     $('#qsWa').dataset.waMsg = quoteMessage(); applyLinks($('.qs__foot'));
@@ -190,113 +314,168 @@
     const bar = $('#qbar');
     bar.classList.toggle('is-on', n > 0);
     document.body.classList.toggle('has-quote', n > 0);
-    $('#qbarCount').textContent = n + (n === 1 ? ' product' : ' products');
-    $('#qbarThumbs').innerHTML = [...rfq.keys()].slice(-4).reverse().map(id => '<i>' + imgTag(itemOf(id).img) + '</i>').join('');
+    $('#qbarCount').textContent = n + (n === 1 ? ' item' : ' items');
+    $('#qbarThumbs').innerHTML = [...rfq.keys()].slice(-4).reverse().map(k => '<i>' + imgTag(itemOf(k).img) + '</i>').join('');
     if (qs.classList.contains('is-open')) renderSheet();
     if (qvId) syncQV();
   }
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-add]');
-    if (b) { e.preventDefault(); e.stopPropagation(); toggleRfq(b.dataset.add, b); }
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const o = itemOf(b.dataset.add); if (!o) return;
+    const root = b.closest('[data-pick-root]');
+    if (!root) {
+      // lists without a size box: products with several sizes open the quick view to pick one
+      if (needsPick(o)) return openQV(o.id);
+      return toggleRfq(keyOf(o, defaultPick(o)), b);
+    }
+    const p = readPick(root, o);
+    if (!p.ok) return flagPick(root);
+    toggleRfq(keyOf(o, p.v), b);
   });
+  // a size was picked on a card, in the quick view or in the quote list
+  function onPick(e) {
+    const el = e.target; if (!el.dataset || !el.dataset.pk) return;
+    const root = el.closest('[data-pick-root]'); if (!root) return;
+    root.classList.remove('pk-err');
+    const o = itemOf(root.dataset.pickRoot); if (!o) return;
+    if (el.dataset.pk === 'a') tidyPair(root, o);
+    const p = readPick(root, o);
+    if (root.classList.contains('qs__row')) { if (p.ok && e.type === 'change') reKey(root.dataset.id, keyOf(o, p.v)); return; }
+    if (root.id === 'qvPick') { syncQV(); return; }
+    $$('[data-add]', root).forEach(paintAdd);
+    const wa = $('[data-wa-msg]', root);
+    if (wa) { wa.dataset.waMsg = waPrice(o, p.ok ? p.v : null); applyLinks(root); }
+  }
+  document.addEventListener('change', onPick);
+  document.addEventListener('input', e => { if (e.target.tagName === 'INPUT') onPick(e); });
   $('#rfqClear').addEventListener('click', () => { rfq.clear(); saveRfq(); syncRfq(true); });
 
+
+  // page scrolling comes back only when no overlay, menu or filter sheet is still open
+  function unlock() {
+    if (!lenis) return;
+    const b = document.body.classList;
+    if ($('#qv').classList.contains('is-open') || $('#qs').classList.contains('is-open') || $('#showroom').classList.contains('is-open') || b.contains('is-menu') || b.contains('is-filtering') || b.contains('is-loading')) return;
+    lenis.start();
+  }
+  // dialogs: focus moves into them and goes back to the button that opened them
+  const focusBack = new Map();
+  function focusIn(box, sel) { if (!focusBack.has(box)) focusBack.set(box, document.activeElement); const el = $(sel, box); if (el) setTimeout(() => el.focus({ preventScroll: true }), 60); }
+  function focusOut(box) { const el = focusBack.get(box); focusBack.delete(box); if (el && el.focus && document.contains(el)) el.focus({ preventScroll: true }); }
 
   /* ================= Quote review sheet ================= */
   const qs = $('#qs');
   function renderSheet() {
     const n = rfq.size;
     $('#qsCount').textContent = n;
-    $('#qsList').innerHTML = n ? [...rfq].map(([id, q]) => {
-      const o = itemOf(id);
-      return '<div class="qs__row" data-id="' + id + '">' +
-        '<button class="qs__img" data-qv="' + id + '">' + imgTag(o.img) + '</button>' +
-        '<div class="qs__info"><span class="mono">' + o.c.name + '</span><b>' + o.name + '</b>' + (o.size ? '<small>' + o.size + '</small>' : '') + '</div>' +
+    $('#qsList').innerHTML = n ? [...rfq].map(([k, q]) => {
+      const o = itemOf(k);
+      return '<div class="qs__row" data-id="' + esc(k) + '" data-pick-root="' + o.id + '">' +
+        '<button class="qs__img" data-qv="' + esc(k) + '">' + imgTag(o.img) + '</button>' +
+        '<div class="qs__info"><span class="mono">' + o.c.name + '</span><b>' + esc(o.name) + '</b>' +
+          (fixedSize(o) ? (o.size ? '<small>' + esc(o.size) + '</small>' : '') : pickerHTML(o, o.pick)) + '</div>' +
         '<div class="qty"><button type="button" data-q="-1" aria-label="Less">−</button><input type="text" inputmode="numeric" value="' + q + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></div>' +
         '<button class="qs__rm" type="button" aria-label="Remove">×</button></div>';
-    }).join('') : '<div class="qs__empty"><b>Your quote is empty.</b><p>Browse the catalogue and tap “Add to quote” on anything you need — sizes and quantities can be adjusted here.</p><div class="qs__empty-btns"><button class="btn btn--red" id="qsBrowse" type="button">Browse the catalogue</button><a class="btn btn--ghost" href="tel:+97142850135">Call +971 4 285 0135</a></div></div>';
+    }).join('') : '<div class="qs__empty"><b>Your quote is empty.</b><p>Browse the catalogue, pick a size and tap “Add to quote”. Quantities can be changed here.</p><div class="qs__empty-btns"><button class="btn btn--red" id="qsBrowse" type="button">Browse the catalogue</button><a class="btn btn--ghost" href="tel:+97142850135">Call +971 4 285 0135</a></div></div>';
+    $$('.qs__row', $('#qsList')).forEach(r => tidyPair(r, itemOf(r.dataset.id)));
     $('.qs__foot').hidden = n === 0;
   }
   function openSheet() {
+    closeMenu();
     renderSheet();
     qs.classList.add('is-open'); qs.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    focusIn(qs, '.qv__close');
     gsap.fromTo('.qs__row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.04, delay: 0.15 });
   }
   function closeSheet() {
     if (!qs.classList.contains('is-open')) return;
     qs.classList.remove('is-open'); qs.setAttribute('aria-hidden', 'true');
-    if (!sr.classList.contains('is-open')) lenis && lenis.start();
+    unlock(); focusOut(qs);
   }
   $$('[data-qs-close]', qs).forEach(b => b.addEventListener('click', closeSheet));
   $('#qsList').addEventListener('click', e => {
+    if (e.target.closest('#qsBrowse')) { afterShowroom(() => scrollToEl('#catalogue')); return; }
     const row = e.target.closest('.qs__row'); if (!row) return;
     const id = row.dataset.id;
     const step = e.target.closest('[data-q]');
     if (step) setQty(id, (rfq.get(id) || 0) + (+step.dataset.q));
     if (e.target.closest('.qs__rm')) setQty(id, 0);
-    if (e.target.closest('#qsBrowse')) { closeSheet(); hardCloseShowroom(); scrollToEl('#catalogue'); }
   });
   $('#qsList').addEventListener('change', e => {
-    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT') setQty(row.dataset.id, e.target.value);
+    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value);
   });
-  $('#qsForm').addEventListener('click', () => { closeSheet(); hardCloseShowroom(); setTimeout(() => scrollToEl('#contact'), 80); });
+  // if a showroom was open, scroll once it has finished closing (the page underneath is measured then)
+  const afterShowroom = fn => { const was = sr.classList.contains('is-open'); closeSheet(); hardCloseShowroom(); setTimeout(fn, was && !reduce ? 950 : 80); };
+  $('#qsForm').addEventListener('click', () => afterShowroom(() => scrollToEl('#contact')));
   $('#qbarOpen').addEventListener('click', openSheet);
   $('#rfqBtn').addEventListener('click', openSheet);
 
   /* ================= Quick view ================= */
   const qv = $('#qv');
   let qvId = null;
+  function qvKey() { const o = itemOf(qvId), p = readPick($('#qvPick'), o); return p.ok ? keyOf(o, p.v) : null; }
   function syncQV() {
-    const on = rfq.has(qvId);
+    const o = itemOf(qvId); if (!o) return;
+    const key = qvKey(), on = key && rfq.has(key);
     const btn = $('#qvAdd');
-    btn.classList.toggle('is-added', on);
+    btn.classList.toggle('is-added', !!on);
     $('span', btn).textContent = on ? 'Update quantity' : 'Add to quote';
-    $('#qvState').hidden = !on;
-    if (on) $('#qvState b').textContent = rfq.get(qvId) + ' in your quote';
+    const lines = [...rfq].filter(([k]) => k.startsWith(o.id + '|'));
+    $('#qvState').hidden = !lines.length;
+    if (lines.length) $('#qvState b').textContent = 'In your quote: ' + lines.map(([k, q]) => (sizeWords(o, itemOf(k).pick) || o.name) + ' × ' + q).join(' · ');
+    const p = readPick($('#qvPick'), o);
+    $('#qvWa').dataset.waMsg = 'Hello Fakhri Tools, please send me a quote for: ' + o.name + (p.ok && sizeWords(o, p.v) ? ' (' + sizeWords(o, p.v) + ')' : (o.size ? ' (' + o.size + ')' : '')) + '.'; applyLinks(qv);
   }
-  function fillQV(id) {
-    const o = itemOf(id); if (!o) return;
+  function fillQV(key) {
+    const o = itemOf(key); if (!o) return;
     qvId = o.id;
-    const mat = materialOf(o.name);
+    const mat = materialOf(o.name), sp = sizeSpec(o);
     $('#qvMedia').innerHTML = imgTag(o.img, o.name);
     $('#qvCat').textContent = famName(o.c.fam) + ' / ' + o.c.name;
     $('#qvName').textContent = o.name;
-    $('#qvSize').textContent = o.size || 'On request';
+    $('#qvRange').textContent = o.size ? (sp.t === 'one' ? 'Size' : 'Sizes we offer: ' + o.size) : 'Size';
+    const pk = $('#qvPick');
+    pk.dataset.pickRoot = o.id;
+    pk.innerHTML = pickerHTML(o, o.pick !== null ? o.pick : (sp.t === 'one' ? sp.v : ''));
+    tidyPair(pk, o);
     $('#qvSpecs').innerHTML =
       '<div><dt class="mono">Material</dt><dd>' + (mat || 'See specification') + '</dd></div>' +
       '<div><dt class="mono">Specs & ratings</dt><dd>' + (o.chips.length ? chipsHTML(o.chips) : 'Standard') + '</dd></div>' +
-      '<div><dt class="mono">How to buy</dt><dd>Add it to your quote, then send by WhatsApp or email — or call the counter</dd></div>';
-    $('#qvQty').value = rfq.get(o.id) || 1;
+      '<div><dt class="mono">How to buy</dt><dd>Pick the size, add it to your quote, then send by WhatsApp or email — or call the counter</dd></div>';
+    $('#qvQty').value = (o.pick !== null && rfq.get(key)) || 1;
     $('#qvPos').textContent = pad(o.i + 1) + ' / ' + pad(o.c.items.length);
-    $('#qvWa').dataset.waMsg = 'Hello Fakhri Tools, please send me a quote for: ' + o.name + (o.size ? ' (' + o.size + ')' : '') + '.'; applyLinks(qv);
     syncQV();
   }
-  function openQV(id) {
+  function openQV(key) {
     const wasOpen = qv.classList.contains('is-open');
-    fillQV(id);
+    fillQV(key);
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
     gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
   function closeQV() {
     if (!qv.classList.contains('is-open')) return;
     qv.classList.remove('is-open'); qv.setAttribute('aria-hidden', 'true'); qvId = null;
-    if (!sr.classList.contains('is-open') && !qs.classList.contains('is-open')) lenis && lenis.start();
+    unlock(); focusOut(qv);
   }
   function stepQV(d) { const o = itemOf(qvId); if (o) openQV(o.c.slug + ':' + ((o.i + d + o.c.items.length) % o.c.items.length)); }
   $$('[data-qv-close]', qv).forEach(b => b.addEventListener('click', closeQV));
   $('#qvPrev').addEventListener('click', () => stepQV(-1));
   $('#qvNext').addEventListener('click', () => stepQV(1));
   $$('.qv [data-step]').forEach(b => b.addEventListener('click', () => { const i = $('#qvQty'); i.value = Math.max(1, (+i.value || 1) + (+b.dataset.step)); }));
-  $('#qvAdd').addEventListener('click', e => {
-    const q = Math.max(1, +$('#qvQty').value || 1);
-    const isNew = !rfq.has(qvId);
-    rfq.set(qvId, q); saveRfq(); syncRfq(isNew);
-    toast((isNew ? 'Added to quote — ' : 'Updated — ') + itemOf(qvId).name + ' × ' + q);
-    const media = $('#qvMedia');
-    if (isNew) requestAnimationFrame(() => flyToBar(media));
+  $('#qvAdd').addEventListener('click', () => {
+    const o = itemOf(qvId), p = readPick($('#qvPick'), o);
+    if (!p.ok) return flagPick($('#qvPick'));
+    const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, Math.round(+$('#qvQty').value) || 1));
+    const isNew = !rfq.has(key);
+    rfq.set(key, q); saveRfq(); syncRfq(isNew);
+    toast((isNew ? 'Added to quote — ' : 'Updated — ') + o.name + sizeOfLine(itemOf(key)) + ' × ' + q);
+    if (isNew) requestAnimationFrame(() => flyToBar($('#qvMedia')));
   });
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-qv]');
@@ -305,31 +484,31 @@
 
   /* ================= Product markup ================= */
   function rowHTML(c, i, withCat) {
-    const o = itemOf(c.slug + ':' + i), on = rfq.has(o.id);
+    const o = itemOf(c.slug + ':' + i), on = hasAny(o.id);
     return '<div class="prow" data-fly>' +
       '<button class="prow__img" data-qv="' + o.id + '">' + imgTag(o.img) + '</button>' +
       '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + c.name + '</span>' : '') + '<h4>' + o.name + '</h4>' +
       (o.size ? '<div class="prow__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
-      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button>' +
+      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
       '</div>';
   }
   function cardHTML(c, i) {
-    const o = itemOf(c.slug + ':' + i), on = rfq.has(o.id), mat = materialOf(o.name);
-    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + o.chips.join('|') + '">' +
+    const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = materialOf(o.name);
+    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
       '<button class="pc__media" data-qv="' + o.id + '" data-cursor="View"><span class="pc__no mono">' + pad(i + 1) + '</span>' +
       (mat ? '<span class="pc__mat mono">' + mat + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
       '<div class="pc__body"><h4>' + o.name + '</h4>' + (o.size ? '<div class="pc__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
       '<div class="pc__foot"><button class="pc__quick mono" data-qv="' + o.id + '">Quick view</button>' +
-      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button></div>' +
+      '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button></div>' +
       '</article>';
   }
 
   /* ================= Category showroom (full screen) ================= */
   const sr = $('#showroom'), srScroll = $('#srScroll'), srContent = $('#srContent');
   const RELATED = {
-    valves: ['gaskets-caf-canf-sheets', 'ss-ms-flanges-forging-casting', 'ss-forged-low-pressure-bw-fittings', 'instrumentation-fittings-pressure-gas'],
-    couplings: ['gaskets-caf-canf-sheets', 'quick-couplings', 'chicago-couplings-fittings', 'hammer-union'],
-    fittings: ['ss-ms-flanges-forging-casting', 'gaskets-caf-canf-sheets', 'ball-valves', 'gate-valves'],
+    valves: ['gaskets-sheets', 'ss-ms-flanges-forging-casting', 'ss-forged-low-pressure-bw-fittings', 'instrumentation-fittings-pressure-gas'],
+    couplings: ['gaskets-sheets', 'quick-couplings', 'chicago-couplings-fittings', 'hammer-union'],
+    fittings: ['ss-ms-flanges-forging-casting', 'gaskets-sheets', 'ball-valves', 'gate-valves'],
     sealing: ['ss-ms-flanges-forging-casting', 'ball-valves', 'gate-valves', 'instrumentation-fittings-pressure-gas']
   };
   let srIdx = -1;
@@ -347,7 +526,7 @@
     const specs = [...specCount].sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 10);
     const next = CATS[(idx + 1) % CATS.length];
     const related = RELATED[c.fam].filter(s => s !== c.slug).slice(0, 3).map(catBySlug);
-    const fchips = (key, list) => '<button class="chip is-on" data-f="' + key + '" data-v="all">All</button>' + list.map(v => '<button class="chip" data-f="' + key + '" data-v="' + v + '">' + v + '</button>').join('');
+    const fchips = (key, list) => '<button class="chip is-on" data-f="' + key + '" data-v="all">All</button>' + list.map(v => '<button class="chip" data-f="' + key + '" data-v="' + esc(v) + '">' + esc(v) + '</button>').join('');
 
     srContent.innerHTML =
       '<header class="sr__hero">' +
@@ -469,7 +648,7 @@
       sr.style.clipPath = ''; document.body.classList.remove('is-shop');
       srIdx = -1;
       if (/^#products\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
-      if (!qs.classList.contains('is-open')) lenis && lenis.start();
+      unlock();
     };
     if (reduce) return finish();
     gsap.fromTo(sr, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: 'inset(0px 0px ' + innerHeight + 'px 0px round 0px)', duration: 0.8, ease: 'expo.inOut', onComplete: finish });
@@ -480,8 +659,9 @@
   }
   function hardCloseShowroom() {
     if (!sr.classList.contains('is-open')) return;
-    if (history.state && history.state.sr) history.replaceState(null, '', location.pathname + location.search);
-    doCloseShowroom();
+    // going back removes the showroom's own history step (popstate then closes it)
+    if (history.state && history.state.sr) history.back();
+    else doCloseShowroom();
   }
   const closeDrawer = hardCloseShowroom;
   window.addEventListener('popstate', () => {
@@ -501,7 +681,7 @@
     closeMega(); closeMenu();
   }
   document.addEventListener('keydown', e => {
-    if (!qv.classList.contains('is-open')) return;
+    if (!qv.classList.contains('is-open') || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.key === 'ArrowRight') stepQV(1);
     if (e.key === 'ArrowLeft') stepQV(-1);
   });
@@ -523,22 +703,26 @@
     '<div><h6>' + f.name + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
       '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
-  $('#footCats').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + c.name + '</button>').join('');
+  // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html">' + c.name + '</a>').join('') + '<a href="products/index.html"><b>All product pages</b></a>';
 
   const megaBtn = $('#megaBtn');
+  $('#megaN').textContent = CATS.length;
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
   function closeMega() { nav.classList.remove('is-mega'); megaBtn.setAttribute('aria-expanded', 'false'); }
-  megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') ? closeMega() : openMega());
+  // with a mouse the menu opens on hover and closes when the pointer leaves, so a click only opens it
+  megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') && !fine ? closeMega() : openMega());
   if (fine) {
     megaBtn.addEventListener('mouseenter', openMega);
     nav.addEventListener('mouseleave', closeMega);
   }
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); lenis && lenis.start(); } }
+  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
-    lenis && (on ? lenis.stop() : lenis.start());
+    $('#burger').setAttribute('aria-expanded', String(on));
+    if (on) lenis && lenis.stop(); else unlock();
   });
 
   document.addEventListener('keydown', e => {
@@ -568,8 +752,7 @@
   const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1.2 }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 96, behavior: 'smooth' }); };
   const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
   const kGrid = $('#katGrid'), kSide = $('#katSide');
-  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  const waPrice = o => 'Hello Fakhri Tools, please send me a price for: ' + o.name + (o.size ? ' (' + o.size + ')' : '') + '. Quantity: ';
+  const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + o.name + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
 
   // what passes every filter except the one named in `skip` (so each group shows honest counts)
   function pass(o, skip) {
@@ -582,8 +765,8 @@
   const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
 
   // category rail with photos
-  $('#katRail').innerHTML = '<button class="kr is-on" data-pick="" role="listitem"><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
-    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '" role="listitem"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
+  $('#katRail').innerHTML = '<button class="kr is-on" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
+    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
     kf.cats.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
@@ -592,19 +775,21 @@
     if (top < 0 || top > innerHeight * 0.6) scrollKat();
   });
 
+  const kOpenG = new Map();
+  $('#katFacets').addEventListener('click', e => { const sm = e.target.closest('summary'); if (sm) kOpenG.set(sm.parentNode.dataset.g, !sm.parentNode.open); });
   function facetsHTML() {
     const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mats), sc = countBy('specs', o => o.chips);
     const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
     let h = '';
     FAMS.forEach(f => {
       const cs = CATS.filter(c => c.fam === f.id);
-      const open = cs.some(c => kf.cats.has(c.slug)) || !kf.cats.size;
-      h += '<details class="kgroup"' + (open ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
+      const open = cs.some(c => kf.cats.has(c.slug));
+      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
         cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
     });
-    h += '<details class="kgroup" open><summary>Material</summary><div class="kgroup__list">' +
+    h += '<details class="kgroup" data-g="mat"' + (kOpenG.get('mat') === false ? '' : ' open') + '><summary>Material</summary><div class="kgroup__list">' +
       MAT_ORDER.filter(m => ALL.some(o => o.mats.includes(m))).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
-    h += '<details class="kgroup" open><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
+    h += '<details class="kgroup" data-g="spec"' + ((kOpenG.has('spec') ? kOpenG.get('spec') : kf.specs.size > 0) ? ' open' : '') + '><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
       SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
     return h;
   }
@@ -614,17 +799,17 @@
     const [head, ...rest] = base.split(', ');
     return '<span class="kc__np"><b>' + esc(head) + '</b>' + (rest.length ? '<em>' + esc(rest.join(', ')) + '</em>' : '') + '<span class="mono">Photo on WhatsApp</span></span>';
   }
-  function kcardHTML(o) {
-    const on = rfq.has(o.id);
-    return '<article class="kc" data-fly>' +
+  function kcardHTML(o, cur) {
+    const one = fixedSize(o), on = one && rfq.has(keyOf(o, sizeSpec(o).v));
+    return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
         (o.mat !== 'Other' ? '<span class="kc__mat mono">' + (o.mats.length > 1 ? 'Carbon & stainless' : o.mat) + '</span>' : '') + (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
-        (o.size ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : '') +
+        (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
         (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
       '</div>' +
-      '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add to quote') + '</span></button>' +
+      '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
         '<a class="kc__wa" href="#" data-wa-link data-wa-msg="' + esc(waPrice(o)) + '" aria-label="Ask the price of ' + esc(o.name) + ' on WhatsApp" title="Ask the price on WhatsApp"><svg><use href="#wa"/></svg></a></div>' +
       '</article>';
   }
@@ -638,7 +823,14 @@
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
     const shown = hits.slice(0, kf.limit);
-    let html = shown.map(kcardHTML);
+    // sizes already picked on cards survive "Show more", filters, sort and search
+    const keep = new Map();
+    $$('[data-pick-root]', kGrid).forEach(r => {
+      if (!$$('[data-pk]', r).some(el => el.value)) return;
+      const o = itemOf(r.dataset.pickRoot), p = o && readPick(r, o);
+      if (p && p.ok) keep.set(o.id, p.v);
+    });
+    let html = shown.map(o => kcardHTML(o, keep.get(o.id)));
     if (shown.length >= 7) html.splice(7, 0, promoHTML());
     kGrid.innerHTML = hits.length ? html.join('') :
       '<div class="kat-empty"><b>Nothing matches that yet.</b><p>Clear a filter, or send us a photo of the part on WhatsApp and we’ll check our stock.</p>' +
@@ -662,6 +854,11 @@
     const nf = kf.cats.size + kf.mats.size + kf.specs.size;
     const fn = $('#katFilterN'); fn.hidden = !nf; fn.textContent = nf;
     $$('.kr', $('#katRail')).forEach(b => b.classList.toggle('is-on', kf.cats.size ? kf.cats.size === 1 && kf.cats.has(b.dataset.pick) : !b.dataset.pick));
+    keep.forEach((v, id) => {
+      const r = $('[data-pick-root="' + id + '"]', kGrid); if (!r) return;
+      const o = itemOf(id); tidyPair(r, o); $$('[data-add]', r).forEach(paintAdd);
+      const wa = $('[data-wa-msg]', r); if (wa) wa.dataset.waMsg = waPrice(o, v);
+    });
     applyLinks(kGrid); applyLinks($('#katMore'));
     if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
@@ -670,8 +867,11 @@
 
   $('#katFacets').addEventListener('change', e => {
     const t = e.target; if (!t.dataset.g) return;
-    kf[t.dataset.g][t.checked ? 'add' : 'delete'](t.value);
+    const had = document.activeElement === t, g = t.dataset.g, val = t.value;
+    kf[g][t.checked ? 'add' : 'delete'](val);
     kf.limit = PAGE; renderKat(true);
+    // keyboard users keep their place in the filter list
+    if (had) { const el = $$('#katFacets input[data-g="' + g + '"]').find(x => x.value === val); if (el) el.focus({ preventScroll: true }); }
   });
   $('#katFacets').addEventListener('click', e => {
     const b = e.target.closest('[data-spec]'); if (!b) return;
@@ -690,8 +890,19 @@
   $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = e.target.value.trim().toLowerCase().replace(/[<>&"]/g, ''); kf.limit = PAGE; renderKat(true); }, 140); });
   $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
 
+  // laptops: the filter column scrolls with the page and then sticks once its bottom is in view (no scroll box inside a scroll box)
+  const deskQ = matchMedia('(min-width: 1101px)');
+  function fitSide() {
+    if (!deskQ.matches) { kSide.style.top = ''; return; }
+    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 80;
+    const room = innerHeight - navH - 24;
+    kSide.style.top = (kSide.offsetHeight <= room ? navH + 24 : innerHeight - kSide.offsetHeight - 20) + 'px';
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(fitSide).observe(kSide);
+  addEventListener('resize', fitSide);
+
   // phones: filters slide up as a sheet
-  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); lenis && (on ? lenis.stop() : lenis.start()); };
+  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
   $('#katFilterBtn').addEventListener('click', () => kOpen(true));
   $('#katSideClose').addEventListener('click', () => kOpen(false));
   $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });
@@ -699,14 +910,36 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && kSide.classList.contains('is-open')) kOpen(false); });
   renderKat(false);
 
-  /* ---------------- Oilfield brands ---------------- */
+  /* ---------------- Business details for search engines (facts from the owner's form) ---------------- */
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'HardwareStore',
+    name: 'Fakhri Tools & Workshop Materials Trading LLC',
+    image: new URL('assets/share.jpg', location.href).href,
+    logo: new URL('assets/logo-stacked.png', location.href).href,
+    telephone: '+97142850135',
+    address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
+    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '07:30', closes: '18:00' }],
+    knowsLanguage: ['en', 'hi', 'ur', 'ar'],
+    paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque',
+    areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
+    hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves', itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name })) }
+  });
+  document.head.appendChild(ld);
+
+  /* ---------------- Brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
     '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
       '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" decoding="async">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
-      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Oilfield brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
-    '</button>').join('');
+      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
+    '</button>').join('') +
+    '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
+      '<span class="btile__mark"><span class="btile__word is-long">Ask for your brand</span></span>' +
+      '<span class="btile__foot"><span class="mono">On WhatsApp</span><b>Ask now <svg><use href="#arrow"/></svg></b></span></a>';
+  applyLinks($('#brandsGrid'));
   $('#brandsGrid').addEventListener('click', e => {
     const t = e.target.closest('[data-brand]'); if (!t) return;
     const msg = $('#fMsg');
@@ -983,15 +1216,7 @@
       }
     });
 
-    const cards = $$('.why__card');
-    cards.forEach(c => { const sh = document.createElement('i'); sh.className = 'why__shade'; c.appendChild(sh); });
-    cards.forEach((card, i) => {
-      if (i === cards.length - 1) return;
-      gsap.to(card, { scale: 0.9 + i * 0.025, ease: 'none',
-        scrollTrigger: { trigger: cards[i + 1], start: 'top 85%', end: 'top 25%', scrub: true } });
-      gsap.to($('.why__shade', card), { opacity: 0.5, ease: 'none',
-        scrollTrigger: { trigger: cards[i + 1], start: 'top 85%', end: 'top 25%', scrub: true } });
-    });
+    gsap.from('.why__card', { y: 50, opacity: 0, duration: 1, ease: 'expo.out', stagger: 0.1, scrollTrigger: { trigger: '.why__cards', start: 'top 85%' } });
 
     gsap.fromTo('.pipe__fill', { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.timeline', start: 'top 65%', end: 'bottom 65%', scrub: true } });
     $$('.ms').forEach(m => ScrollTrigger.create({ trigger: m, start: 'top 65%', onEnter: () => m.classList.add('is-on'), onLeaveBack: () => m.classList.remove('is-on') }));
