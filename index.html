@@ -608,7 +608,7 @@
     <div class="qv__info">
       <span class="qv__cat mono" id="qvCat"></span>
       <h3 class="qv__name" id="qvName"></h3>
-      <div class="qv__size"><small class="mono">Size range</small><b id="qvSize"></b></div>
+      <div class="qv__size"><small class="mono" id="qvRange">Size</small><div id="qvPick" data-pick-root></div></div>
       <dl class="qv__specs" id="qvSpecs"></dl>
       <div class="qv__buy">
         <div class="qty"><button type="button" data-step="-1" aria-label="Less">−</button><input id="qvQty" type="text" inputmode="numeric" value="1" aria-label="Quantity"><button type="button" data-step="1" aria-label="More">+</button></div>
@@ -625,7 +625,7 @@
 <div class="qs" id="qs" aria-hidden="true">
   <div class="qs__scrim" data-qs-close></div>
   <div class="qs__panel" role="dialog" aria-modal="true" aria-label="Your quote request">
-    <header class="qs__head"><div><span class="mono">Your quote request</span><h3><span id="qsCount">0</span> products</h3></div><button class="qv__close" data-qs-close aria-label="Close"><span></span><span></span></button></header>
+    <header class="qs__head"><div><span class="mono">Your quote request</span><h3><span id="qsCount">0</span> items</h3></div><button class="qv__close" data-qs-close aria-label="Close"><span></span><span></span></button></header>
     <div class="qs__list" id="qsList" data-lenis-prevent></div>
     <footer class="qs__foot">
       <p>Send your list to Fakhri Tools and ask for a quote.</p>

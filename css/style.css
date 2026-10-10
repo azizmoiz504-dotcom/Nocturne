@@ -1285,3 +1285,39 @@ body.has-quote .fabs{bottom:14px}
 .kc__np em{font-style:normal;font-family:var(--f-display);font-weight:700;font-size:clamp(18px,1.8vw,22px);line-height:1;text-transform:uppercase;color:var(--red)}
 .kc__np .mono{position:absolute;left:12%;bottom:10%;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1a9a4b}
 @media (max-width:600px){.kc__np{padding:14% 10% 10%}.kc__np b{font-size:20px}.kc__np em{font-size:16px}.kc__np .mono{font-size:10.5px}}
+
+/* size picker (cards, quick view, quote list) */
+.pk{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.pk__lab{font-size:12.5px;letter-spacing:.1em;color:var(--paper-mute)}
+.pk__ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pk select,.pk input{flex:1 1 120px;min-width:0;height:44px;padding:0 34px 0 12px;border:1.5px solid #cfd5de;border-radius:12px;background:#fff;color:var(--paper-ink);font-family:var(--f-body);font-size:16px;font-weight:600;transition:border-color .2s,box-shadow .2s}
+.pk input{padding-right:12px;font-weight:500}
+.pk select{-webkit-appearance:none;appearance:none;cursor:pointer;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23071823' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center}
+.pk select:hover,.pk input:hover{border-color:#9aa4b2}
+.pk select:focus,.pk input:focus{outline:0;border-color:var(--paper-ink);box-shadow:0 0 0 3px rgba(7,24,35,.12)}
+.pk select:invalid,.pk select:has(option[value=""]:checked){color:var(--paper-mute);font-weight:500}
+.pk option{color:var(--paper-ink);font-weight:500}
+.pk__pair{display:flex;align-items:center;gap:6px;flex:1 1 100%;min-width:0}
+.pk__pair select{flex:1 1 0}
+.pk__pair i{font-style:normal;font-weight:700;color:var(--paper-mute)}
+.pk__one{font-size:17px;font-weight:600;color:var(--paper-ink)}
+.pk--len input[data-pk="len"]{flex:1 1 100%}
+.pk__note{font-size:13.5px;color:var(--paper-mute)}
+.pk-err select:has(option[value=""]:checked),.pk-err .pk__ctl select:first-child{border-color:var(--red);box-shadow:0 0 0 3px rgba(185,26,32,.15)}
+.pk-err .pk{animation:pkShake .4s}
+@keyframes pkShake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.kc .pk{margin-top:6px}
+.qv__size{flex-direction:column;align-items:stretch}
+.qv__size .pk__lab{display:none}
+.qv__size .pk select,.qv__size .pk input{height:52px;font-size:18px}
+.qs__info .pk{margin-top:6px;max-width:340px}
+.qs__info .pk__lab{display:none}
+.qs__info .pk select,.qs__info .pk input{height:40px;font-size:15px}
+@media (max-width:600px){
+  .kc .pk__lab{display:none}
+  .kc .pk select,.kc .pk input{height:40px;font-size:16px;padding-left:9px;padding-right:26px;background-position:right 9px center;border-radius:10px}
+  .kc .pk input{padding-right:9px}
+  .kc .pk__pair{flex-wrap:wrap;gap:6px}
+  .kc .pk__pair select{flex:1 1 100%}
+  .kc .pk__pair i{display:none}
+}
