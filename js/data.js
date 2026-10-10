@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (18 categories, 116 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (18 categories, 124 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -44,7 +44,7 @@ window.FT_CATS = [
     items: [
       ['Bronze Check Valve, Swing Type', ['NPT', 'BSPT'], '½" – 4"', 'check-valves/1.jpg'],
       ['Bronze Check Valve, Lift Type', ['NPT'], '½" – 4"', 'check-valves/2.jpg'],
-      ['C.I Swing Check Valve', ['CL150', 'F/T'], '½" – 10"', 'check-valves/ci-swing-check.jpg'],
+      ['C.I Swing Check Valve', ['CL150', 'F/T'], '½" – 10"', 'check-valves/edit-mv2d3shk.jpg'],
       ['Bronze Spring Check Valve, Vertical', ['NPT', 'BSPT'], '½" – 4"', 'check-valves/4.jpg'],
       ['S.S Low Pressure Swing Check Valve', ['NPT', 'BSPT'], '½" – 4"', 'check-valves/5.jpg'],
       ['S.S Forged Steel Check Valve', ['NPT', 'SW'], '½" – 2"', 'check-valves/ss-forged-steel-check.jpg'],
@@ -53,34 +53,34 @@ window.FT_CATS = [
       ['S.S Wafer Type Check Valve', ['CL150'], '½" – 12"', 'check-valves/8.jpg'],
       ['C.S Wafer Type Check Valve', ['CL150'], '½" – 12"', 'check-valves/10.jpg'],
       ['C.S Check Valve', ['CL150', 'CL300', 'F/T'], '½" – 12"', 'check-valves/cs-check.jpg'],
-      ['C.I Swing Check Valve', ['PN16', 'F/T'], '1" – 12"', 'check-valves/12.jpg'],
+      ['C.I Swing Check Valve', ['PN16', 'F/T'], '1" – 12"', 'check-valves/edit-mv2d1bik.jpg'],
       ['S.S Swing Check Valve', ['CL150', 'F/T'], '1" – 12"', 'check-valves/13.jpg']
     ] },
   { slug: 'ball-valves', name: 'Ball Valves', fam: 'valves',
     desc: 'Quarter-turn shut-off from 600 to 3000 WOG — 1PC, 2PC and 3PC designs in bronze, brass, S.S, C.S and C.I.',
-    cover: 'ball-valves/1.jpg',
+    cover: 'ball-valves/edit-mv2dxfry.jpg',
     items: [
-      ['Bronze Ball Valve', ['600 WOG', 'NPT'], '¼" – 4"', 'ball-valves/1.jpg'],
-      ['Brass Ball Valve', ['600 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/2.jpg'],
+      ['C.S Ball Valve, 3PC', ['CL150', 'F/T'], '½" – 6"', 'ball-valves/edit-mv2dh1au.jpg'],
+      ['C.S Ball Valve, 2PC', ['CL150', 'F/T'], '½" – 12"', 'ball-valves/edit-mv2dbjm2.jpg'],
+      ['S.S Ball Valve, 2PC F/T', ['PN16', 'CL150', 'CF8M'], '¼" – 10"', 'ball-valves/edit-mv2dcmq1.jpg'],
+      ['C.I Ball Valve, 2PC', ['CL150', 'F/T', 'NPT'], '¼" – 8"', 'ball-valves/edit-mv2dxfry.jpg'],
+      ['C.I Ball Valve, 2PC', ['PN16', 'F/T'], '½" – 8"', 'ball-valves/edit-mv2dz8c5.jpg'],
       ['S.S Ball Valve XDS', ['800 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/3.jpg'],
+      ['Bronze Ball Valve', ['600 WOG', 'NPT'], '¼" – 4"', 'ball-valves/edit-mv2d9dgh.jpg'],
+      ['Brass Ball Valve', ['600 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/edit-mv2d5gqf.jpg'],
       ['S.S Ball Valve, HEX Body R/B 1PC', ['1000 WOG', 'CF8M', 'NPT'], '¼" – 2"', 'ball-valves/4.jpg'],
       ['S.S Ball Valve, 2PC F/B', ['1000 WOG', 'CF8M', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/5.jpg'],
       ['S.S Ball Valve, 3PC F/B', ['1000 WOG', 'CF8M', 'NPT', 'BSPT', 'BW', 'SW'], '¼" – 4"', 'ball-valves/6.jpg'],
-      ['S.S Ball Valve, 2PC F/B', ['3000 WOG', 'CF8M', 'NPT'], '¼" – 2"', 'ball-valves/7.jpg'],
-      ['S.S Ball Valve, 2PC F/T', ['PN16', 'CL150', 'CF8M'], '¼" – 10"', 'ball-valves/8.jpg'],
-      ['C.S Ball Valve, 2PC', ['CL150', 'F/T'], '½" – 12"', 'ball-valves/9.jpg'],
-      ['C.S Ball Valve, 3PC', ['CL150', 'F/T'], '½" – 6"', 'ball-valves/10.jpg'],
+      ['S.S Ball Valve, 2PC F/B', ['3000 WOG', 'CF8M', 'NPT'], '¼" – 2"', 'ball-valves/edit-mv2d8ycd.jpg'],
       ['C.S Ball Valve XDS', ['800 WOG', 'NPT', 'BSPT'], '½" – 4"', 'ball-valves/11.jpg'],
       ['C.S Ball Valve, 2PC', ['3000 WOG', 'NPT'], '½" – 2"', 'ball-valves/12.jpg'],
       ['C.S F.S Ball Valve, 3PC', ['1000#', 'NPT', 'BSPT'], '½" – 4"', 'ball-valves/13.jpg'],
-      ['S.S Ball Valve, 3PC', ['3000#', 'NPT'], '¼" – 2"', 'ball-valves/14.jpg'],
-      ['C.S Hydraulic Ball Valve', ['600#', 'NPT'], '¼" – 2"', 'ball-valves/15.jpg'],
-      ['C.I Ball Valve, 2PC', ['CL150', 'F/T', 'NPT'], '¼" – 8"', 'ball-valves/16.jpg'],
-      ['C.I Ball Valve, 2PC', ['PN16', 'F/T'], '½" – 8"', 'ball-valves/17.jpg']
+      ['S.S Ball Valve, 3PC', ['3000#', 'NPT'], '¼" – 2"', 'ball-valves/edit-mv2dow6e.jpg'],
+      ['C.S Hydraulic Ball Valve', ['600#', 'NPT'], '¼" – 2"', 'ball-valves/edit-mv2dw070.jpg']
     ] },
   { slug: 'y-strainers', name: 'Y Strainers', fam: 'valves',
     desc: 'Line protection for pumps, meters and valves — screwed and flanged, ½" to 12".',
-    cover: 'y-strainers/1.jpg',
+    cover: 'y-strainers/4.jpg',
     items: [
       ['Bronze Y Strainer', ['NPT'], '½" – 2"', 'y-strainers/1.jpg'],
       ['S.S Y Strainer', ['200#', 'NPT', 'BSPT'], '½" – 4"', 'y-strainers/2.jpg'],
@@ -91,10 +91,10 @@ window.FT_CATS = [
     ] },
   { slug: 'safety-valves', name: 'Safety Valves', fam: 'valves',
     desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever.',
-    cover: 'safety-valves/1.jpg',
+    cover: 'safety-valves/edit-mv2ecfs7.jpg',
     items: [
-      ['Bronze Safety Valve, with & without lever', ['20 BAR', 'NPT'], '1½" – 2"', 'safety-valves/1.jpg'],
-      ['Bronze Safety Valve, with & without lever', ['10 BAR', 'NPT'], '1½" – 2"', 'safety-valves/2.jpg']
+      ['Bronze Safety Valve, with & without lever', ['20 BAR', 'NPT'], '1½" – 2"', 'safety-valves/edit-mv2ecfs7.jpg'],
+      ['Bronze Safety Valve, with & without lever', ['10 BAR', 'NPT'], '1½" – 2"', 'safety-valves/edit-mv2ecjco.jpg']
     ] },
   { slug: 'butterfly-valves', name: 'Butterfly Valves', fam: 'valves',
     desc: 'Compact large-bore control — lever, gear and lug-type bodies up to 24".',
@@ -107,16 +107,16 @@ window.FT_CATS = [
     ] },
   { slug: 'quick-couplings', name: 'Quick Couplings', fam: 'couplings',
     desc: 'Bauer, Miller, Storz and camlock couplings for fast, secure hose connections.',
-    cover: 'quick-couplings/1.jpg',
+    cover: 'quick-couplings/edit-mv2eigwv.jpg',
     items: [
-      ['Bauer Couplings', [], '2" – 8"', 'quick-couplings/1.jpg'],
-      ['Miller Couplings', [], '2" – 8"', 'quick-couplings/2.jpg'],
-      ['Aluminium Storz Hose Coupling', [], '1½" – 4"', 'quick-couplings/3.jpg'],
+      ['Bauer Couplings', [], '2" – 8"', 'quick-couplings/edit-mv2eigwv.jpg'],
+      ['Miller Couplings', [], '2" – 8"', 'quick-couplings/edit-mv2ejntv.jpg'],
+      ['Aluminium Storz Hose Coupling', [], '1½" – 4"', 'quick-couplings/edit-mv2ehz7j.jpg'],
       ['Aluminium Storz Female Coupling', ['BSPT'], '1½" – 4"', 'quick-couplings/4.jpg'],
       ['Aluminium Storz Cap', [], '1½" – 4"', 'quick-couplings/5.jpg'],
       ['Camlock Couplings, Aluminium', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/6.jpg'],
       ['Camlock Couplings, Brass', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/7.jpg'],
-      ['Camlock Couplings, Stainless Steel', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/8.jpg'],
+      ['Camlock Couplings, Stainless Steel', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv2ekofo.jpg'],
       ['Aluminium Camlock Reducing Coupling', [], '', 'quick-couplings/9.jpg'],
       ['Brass Camlock Leg', [], '2" – 6"', 'quick-couplings/10.jpg']
     ] },
@@ -130,7 +130,9 @@ window.FT_CATS = [
       ['Brass QRC Female Plug', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/4.jpg'],
       ['Brass QRC Female Body', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/5.jpg'],
       ['Brass QRC Male Plug', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/6.jpg'],
-      ['Double Bolt Clamp', [], 'SL 29 – SL 675', 'qrc-couplings-ludecke/7.jpg']
+      ['Double Bolt Clamp', [], 'SL 29 – SL 675', 'qrc-couplings-ludecke/7.jpg'],
+      ['Single Bolt Clamp', ['CS ZINC PLATED'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv2fnn47.jpg'],
+      ['Single Bolt Clamp', ['SS'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv2frv8b.jpg']
     ] },
   { slug: 'union-flexible-connectors', name: 'Union & Flexible Connectors', fam: 'couplings',
     desc: 'Galvanised flexible unions and single-bellow flange connectors that absorb movement and vibration.',
@@ -149,44 +151,51 @@ window.FT_CATS = [
     ] },
   { slug: 'ms-forged-low-pressure-bw-fittings', name: 'M.S Forged, Low Pressure & B/W Fittings', fam: 'fittings',
     desc: 'Carbon steel forged, low-pressure and butt-weld fittings, pipe, tubing and nipples.',
-    cover: 'ms-forged-low-pressure-bw-fittings/1.jpg',
+    cover: 'ms-forged-low-pressure-bw-fittings/edit-mv2hv11p.jpg',
     items: [
-      ['M.S Pipe Fitting, Low Pressure', ['1000#', 'BSPT'], '¼" – 2"', 'ms-forged-low-pressure-bw-fittings/1.jpg'],
-      ['M.S Forged Pipe Fitting', ['A105', '2000#', '3000#', '6000#', 'NPT', 'SW'], '⅛" – 4"', 'ms-forged-low-pressure-bw-fittings/2.jpg'],
-      ['M.S Pipe & Tubing, SMLS & ERW', ['SCH STD', 'SCH40', 'SCH80', 'SCH160', 'XS', 'XXS'], '¼" – 24" · 6 m / DRL', 'ms-forged-low-pressure-bw-fittings/3.jpg'],
-      ['M.S B/W Pipe Fitting, SMLS', ['WPB', 'SCH40', 'SCH80', 'SCH160'], '¼" – 24"', 'ms-forged-low-pressure-bw-fittings/4.jpg'],
-      ['M.S Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/5.jpg'],
-      ['M.S Long & Close Nipple', ['A105', 'SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 6" × 8"', 'ms-forged-low-pressure-bw-fittings/6.jpg']
+      ['M.S Pipe Fitting, Low Pressure', ['1000#', 'BSPT'], '¼" – 2"', 'ms-forged-low-pressure-bw-fittings/edit-mv2hvkmd.jpg'],
+      ['M.S Forged Pipe Fitting', ['A105', '2000#', '3000#', '6000#', 'NPT', 'SW'], '⅛" – 4"', 'ms-forged-low-pressure-bw-fittings/edit-mv2hmxve.jpg'],
+      ['M.S Pipe & Tubing, SMLS & ERW', ['SCH STD', 'SCH40', 'SCH80', 'SCH160', 'XS', 'XXS'], '¼" – 24" · 6 m / DRL', 'ms-forged-low-pressure-bw-fittings/edit-mv2hrkkh.jpg'],
+      ['M.S B/W Pipe Fitting, SMLS', ['WPB', 'SCH40', 'SCH80', 'SCH160'], '¼" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv2hv11p.jpg'],
+      ['M.S Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv2i2wsu.jpg'],
+      ['M.S Long & Close Nipple', ['A105', 'SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 6" × 8"', 'ms-forged-low-pressure-bw-fittings/edit-mv2i4e9k.jpg']
     ] },
   { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S Forged, Low Pressure & B/W Fittings', fam: 'fittings',
     desc: '316L / 304L forged, low-pressure, block and butt-weld fittings, pipe and nipples.',
-    cover: 'ss-forged-low-pressure-bw-fittings/1.jpg',
+    cover: 'ss-forged-low-pressure-bw-fittings/edit-mv2icvgo.jpg',
     items: [
-      ['S.S Low Pressure Pipe Fittings', ['CL150', '316', 'NPT', 'BSPT'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/1.jpg'],
-      ['S.S Forged Steel Pipe Fitting', ['A182 316L', '3000#', 'NPT', 'SW'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/2.jpg'],
-      ['S.S Block Pipe Fitting', ['A182 316L', '10000#', 'NPT'], '¼" – ½"', 'ss-forged-low-pressure-bw-fittings/3.jpg'],
-      ['S.S B/W Pipe Fitting', ['A403 316L', 'SMLS', 'ERW', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'ss-forged-low-pressure-bw-fittings/4.jpg'],
-      ['S.S Pipe & Tubing', ['316L', '304L', 'SMLS', 'ERW', 'SCH10', 'SCH40', 'SCH80'], '⅛" – 12" · 6 m', 'ss-forged-low-pressure-bw-fittings/5.jpg'],
-      ['S.S Long & Close Pipe Nipple', ['A182 316L', 'ERW', 'SMLS', 'SCH10', 'SCH40', 'SCH80'], '¼" – 4" × 6"', 'ss-forged-low-pressure-bw-fittings/6.jpg']
+      ['S.S Low Pressure Pipe Fittings', ['CL150', '316', 'NPT', 'BSPT'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv2i9rd9.jpg'],
+      ['S.S Forged Steel Pipe Fitting', ['A182 316L', '3000#', 'NPT', 'SW'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv2ibtbh.jpg'],
+      ['S.S B/W Pipe Fitting', ['A403 316L', 'SMLS', 'ERW', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'ss-forged-low-pressure-bw-fittings/edit-mv2icvgo.jpg'],
+      ['S.S Pipe & Tubing', ['316L', '304L', 'SMLS', 'ERW', 'SCH10', 'SCH40', 'SCH80'], '⅛" – 12" · 6 m', 'ss-forged-low-pressure-bw-fittings/edit-mv2idq23.jpg'],
+      ['S.S Long & Close Pipe Nipple', ['A182 316L', 'ERW', 'SMLS', 'SCH10', 'SCH40', 'SCH80'], '¼" – 4" × 6"', 'ss-forged-low-pressure-bw-fittings/edit-mv2iflxi.jpg']
     ] },
   { slug: 'gaskets-caf-canf-sheets', name: 'Gaskets & CAF / CNAF Sheets', fam: 'sealing',
     desc: 'CAF, CNAF, neoprene, spiral wound and RTJ — plus gland packing and coupling washers.',
-    cover: 'gaskets-caf-canf-sheets/1.jpg',
+    cover: 'gaskets-caf-canf-sheets/edit-mv2ivzmn.jpg',
     items: [
-      ['CAF / CNAF Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-caf-canf-sheets/1.jpg'],
-      ['CAF, CNAF & Metallic Gasket Sheet', ['1 – 6 MM'], '1.5 m × 1.5 m', 'gaskets-caf-canf-sheets/2.jpg'],
+      ['CAF / CNAF Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-caf-canf-sheets/edit-mv2ivzmn.jpg'],
+      ['CAF, CNAF & Metallic Gasket Sheet', ['1 – 6 MM'], '1.5 m × 1.5 m', 'gaskets-caf-canf-sheets/edit-mv2ipd6e.jpg'],
       ['Neoprene Rubber Sheet', ['1 – 16 MM'], '1.2 m × 10 m', 'gaskets-caf-canf-sheets/3.jpg'],
-      ['Spiral Wound Gasket', ['GRAPHITE', 'CAF', 'PTFE', 'CL150–CL1500'], '½" – 24"', 'gaskets-caf-canf-sheets/4.jpg'],
-      ['Graphited Gland Packing', [], '6 mm – 25 mm', 'gaskets-caf-canf-sheets/5.jpg'],
-      ['Rubber Washers for Chicago, Camlock, Storz, Bauer & Miller', [], '', 'gaskets-caf-canf-sheets/6.jpg'],
+      ['Spiral Wound Gasket', ['GRAPHITE', 'CAF', 'PTFE', 'CL150–CL1500'], '½" – 24"', 'gaskets-caf-canf-sheets/edit-mv2iklux.jpg'],
+      ['Graphited Gland Packing', [], '6 mm – 25 mm', 'gaskets-caf-canf-sheets/edit-mv2ilfvs.jpg'],
+      ['Rubber Washers for Chicago, Camlock, Storz, Bauer & Miller', [], '', 'gaskets-caf-canf-sheets/edit-mv2iob1d.jpg'],
       ['RTJ Ring Gaskets', ['STAINLESS', 'SOFT IRON'], '', 'gaskets-caf-canf-sheets/7.jpg']
     ] },
   { slug: 'ss-ms-flanges-forging-casting', name: 'S.S & M.S Flanges', fam: 'fittings',
     desc: 'S.S A182 316L and M.S A105 flanges — forged or cast, SORF, WNRF, blind and screwed.',
-    cover: 'ss-ms-flanges-forging-casting/1.jpg',
+    cover: 'ss-ms-flanges-forging-casting/edit-mv2j5u18.jpg',
     items: [
-      ['S.S Flanges, Forged', ['A182 316L', 'SORF', 'SWRF', 'WNRF', 'BLIND', 'SCREWED', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/1.jpg'],
-      ['M.S Flanges, Forging & Casting', ['A105', 'SORF', 'SWRF', 'WNRF', 'BLIND', 'PN10–PN25', 'CL150–CL2500', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/2.jpg']
+      ['SS Flanges SORF', ['A182 316L', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2j5u18.jpg'],
+      ['SS Flanges SWRF', ['A182 316L', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2j8t2f.jpg'],
+      ['SS Flanges WNRF', ['A182 316L', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2jh60w.jpg'],
+      ['SS Flanges BLIND', ['A182 316L', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2jeu4i.jpg'],
+      ['SS Flanges THREADED', ['A182 316L', 'PN16', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2jhzu8.jpg'],
+      ['MS Flanges SORF', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2jrw6t.jpg'],
+      ['MS Flanges SWRF', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kgxw8.jpg'],
+      ['MS Flanges WNRF', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kpmjk.jpg'],
+      ['MS Flanges BLIND', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kpg3a.jpg'],
+      ['MS Flanges THREADED', ['A105', 'PN10–PN25', 'CL150–CL600', '5K/10K/16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv2kq8gj.jpg']
     ] },
   { slug: 'chicago-couplings-fittings', name: 'Chicago Couplings & Fittings', fam: 'couplings',
     desc: 'Galvanised claw couplings, king nipples, menders and bolt clamps for air and water hose.',
@@ -198,7 +207,6 @@ window.FT_CATS = [
       ['Safety Pin', [], '', 'chicago-couplings-fittings/6.jpg'],
       ['G.I King Nipple', ['NPT', 'BSPT'], '½" – 12"', 'chicago-couplings-fittings/7.jpg'],
       ['G.I Hose Mender', [], '½" – 8"', 'chicago-couplings-fittings/8.jpg'],
-      ['Double Bolt Clamp', [], 'SL 22 – SL 1275', 'chicago-couplings-fittings/9.jpg'],
       ['Four Bolt Clamp', [], '½" – 3"', 'chicago-couplings-fittings/10.jpg']
     ] },
   { slug: 'instrumentation-fittings-pressure-gas', name: 'Instrumentation & Pressure Gauges', fam: 'sealing',
@@ -206,7 +214,7 @@ window.FT_CATS = [
     cover: 'instrumentation-fittings-pressure-gas/1.jpg',
     items: [
       ['S.S Compression Fitting, Nut & Ferrule', ['6 – 12 MM'], '¼" – ½"', 'instrumentation-fittings-pressure-gas/1.jpg'],
-      ['S.S Needle Valve', ['1000#', '3000#', '6000#', '10000#', 'F/F', 'M/F', 'NPT'], '¼" – 1"', 'instrumentation-fittings-pressure-gas/2.jpg'],
+      ['S.S Needle Valve', ['1000#', '3000#', '6000#', '10000#', 'F/F', 'M/F', 'NPT'], '¼" – 1"', 'instrumentation-fittings-pressure-gas/edit-mv2ky4g0.jpg'],
       ['Pressure Gauge, Full S.S Body, Liquid Filled', ['4" DIAL', '2½" DIAL', '0–15,000 PSI'], '½" / ¼" bottom connection', 'instrumentation-fittings-pressure-gas/3.jpg']
     ] },
   { slug: 'universal-couplings-flange-adapter', name: 'Universal Couplings & Flange Adapters', fam: 'couplings',
@@ -222,13 +230,13 @@ window.FT_CATS = [
    To show a brand's real logo, save the logo file in assets/brands/ and type its file name in `logo`,
    for example  logo: 'assets/brands/benkan.png'.  While `logo` is empty, the brand name is shown instead. */
 window.FT_BRANDS = [
-  { name: 'Benkan', logo: '' },
-  { name: 'Viraj', logo: '' },
-  { name: 'Maass Global Group', logo: '' },
-  { name: 'YC Inox', logo: '' },
-  { name: 'Valve-tek', logo: '' },
-  { name: 'S.A. Brand', logo: '' },
-  { name: 'Mega', logo: '' },
-  { name: 'Both-Well', logo: '' },
-  { name: 'Lintas', logo: '' }
+  { name: 'Benkan', logo: 'assets/brands/benkan.png' },
+  { name: 'Viraj', logo: 'assets/brands/viraj.png' },
+  { name: 'Maass Global Group', logo: 'assets/brands/maass.png' },
+  { name: 'YC Inox', logo: 'assets/brands/yc-inox.png' },
+  { name: 'Valve-tek', logo: 'assets/brands/valve-tek.png' },
+  { name: 'S.A. Brand', logo: 'assets/brands/sa-brand.png' },
+  { name: 'Mega', logo: 'assets/brands/mega.png' },
+  { name: 'Both-Well', logo: 'assets/brands/both-well.png' },
+  { name: 'Lintas', logo: 'assets/brands/lintas.png' }
 ];
