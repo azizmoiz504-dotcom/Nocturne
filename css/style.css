@@ -1076,3 +1076,19 @@ body.has-quote .fabs{bottom:88px}
 @media (max-width:1440px){.nav__links{display:none}.burger{display:block}.nav__call{margin-left:auto}}
 @media (min-width:1441px) and (max-width:1700px){.nav .nav__links a,.nav .nav__mega-btn{font-size:20px;padding:9px 8px}}
 @media (min-width:1701px){.nav .nav__links a,.nav .nav__mega-btn{font-size:21px;padding:9px 8px}}
+
+/* Quick view: bigger size, material, specs and how-to-buy text */
+.qv__size small,.qv__specs dt{font-size:19px}
+.qv__size b{font-size:25px}
+.qv__specs > div{grid-template-columns:170px 1fr;padding:15px 2px}
+.qv__specs dd{font-size:21px;line-height:1.35}
+.qv__specs .prow__chips span{font-size:17px;padding:4px 9px}
+@media (max-width:600px){
+  .qv__size small,.qv__specs dt{font-size:17px}
+  .qv__size b{font-size:22px}
+  .qv__specs > div{grid-template-columns:125px 1fr}
+  .qv__specs dd{font-size:19px}
+  .qv__specs .prow__chips span{font-size:16px}
+}
+.btile__mark img{width:82%;height:92px;max-width:none;max-height:none;object-fit:contain}
+@media (max-width:600px){.btile__mark img{width:88%;height:66px}}
