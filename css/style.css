@@ -1129,7 +1129,7 @@ body.has-quote .fabs{bottom:14px}
 .kr.is-on .kr__n{background:var(--red)}
 
 .kat{display:grid;grid-template-columns:290px minmax(0,1fr);gap:clamp(20px,2.5vw,36px);align-items:start}
-.kat-side{position:sticky;top:calc(var(--nav-h) + 24px);max-height:calc(100vh - var(--nav-h) - 40px);overflow:auto;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;padding-right:4px}
+.kat-side{position:sticky;top:calc(var(--nav-h) + 24px);display:flex;flex-direction:column;gap:14px}
 .kat-side__head,.kat-side__apply,.kat-side__close{display:none}
 .kat-side__head b{font-family:var(--f-display);font-size:28px;text-transform:uppercase}
 .kat-side__body{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line-dk);border-radius:20px;overflow:hidden}

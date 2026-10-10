@@ -592,19 +592,21 @@
     if (top < 0 || top > innerHeight * 0.6) scrollKat();
   });
 
+  const kOpenG = new Map();
+  $('#katFacets').addEventListener('click', e => { const sm = e.target.closest('summary'); if (sm) kOpenG.set(sm.parentNode.dataset.g, !sm.parentNode.open); });
   function facetsHTML() {
     const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mats), sc = countBy('specs', o => o.chips);
     const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
     let h = '';
     FAMS.forEach(f => {
       const cs = CATS.filter(c => c.fam === f.id);
-      const open = cs.some(c => kf.cats.has(c.slug)) || !kf.cats.size;
-      h += '<details class="kgroup"' + (open ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
+      const open = cs.some(c => kf.cats.has(c.slug));
+      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
         cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
     });
-    h += '<details class="kgroup" open><summary>Material</summary><div class="kgroup__list">' +
+    h += '<details class="kgroup" data-g="mat"' + (kOpenG.get('mat') === false ? '' : ' open') + '><summary>Material</summary><div class="kgroup__list">' +
       MAT_ORDER.filter(m => ALL.some(o => o.mats.includes(m))).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
-    h += '<details class="kgroup" open><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
+    h += '<details class="kgroup" data-g="spec"' + ((kOpenG.has('spec') ? kOpenG.get('spec') : kf.specs.size > 0) ? ' open' : '') + '><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
       SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
     return h;
   }
@@ -689,6 +691,17 @@
   let kT;
   $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = e.target.value.trim().toLowerCase().replace(/[<>&"]/g, ''); kf.limit = PAGE; renderKat(true); }, 140); });
   $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
+
+  // laptops: the filter column scrolls with the page and then sticks once its bottom is in view (no scroll box inside a scroll box)
+  const deskQ = matchMedia('(min-width: 1101px)');
+  function fitSide() {
+    if (!deskQ.matches) { kSide.style.top = ''; return; }
+    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 80;
+    const room = innerHeight - navH - 24;
+    kSide.style.top = (kSide.offsetHeight <= room ? navH + 24 : innerHeight - kSide.offsetHeight - 20) + 'px';
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(fitSide).observe(kSide);
+  addEventListener('resize', fitSide);
 
   // phones: filters slide up as a sheet
   const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); lenis && (on ? lenis.stop() : lenis.start()); };
