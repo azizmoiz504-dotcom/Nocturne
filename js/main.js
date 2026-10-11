@@ -707,7 +707,6 @@
   $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
 
   const megaBtn = $('#megaBtn');
-  $('#megaN').textContent = CATS.length;
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
   function closeMega() { nav.classList.remove('is-mega'); megaBtn.setAttribute('aria-expanded', 'false'); }
   // with a mouse the menu opens on hover and closes when the pointer leaves, so a click only opens it
@@ -872,18 +871,20 @@
     ScrollTrigger.refresh();
   }
 
+  // after a filter change the list gets shorter; if you were further down, go back to the top of the list so the results are in view
+  const toListTop = () => { if (!kSide.classList.contains('is-open') && $('.kat-main').getBoundingClientRect().top < navOff() - 20) scrollKat(); };
   $('#katFacets').addEventListener('change', e => {
     const t = e.target; if (!t.dataset.g) return;
     const had = document.activeElement === t, g = t.dataset.g, val = t.value;
     kf[g][t.checked ? 'add' : 'delete'](val);
-    kf.limit = PAGE; renderKat(true);
+    kf.limit = PAGE; renderKat(true); toListTop();
     // keyboard users keep their place in the filter list
     if (had) { const el = $$('#katFacets input[data-g="' + g + '"]').find(x => x.value === val); if (el) el.focus({ preventScroll: true }); }
   });
   $('#katFacets').addEventListener('click', e => {
     const b = e.target.closest('[data-spec]'); if (!b) return;
     const s = b.dataset.spec; kf.specs.has(s) ? kf.specs.delete(s) : kf.specs.add(s);
-    kf.limit = PAGE; renderKat(true);
+    kf.limit = PAGE; renderKat(true); toListTop();
   });
   // open one category in the product list (empty slug = all products) and bring the list into view
   function showCat(slug) {
@@ -894,13 +895,13 @@
     renderKat(true);
     afterShowroom(scrollKat);
   }
-  function clearKat() { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE; renderKat(true); }
+  function clearKat() { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE; renderKat(true); toListTop(); }
   $('#katReset').addEventListener('click', clearKat);
   $('#catalogue').addEventListener('click', e => {
     if (e.target.closest('[data-kclear]')) return clearKat();
     if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
     const p = e.target.closest('[data-pg]');
-    if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); }
+    if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); toListTop(); }
   });
   let kT;
   $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = e.target.value.trim().toLowerCase().replace(/[<>&"]/g, ''); kf.limit = PAGE; renderKat(true); }, 140); });

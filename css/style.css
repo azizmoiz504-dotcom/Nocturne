@@ -1458,3 +1458,6 @@ body.has-quote .fabs{bottom:14px}
 @media (max-width:430px){.qbar__thumbs{display:none}.qbar{padding-left:16px}}
 .kat-main,.kat-search,.kat-search input{min-width:0}
 .contact__info,.clock-card{min-width:0}@media (max-width:360px){.clock-card{gap:14px;padding-left:14px;padding-right:14px}.clock-face{width:80px;height:80px}}
+/* the WhatsApp symbol fills more of its green circle */
+.fab--wa svg{width:62px;height:62px}
+@media (max-width:600px){.fab--wa svg{width:56px;height:56px}}
