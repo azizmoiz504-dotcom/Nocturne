@@ -111,7 +111,8 @@
   }
   const coverOf = c => c.imgs[0] ? IMG + c.imgs[0] : '';
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
-  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|stainless/i], ['Carbon steel', /\bC\.S\b/], ['Cast iron', /\bC\.I\b/i], ['Galvanised', /\bG\.I\b/], ['Mild steel', /\bM\.S\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
+  // names are written both ways ("S.S" and "SS316L", "C.I" and "CI"); forged steel A105 is carbon steel
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
   function materialOf(name) {
     let best = null, at = 1e9;
     MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } });
