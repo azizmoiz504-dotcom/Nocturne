@@ -1461,3 +1461,8 @@ body.has-quote .fabs{bottom:14px}
 /* the WhatsApp symbol fills more of its green circle */
 .fab--wa svg{width:62px;height:62px}
 @media (max-width:600px){.fab--wa svg{width:56px;height:56px}}
+/* bigger product photos that still sit fully inside their white frame (also when they grow a little on hover) */
+.kc__media img{inset:4%;width:92%;height:92%}
+.kc:hover .kc__media img{transform:scale(1.04)}
+/* smaller "Quick view" tag on hover */
+.kc__peek{font-size:12.5px;letter-spacing:.12em;padding:5px 10px;bottom:10px}
