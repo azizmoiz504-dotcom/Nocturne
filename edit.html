@@ -68,9 +68,10 @@
 <div class="grid" id="grid"></div>
 <div class="toast" id="toast"></div>
 
-<script src="js/data.js"></script>
 <script>
-(() => {
+// always load the newest product list (never a copy the browser kept from an earlier visit)
+(() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => startEditor(); d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
+function startEditor() {
   const KEY = 'ft-editor-v1';
   const IMG = window.FT_IMG || '';
   // a fingerprint of the website's product list, so the editor notices when Claude adds products
@@ -101,6 +102,12 @@
           if (!state.base && !isNew && it[3]) return;
           mine.items.push([it[0], it[1].slice(), it[2], it[3]]); added++;
         });
+      });
+      // photos the website gained since (e.g. new product photos) fill any card of the same name that has none
+      window.FT_CATS.forEach(c => {
+        const mine = state.cats.find(x => x.slug === c.slug); if (!mine) return;
+        mine.items.forEach(it => { if (it[3]) return; const s = c.items.find(x => x[0] === it[0] && x[3]); if (s) { it[3] = s[3]; added++; } });
+        if (!mine.cover && c.cover) mine.cover = c.cover;
       });
       state.ver = VER; state.base = siteKeys();
     }
@@ -241,8 +248,8 @@
   };
   fillCats();
   render();
-  if (added) setTimeout(() => toast(added + ' new products from the website were added to your list'), 400);
-})();
+  if (added) setTimeout(() => toast(added + ' new products or photos from the website were added to your list'), 400);
+}
 </script>
 </body>
 </html>
