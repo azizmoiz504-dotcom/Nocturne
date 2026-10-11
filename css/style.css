@@ -1405,3 +1405,56 @@ body.has-quote .fabs{bottom:14px}
 @media (max-width:380px){.nav__util-in > a:first-child{display:none}}
 @media (max-width:560px){.toast{white-space:normal;border-radius:16px;width:max-content;max-width:calc(100vw - 28px);line-height:1.35;text-overflow:clip}}
 @media (max-width:420px){.lbl__x{display:none}}
+
+/* round 4: call/WhatsApp buttons 1.5x bigger */
+.fabs{gap:14px}
+.fab{width:99px;height:99px}
+.fab svg{width:46px;height:46px}
+.fab__tip{font-size:18px}
+.footer__base{padding-right:130px}
+@media (min-width:900px){.hero__hud{padding-right:130px}}
+@media (max-width:600px){
+  .fabs{gap:12px}
+  .fab{width:88px;height:88px}
+  .fab svg{width:42px;height:42px}
+  .footer__base{padding-right:106px}
+  .qbar{max-width:calc(100vw - 118px)}
+}
+
+/* round 4: logo 1.4x bigger; it shrinks only when the bar has no room left */
+:root{--nav-h:122px}
+.nav .nav__bar{height:104px}
+.nav.is-scrolled .nav__bar{height:90px}
+.brand{flex:0 1 auto;min-width:0}
+.brand__plate{min-width:0;max-width:100%}
+.brand__plate img,.nav.is-scrolled .brand__plate img{height:auto;max-width:100%;width:471px}
+.nav.is-scrolled .brand__plate img{width:415px}
+@media (max-width:1100px){
+  .nav .nav__bar{height:94px}
+  .nav.is-scrolled .nav__bar{height:86px}
+  .brand__plate img,.nav.is-scrolled .brand__plate img{width:397px}
+}
+@media (max-width:560px){
+  :root{--nav-h:100px}
+  .nav .nav__bar,.nav.is-scrolled .nav__bar{height:74px;padding:0 6px 0 12px;gap:8px}
+  .brand__plate img,.nav.is-scrolled .brand__plate img{width:285px}
+  .nav .rfq-btn{display:none}
+}
+/* the full link row needs room next to the bigger logo; below 1600px the menu button takes over */
+@media (max-width:1599px){.nav__links{display:none}.nav .burger{display:block}.nav__call{margin-left:auto}}
+/* laptops: a wider, shorter filter column so it fits on the screen and stays put while the products scroll */
+@media (min-width:1101px){
+  .kat{grid-template-columns:330px minmax(0,1fr)}
+  .kgroup summary{padding:14px 16px;font-size:21.5px;line-height:1.1}
+  .kat-side{gap:12px}
+}
+@media (min-width:1101px) and (max-height:860px){
+  .kat-help{padding:14px 16px}
+  .kat-help span{display:none}
+  .kat-help svg{grid-row:auto}
+}
+/* phones: the quote bar fits beside the bigger call/WhatsApp buttons */
+@media (max-width:600px){.qbar{gap:10px}.qbar__btn{padding:0 14px}}
+@media (max-width:430px){.qbar__thumbs{display:none}.qbar{padding-left:16px}}
+.kat-main,.kat-search,.kat-search input{min-width:0}
+.contact__info,.clock-card{min-width:0}@media (max-width:360px){.clock-card{gap:14px;padding-left:14px;padding-right:14px}.clock-face{width:80px;height:80px}}

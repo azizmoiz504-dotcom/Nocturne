@@ -382,12 +382,12 @@ window.FT_BRANDS = [
   { name: 'Mega', logo: 'assets/brands/mega.png' },
   { name: 'Both-Well', logo: 'assets/brands/both-well.png' },
   { name: 'Lintas', logo: 'assets/brands/lintas.png' },
-  // from mabrook-uae.com/our-brands (group company); logos still to come, shown as name tiles
-  { name: 'Bossini' },
+  // from mabrook-uae.com/our-brands (group company); logos linked from each brand's own website (name shown if a logo won't load)
+  { name: 'Bossini', logo: 'https://www.bossvalves.com/wp-content/uploads/2018/06/BOSSINI-LOGO.jpg' },
   { name: 'Froch' },
-  { name: 'Jazeera Steel' },
+  { name: 'Jazeera Steel', logo: 'https://jazeerasteel.com/images/logo.png' },
   { name: 'TA Chen' },
-  { name: 'Surya' },
+  { name: 'Surya', logo: 'https://suryasteel.net/assets/images/surya-steel/logo/surya-steel-logo.png' },
   { name: 'Pegler' },
   { name: 'SPI' },
   { name: '100 Tong' }
