@@ -771,7 +771,7 @@
     CATS.map(c => '<button class="kr" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
-    kf.cats.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
+    kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
     kf.limit = PAGE; renderKat(true);
     const top = $('.kat-main').getBoundingClientRect().top;
     if (top < 0 || top > innerHeight * 0.6) scrollKat();
@@ -811,7 +811,7 @@
     const one = fixedSize(o), on = one && rfq.has(keyOf(o, sizeSpec(o).v));
     return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
-        (o.mat !== 'Other' ? '<span class="kc__mat mono">' + (o.mats.length > 1 ? 'Carbon & stainless' : o.mat) + '</span>' : '') + (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
+        (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
         (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
@@ -876,14 +876,15 @@
   $('#katFacets').addEventListener('change', e => {
     const t = e.target; if (!t.dataset.g) return;
     const had = document.activeElement === t, g = t.dataset.g, val = t.value;
-    kf[g][t.checked ? 'add' : 'delete'](val);
+    // one filter at a time: ticking a new one clears the one before
+    if (t.checked) { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf[g].add(val); } else kf[g].delete(val);
     kf.limit = PAGE; renderKat(true); toListTop();
     // keyboard users keep their place in the filter list
     if (had) { const el = $$('#katFacets input[data-g="' + g + '"]').find(x => x.value === val); if (el) el.focus({ preventScroll: true }); }
   });
   $('#katFacets').addEventListener('click', e => {
     const b = e.target.closest('[data-spec]'); if (!b) return;
-    const s = b.dataset.spec; kf.specs.has(s) ? kf.specs.delete(s) : kf.specs.add(s);
+    const s = b.dataset.spec; if (kf.specs.has(s)) kf.specs.delete(s); else { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.specs.add(s); }
     kf.limit = PAGE; renderKat(true); toListTop();
   });
   // open one category in the product list (empty slug = all products) and bring the list into view

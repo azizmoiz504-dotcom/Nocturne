@@ -37,7 +37,7 @@
   .img.empty .hint { position:static; background:none; font-size:13px; font-weight:600; text-align:center; padding:6px 10px; }
   .img .hint { position:absolute; bottom:6px; background:rgba(255,255,255,.85); padding:0 6px; border-radius:6px; font-size:11px; color:var(--muted); }
   label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
-  .card input { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:8px; }
+  .card input, .card select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
   .row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
   .row button { flex:1; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:#f7f8fa; cursor:pointer; font-size:13px; }
   .row button:hover { background:#e8ecf0; }
@@ -60,7 +60,7 @@
 </header>
 <div class="help">
   <b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a card's picture, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
-  <b>Copy</b> makes a second card with the same details. Type straight into the boxes to change names, specs or sizes.
+  <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to the right category. Type straight into the boxes to change names, specs or sizes.
   When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done".
   Your work is kept in this browser if you close the page.
 </div>
@@ -140,7 +140,8 @@
         '<label>Specs (comma between each)</label><input data-f="1">' +
         '<label>Size range</label><input data-f="2">' +
         '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
-        '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>';
+        '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
+        '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + x.name + '</option>').join('') + '</select>';
       if (it[3]) d.querySelector('img').src = src(it[3]);
       else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
       const ins = d.querySelectorAll('input');
@@ -167,6 +168,18 @@
     if (a === 'cover') { change(() => { cat().cover = items[i][3]; }); toast('Main photo changed'); }
     if (a === 'pick') pickFile(i);
     if (a === 'del' && confirm('Delete "' + items[i][0] + '"?')) change(() => { items.splice(i, 1); sel = -1; });
+  });
+  // move a card to another section (it goes to the end of that section's list)
+  grid.addEventListener('change', e => {
+    if (!e.target.matches('[data-move]') || e.target.value === '') return;
+    const i = +e.target.closest('.card').dataset.i, to = state.cats[+e.target.value], c = cat(), it = c.items[i];
+    change(() => {
+      c.items.splice(i, 1);
+      if (c.cover && c.cover === it[3]) c.cover = (c.items.find(x => x[3]) || [])[3] || '';
+      to.items.push(it); sel = -1;
+    });
+    fillCats();
+    toast('Moved "' + it[0] + '" to ' + to.name);
   });
   function select(i, rerender) { sel = i; if (rerender) render(); else document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); }
 
