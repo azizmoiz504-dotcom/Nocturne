@@ -666,13 +666,13 @@
   const closeDrawer = hardCloseShowroom;
   window.addEventListener('popstate', () => {
     const m = location.hash.match(/^#products\/(.+)$/);
-    const i = m ? CATS.findIndex(c => c.slug === m[1]) : -1;
-    if (i > -1) openShowroom(i, null, false); else doCloseShowroom();
+    if (m && catBySlug(m[1])) showCat(m[1]); else doCloseShowroom();
   });
-  const openBySlug = (slug, srcEl) => { const i = CATS.findIndex(c => c.slug === slug); if (i > -1) openShowroom(i, srcEl); };
+  // every category link (top menu, footer, old #products/<slug> links) opens that category in the one product list on the page
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-cat]');
-    if (b) { e.preventDefault(); closeQV(); openBySlug(b.dataset.cat, b.classList.contains('card') ? b : null); }
+    if (!b || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault(); closeQV(); showCat(b.dataset.cat);
   });
   function closeTop() {
     if (qv.classList.contains('is-open')) return closeQV();
@@ -704,7 +704,7 @@
       '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
   // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
-  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html">' + c.name + '</a>').join('') + '<a href="products/index.html"><b>All product pages</b></a>';
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
 
   const megaBtn = $('#megaBtn');
   $('#megaN').textContent = CATS.length;
@@ -713,8 +713,10 @@
   // with a mouse the menu opens on hover and closes when the pointer leaves, so a click only opens it
   megaBtn.addEventListener('click', () => nav.classList.contains('is-mega') && !fine ? closeMega() : openMega());
   if (fine) {
-    megaBtn.addEventListener('mouseenter', openMega);
-    nav.addEventListener('mouseleave', closeMega);
+    let megaT;
+    megaBtn.addEventListener('mouseenter', () => { clearTimeout(megaT); openMega(); });
+    nav.addEventListener('mouseenter', () => clearTimeout(megaT));
+    nav.addEventListener('mouseleave', () => { clearTimeout(megaT); megaT = setTimeout(closeMega, 400); });
   }
 
   /* ---------------- Mobile menu ---------------- */
@@ -749,7 +751,8 @@
   const SPECS = [...specFreq].filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]).slice(0, 16).map(([s]) => s);
   const SPEC_LABEL = { 'F/T': 'Flanged (F/T)', SW: 'Socket weld (SW)', BW: 'Butt weld (BW)', NPT: 'NPT thread', BSPT: 'BSPT thread' };
   const PAGE = 24;
-  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el, { offset: -96, duration: 1.2 }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 96, behavior: 'smooth' }); };
+  const navOff = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 100) + 8;
+  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el, { offset: -navOff(), duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navOff(), behavior: 'smooth' }); };
   const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
   const kGrid = $('#katGrid'), kSide = $('#katSide');
   const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + o.name + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
@@ -776,7 +779,13 @@
   });
 
   const kOpenG = new Map();
-  $('#katFacets').addEventListener('click', e => { const sm = e.target.closest('summary'); if (sm) kOpenG.set(sm.parentNode.dataset.g, !sm.parentNode.open); });
+  // one filter group open at a time on laptops, so the filter column stays short and never has to scroll on its own
+  $('#katFacets').addEventListener('click', e => {
+    const sm = e.target.closest('summary'); if (!sm) return;
+    const d = sm.parentNode, opening = !d.open;
+    kOpenG.set(d.dataset.g, opening);
+    if (opening && deskQ.matches) $$('#katFacets details[open]').forEach(x => { if (x !== d) { x.open = false; kOpenG.set(x.dataset.g, false); } });
+  });
   function facetsHTML() {
     const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mats), sc = countBy('specs', o => o.chips);
     const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
@@ -787,7 +796,7 @@
       h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
         cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
     });
-    h += '<details class="kgroup" data-g="mat"' + (kOpenG.get('mat') === false ? '' : ' open') + '><summary>Material</summary><div class="kgroup__list">' +
+    h += '<details class="kgroup" data-g="mat"' + ((kOpenG.has('mat') ? kOpenG.get('mat') : kf.mats.size > 0) ? ' open' : '') + '><summary>Material</summary><div class="kgroup__list">' +
       MAT_ORDER.filter(m => ALL.some(o => o.mats.includes(m))).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
     h += '<details class="kgroup" data-g="spec"' + ((kOpenG.has('spec') ? kOpenG.get('spec') : kf.specs.size > 0) ? ' open' : '') + '><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
       SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
@@ -847,10 +856,8 @@
     kf.mats.forEach(m => pills.push(['mats', m, m]));
     kf.specs.forEach(s => pills.push(['specs', s, SPEC_LABEL[s] || s]));
     if (kf.q) pills.push(['q', '', '“' + kf.q + '”']);
-    const one = kf.cats.size === 1 ? catBySlug([...kf.cats][0]) : null;
     $('#katActive').innerHTML = pills.map(p => '<button class="kpill" data-pg="' + p[0] + '" data-pv="' + esc(p[1]) + '">' + esc(p[2]) + '<span aria-hidden="true">×</span></button>').join('') +
-      (pills.length > 1 ? '<button class="kpill kpill--clear mono" data-kclear>Clear all</button>' : '') +
-      (one ? '<button class="kpill kpill--open" data-cat="' + one.slug + '">Open the ' + one.name + ' showroom <svg><use href="#arrow"/></svg></button>' : '');
+      (pills.length > 1 ? '<button class="kpill kpill--clear mono" data-kclear>Clear all</button>' : '');
     const nf = kf.cats.size + kf.mats.size + kf.specs.size;
     const fn = $('#katFilterN'); fn.hidden = !nf; fn.textContent = nf;
     $$('.kr', $('#katRail')).forEach(b => b.classList.toggle('is-on', kf.cats.size ? kf.cats.size === 1 && kf.cats.has(b.dataset.pick) : !b.dataset.pick));
@@ -878,6 +885,15 @@
     const s = b.dataset.spec; kf.specs.has(s) ? kf.specs.delete(s) : kf.specs.add(s);
     kf.limit = PAGE; renderKat(true);
   });
+  // open one category in the product list (empty slug = all products) and bring the list into view
+  function showCat(slug) {
+    closeMega(); closeMenu();
+    kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE;
+    if (slug && catBySlug(slug)) kf.cats.add(slug);
+    kOpenG.clear();
+    renderKat(true);
+    afterShowroom(scrollKat);
+  }
   function clearKat() { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE; renderKat(true); }
   $('#katReset').addEventListener('click', clearKat);
   $('#catalogue').addEventListener('click', e => {
@@ -902,7 +918,8 @@
   addEventListener('resize', fitSide);
 
   // phones: filters slide up as a sheet
-  const kOpen = on => { kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
+  // the phone sheet scrolls on its own; on laptops the wheel always scrolls the page smoothly, even over the filters
+  const kOpen = on => { kSide.toggleAttribute('data-lenis-prevent', on); kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
   $('#katFilterBtn').addEventListener('click', () => kOpen(true));
   $('#katSideClose').addEventListener('click', () => kOpen(false));
   $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });
@@ -933,12 +950,21 @@
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
     '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
-      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" decoding="async">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
+      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
       '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
     '</button>').join('') +
     '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
       '<span class="btile__mark"><span class="btile__word is-long">Ask for your brand</span></span>' +
       '<span class="btile__foot"><span class="mono">On WhatsApp</span><b>Ask now <svg><use href="#arrow"/></svg></b></span></a>';
+  // a logo that will not load (moved or blocked by its website) falls back to the brand name
+  $$('#brandsGrid .btile__mark img').forEach(img => {
+    const toWord = () => {
+      const t = img.closest('.btile'), n = t.dataset.brand;
+      img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + n.replace(/-/g, '‑') + '</span>';
+      $('.btile__foot .mono', t).textContent = 'Brand';
+    };
+    if (img.complete && !img.naturalWidth) toWord(); else img.addEventListener('error', toWord, { once: true });
+  });
   applyLinks($('#brandsGrid'));
   $('#brandsGrid').addEventListener('click', e => {
     const t = e.target.closest('[data-brand]'); if (!t) return;
@@ -1269,8 +1295,7 @@
   runLoader();
   const deep = location.hash.match(/^#products\/(.+)$/);
   if (deep) {
-    const di = CATS.findIndex(c => c.slug === deep[1]);
-    if (di > -1) setTimeout(() => openShowroom(di, null, false), reduce ? 0 : 4100);
+    if (catBySlug(deep[1])) setTimeout(() => showCat(deep[1]), reduce ? 0 : 4100);
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
   fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });
