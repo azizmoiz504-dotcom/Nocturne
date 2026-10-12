@@ -1469,3 +1469,8 @@ body.has-quote .fabs{bottom:14px}
 
 /* SEO: the descriptive line under the slogan is the page's main heading (h1); both keep their original look */
 h1.hero__sub{font-weight:400}
+
+/* SEO: plain links to the service and guide pages in the footer */
+.footer__h-gap{margin-top:28px}
+#footGuides a{display:block;color:var(--steel-2);font-size:18.5px;padding:4px 0}
+#footGuides a:hover{color:#fff}

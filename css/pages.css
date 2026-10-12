@@ -109,3 +109,7 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 .faq details{background:#fff;border:1px solid var(--line);border-radius:16px;margin-top:10px}
 .faq summary{cursor:pointer;padding:16px 20px;font-weight:600;list-style-position:outside}
 .faq details p{padding:0 20px 18px;color:#26323d}
+
+/* Long words in headings wrap on small phones */
+.hero h1,.cat b{overflow-wrap:break-word;hyphens:auto}
+.cats > *{min-width:0}
