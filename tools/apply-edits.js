@@ -25,7 +25,7 @@ for (const e of edits.cats) {
   if (!c) throw new Error('Unknown category ' + e.slug);
   // optional 5th field: the material the owner picked in the editor (empty = read from the name)
   const MAT_OK = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
-  c.items = e.items.map(it => { const row = [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]; if (it[4] && MAT_OK.includes(it[4])) row.push(it[4]); return row; });
+  c.items = e.items.map(it => { const row = [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]; const m = typeof it[4] === 'string' ? (MAT_OK.find(x => x.toLowerCase() === it[4].trim().toLowerCase()) || it[4].replace(/[<>"&`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40)) : ''; if (m) row.push(m); return row; });
   if (typeof e.name === 'string' && e.name.trim()) c.name = e.name.trim();
   c.cover = photo(e.cover);
   if (!/^[a-z0-9-]+$/.test(c.slug)) throw new Error('Bad slug ' + c.slug);

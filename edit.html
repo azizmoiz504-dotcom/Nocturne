@@ -76,7 +76,7 @@
   <summary>How to use the editor</summary>
   <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
   <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
-  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website.</p>
+  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own.</p>
   <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
   When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done". Your work is kept in this browser if you close the page.</p>
 </details>
@@ -174,6 +174,7 @@ function startEditor() {
     const g = $('#grid'); g.innerHTML = '';
     c.items.forEach((it, i) => {
       const d = document.createElement('div');
+      const own = !!it[4] && (it[4] === 'Other' || !MAT_LIST.includes(it[4]));
       d.className = 'card' + (i === sel ? ' sel' : ''); d.draggable = true; d.dataset.i = i;
       d.innerHTML =
         '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] && it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
@@ -181,7 +182,8 @@ function startEditor() {
         '<label>Name</label><input data-f="0">' +
         '<label>Specs (comma between each)</label><input data-f="1">' +
         '<label>Size range</label><input data-f="2">' +
-        '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
+        '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => m === 'Other' ? '<option value="Other"' + (own ? ' selected' : '') + '>Other: type your own…</option>' : '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
+        '<input data-matown placeholder="Type the material, e.g. Copper" maxlength="40"' + (own ? '' : ' hidden') + '>' +
         '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
         '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
         '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
@@ -189,6 +191,7 @@ function startEditor() {
       else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
       const ins = d.querySelectorAll('input');
       ins[0].value = it[0]; ins[1].value = it[1].join(', '); ins[2].value = it[2];
+      if (own && it[4] !== 'Other') d.querySelector('[data-matown]').value = it[4];
       g.appendChild(d);
     });
   }
@@ -198,6 +201,7 @@ function startEditor() {
   // a card can't be dragged while you press inside a box or dropdown (dragging stole the click before)
   grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, select, button'); });
   grid.addEventListener('input', e => {
+    if (e.target.matches('[data-matown]')) { const it = cat().items[+e.target.closest('.card').dataset.i]; it[4] = e.target.value.trim() || 'Other'; state.dirty = true; persist(); return; }
     const f = e.target.dataset.f; if (f === undefined) return;
     const it = cat().items[+e.target.closest('.card').dataset.i];
     it[+f] = f === '1' ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : e.target.value;
@@ -218,9 +222,12 @@ function startEditor() {
   // move a card to another section (it goes to the end of that section's list)
   grid.addEventListener('change', e => {
     if (e.target.matches('[data-mat]')) {
-      const it = cat().items[+e.target.closest('.card').dataset.i], v = e.target.value;
+      const card = e.target.closest('.card'), it = cat().items[+card.dataset.i], v = e.target.value, box = card.querySelector('[data-matown]');
       snap(); if (v) it[4] = v; else it.length = 4; state.dirty = true; persist();
-      toast(v ? 'Material set to ' + v : 'Material back to automatic'); return;
+      box.hidden = v !== 'Other';
+      if (v === 'Other') { box.value = ''; box.focus(); toast('Type the material in the box'); }
+      else toast(v ? 'Material set to ' + v : 'Material back to automatic');
+      return;
     }
     if (!e.target.matches('[data-move]') || e.target.value === '') return;
     const i = +e.target.closest('.card').dataset.i, to = state.cats[+e.target.value], c = cat(), it = c.items[i];
