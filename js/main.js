@@ -468,7 +468,7 @@
     pk.innerHTML = pickerHTML(o, o.pick !== null ? o.pick : (sp.t === 'one' ? sp.v : ''));
     tidyPair(pk, o);
     $('#qvSpecs').innerHTML =
-      '<div><dt class="mono">Material</dt><dd>' + (mat || 'See specification') + '</dd></div>' +
+      '<div><dt class="mono">Material</dt><dd>' + (mat ? esc(mat) : 'See specification') + '</dd></div>' +
       '<div><dt class="mono">Specs & ratings</dt><dd>' + (o.chips.length ? chipsHTML(o.chips) : 'Standard') + '</dd></div>' +
       '<div><dt class="mono">How to buy</dt><dd>Pick the size, add it to your quote, then send by WhatsApp or email — or call the counter</dd></div>';
     $('#qvQty').value = (o.pick !== null && rfq.get(key)) || 1;
@@ -773,13 +773,18 @@
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = matOf(o) || 'Other';
-    o.mats = o.matSet ? o.matSet.split(' & ') : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
+    o.mats = o.matSet ? (o.matSet === 'Carbon steel & Stainless' ? ['Carbon steel', 'Stainless'] : [o.matSet]) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
   $('#search').placeholder = 'Search ' + ALL.length + ' products' + (innerWidth > 700 ? ': try "camlock", "CL150" or "316L"' : '');
   const MAT_ORDER = ['Stainless', 'Carbon steel', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  // materials the owner typed in the editor get their own filter line, just above "Other"
+  const matList = () => {
+    const used = new Set(ALL.flatMap(o => o.mats)), own = [...used].filter(m => !MAT_ORDER.includes(m)).sort();
+    return MAT_ORDER.filter(m => m !== 'Other' && used.has(m)).concat(own, used.has('Other') ? ['Other'] : []);
+  };
   const specFreq = new Map();
   ALL.forEach(o => o.chips.forEach(s => specFreq.set(s, (specFreq.get(s) || 0) + 1)));
   const SPECS = [...specFreq].filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]).slice(0, 16).map(([s]) => s);
@@ -834,7 +839,7 @@
         cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
     });
     h += '<details class="kgroup" data-g="mat"' + ((kOpenG.has('mat') ? kOpenG.get('mat') : kf.mats.size > 0) ? ' open' : '') + '><summary>Material</summary><div class="kgroup__list">' +
-      MAT_ORDER.filter(m => ALL.some(o => o.mats.includes(m))).map(m => box('mats', m, m, mc.get(m))).join('') + '</div></details>';
+      matList().map(m => box('mats', m, esc(m), mc.get(m))).join('') + '</div></details>';
     h += '<details class="kgroup" data-g="spec"' + ((kOpenG.has('spec') ? kOpenG.get('spec') : kf.specs.size > 0) ? ' open' : '') + '><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
       SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
     return h;
