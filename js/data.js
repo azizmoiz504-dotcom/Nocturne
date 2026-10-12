@@ -111,7 +111,7 @@ window.FT_CATS = [
       ['Millar Coupling', [], '3" – 8"', 'quick-couplings/edit-mv2ejntv.jpg'],
       ['Aluminium Storz Coupling', [], '1½" – 4"', 'quick-couplings/edit-mv45df09.jpg'],
       ['SS Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv45141g.jpg'],
-      ['Brass Camlock Coupling', ['NPT', 'BSPT'], '½" – 6"', ''],
+      ['Brass Camlock Coupling', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv44lj6l.jpg'],
       ['Aluminum Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv2ekofo.jpg'],
       ['PVC Camlock Coupling', ['NPT', 'BSPT'], '1" - 3"', 'quick-couplings/edit-mv44y1xi.jpg'],
       ['Aluminum Reducing Camlock Coupling', [], '2" - 4"', 'quick-couplings/9.jpg'],
