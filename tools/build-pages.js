@@ -93,7 +93,8 @@ function catPage(c, idx) {
       (s.faq && s.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + s.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>').join('') + '</section>' : '') +
       '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
         '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I am looking for this part (' + c.name + '): ') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
-      '<section class="more"><h2>More products</h2><div class="more__list">' + others.map(o => '<a href="' + o.slug + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
+      '<section class="more"><h2>More products</h2><div class="more__list">' + others.map(o => '<a href="' + o.slug + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div>' +
+        (PAGES.length ? '<h2 class="more__h">Services &amp; guides</h2><div class="more__list">' + PAGES.filter(pg => !pg.path.startsWith('products/')).map(pg => '<a href="../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join('') + '</div>' : '') + '</section>' +
     '</div>';
   const title = s.title || fit(c.name + ' in Al Quoz, Dubai | Fakhri Tools', c.name + ' Dubai | Fakhri Tools', c.name + ' | Fakhri Tools');
   const desc = s.desc || cut(c.name + ' at our trade counter in Al Quoz Industrial Area 3, Dubai. ' + c.desc + ' Get a quote on WhatsApp.', 155);
@@ -125,10 +126,44 @@ function hubPage() {
     canon: 'products/index.html', body, ld, depth: 1 });
 }
 
+// Extra pages from tools/seo-content.json "_pages": services, guides, hubs, delivery and contact.
+// Same look as the category pages; text is written in that file, never generated.
+const PAGES = SEO._pages || [];
+function extraPage(pg) {
+  const depth = pg.path.includes('/') ? 1 : 0, up = depth ? '../' : '';
+  const table = tb => '<div class="tbl"><table>' + (tb.caption ? '<caption>' + esc(tb.caption) + '</caption>' : '') +
+    '<thead><tr>' + tb.head.map(h => '<th scope="col">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' +
+    tb.rows.map(r => '<tr>' + r.map((c, i) => i ? '<td>' + esc(c) + '</td>' : '<th scope="row">' + esc(c) + '</th>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const cats = (pg.cats || []).map(s => CATS.find(c => c.slug === s)).filter(Boolean);
+  const body = '<div class="wrap">' +
+    '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + up + 'index.html">Home</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
+    '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + esc(pg.h1) + '</h1>' +
+      (pg.lead ? '<p class="lead">' + esc(pg.lead) + '</p>' : '') + '</header>' +
+    (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + esc(s.h2) + '</h2>' : '') +
+      (s.p || []).map(x => '<p>' + esc(x) + '</p>').join('') +
+      (s.list && s.list.length ? '<ul>' + s.list.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
+      (s.table ? table(s.table) : '') + '</section>').join('') +
+    (cats.length ? '<section class="fam"><h2>' + esc(pg.catsTitle || 'Shop these categories') + '</h2><div class="cats">' + cats.map(c =>
+      '<a class="cat" href="' + up + 'products/' + c.slug + '.html"><span class="cat__img">' + (c.cover ? '<img src="' + up + IMG + c.cover + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') + '</div></section>' : '') +
+    (pg.faq && pg.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + pg.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>').join('') + '</section>' : '') +
+    '<section class="ask"><div><h2>' + esc(pg.askTitle || 'Send us your list') + '</h2><p>Sizes, rating, end connection and quantity. We reply with stock and a price.</p></div>' +
+      '<a class="btn btn--wa" href="' + wa(pg.wa || 'Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
+    '<section class="more"><h2>Products</h2><div class="more__list">' + CATS.map(o => '<a href="' + up + 'products/' + o.slug + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
+    '</div>';
+  const ld = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: pg.crumb || pg.h1, item: SITE + pg.path }] },
+    STORE] };
+  return shell({ title: pg.title, desc: pg.desc, canon: pg.path, body, ld, depth });
+}
+
 fs.mkdirSync('products', { recursive: true });
 for (const f of fs.readdirSync('products')) if (f.endsWith('.html')) fs.unlinkSync(path.join('products', f));
 CATS.forEach((c, i) => fs.writeFileSync(path.join('products', c.slug + '.html'), catPage(c, i)));
 fs.writeFileSync(path.join('products', 'index.html'), hubPage());
+for (const dir of ['services', 'guides']) if (fs.existsSync(dir)) for (const f of fs.readdirSync(dir)) if (f.endsWith('.html')) fs.unlinkSync(path.join(dir, f));
+for (const pg of PAGES) { fs.mkdirSync(path.dirname(pg.path), { recursive: true }); fs.writeFileSync(pg.path, extraPage(pg)); }
 
 // 404 page: GitHub Pages shows it for any missing address, so its links start from the site root.
 fs.writeFileSync('404.html', shell({ title: 'Page not found | Fakhri Tools', desc: 'This page could not be found.', canon: null, ld: null, noindex: true, abs: true,
@@ -137,7 +172,7 @@ fs.writeFileSync('404.html', shell({ title: 'Page not found | Fakhri Tools', des
     '<section class="more"><h2>Products</h2><div class="more__list">' + CATS.map(o => '<a href="' + SITE + 'products/' + o.slug + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section></div>' }));
 
 // Sitemap and robots: only real pages. Helper pages (edit, photo pickers) and 404 stay out.
-const urls = ['', 'products/index.html', ...CATS.map(c => 'products/' + c.slug + '.html')];
+const urls = ['', 'products/index.html', ...CATS.map(c => 'products/' + c.slug + '.html'), ...PAGES.map(pg => pg.path)];
 fs.writeFileSync('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc></url>').join('\n') + '\n</urlset>\n');
 fs.writeFileSync('robots.txt', 'User-agent: *\nAllow: /\n\nSitemap: ' + SITE + 'sitemap.xml\n');
@@ -146,6 +181,7 @@ fs.writeFileSync('robots.txt', 'User-agent: *\nAllow: /\n\nSitemap: ' + SITE + '
 const between = (html, a, b, inner) => {
   const i = html.indexOf(a), j = html.indexOf(b, i + a.length);
   if (i < 0 || j < 0) throw new Error('index.html is missing the marker ' + a);
+  // (markers: <!-- seo:head -->, <!-- seo:ld -->, <div id="footCats">, <div id="footGuides">)
   return html.slice(0, i + a.length) + inner + html.slice(j);
 };
 let home = fs.readFileSync('index.html', 'utf8');
@@ -155,6 +191,7 @@ home = between(home, '<!-- seo:ld -->', '<!-- /seo:ld -->', '<script type="appli
 home = between(home, '<!-- seo:head -->', '<!-- /seo:head -->',
   '<meta name="robots" content="' + (INDEX ? 'index, follow' : 'noindex, nofollow') + '">\n<link rel="canonical" href="' + SITE + '">\n<meta property="og:url" content="' + SITE + '">\n');
 home = between(home, '<div id="footCats">', '</div>', CATS.map(c => '<a href="products/' + c.slug + '.html" data-cat="' + c.slug + '">' + esc(c.name) + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>');
+if (home.includes('<div id="footGuides">')) home = between(home, '<div id="footGuides">', '</div>', PAGES.filter(pg => !pg.path.startsWith('products/')).map(pg => '<a href="' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join(''));
 fs.writeFileSync('index.html', home);
 
 console.log('Built', CATS.length, 'category pages + products/index.html (' + total + ' products), 404.html, sitemap.xml (' + urls.length + ' URLs), robots.txt, index.html store details');
