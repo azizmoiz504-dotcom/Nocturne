@@ -1264,6 +1264,11 @@
   }
 
   /* ---------------- Loader ---------------- */
+  // The intro plays at 3x speed (about 1.3 s) and only on the first page view of a visit,
+  // so buyers reach the products fast and Google measures a quick page.
+  const LOADER_SPEED = 3;
+  let loaderSeen = false;
+  try { loaderSeen = sessionStorage.getItem('ft-intro') === '1'; sessionStorage.setItem('ft-intro', '1'); } catch (e) {}
   function runLoader() {
     const L = $('#loader');
     const finish = () => {
@@ -1272,11 +1277,11 @@
       lenis && lenis.start();
       ScrollTrigger.refresh();
     };
-    if (reduce || !L) { heroIntro(); finish(); return; }
+    if (reduce || !L || loaderSeen) { heroIntro(); finish(); return; }
     lenis && lenis.stop();
     const num = $('#loaderNum'), bar = $('#loaderBar');
     const o = { v: 0 };
-    gsap.timeline()
+    gsap.timeline().timeScale(LOADER_SPEED)
       .from('.loader__mark', { scale: 0.4, rotate: -45, opacity: 0, duration: 1.3, ease: 'expo.out' }, 0)
       .to(o, { v: 100, duration: 2.3, ease: 'power2.inOut', onUpdate: () => {
         num.textContent = String(Math.round(o.v)).padStart(3, '0');
@@ -1298,7 +1303,7 @@
   runLoader();
   const deep = location.hash.match(/^#products\/(.+)$/);
   if (deep) {
-    if (catBySlug(deep[1])) setTimeout(() => showCat(deep[1]), reduce ? 0 : 4100);
+    if (catBySlug(deep[1])) setTimeout(() => showCat(deep[1]), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
   fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });

@@ -1466,3 +1466,6 @@ body.has-quote .fabs{bottom:14px}
 .kc:hover .kc__media img{transform:scale(1.04)}
 /* smaller "Quick view" tag on hover */
 .kc__peek{font-size:12.5px;letter-spacing:.12em;padding:5px 10px;bottom:10px}
+
+/* SEO: the descriptive line under the slogan is the page's main heading (h1); both keep their original look */
+h1.hero__sub{font-weight:400}
