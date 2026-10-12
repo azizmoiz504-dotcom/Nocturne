@@ -23,7 +23,10 @@ for (const e of edits.cats) {
   let c = W.FT_CATS.find(c => c.slug === e.slug);
   if (!c && e.name && e.fam && W.FT_FAMILIES.some(f => f.id === e.fam)) W.FT_CATS.push(c = { slug: e.slug, name: e.name, fam: e.fam, desc: e.desc || '' });
   if (!c) throw new Error('Unknown category ' + e.slug);
-  c.items = e.items.map(it => [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]);
+  // optional 5th field: the material the owner picked in the editor (empty = read from the name)
+  const MAT_OK = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  c.items = e.items.map(it => { const row = [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]; if (it[4] && MAT_OK.includes(it[4])) row.push(it[4]); return row; });
+  if (typeof e.name === 'string' && e.name.trim()) c.name = e.name.trim();
   c.cover = photo(e.cover);
   if (!/^[a-z0-9-]+$/.test(c.slug)) throw new Error('Bad slug ' + c.slug);
   for (const p of [c.cover, ...c.items.map(it => it[3])]) if (p && !fs.existsSync(path.join('assets/products', p))) throw new Error('Missing photo ' + p);
@@ -38,7 +41,7 @@ out += 'window.FT_CATS = [\n' + W.FT_CATS.map(c =>
   '  { slug: ' + q(c.slug) + ', name: ' + q(c.name) + ', fam: ' + q(c.fam) + ',\n' +
   '    desc: ' + q(c.desc) + ',\n' +
   '    cover: ' + q(c.cover) + ',\n' +
-  '    items: [\n' + c.items.map(it => '      [' + q(it[0]) + ', [' + it[1].map(q).join(', ') + '], ' + q(it[2]) + ', ' + q(it[3]) + ']').join(',\n') + '\n    ] }').join(',\n') + '\n];\n\n';
+  '    items: [\n' + c.items.map(it => '      [' + q(it[0]) + ', [' + it[1].map(q).join(', ') + '], ' + q(it[2]) + ', ' + q(it[3]) + (it[4] ? ', ' + q(it[4]) : '') + ']').join(',\n') + '\n    ] }').join(',\n') + '\n];\n\n';
 out += src.slice(src.indexOf('/* Oilfield brands'));
 fs.writeFileSync('js/data.js', out);
 fs.writeFileSync('index.html', fs.readFileSync('index.html', 'utf8').replace(/\d+ products\.<br>\d+ categories\./, total + ' products.<br>' + W.FT_CATS.length + ' categories.'));

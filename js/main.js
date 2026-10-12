@@ -113,7 +113,7 @@
     const c = catBySlug(slug);
     if (!c || !c.items[+i]) return null;
     const it = c.items[+i], id = slug + ':' + (+i);
-    return { id, c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '', pick: bar < 0 ? null : k.slice(bar + 1) };
+    return { id, c, i: +i, name: it[0], chips: it[1], size: it[2], img: it[3] ? IMG + it[3] : '', matSet: it[4] || '', pick: bar < 0 ? null : k.slice(bar + 1) };
   }
   const coverOf = c => c.imgs[0] ? IMG + c.imgs[0] : '';
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
@@ -124,6 +124,8 @@
     MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } });
     return best;
   }
+  // the material the owner set in the editor wins; otherwise it is read from the name
+  const matOf = o => o.matSet || materialOf(o.name);
   const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + s + '</span>').join('') + '</div>' : '';
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
@@ -456,7 +458,7 @@
   function fillQV(key) {
     const o = itemOf(key); if (!o) return;
     qvId = o.id;
-    const mat = materialOf(o.name), sp = sizeSpec(o);
+    const mat = matOf(o), sp = sizeSpec(o);
     $('#qvMedia').innerHTML = imgTag(o.img, o.name);
     $('#qvCat').textContent = famName(o.c.fam) + ' / ' + o.c.name;
     $('#qvName').textContent = o.name;
@@ -770,8 +772,8 @@
   const ALL = [];
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
-    o.mat = materialOf(o.name) || 'Other';
-    o.mats = /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
+    o.mat = matOf(o) || 'Other';
+    o.mats = o.matSet ? o.matSet.split(' & ') : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);

@@ -6,51 +6,65 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Product Editor</title>
 <style>
-  :root { --ink:#0d1b26; --red:#c41e24; --line:#d9dee3; --bg:#eef1f4; --muted:#5c6b78; }
+  :root { --ink:#0d1b26; --red:#c41e24; --line:#d3d9df; --bg:#eef1f4; --muted:#56636f; --soft:#f5f7f9; }
   * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
-  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:12px 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  header h1 { font-size:17px; margin:0 12px 0 0; }
-  select, button, input { font:inherit; }
-  header select { padding:7px 10px; border-radius:8px; border:0; max-width:100%; }
-  .btn { border:0; border-radius:999px; padding:8px 14px; cursor:pointer; background:#fff; color:var(--ink); font-weight:600; }
+  body { margin:0; font:18px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  select, button, input { font:inherit; color:inherit; }
+  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:14px 22px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
+  header h1 { font-size:22px; margin:0 10px 0 0; letter-spacing:.01em; }
+  header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 460px; min-width:220px; max-width:100%; font-size:19px; font-weight:600; color:var(--ink); background:#fff; }
+  .btn { border:0; border-radius:999px; padding:11px 20px; cursor:pointer; background:#fff; color:var(--ink); font-weight:700; font-size:17px; }
   .btn.red { background:var(--red); color:#fff; }
-  .btn.ghost { background:transparent; color:inherit; border:1px solid currentColor; }
+  .btn.ghost { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.6); }
+  .btn:hover { filter:brightness(1.08); }
   .spacer { flex:1; }
-  .help { background:#fff; border-bottom:1px solid var(--line); padding:10px 16px; color:var(--muted); font-size:14px; }
-  .help b { color:var(--ink); }
-  .cover { display:flex; align-items:center; gap:14px; padding:14px 16px 0; }
-  .cover img { width:84px; height:84px; object-fit:contain; background:#fff; border-radius:50%; border:3px solid var(--red); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:14px; padding:14px 16px 90px; }
-  .card { background:#fff; border:2px solid transparent; border-radius:14px; padding:10px; display:flex; flex-direction:column; gap:6px; cursor:grab; position:relative; }
+  .count { font-size:16px; opacity:.85; }
+  details.help { background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; color:var(--muted); font-size:17px; }
+  details.help summary { cursor:pointer; color:var(--ink); font-weight:700; }
+  details.help b { color:var(--ink); }
+  details.help p { margin:8px 0 0; }
+  .catbox { margin:18px 22px 0; background:#fff; border-radius:18px; padding:18px; display:flex; flex-wrap:wrap; gap:20px; align-items:center; border:2px solid transparent; }
+  .catbox.sel { border-color:var(--red); }
+  .catbox .ph { width:130px; height:130px; flex:none; border-radius:50%; background:var(--soft); border:3px solid var(--red); display:grid; place-items:center; overflow:hidden; position:relative; cursor:pointer; }
+  .catbox .ph img { max-width:86%; max-height:86%; object-fit:contain; }
+  .catbox .ph.drop { outline:4px dashed var(--red); outline-offset:4px; }
+  .catbox .ph span { font-size:14px; color:var(--muted); text-align:center; padding:10px; }
+  .catbox .fields { flex:1; min-width:260px; display:flex; flex-direction:column; gap:8px; }
+  .catbox input { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:22px; font-weight:700; }
+  .catbox .row { margin-top:4px; }
+  .catbox .row button { flex:0 1 auto; padding:10px 16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:18px 22px 110px; }
+  .card { background:#fff; border:2px solid transparent; border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:7px; cursor:grab; position:relative; box-shadow:0 2px 6px rgba(13,27,38,.06); }
   .card.sel { border-color:var(--red); }
   .card.dragging { opacity:.4; }
-  .card.over { box-shadow:0 0 0 3px var(--red) inset; }
+  .card.over { box-shadow:0 0 0 4px var(--red) inset; }
   .num, .star { z-index:2; }
-  .num { position:absolute; top:14px; left:16px; font-size:12px; color:var(--muted); font-weight:700; }
-  .star { position:absolute; top:12px; right:14px; font-size:12px; background:var(--red); color:#fff; padding:2px 8px; border-radius:99px; }
-  .img { height:150px; background:#f3f5f7; border-radius:10px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .num { position:absolute; top:20px; left:22px; font-size:15px; color:var(--muted); font-weight:800; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:99px; }
+  .star { position:absolute; top:18px; right:20px; font-size:14px; font-weight:700; background:var(--red); color:#fff; padding:3px 10px; border-radius:99px; }
+  .img { height:190px; background:var(--soft); border-radius:14px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
   .img img { max-width:90%; max-height:90%; object-fit:contain; pointer-events:none; }
-  .img.drop { outline:3px dashed var(--red); outline-offset:-6px; }
+  .img.drop { outline:4px dashed var(--red); outline-offset:-8px; }
   .img.empty { background:repeating-linear-gradient(45deg,#f3f5f7 0 10px,#eceff3 10px 20px); }
   .img.empty img { display:none; }
-  .img.empty .hint { position:static; background:none; font-size:13px; font-weight:600; text-align:center; padding:6px 10px; }
-  .img .hint { position:absolute; bottom:6px; background:rgba(255,255,255,.85); padding:0 6px; border-radius:6px; font-size:11px; color:var(--muted); }
-  label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
-  .card input, .card select { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
-  .row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-  .row button { flex:1; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:#f7f8fa; cursor:pointer; font-size:13px; }
-  .row button:hover { background:#e8ecf0; }
+  .img.empty .hint { position:static; background:none; font-size:16px; font-weight:600; text-align:center; padding:8px 12px; }
+  .img .hint { position:absolute; bottom:8px; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:8px; font-size:13px; color:var(--muted); }
+  label { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+  .card input, .card select { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:18px; background:#fff; cursor:text; }
+  .card select { cursor:pointer; }
+  .card input:focus, .card select:focus, .catbox input:focus { outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,27,38,.12); }
+  .card input[data-f="0"] { font-weight:700; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .row button { flex:1 1 auto; white-space:nowrap; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--soft); cursor:pointer; font-size:16px; font-weight:600; }
+  .row button:hover { background:#e6eaee; }
   .row .del { color:var(--red); }
-  .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 18px; border-radius:999px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 24px; border-radius:999px; font-size:18px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
   .toast.on { opacity:1; }
-  .count { font-size:13px; opacity:.8; }
-  @media (max-width:600px) { header h1 { width:100%; } .grid { grid-template-columns:1fr 1fr; gap:10px; padding:10px 10px 90px; } .img { height:110px; } }
+  @media (max-width:700px) { body { font-size:17px; } header { padding:12px 14px; } header h1 { width:100%; font-size:20px; } header select { min-width:0; width:100%; flex:1 1 100%; } header { position:static; } .grid { grid-template-columns:1fr; gap:14px; padding:14px 14px 100px; } .catbox { margin:14px 14px 0; } .catbox .ph { width:100px; height:100px; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Fakhri Tools · Product Editor</h1>
+  <h1>Product Editor</h1>
   <select id="cat" aria-label="Category"></select>
   <span class="count" id="count"></span>
   <span class="spacer"></span>
@@ -58,13 +72,22 @@
   <button class="btn ghost" id="reset">Start over</button>
   <button class="btn red" id="save">Save changes file</button>
 </header>
-<div class="help">
-  <b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a card's picture, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
-  <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to the right category. Type straight into the boxes to change names, specs or sizes.
-  When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done".
-  Your work is kept in this browser if you close the page.
+<details class="help" open>
+  <summary>How to use the editor</summary>
+  <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
+  <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
+  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website.</p>
+  <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
+  When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done". Your work is kept in this browser if you close the page.</p>
+</details>
+<div class="catbox" id="catbox">
+  <div class="ph" id="coverPh" title="Drop, paste or choose the category's main photo"><img id="coverImg" alt=""><span id="coverHint">No main photo yet: drop, paste or choose one</span></div>
+  <div class="fields">
+    <label for="catName">Category name (shown on the website)</label>
+    <input id="catName" maxlength="80">
+    <div class="row"><button id="coverPick" type="button">Choose main photo</button><span class="count" style="align-self:center;color:var(--muted)">or drop a photo on the circle, or click it and press Ctrl+V</span></div>
+  </div>
 </div>
-<div class="cover"><img id="coverImg" alt=""><div><b>Main photo for this category</b><br><span class="count">Press "Make main photo" on any card to change it.</span></div></div>
 <div class="grid" id="grid"></div>
 <div class="toast" id="toast"></div>
 
@@ -78,7 +101,14 @@ function startEditor() {
   const VER = (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(window.FT_CATS));
   const keyOf = (slug, it) => slug + '|' + it[0];
   const siteKeys = () => window.FT_CATS.flatMap(c => c.items.map(it => keyOf(c.slug, it)));
-  const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(it => [it[0], it[1].slice(), it[2], it[3]]) })), images: {} });
+  // a product is [name, specs, size, photo] plus an optional material the owner picked
+  const cp = it => { const o = [it[0], it[1].slice(), it[2], it[3]]; if (it[4]) o.push(it[4]); return o; };
+  const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(cp) })), images: {} });
+  // materials match the website's Material filter
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
+  const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
+  const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   let state, history = [], sel = -1, clip = null, added = 0;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!state || !state.cats) state = fresh();
@@ -89,9 +119,10 @@ function startEditor() {
       // the gasket category was renamed (no "CAF" anywhere on the site): move unsaved work across
       const REN = [['gaskets-caf-canf-sheets', 'gaskets-sheets'], ['CAF / CNAF Rubber Gasket, Ring & Full Face', 'CNAF & Rubber Gasket, Ring & Full Face'], ['CAF, CNAF & Metallic Gasket Sheet', 'CNAF & Metallic Gasket Sheet'], ['Gaskets & CAF / CNAF Sheets', 'Gaskets & CNAF Sheets'],
         // spelling fixes made on the website (2026-10-12)
-        ['Aluminum ', 'Aluminium '], ['1Pcs Body', '1PC Body'], ['2Pcs Body', '2PC Body'], ['Forged steel Y Strainer', 'Forged Steel Y Strainer'], ['Brass Vertical Spring Check Valve, Vertical', 'Brass Vertical Spring Check Valve']];
+        ['Aluminum ', 'Aluminium '], ['1Pcs Body', '1PC Body'], ['2Pcs Body', '2PC Body'], ['Forged steel Y Strainer', 'Forged Steel Y Strainer'], ['Brass Vertical Spring Check Valve, Vertical', 'Brass Vertical Spring Check Valve'],
+        ['G.I Eqal Tee', 'G.I Equal Tee'], ['C.S KIM NIPPLE', 'C.S King Nipple'], ['S.S Swag Nipple', 'S.S Swage Nipple']];
       const ren = v => typeof v === 'string' ? REN.reduce((s, [a, b]) => s.split(a).join(b), v) : v;
-      state.cats.forEach(x => { x.slug = ren(x.slug); x.name = ren(x.name); x.cover = ren(x.cover); x.items = x.items.map(it => [ren(it[0]), it[1].filter(t => t !== 'CAF'), it[2], ren(it[3])]); });
+      state.cats.forEach(x => { x.slug = ren(x.slug); x.name = ren(x.name); x.cover = ren(x.cover); x.items = x.items.map(it => { const o = cp(it); o[0] = ren(o[0]); o[1] = o[1].filter(t => t !== 'CAF'); o[3] = ren(o[3]); return o; }); });
       state.base = (state.base || []).map(ren);
       const base = new Set(state.base || []);
       window.FT_CATS.forEach((c, at) => {
@@ -102,7 +133,7 @@ function startEditor() {
           if (base.has(keyOf(c.slug, it)) || mine.items.some(x => x[0] === it[0])) return;
           // copies saved before this check existed: only bring in the photo-less cards from the product guide, so renamed cards don't come back twice
           if (!state.base && !isNew && it[3]) return;
-          mine.items.push([it[0], it[1].slice(), it[2], it[3]]); added++;
+          mine.items.push(cp(it)); added++;
         });
       });
       // photos the website gained since (e.g. new product photos) fill any card of the same name that has none
@@ -137,7 +168,9 @@ function startEditor() {
     const c = cat();
     $('#count').textContent = c.items.length + ' products';
     if (selEl.options[ci]) selEl.options[ci].text = c.name + ' (' + c.items.length + ')';
-    $('#coverImg').style.visibility = c.cover ? '' : 'hidden'; if (c.cover) $('#coverImg').src = src(c.cover);
+    $('#coverImg').style.display = c.cover ? '' : 'none'; $('#coverHint').style.display = c.cover ? 'none' : ''; if (c.cover) $('#coverImg').src = src(c.cover);
+    if (document.activeElement !== $('#catName')) $('#catName').value = c.name;
+    $('#catbox').classList.toggle('sel', sel === 'cover');
     const g = $('#grid'); g.innerHTML = '';
     c.items.forEach((it, i) => {
       const d = document.createElement('div');
@@ -148,9 +181,10 @@ function startEditor() {
         '<label>Name</label><input data-f="0">' +
         '<label>Specs (comma between each)</label><input data-f="1">' +
         '<label>Size range</label><input data-f="2">' +
+        '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
         '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
         '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
-        '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + x.name + '</option>').join('') + '</select>';
+        '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
       if (it[3]) d.querySelector('img').src = src(it[3]);
       else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
       const ins = d.querySelectorAll('input');
@@ -161,6 +195,8 @@ function startEditor() {
 
   const grid = $('#grid');
   grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input')) snap(); });
+  // a card can't be dragged while you press inside a box or dropdown (dragging stole the click before)
+  grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, select, button'); });
   grid.addEventListener('input', e => {
     const f = e.target.dataset.f; if (f === undefined) return;
     const it = cat().items[+e.target.closest('.card').dataset.i];
@@ -170,7 +206,8 @@ function startEditor() {
   grid.addEventListener('click', e => {
     const card = e.target.closest('.card'); if (!card) return;
     const i = +card.dataset.i, items = cat().items, a = e.target.dataset.a;
-    if (!a) { if (!e.target.matches('input')) select(i, true); return; }
+    // clicks on boxes and dropdowns must not redraw the cards, or an open dropdown closes straight away
+    if (!a) { select(i, false); return; }
     if (a === 'up' && i > 0) change(() => { items.splice(i - 1, 0, items.splice(i, 1)[0]); sel = i - 1; });
     if (a === 'down' && i < items.length - 1) change(() => { items.splice(i + 1, 0, items.splice(i, 1)[0]); sel = i + 1; });
     if (a === 'copy') { change(() => { items.splice(i + 1, 0, JSON.parse(JSON.stringify(items[i]))); sel = i + 1; }); toast('Copied. Change the new card’s name and photo.'); }
@@ -180,6 +217,11 @@ function startEditor() {
   });
   // move a card to another section (it goes to the end of that section's list)
   grid.addEventListener('change', e => {
+    if (e.target.matches('[data-mat]')) {
+      const it = cat().items[+e.target.closest('.card').dataset.i], v = e.target.value;
+      snap(); if (v) it[4] = v; else it.length = 4; state.dirty = true; persist();
+      toast(v ? 'Material set to ' + v : 'Material back to automatic'); return;
+    }
     if (!e.target.matches('[data-move]') || e.target.value === '') return;
     const i = +e.target.closest('.card').dataset.i, to = state.cats[+e.target.value], c = cat(), it = c.items[i];
     change(() => {
@@ -190,7 +232,23 @@ function startEditor() {
     fillCats();
     toast('Moved "' + it[0] + '" to ' + to.name);
   });
-  function select(i, rerender) { sel = i; if (rerender) render(); else document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); }
+  function select(i, rerender) { sel = i; if (rerender) render(); else { document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); $('#catbox').classList.toggle('sel', i === 'cover'); } }
+
+  // Category name and main photo
+  const nameIn = $('#catName');
+  nameIn.addEventListener('focus', snap);
+  nameIn.addEventListener('input', () => { const v = nameIn.value.trim(); if (!v) return; cat().name = v; state.dirty = true; persist(); if (selEl.options[ci]) selEl.options[ci].text = v + ' (' + cat().items.length + ')'; });
+  nameIn.addEventListener('blur', () => { if (!nameIn.value.trim()) nameIn.value = cat().name; render(); });
+  const ph = $('#coverPh');
+  ph.addEventListener('click', () => { select('cover', false); toast('Main photo picked: press Ctrl+V to paste a photo'); });
+  $('#coverPick').onclick = () => { select('cover', false); pickFile('cover'); };
+  ph.addEventListener('dragover', e => { e.preventDefault(); ph.classList.add('drop'); });
+  ph.addEventListener('dragleave', () => ph.classList.remove('drop'));
+  ph.addEventListener('drop', e => {
+    e.preventDefault(); ph.classList.remove('drop');
+    const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+    if (f) setPhoto('cover', f); else if (from >= 0) { const it = cat().items[from]; if (it[3]) { change(() => { cat().cover = it[3]; }); toast('Main photo changed'); } } else toast('That was not a photo');
+  });
 
   // Drag to reorder
   let from = -1;
@@ -223,6 +281,7 @@ function startEditor() {
         const cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
         const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
         const id = 'new:' + cat().slug + '-' + Date.now().toString(36);
+        if (i === 'cover') { change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); cat().cover = id; sel = 'cover'; }); toast('Main photo changed'); return; }
         change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
         toast('Photo changed');
       };
@@ -232,10 +291,10 @@ function startEditor() {
   }
   document.addEventListener('paste', e => {
     const f = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/'));
-    if (f) { e.preventDefault(); if (sel < 0) return toast('Click a card first, then paste'); setPhoto(sel, f.getAsFile()); return; }
-    if (!e.target.matches('input') && clip) { e.preventDefault(); change(() => { const at = sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
+    if (f) { e.preventDefault(); if (sel === -1) return toast('Click a card or the main photo first, then paste'); setPhoto(sel, f.getAsFile()); return; }
+    if (!e.target.matches('input') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
   });
-  document.addEventListener('copy', e => { if (e.target.matches('input') || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+  document.addEventListener('copy', e => { if (e.target.matches('input') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
 
   $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
   $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
