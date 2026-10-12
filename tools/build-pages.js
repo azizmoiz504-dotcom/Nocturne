@@ -94,7 +94,7 @@ function catPage(c, idx) {
       '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
         '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I am looking for this part (' + c.name + '): ') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
       '<section class="more"><h2>More products</h2><div class="more__list">' + others.map(o => '<a href="' + o.slug + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div>' +
-        (PAGES.length ? '<h2 class="more__h">Services &amp; guides</h2><div class="more__list">' + PAGES.filter(pg => !pg.path.startsWith('products/')).map(pg => '<a href="../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join('') + '</div>' : '') + '</section>' +
+        (PAGES.length ? '<h2 class="more__h">Services &amp; guides</h2><div class="more__list">' + PAGES.map(pg => '<a href="../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join('') + '</div>' : '') + '</section>' +
     '</div>';
   const title = s.title || fit(c.name + ' in Al Quoz, Dubai | Fakhri Tools', c.name + ' Dubai | Fakhri Tools', c.name + ' | Fakhri Tools');
   const desc = s.desc || cut(c.name + ' at our trade counter in Al Quoz Industrial Area 3, Dubai. ' + c.desc + ' Get a quote on WhatsApp.', 155);
@@ -191,7 +191,7 @@ home = between(home, '<!-- seo:ld -->', '<!-- /seo:ld -->', '<script type="appli
 home = between(home, '<!-- seo:head -->', '<!-- /seo:head -->',
   '<meta name="robots" content="' + (INDEX ? 'index, follow' : 'noindex, nofollow') + '">\n<link rel="canonical" href="' + SITE + '">\n<meta property="og:url" content="' + SITE + '">\n');
 home = between(home, '<div id="footCats">', '</div>', CATS.map(c => '<a href="products/' + c.slug + '.html" data-cat="' + c.slug + '">' + esc(c.name) + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>');
-if (home.includes('<div id="footGuides">')) home = between(home, '<div id="footGuides">', '</div>', PAGES.filter(pg => !pg.path.startsWith('products/')).map(pg => '<a href="' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join(''));
+if (home.includes('<div id="footGuides">')) home = between(home, '<div id="footGuides">', '</div>', PAGES.map(pg => '<a href="' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join(''));
 fs.writeFileSync('index.html', home);
 
 console.log('Built', CATS.length, 'category pages + products/index.html (' + total + ' products), 404.html, sitemap.xml (' + urls.length + ' URLs), robots.txt, index.html store details');
