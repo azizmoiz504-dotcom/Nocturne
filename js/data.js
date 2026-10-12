@@ -252,7 +252,7 @@ window.FT_CATS = [
       ['C.S & S.S Butt-Weld Reducer, Concentric', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '¾" × ½" – 24" × 20"', 'butt-weld-fittings/edit-mv507iwd.jpg'],
       ['S.S Butt-Weld Reducer, Eccentric', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '¾" × ½" – 24" × 20"', 'butt-weld-fittings/edit-mv509zp5.jpg'],
       ['S.S Butt-Weld End Cap', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', 'butt-weld-fittings/edit-mv50bc95.jpg'],
-      ['S.S Swag Nipple', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', 'butt-weld-fittings/edit-mv50q1qx.jpg'],
+      ['S.S Swage Nipple', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 24"', 'butt-weld-fittings/edit-mv50q1qx.jpg'],
       ['S.S Cross', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 12"', 'butt-weld-fittings/edit-mv51pdxc.jpg'],
       ['S.S Long Nipple', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 8" × 12"', 'butt-weld-fittings/edit-mv520ula.jpg']
     ] },
@@ -274,7 +274,7 @@ window.FT_CATS = [
       ['C.S thread Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv559u9x.jpg'],
       ['C.S & S.S Socket-Weld Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv55ljvp.jpg'],
       ['C.S & S.S Socket-Weld Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv55rml1.jpg'],
-      ['C.S KIM NIPPLE', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg']
+      ['C.S King Nipple', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg']
     ] },
   { slug: 'threaded-forged-fittings', name: 'Threaded Forged Fittings', fam: 'fittings',
     desc: 'Forged C.S and S.S threaded fittings to ASME B16.11, Class 1000 to 6000.',
@@ -300,7 +300,7 @@ window.FT_CATS = [
     items: [
       ['G.I Elbow, 45°', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5et95d.jpg'],
       ['G.I Elbow, 90°', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5eu744.jpg'],
-      ['G.I Eqal Tee', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5ewbov.jpg'],
+      ['G.I Equal Tee', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5ewbov.jpg'],
       ['G.I Tee, Reducing', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5ev5s4.jpg'],
       ['G.I Coupling, Socket', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.3'], '½" – 6"', 'gi-pipe-fittings/edit-mv5ex1ot.jpg'],
       ['G.I Coupling, Reducing Socket', ['CL150', 'CL300', 'BSP', 'NPT', 'B16.14'], '⅜" × ¼" – 6" × 4"', 'gi-pipe-fittings/edit-mv5eya3e.jpg'],
