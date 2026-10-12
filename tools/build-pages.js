@@ -18,6 +18,11 @@ const CFG = ctx.window.FT_CONFIG, FAMS = ctx.window.FT_FAMILIES, CATS = ctx.wind
 // Optional hand-written SEO copy per category: { "<slug>": { title, desc, h1, intro: [paragraphs], faq: [[q, a], ...] } }
 const SEO = fs.existsSync('tools/seo-content.json') ? JSON.parse(fs.readFileSync('tools/seo-content.json', 'utf8')) : {};
 const total = CATS.reduce((a, c) => a + c.items.length, 0);
+// size typos stop the size picker working on the site, so flag them here (e.g. 1/2" instead of ½", 2"-12" without spaces)
+CATS.forEach(c => c.items.forEach(it => {
+  const sz = it[2] || '';
+  if (/(^|[^\d/])1\/2"|\b11\/2"|\d"-\d|\d" - \d|\d" –\d|\d–\d"|,\S/.test(sz)) console.warn('Size typo? ' + c.slug + ' / ' + it[0] + ': ' + sz);
+}));
 
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 const wa = text => 'https://wa.me/' + CFG.whatsappDigits + '?text=' + encodeURIComponent(text);
@@ -37,13 +42,14 @@ function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = fal
     (canon !== null ? '<link rel="canonical" href="' + SITE + canon + '">\n<meta property="og:url" content="' + SITE + canon + '">\n' : '') +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Fakhri Tools">\n' +
     '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:image" content="' + SITE + 'assets/share.jpg">\n<meta name="twitter:card" content="summary_large_image">\n' +
-    '<meta name="theme-color" content="#040c13">\n<link rel="icon" type="image/png" href="' + up + 'assets/favicon-64.png">\n' +
+    '<meta name="theme-color" content="#040c13">\n<link rel="icon" type="image/png" sizes="96x96" href="' + up + 'assets/favicon-96.png">\n<link rel="icon" type="image/png" sizes="64x64" href="' + up + 'assets/favicon-64.png">\n<link rel="apple-touch-icon" href="' + up + 'assets/apple-touch-icon.png">\n' +
     '<link rel="stylesheet" href="' + up + 'fonts/fonts.css">\n<link rel="stylesheet" href="' + up + 'css/pages.css?v=' + ver + '">\n' +
     (ld ? '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>\n' : '') + '</head>\n<body>\n' +
     '<header class="top"><div class="wrap top__in">' +
       '<a class="top__logo" href="' + up + 'index.html"><img src="' + up + 'assets/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC" width="320" height="58"></a>' +
       '<nav class="top__nav"><a href="' + up + 'products/index.html">All products</a><a class="hide-sm" href="' + up + 'index.html#how">How to buy</a><a class="hide-sm" href="' + up + 'index.html#network">Find us</a></nav>' +
-      '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>WhatsApp</span></a>' +
+      '<a class="btn btn--call" href="' + CFG.phoneLink + '" aria-label="Call ' + esc(CFG.phoneDisplay) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>' +
+      '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(CFG.whatsappDisplay) + '">' + WA_SVG + '<span>WhatsApp</span></a>' +
     '</div></header>\n<main>' + body + '</main>\n' +
     '<footer class="foot"><div class="wrap foot__in">' +
       '<div><b>Fakhri Tools &amp; Workshop Materials Trading LLC</b><span>B2B trade counter · Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai</span><span>Landmark: Ajyad Traditional Kitchen, at the start of our row</span></div>' +
@@ -76,7 +82,7 @@ function catPage(c, idx) {
       '<div class="p__body"><h2>' + esc(name) + '</h2>' +
         (size ? '<p class="p__size"><span>Sizes</span>' + esc(size) + '</p>' : '') +
         (specs.length ? '<ul class="p__specs">' + specs.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>' : '') + '</div>' +
-      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '">Pick size &amp; add to quote</a>' +
+      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '"><span class="lg">Pick size &amp; add</span><span class="sm">Add</span> to quote</a>' +
         '<a class="btn btn--wa btn--round" href="' + wa('Hello Fakhri Tools, please send me a price for: ' + name + sizeTxt + '. Size and quantity: ') + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
     '</article>';
   }).join('');

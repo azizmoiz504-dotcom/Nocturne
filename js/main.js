@@ -91,8 +91,11 @@
   function scrollToEl(target) {
     const el = typeof target === 'string' ? (target === '#top' ? 0 : $(target)) : target;
     if (el === null || el === undefined) return;
-    if (lenis) lenis.scrollTo(el, { duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4), force: true });   // force: works even while an overlay is still closing
+    // the enquiry form is not a full section, so it stops just below the header instead of under it
+    const off = target === '#form' ? -(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 100) - 12 : 0;
+    if (lenis) lenis.scrollTo(el, { offset: off, duration: 1.8, easing: t => 1 - Math.pow(1 - t, 4), force: true });   // force: works even while an overlay is still closing
     else if (el === 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else if (off) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY + off, behavior: 'smooth' });
     else el.scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -100,10 +103,13 @@
   const catBySlug = s => CATS.find(c => c.slug === s);
   const famName = id => FAMS.find(f => f.id === id).name;
   // a quote line is "slug:index|size" — the part after | is the size the customer picked
+  // category links that were renamed keep working
+  const SLUG_ALIAS = { 'gaskets-caf-canf-sheets': 'gaskets-sheets' };
+  const slugAlias = s => SLUG_ALIAS[s] || s;
   function itemOf(key) {
     const k = String(key), bar = k.indexOf('|');
     let [slug, i] = (bar < 0 ? k : k.slice(0, bar)).split(':');
-    if (slug === 'gaskets-caf-canf-sheets') slug = 'gaskets-sheets';   // old name, still in some saved quotes
+    slug = slugAlias(slug);   // old names, still in some saved quotes and links
     const c = catBySlug(slug);
     if (!c || !c.items[+i]) return null;
     const it = c.items[+i], id = slug + ':' + (+i);
@@ -292,7 +298,8 @@
   function paintAdd(b) {
     const on = addState(b);
     b.classList.toggle('is-added', on);
-    const l = $('.lbl', b); if (l) l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>';
+    // only rewrite the label when it changes: replacing it under the mouse would swallow the click
+    const l = $('.lbl', b); if (l && l.dataset.on !== String(on)) { l.dataset.on = on; l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>'; }
   }
   function syncRfq(bump) {
     const n = rfq.size;
@@ -342,7 +349,12 @@
     root.classList.remove('pk-err');
     const o = itemOf(root.dataset.pickRoot); if (!o) return;
     if (el.dataset.pk === 'a') tidyPair(root, o);
-    const p = readPick(root, o);
+    let p = readPick(root, o);
+    // in the quote list a new big end must never leave the old size in the quote: take the next smaller size
+    if (!p.ok && el.dataset.pk === 'a' && root.classList.contains('qs__row')) {
+      const b = $('[data-pk="b"]', root), ok = b && $$('option', b).filter(op => op.value && op.value !== '?' && !op.disabled);
+      if (ok && ok.length) { b.value = ok[ok.length - 1].value; p = readPick(root, o); }
+    }
     if (root.classList.contains('qs__row')) { if (p.ok && e.type === 'change') reKey(root.dataset.id, keyOf(o, p.v)); return; }
     if (root.id === 'qvPick') { syncQV(); return; }
     $$('[data-add]', root).forEach(paintAdd);
@@ -364,6 +376,16 @@
   // dialogs: focus moves into them and goes back to the button that opened them
   const focusBack = new Map();
   function focusIn(box, sel) { if (!focusBack.has(box)) focusBack.set(box, document.activeElement); const el = $(sel, box); if (el) setTimeout(() => el.focus({ preventScroll: true }), 60); }
+  // Tab and Shift+Tab stay inside an open quick view or quote list
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const box = $('#qv.is-open .qv__card') || $('#qs.is-open .qs__panel'); if (!box) return;
+    const f = $$('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea', box).filter(el => el.getClientRects().length && !el.closest('[hidden]'));
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  });
   function focusOut(box) { const el = focusBack.get(box); focusBack.delete(box); if (el && el.focus && document.contains(el)) el.focus({ preventScroll: true }); }
 
   /* ================= Quote review sheet ================= */
@@ -385,6 +407,7 @@
   }
   function openSheet() {
     closeMenu();
+    $('#toast').classList.remove('is-on');   // the message would sit over the list's close button
     renderSheet();
     qs.classList.add('is-open'); qs.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
@@ -410,7 +433,7 @@
   });
   // if a showroom was open, scroll once it has finished closing (the page underneath is measured then)
   const afterShowroom = fn => { const was = sr.classList.contains('is-open'); closeSheet(); hardCloseShowroom(); setTimeout(fn, was && !reduce ? 950 : 80); };
-  $('#qsForm').addEventListener('click', () => afterShowroom(() => scrollToEl('#contact')));
+  $('#qsForm').addEventListener('click', () => afterShowroom(() => scrollToEl('#form')));
   $('#qbarOpen').addEventListener('click', openSheet);
   $('#rfqBtn').addEventListener('click', openSheet);
 
@@ -667,7 +690,8 @@
   const closeDrawer = hardCloseShowroom;
   window.addEventListener('popstate', () => {
     const m = location.hash.match(/^#products\/(.+)$/);
-    if (m && catBySlug(m[1])) showCat(m[1]); else doCloseShowroom();
+    const ms = m && slugAlias(m[1]);
+    if (ms && catBySlug(ms)) showCat(ms); else doCloseShowroom();
   });
   // every category link (top menu, footer, old #products/<slug> links) opens that category in the one product list on the page
   document.addEventListener('click', e => {
@@ -735,12 +759,20 @@
   });
 
   /* ---------------- Catalogue: filters on the left, every product on the right ---------------- */
+  // search text is matched in one plain form: 1/2 = ½, 1-1/2 or 1 1/2 = 1½, C.S = CS, aluminum = aluminium
+  const FRAC = { '1/8': '⅛', '1/4': '¼', '3/8': '⅜', '1/2': '½', '3/4': '¾' };
+  const qn = s => String(s).toLowerCase()
+    .replace(/(^|\s)(\d{1,2})[\s-]+(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, n, f) => sp + n + FRAC[f])
+    .replace(/(^|[^\d\/])(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, f) => sp + FRAC[f])
+    .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium');
+  // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
+  const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
   const ALL = [];
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = materialOf(o.name) || 'Other';
     o.mats = /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
-    o.hay = (o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam)).toLowerCase();
+    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
@@ -752,7 +784,8 @@
   const SPEC_LABEL = { 'F/T': 'Flanged (F/T)', SW: 'Socket weld (SW)', BW: 'Butt weld (BW)', NPT: 'NPT thread', BSPT: 'BSPT thread' };
   const PAGE = 24;
   const navOff = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 100) + 8;
-  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el, { offset: -navOff(), duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navOff(), behavior: 'smooth' }); };
+  // an exact page position, so a filter row appearing or disappearing above the list can't throw it off
+  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el.getBoundingClientRect().top + scrollY - navOff(), { duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navOff(), behavior: 'smooth' }); };
   const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
   const kGrid = $('#katGrid'), kSide = $('#katSide');
   const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + o.name + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
@@ -768,10 +801,12 @@
   const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
 
   // category rail with photos
-  $('#katRail').innerHTML = '<button class="kr is-on" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></button>' +
-    CATS.map(c => '<button class="kr" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></button>').join('');
+  // real links to each category page (search engines follow them); a click filters the list on this page instead
+  $('#katRail').innerHTML = '<a class="kr is-on" href="products/index.html" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></a>' +
+    CATS.map(c => '<a class="kr" href="products/' + c.slug + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
+    e.preventDefault();
     kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
     kf.limit = PAGE; renderKat(true);
     const top = $('.kat-main').getBoundingClientRect().top;
@@ -847,7 +882,7 @@
     $('#katCount').textContent = hits.length === ALL.length ? 'All ' + ALL.length + ' products' : hits.length + ' of ' + ALL.length + ' products';
     $('#katApplyN').textContent = hits.length;
     $('#katMore').innerHTML = hits.length > shown.length ?
-      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more products</button>' :
+      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more product' + (hits.length - shown.length === 1 ? '' : 's') + '</button>' :
       (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
     $('#katFacets').innerHTML = facetsHTML();
     // active filter pills
@@ -906,7 +941,7 @@
     if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); toListTop(); }
   });
   let kT;
-  $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = e.target.value.trim().toLowerCase().replace(/[<>&"]/g, ''); kf.limit = PAGE; renderKat(true); }, 140); });
+  $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = qn(e.target.value.trim().replace(/[<>&"]/g, '')); kf.limit = PAGE; renderKat(true); }, 140); });
   $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
 
   // laptops: the filter column scrolls with the page and then sticks once its bottom is in view (no scroll box inside a scroll box)
@@ -953,7 +988,7 @@
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
     '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
-      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
+      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
       '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
     '</button>').join('') +
     '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
@@ -975,7 +1010,7 @@
     const line = 'Quote request — ' + t.dataset.brand + ': ';
     if (!msg.value.includes(line)) msg.value = (msg.value ? msg.value.trim() + String.fromCharCode(10) : '') + line;
     toast(t.dataset.brand + ' added to your enquiry');
-    scrollToEl('#contact');
+    scrollToEl('#form');
   });
 
   /* ---------------- Gauges ---------------- */
@@ -1092,6 +1127,8 @@
 
   /* ---------------- Quote form → WhatsApp or email ---------------- */
   const form = $('#form');
+  // a field marked red turns back to normal as soon as it is corrected
+  form.addEventListener('input', e => { const f = e.target.closest('.field'); if (f) f.classList.remove('is-err'); });
   function formMessage() {
     const v = id => $(id).value.trim();
     const lines = ['Hello Fakhri Tools, I would like a quote.', '', 'Name: ' + v('#fName'), 'Mobile: ' + v('#fMobile')];
@@ -1102,15 +1139,19 @@
     return lines.join('\n');
   }
   function validForm() {
-    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => v.replace(/\D/g, '').length >= 7]];
-    let ok = true;
+    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
+    let first = null;
     checks.forEach(([s, fn]) => {
-      const el = $(s, form), field = el.closest('.field');
+      const el = $(s, form); if (!el) return;
+      const field = el.closest('.field');
       field.classList.remove('is-err'); void field.offsetWidth;
-      if (!fn(el.value)) { field.classList.add('is-err'); ok = false; }
+      if (!fn(el.value)) { field.classList.add('is-err'); first = first || el; }
     });
-    if (!ok) toast('Please add your name and mobile number');
-    return ok;
+    if (first) {
+      toast(first.id === 'fEmail' ? 'Please check your email address, or leave it empty' : 'Please add your name and mobile number');
+      scrollToEl('#form'); setTimeout(() => first.focus({ preventScroll: true }), 700);
+    }
+    return !first;
   }
   function send(how) {
     if (!validForm()) return;
@@ -1187,6 +1228,14 @@
   }
 
   function setupScroll() {
+    // "reduce motion" is on: no pinned sections and no scroll-linked animation; everything is simply shown
+    if (reduce) {
+      steps0();
+      ScrollTrigger.create({ trigger: '#anatomy', start: 'top 70%', end: 'bottom 30%', onToggle: s => { window.FT3D && window.FT3D.setAnatomy(s.isActive ? 0.9 : 0); } });
+      $$('.ms').forEach(m => m.classList.add('is-on'));
+      gsap.set('.pipe__fill', { scaleY: 1 });
+      return;
+    }
     gsap.to('.hero__content', { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom 20%', scrub: true } });
     gsap.to('.atmos', { opacity: 0.35, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
 
@@ -1253,6 +1302,12 @@
     gsap.from('.contact__grid > *', { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.contact__grid', start: 'top 85%' } });
   }
 
+  // reduced motion: the anatomy section shows its last step and the fully exploded valve
+  function steps0() {
+    $$('.anatomy__steps p').forEach((x, i, all) => x.classList.toggle('is-active', i === all.length - 1));
+    $('#explodeVal').textContent = '0%'; $('#explodeBar').style.transform = 'scaleX(0)';
+  }
+
   /* ---------------- Anchors ---------------- */
   function bindAnchors() {
     $$('[data-scroll]').forEach(a => a.addEventListener('click', e => {
@@ -1303,7 +1358,8 @@
   runLoader();
   const deep = location.hash.match(/^#products\/(.+)$/);
   if (deep) {
-    if (catBySlug(deep[1])) setTimeout(() => showCat(deep[1]), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
+    const ds = slugAlias(deep[1]);
+    if (catBySlug(ds)) setTimeout(() => showCat(ds), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
   fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });

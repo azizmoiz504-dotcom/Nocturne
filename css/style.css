@@ -1474,3 +1474,72 @@ h1.hero__sub{font-weight:400}
 .footer__h-gap{margin-top:28px}
 #footGuides a{display:block;color:var(--steel-2);font-size:18.5px;padding:4px 0}
 #footGuides a:hover{color:#fff}
+
+/* ---------- round 6: phone and small-screen fixes ---------- */
+/* burger menu: scrolls when the screen is short (phone held sideways) */
+.mmenu{overflow-y:auto;overscroll-behavior:contain}
+@media (max-height:520px){.mmenu{padding-top:calc(var(--nav-h) + 12px)}.mmenu__links a{font-size:min(11vw,9.5vh)}}
+.mmenu__foot a{color:#fff}
+/* phone filter sheet sits above the header (header is dimmed and can't be tapped while it is open) */
+body.is-filtering main{z-index:130}
+@media (max-width:1100px){.kat-side{padding-bottom:0}}
+/* quick view on phones: nothing is cut off on the right, the close button stays on screen */
+@media (max-width:899px){
+  .qv__card{display:block}
+  .qv__info{min-width:0}
+  .qv__info dd,.qv__info .prow__chips span{overflow-wrap:anywhere}
+  .qv__buy .btn{min-width:0}
+  .qv__close{position:sticky;display:block;top:12px;right:auto;margin:12px 12px -56px auto}
+}
+.pk input{width:100%}
+/* a photo tapped in the quote list opens its quick view on top of the list */
+.qv{z-index:188}
+/* quote list: more room for the items on small and sideways phones */
+@media (max-height:700px),(max-width:400px){
+  .qs__panel{max-height:calc(100dvh - 12px)}
+  .qs__head{padding:16px 20px 12px}
+  .qs__head h3{font-size:28px}
+  .qs__foot{padding:12px 20px 16px}
+  .qs__foot p{display:none}
+}
+.qs__rm{width:44px;height:44px}
+/* quote bar on the narrowest phones: shorter button so it never covers the WhatsApp button */
+@media (max-width:380px){.qbar{gap:8px;padding-left:14px}.qbar__btn{padding:0 12px;font-size:16.5px}.qbar__btn svg{display:none}.qbar__txt b{font-size:16.5px}}
+/* phones held sideways: smaller call/WhatsApp buttons side by side */
+@media (max-height:500px) and (min-width:601px){.fabs{flex-direction:row;gap:10px;right:16px;bottom:14px}.fab{width:58px;height:58px}.fab svg{width:30px;height:30px}.fab--wa svg{width:36px;height:36px}}
+/* the call/WhatsApp buttons step aside while the valve labels are showing on phones */
+.fabs{transition:bottom .6s var(--ease),opacity .4s}body.is-anatomy .fabs{opacity:0;pointer-events:none}
+/* no page zoom on iPhone when the sort menu is tapped */
+.kat-sort select{font-size:17px}
+/* the "/" keyboard hint means nothing on phones */
+@media (hover:none),(max-width:600px){.kat-search kbd{display:none}}
+/* bigger tap targets for filter rows */
+@media (max-width:1100px){.kf{padding-top:11px;padding-bottom:11px}}
+/* industries: the drawing shrinks on laptop screens so the text and tags below it always show */
+@media (min-width:900px){
+  .sector{padding-top:calc(var(--nav-h) + 12px);padding-bottom:64px}
+  .sector__art{flex:1 1 auto;min-height:0;max-height:calc(100svh - var(--nav-h) - 400px);width:auto;max-width:min(560px,100%)}
+  .sector__art + h3{margin-top:20px}
+}
+@media (min-width:900px) and (max-height:820px){.sector h3{font-size:clamp(40px,4vw,64px)}.sector p{font-size:19px}}
+/* the message pop-up never blocks a click, and long messages wrap instead of being cut */
+.toast{pointer-events:none;white-space:normal;width:max-content;max-width:min(640px,calc(100vw - 40px));border-radius:18px;line-height:1.35;text-overflow:clip}
+/* quick view on laptops: only the text side scrolls, so the close button always stays in view */
+@media (min-width:900px){.qv__card{overflow:hidden}.qv__info{overflow-y:auto;max-height:calc(100vh - 40px);overscroll-behavior:contain}}
+/* the filter list doesn't jump when the row of active filters appears above it */
+.kat{overflow-anchor:none}
+/* "reduce motion" on: industries are stacked like on phones (no sideways scrolling section) */
+@media (prefers-reduced-motion:reduce){
+  .sectors__track{flex-direction:column;height:auto;width:100%;transform:none!important}
+  .sector,.sector--intro{width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:80px var(--pad)}
+  .sector__art{max-height:none;width:100%;margin-top:40px}
+  .sectors__progress{display:none}
+  .sector__art *{stroke-dashoffset:0!important}
+}
+/* section numbers: a lighter red so the small text is easy to read on the dark background */
+.sec-num{color:#f0484e}
+/* quick view on phones: "Add to quote" stays in reach at the bottom while the details scroll */
+@media (max-width:899px){.qv__buy{position:sticky;bottom:0;z-index:2;background:var(--paper);margin-left:-4px;margin-right:-4px;padding:12px 4px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -14px 20px -16px rgba(0,0,0,.35)}}
+.kr,.kr img{-webkit-user-drag:none}
+/* short screens (phones held sideways, small phones): more compact valve labels so they all fit */
+@media (max-height:700px) and (max-width:1100px){.vlabel__txt{padding:3px 8px}.vlabel__txt b{font-size:15px}.vlabel__txt small{display:none}.vlabel__line{width:14px}}

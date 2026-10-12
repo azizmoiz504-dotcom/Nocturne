@@ -87,7 +87,9 @@ function startEditor() {
     else {
       // keep the owner's unsaved work and add whatever the website gained since they started
       // the gasket category was renamed (no "CAF" anywhere on the site): move unsaved work across
-      const REN = [['gaskets-caf-canf-sheets', 'gaskets-sheets'], ['CAF / CNAF Rubber Gasket, Ring & Full Face', 'CNAF & Rubber Gasket, Ring & Full Face'], ['CAF, CNAF & Metallic Gasket Sheet', 'CNAF & Metallic Gasket Sheet'], ['Gaskets & CAF / CNAF Sheets', 'Gaskets & CNAF Sheets']];
+      const REN = [['gaskets-caf-canf-sheets', 'gaskets-sheets'], ['CAF / CNAF Rubber Gasket, Ring & Full Face', 'CNAF & Rubber Gasket, Ring & Full Face'], ['CAF, CNAF & Metallic Gasket Sheet', 'CNAF & Metallic Gasket Sheet'], ['Gaskets & CAF / CNAF Sheets', 'Gaskets & CNAF Sheets'],
+        // spelling fixes made on the website (2026-10-12)
+        ['Aluminum ', 'Aluminium '], ['1Pcs Body', '1PC Body'], ['2Pcs Body', '2PC Body'], ['Forged steel Y Strainer', 'Forged Steel Y Strainer'], ['Brass Vertical Spring Check Valve, Vertical', 'Brass Vertical Spring Check Valve']];
       const ren = v => typeof v === 'string' ? REN.reduce((s, [a, b]) => s.split(a).join(b), v) : v;
       state.cats.forEach(x => { x.slug = ren(x.slug); x.name = ren(x.name); x.cover = ren(x.cover); x.items = x.items.map(it => [ren(it[0]), it[1].filter(t => t !== 'CAF'), it[2], ren(it[3])]); });
       state.base = (state.base || []).map(ren);

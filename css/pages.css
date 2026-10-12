@@ -114,3 +114,15 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 /* Long words in headings wrap on small phones */
 @media (max-width:420px){.hero h1,.cat b{overflow-wrap:break-word;hyphens:auto}}
 .cats > *{min-width:0}
+/* phones: the product button keeps a short label that fits on one or two lines */
+.p__foot .btn--dark .sm{display:none}
+@media (max-width:480px){.p__foot .btn--dark .lg{display:none}.p__foot .btn--dark .sm{display:inline}.p__foot .btn--dark{height:auto;min-height:46px;padding:6px 12px}}
+/* bigger tap targets for the breadcrumb and footer links */
+@media (max-width:700px){.crumbs a,.foot a{display:inline-block;padding:10px 0}}
+/* header call button next to WhatsApp; WhatsApp green dark enough for white text */
+.btn--call{background:var(--red);color:#fff;width:52px;padding:0;flex:none}
+.btn--call:hover{background:#d3242b}
+.btn--wa{background:#128c4a}
+.btn--wa:hover{background:#0f7a40}
+@media (max-width:700px){.top .btn--call{width:46px;height:46px}}
+@media (max-width:420px){.top .btn--call{margin-left:auto}.top .btn--wa{margin-left:0}}

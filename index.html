@@ -19,10 +19,12 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#040c13">
-<link rel="icon" type="image/png" href="assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="96x96" href="assets/favicon-96.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/style.css?v=15">
 <noscript><style>.loader{display:none}body.is-loading{overflow:auto}</style></noscript>
 <!-- seo:ld --><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"HardwareStore","@id":"https://azizmoiz504-dotcom.github.io/Nocturne/#store","name":"Fakhri Tools & Workshop Materials Trading LLC","alternateName":"Fakhri Tools","description":"B2B trade counter for pipes, pipe fittings, flanges, valves, camlocks and couplings, industrial hoses, gaskets and gauges in Al Quoz Industrial Area 3, Dubai.","url":"https://azizmoiz504-dotcom.github.io/Nocturne/","image":"https://azizmoiz504-dotcom.github.io/Nocturne/assets/share.jpg","logo":"https://azizmoiz504-dotcom.github.io/Nocturne/assets/logo-stacked.png","telephone":"+97142850135","contactPoint":[{"@type":"ContactPoint","contactType":"sales","telephone":"+971522767034","availableLanguage":["English","Arabic","Hindi","Urdu"]}],"address":{"@type":"PostalAddress","streetAddress":"Warehouse 8, 8th Street, Al Quoz Industrial Area 3","addressLocality":"Dubai","addressRegion":"Dubai","addressCountry":"AE"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"07:30","closes":"18:00"}],"areaServed":{"@type":"Country","name":"United Arab Emirates"},"paymentAccepted":"Cash, Credit Card, Bank Transfer, Cheque"},{"@type":"WebSite","@id":"https://azizmoiz504-dotcom.github.io/Nocturne/#site","name":"Fakhri Tools","alternateName":"Fakhri Tools & Workshop Materials Trading LLC","url":"https://azizmoiz504-dotcom.github.io/Nocturne/","inLanguage":"en"}]}</script><!-- /seo:ld -->
 </head>
@@ -113,7 +115,7 @@
   <div class="nav__util mono">
     <div class="wrap nav__util-in">
       <a href="tel:+97142850135">+971 4 285 0135</a>
-      <a href="#contact" data-email-link data-scroll><span data-email-text>[Email address]</span></a>
+      <a href="#contact" data-email-link data-scroll><span data-email-text>dxbsales@ftools.com</span></a>
       <span class="hide-sm">Wh #8, 8th St, Al Quoz Industrial Area 3, Dubai</span>
       <span class="nav__clock"><span class="hide-xs">DXB <b class="js-clock">--:--</b> · </span><b class="js-open">—</b></span>
     </div>
@@ -140,7 +142,7 @@
   </div>
 </header>
 
-<div class="mmenu" id="mmenu">
+<div class="mmenu" id="mmenu" data-lenis-prevent>
   <nav class="mmenu__links">
     <a href="#about" data-scroll>About</a>
     <a href="#catalogue" data-scroll>Products</a>
@@ -151,7 +153,8 @@
     <a href="#contact" data-scroll>Contact</a>
   </nav>
   <div class="mmenu__foot mono">
-    <a href="tel:+97142850135">+971 4 285 0135</a>
+    <a href="tel:+97142850135">Call +971 4 285 0135</a>
+    <a href="#" data-wa-link>WhatsApp <span data-wa-text>+971 52 276 7034</span></a>
     <span>Mon–Sat 7:30am–6:00pm · Sunday closed</span>
   </div>
 </div>
@@ -387,7 +390,7 @@
       <aside class="kat-side" id="katSide" aria-label="Filter products">
         <div class="kat-side__head"><b>Filter</b><button class="kat-side__close" id="katSideClose" aria-label="Close filters"><span></span><span></span></button></div>
         <div class="kat-side__body" id="katFacets"></div>
-        <div class="kat-side__foot"><button class="kat-reset mono" id="katReset">Clear all</button><button class="btn btn--red kat-side__apply" id="katApply">Show <span id="katApplyN">124</span> products</button></div>
+        <div class="kat-side__foot"><button class="kat-reset mono" id="katReset">Clear all</button><button class="btn btn--red kat-side__apply" id="katApply">Show <span id="katApplyN">217</span> products</button></div>
         <a class="kat-help" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I can't find a part on your website. I'll send a photo of it.">
           <svg><use href="#wa"/></svg>
           <b>Can't find your part?</b>
@@ -399,14 +402,14 @@
         <div class="kat-bar">
           <label class="search kat-search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <input id="search" type="search" autocomplete="off" placeholder='Search 124 products: try "camlock", "CL150" or "316L"'>
+            <input id="search" type="search" autocomplete="off" placeholder='Search 217 products: try "camlock", "CL150" or "316L"'>
             <kbd class="mono">/</kbd>
           </label>
           <div class="kat-bar__row">
             <button class="kat-filter-btn" id="katFilterBtn"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Filters <span id="katFilterN" hidden></span></button>
             <span class="kat-count mono" id="katCount" aria-live="polite"></span>
             <label class="kat-sort"><span class="mono">Sort</span>
-              <select id="katSort"><option value="rec">Recommended</option><option value="az">Name A to Z</option><option value="za">Name Z to A</option></select>
+              <select id="katSort" aria-label="Sort products"><option value="rec">Recommended</option><option value="az">Name A to Z</option><option value="za">Name Z to A</option></select>
             </label>
           </div>
           <div class="kat-active" id="katActive"></div>
@@ -452,7 +455,7 @@
       <a class="why__card" href="#" data-wa-link>
         <div class="why__top"><span class="mono">02 / 04</span><svg viewBox="0 0 64 64"><path d="M32 8 A24 24 0 0 0 11 44 L8 56 L20 53 A24 24 0 1 0 32 8 Z"/><path class="acc" d="M22 28 H42 M22 36 H36"/></svg></div>
         <h3>Send a WhatsApp</h3>
-        <p class="why__big" data-wa-text>[WhatsApp number]</p>
+        <p class="why__big" data-wa-text>+971 52 276 7034</p>
         <p>Send your list — item, size and quantity — and ask for a quote.</p>
       </a>
       <a class="why__card" href="#network" data-scroll>
@@ -552,8 +555,8 @@
       <div class="contact__info">
         <dl>
           <div><dt class="mono">Telephone</dt><dd><a href="tel:+97142850135">+971 4 285 0135</a></dd></div>
-          <div><dt class="mono">WhatsApp</dt><dd><a href="#" data-wa-link><span data-wa-text>[WhatsApp number]</span></a></dd></div>
-          <div><dt class="mono">Email</dt><dd><a href="#" data-email-link><span data-email-text>[Email address]</span></a></dd></div>
+          <div><dt class="mono">WhatsApp</dt><dd><a href="#" data-wa-link><span data-wa-text>+971 52 276 7034</span></a></dd></div>
+          <div><dt class="mono">Email</dt><dd><a href="#" data-email-link><span data-email-text>dxbsales@ftools.com</span></a></dd></div>
           <div><dt class="mono">Opening hours</dt><dd>Mon–Sat, 7:30am–6:00pm<br>Sunday closed</dd></div>
           <div class="span2"><dt class="mono">Address</dt><dd>Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Al Quoz, Dubai, United Arab Emirates<br><b class="red">Landmark: Ajyad Traditional Kitchen, at the start of our row.</b> <a class="link-arrow mono" href="#" data-maps target="_blank" rel="noopener">Get directions <svg><use href="#arrow"/></svg></a></dd></div>
         </dl>
@@ -601,8 +604,8 @@
         <span>Landmark: Ajyad Traditional Kitchen</span>
         <span>Mon–Sat 7:30am–6:00pm · Sunday closed</span>
         <a href="tel:+97142850135">+971 4 285 0135</a>
-        <a href="#" data-wa-link>WhatsApp <span data-wa-text>[WhatsApp number]</span></a>
-        <a href="#" data-email-link><span data-email-text>[Email address]</span></a>
+        <a href="#" data-wa-link>WhatsApp <span data-wa-text>+971 52 276 7034</span></a>
+        <a href="#" data-email-link><span data-email-text>dxbsales@ftools.com</span></a>
       </div>
     </div>
     <div class="footer__mega" aria-hidden="true">
@@ -678,11 +681,11 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="vendor/three.min.js"></script>
-<script src="js/config.js?v=12"></script>
-<script src="js/data.js?v=12"></script>
-<script src="js/valve3d.js?v=12"></script>
-<script src="js/globe.js?v=12"></script>
-<script src="js/main.js?v=13"></script>
+<script src="js/config.js?v=13"></script>
+<script src="js/data.js?v=13"></script>
+<script src="js/valve3d.js?v=13"></script>
+<script src="js/globe.js?v=13"></script>
+<script src="js/main.js?v=14"></script>
 <!-- Safety net: if a script fails to load, never leave visitors (or Google) stuck behind the intro screen -->
 <script>addEventListener("load",function(){setTimeout(function(){if(document.body.classList.contains("is-loading")){var l=document.getElementById("loader");if(l)l.remove();document.body.classList.remove("is-loading")}},6000)})</script>
 </body>
