@@ -198,6 +198,8 @@
     labelHost && labelHost.appendChild(el);
     a.el = el;
   });
+  // hidden labels can't be reached with the Tab key until the valve has opened up
+  if (labelHost) labelHost.inert = true;
 
   // --- State ---
   const st = { anaP: 0, mx: 0, my: 0, intro: 0, introT: null };
@@ -236,17 +238,24 @@
   const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   let last = performance.now();
-  let labelsOn = false, slowAvg = 0.016, frameN = 0;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let labelsOn = false, slowAvg = 0.016, frameN = 0, anaTop = 0;
+  // where the anatomy text ends (in screen pixels), so labels on phones stay below it
+  const anaSteps = document.querySelector('.anatomy__steps');
+  const textBottom = () => anaSteps ? Math.max(0, anaSteps.getBoundingClientRect().bottom) : 0;
+  const navEl = document.querySelector('.nav');
+  const navBottom = () => navEl ? Math.max(0, navEl.getBoundingClientRect().bottom) : 0;
 
   function frame(now) {
     requestAnimationFrame(frame);
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
-    const t = now / 1000;
-    const W = innerWidth, H = innerHeight, mobile = W < 900;
+    const t = now / 1000, tm = still ? 0 : t;   // tm: the slow idle turn, which stops when "reduce motion" is on
+    // phones held sideways (short screens) use the side-by-side layout, so the valve sits beside the text
+    const W = innerWidth, H = innerHeight, mobile = W < 900 && H > 500;
 
     const on = heroVis || anaVis;
     if (on !== stageOn) { stageOn = on; document.body.classList.toggle('off-stage', !on); }
-    if (!on) { if (labelsOn) { labelHost.classList.remove('is-on'); labelsOn = false; } return; }
+    if (!on) { if (labelsOn) { labelHost.classList.remove('is-on'); labelHost.inert = true; labelsOn = false; document.body.classList.remove('is-anatomy'); } return; }
     // a full-screen overlay is covering the valve: don't spend frames on it
     const bc = document.body.classList;
     if (bc.contains('is-shop') || bc.contains('is-menu')) return;
@@ -272,11 +281,11 @@
       const hp = clamp(window.scrollY / heroH, 0, 1);
       tg = {
         x: mobile ? 0.15 : halfW * 0.46, y: (mobile ? 1.75 : -0.15) + hp * 2.2,
-        ry: -0.55 + Math.sin(t * 0.3) * 0.22 + hp * 1.6 + st.mx * 0.25,
+        ry: -0.55 + Math.sin(tm * 0.3) * 0.22 + hp * 1.6 + st.mx * 0.25,
         rx: 0.16 + st.my * 0.1 + hp * 0.35,
         s: (mobile ? 0.39 : 0.86 * clamp(camera.aspect / 1.55, 0.78, 1)) * (0.35 + 0.65 * intro), ex: 0, z: 14
       };
-      wheelSpin.rotation.y = -(window.scrollY * 0.006) - t * 0.25;
+      wheelSpin.rotation.y = -(window.scrollY * 0.006) - tm * 0.25;
     }
 
     const k = 1 - Math.pow(0.0015, dt);
@@ -292,9 +301,10 @@
 
     // labels
     const show = anaVis && !heroVis && cur.ex > 0.82;
-    if (show !== labelsOn) { labelHost.classList.toggle('is-on', show); labelsOn = show; }
+    if (show !== labelsOn) { labelHost.classList.toggle('is-on', show); labelHost.inert = !show; labelsOn = show; bc.toggle('is-anatomy', show); }
     if (show) {
       valve.updateMatrixWorld();
+      const sides = { l: [], r: [] };
       anchors.forEach(a => {
         a.o.getWorldPosition(v); v.project(camera);
         const x = (v.x * 0.5 + 0.5) * W, y = (-v.y * 0.5 + 0.5) * H;
@@ -302,8 +312,31 @@
         // never let a label run off either edge of the screen
         const lw = a.w || (a.w = a.el.offsetWidth);
         if (!left && x + lw > W - 16) left = true; else if (left && x - lw < 16) left = false;
-        a.el.classList.toggle('is-left', left);
-        a.el.style.transform = 'translate(' + (left ? 'calc(' + x + 'px - 100%)' : x + 'px') + ',' + y + 'px) translateY(-50%)';
+        a.x = x; a.y = y; a.left = left; a.h = a.h || a.el.offsetHeight || 34;
+        sides[left ? 'l' : 'r'].push(a);
+      });
+      // spread labels apart so no two ever sit on top of each other (also across sides),
+      // and keep them below the header (and on phones below the text at the top of the screen)
+      if (!anaTop || frameN % 20 === 0) anaTop = Math.max(navBottom(), mobile ? textBottom() : 0);
+      const span = a => a.left ? [a.x - a.w, a.x] : [a.x, a.x + a.w];
+      const clash = (a, b) => { const p = span(a), q = span(b); return p[0] < q[1] && q[0] < p[1] && Math.abs(a.y - b.y) < (a.h + b.h) / 2 + 6; };
+      const all = sides.l.concat(sides.r).sort((p, q) => p.y - q.y);
+      const placed = [];
+      all.forEach(a => {
+        a.y = Math.max(a.y, anaTop + a.h / 2 + 8);
+        for (let k = 0, moved = true; moved && k < 12; k++) { moved = false; placed.forEach(b => { if (clash(a, b)) { a.y = b.y + (a.h + b.h) / 2 + 6; moved = true; } }); }
+        placed.push(a);
+      });
+      // anything pushed off the bottom comes back up, nudging the ones above it
+      const done = [];
+      all.slice().reverse().forEach(a => {
+        a.y = Math.min(a.y, H - a.h / 2 - 8);
+        for (let k = 0, moved = true; moved && k < 12; k++) { moved = false; done.forEach(b => { if (clash(a, b)) { a.y = b.y - (a.h + b.h) / 2 - 6; moved = true; } }); }
+        done.push(a);
+      });
+      anchors.forEach(a => {
+        a.el.classList.toggle('is-left', a.left);
+        a.el.style.transform = 'translate(' + (a.left ? 'calc(' + a.x + 'px - 100%)' : a.x + 'px') + ',' + a.y + 'px) translateY(-50%)';
       });
     }
   }

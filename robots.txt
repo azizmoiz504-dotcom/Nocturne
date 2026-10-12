@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://azizmoiz504-dotcom.github.io/Nocturne/sitemap.xml
