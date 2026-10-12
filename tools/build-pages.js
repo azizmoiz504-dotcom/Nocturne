@@ -30,6 +30,7 @@ const famName = id => FAMS.find(f => f.id === id).name;
 // First option that fits Google's ~60-character title width; cut() shortens at a word for descriptions.
 const fit = (...opts) => opts.find(o => o.length <= 60) || opts[opts.length - 1];
 const cut = (s, n) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n - 1)).replace(/[,;:.—-]$/, '') + '…';
+require('./zoom-css.js');   // computer copies of the stylesheets (75% size)
 const ver = fs.statSync('css/pages.css').mtimeMs.toString(36).slice(-6);
 const WA_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>';
 
@@ -43,7 +44,7 @@ function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = fal
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Fakhri Tools">\n' +
     '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:image" content="' + SITE + 'assets/share.jpg">\n<meta name="twitter:card" content="summary_large_image">\n' +
     '<meta name="theme-color" content="#040c13">\n<link rel="icon" type="image/png" sizes="96x96" href="' + up + 'assets/favicon-96.png">\n<link rel="icon" type="image/png" sizes="64x64" href="' + up + 'assets/favicon-64.png">\n<link rel="apple-touch-icon" href="' + up + 'assets/apple-touch-icon.png">\n' +
-    '<link rel="stylesheet" href="' + up + 'fonts/fonts.css">\n<link rel="stylesheet" href="' + up + 'css/pages.css?v=' + ver + '">\n' +
+    '<link rel="stylesheet" href="' + up + 'fonts/fonts.css">\n<link rel="stylesheet" href="' + up + 'css/pages.css?v=' + ver + '" media="(max-width:899.98px)">\n<link rel="stylesheet" href="' + up + 'css/pages-75.css?v=' + ver + '" media="(min-width:900px)">\n' +
     (ld ? '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>\n' : '') + '</head>\n<body>\n' +
     '<header class="top"><div class="wrap top__in">' +
       '<a class="top__logo" href="' + up + 'index.html"><img src="' + up + 'assets/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC" width="320" height="58"></a>' +

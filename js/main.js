@@ -945,7 +945,7 @@
   $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
 
   // laptops: the filter column scrolls with the page and then sticks once its bottom is in view (no scroll box inside a scroll box)
-  const deskQ = matchMedia('(min-width: 1101px)');
+  const deskQ = matchMedia('(min-width: 900px)');   // computers get the 75% stylesheet, where the side filter column starts at 826px
   function fitSide() {
     if (!deskQ.matches) { kSide.style.top = ''; return; }
     const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 80;

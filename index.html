@@ -24,7 +24,9 @@
 <link rel="manifest" href="site.webmanifest">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="css/style.css?v=15">
+<!-- phones use style.css; computers (900px and wider) use style-75.css, the same design at 75% size -->
+<link rel="stylesheet" href="css/style.css?v=16" media="(max-width:899.98px)">
+<link rel="stylesheet" href="css/style-75.css?v=16" media="(min-width:900px)">
 <noscript><style>.loader{display:none}body.is-loading{overflow:auto}</style></noscript>
 <!-- seo:ld --><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"HardwareStore","@id":"https://azizmoiz504-dotcom.github.io/Nocturne/#store","name":"Fakhri Tools & Workshop Materials Trading LLC","alternateName":"Fakhri Tools","description":"B2B trade counter for pipes, pipe fittings, flanges, valves, camlocks and couplings, industrial hoses, gaskets and gauges in Al Quoz Industrial Area 3, Dubai.","url":"https://azizmoiz504-dotcom.github.io/Nocturne/","image":"https://azizmoiz504-dotcom.github.io/Nocturne/assets/share.jpg","logo":"https://azizmoiz504-dotcom.github.io/Nocturne/assets/logo-stacked.png","telephone":"+97142850135","contactPoint":[{"@type":"ContactPoint","contactType":"sales","telephone":"+971522767034","availableLanguage":["English","Arabic","Hindi","Urdu"]}],"address":{"@type":"PostalAddress","streetAddress":"Warehouse 8, 8th Street, Al Quoz Industrial Area 3","addressLocality":"Dubai","addressRegion":"Dubai","addressCountry":"AE"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"07:30","closes":"18:00"}],"areaServed":{"@type":"Country","name":"United Arab Emirates"},"paymentAccepted":"Cash, Credit Card, Bank Transfer, Cheque"},{"@type":"WebSite","@id":"https://azizmoiz504-dotcom.github.io/Nocturne/#site","name":"Fakhri Tools","alternateName":"Fakhri Tools & Workshop Materials Trading LLC","url":"https://azizmoiz504-dotcom.github.io/Nocturne/","inLanguage":"en"}]}</script><!-- /seo:ld -->
 </head>
@@ -375,7 +377,7 @@
     <div class="kat-head">
       <div>
         <div class="sec-head"><span class="sec-num">04</span><span class="mono">The catalogue</span></div>
-        <h2 class="h2" data-split>217 products.<br>28 categories.<br><span class="red">One roof.</span></h2>
+        <h2 class="h2" data-split>233 products.<br>28 categories.<br><span class="red">One roof.</span></h2>
       </div>
       <ul class="kat-promise" data-reveal>
         <li><svg><use href="#wa"/></svg><div><b>Message tonight, priced by 7:30am</b><span>Send your list on WhatsApp after hours and the price is waiting when we open.</span></div></li>
@@ -390,7 +392,7 @@
       <aside class="kat-side" id="katSide" aria-label="Filter products">
         <div class="kat-side__head"><b>Filter</b><button class="kat-side__close" id="katSideClose" aria-label="Close filters"><span></span><span></span></button></div>
         <div class="kat-side__body" id="katFacets"></div>
-        <div class="kat-side__foot"><button class="kat-reset mono" id="katReset">Clear all</button><button class="btn btn--red kat-side__apply" id="katApply">Show <span id="katApplyN">217</span> products</button></div>
+        <div class="kat-side__foot"><button class="kat-reset mono" id="katReset">Clear all</button><button class="btn btn--red kat-side__apply" id="katApply">Show <span id="katApplyN">233</span> products</button></div>
         <a class="kat-help" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I can't find a part on your website. I'll send a photo of it.">
           <svg><use href="#wa"/></svg>
           <b>Can't find your part?</b>
@@ -402,7 +404,7 @@
         <div class="kat-bar">
           <label class="search kat-search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <input id="search" type="search" autocomplete="off" placeholder='Search 217 products: try "camlock", "CL150" or "316L"'>
+            <input id="search" type="search" autocomplete="off" placeholder='Search 233 products: try "camlock", "CL150" or "316L"'>
             <kbd class="mono">/</kbd>
           </label>
           <div class="kat-bar__row">
@@ -682,10 +684,10 @@
 <script src="vendor/lenis.min.js"></script>
 <script src="vendor/three.min.js"></script>
 <script src="js/config.js?v=13"></script>
-<script src="js/data.js?v=13"></script>
-<script src="js/valve3d.js?v=13"></script>
+<script src="js/data.js?v=14"></script>
+<script src="js/valve3d.js?v=14"></script>
 <script src="js/globe.js?v=13"></script>
-<script src="js/main.js?v=14"></script>
+<script src="js/main.js?v=15"></script>
 <!-- Safety net: if a script fails to load, never leave visitors (or Google) stuck behind the intro screen -->
 <script>addEventListener("load",function(){setTimeout(function(){if(document.body.classList.contains("is-loading")){var l=document.getElementById("loader");if(l)l.remove();document.body.classList.remove("is-loading")}},6000)})</script>
 </body>
