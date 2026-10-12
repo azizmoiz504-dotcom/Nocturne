@@ -174,7 +174,7 @@ window.FT_CATS = [
       ['S.S Long & Close Pipe Nipple', ['A182 316L', 'ERW', 'SMLS', 'SCH10', 'SCH40', 'SCH80'], '¼" – 4" × 6"', 'ss-forged-low-pressure-bw-fittings/edit-mv2iflxi.jpg']
     ] },
   { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
-    desc: 'Non-asbestos CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
+    desc: 'CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
     cover: 'gaskets-sheets/edit-mv2ivzmn.jpg',
     items: [
       ['CNAF & Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-sheets/edit-mv2ivzmn.jpg'],
