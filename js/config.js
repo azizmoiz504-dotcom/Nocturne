@@ -19,6 +19,10 @@ window.FT_CONFIG = {
   mapsUrl: 'https://share.google/QAoqso7RYy5niY0su',
   mapsSearchUrl: 'https://www.google.com/maps/search/?api=1&query=Fakhri+Tools+%26+Workshop+Materials+Trading+LLC+Al+Quoz+Dubai',
 
+  // Google Analytics 4 Measurement ID (starts with G-). Leave empty to switch tracking off.
+  // After changing it, run: node tools/build-pages.js
+  ga4: '',
+
   // Opening hours (Dubai time). 1 = Monday … 6 = Saturday. Sunday closed.
   openDays: [1, 2, 3, 4, 5, 6],
   openFrom: 7.5,  // 7:30am

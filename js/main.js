@@ -3,6 +3,8 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const CATS = window.FT_CATS, FAMS = window.FT_FAMILIES, IMG = window.FT_IMG || '', CFG = window.FT_CONFIG;
+  // category page file name (a few have a shorter address; see tools/build-pages.js PAGE_URL)
+  const pageOf = c => (window.FT_PAGE_URL && window.FT_PAGE_URL[c.slug]) || c.slug;
   // Category photos: the cover first, then each product's own photo.
   CATS.forEach(c => { c.imgs = [...new Set([c.cover || c.items[0][3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -740,7 +742,7 @@
       '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
   // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
-  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + c.slug + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + pageOf(c) + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
 
   const megaBtn = $('#megaBtn');
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
@@ -819,7 +821,7 @@
   // category rail with photos
   // real links to each category page (search engines follow them); a click filters the list on this page instead
   $('#katRail').innerHTML = '<a class="kr is-on" href="products/index.html" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></a>' +
-    CATS.map(c => '<a class="kr" href="products/' + c.slug + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
+    CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
     e.preventDefault();
