@@ -126,3 +126,9 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 .btn--wa:hover{background:#0f7a40}
 @media (max-width:700px){.top .btn--call{width:46px;height:46px}}
 @media (max-width:420px){.top .btn--call{margin-left:auto}.top .btn--wa{margin-left:0}}
+
+/* Arabic pages (right to left) */
+[dir=rtl] .guide ul{margin:12px 1.2em 0 0}
+[dir=rtl] .tbl caption,[dir=rtl] .tbl th,[dir=rtl] .tbl td{text-align:right}
+[dir=rtl] .crumbs i{display:inline-block;transform:scaleX(-1)}
+[dir=rtl] .hero h1,[dir=rtl] .guide h2,[dir=rtl] .faq h2,[dir=rtl] .fam h2,[dir=rtl] .ask h2,[dir=rtl] .more h2{font-family:system-ui,'Segoe UI',Tahoma,sans-serif;text-transform:none;letter-spacing:0;line-height:1.25}
