@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (28 categories, 233 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (28 categories, 255 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -10,7 +10,7 @@ window.FT_FAMILIES = [
 ];
 
 window.FT_CATS = [
-  { slug: 'gate-valves', name: 'Gate Valves', fam: 'valves',
+  { slug: 'gate-valves', name: 'GATE VALVE', fam: 'valves',
     desc: 'Full-bore isolation for on/off service — bronze, stainless, cast iron and carbon steel, screwed or flanged.',
     cover: 'gate-valves/edit-mv58e54t.jpg',
     items: [
@@ -24,7 +24,7 @@ window.FT_CATS = [
       ['Bronze Gate Valve', ['1070'], '½" – 2"', 'gate-valves/edit-mv3t1joj.jpg'],
       ['CI Knife Edge Gate Valve F/T', ['CL150'], '2" – 12"', 'gate-valves/9.jpg']
     ] },
-  { slug: 'globe-valves', name: 'Globe Valves', fam: 'valves',
+  { slug: 'globe-valves', name: 'GLOBE VALVE', fam: 'valves',
     desc: 'Throttling and flow regulation — S.S, C.S, forged steel and C.I bodies from ½" to 12".',
     cover: 'globe-valves/edit-mv5892zx.jpg',
     items: [
@@ -35,7 +35,7 @@ window.FT_CATS = [
       ['SS 316 Globe Valve', ['600', '800 WOG', 'SW', 'NPT'], '½" – 2"', 'globe-valves/ktn-13.jpg'],
       ['Forged Steel Globe Valve A105 800#', ['SW', 'NPT'], '½" – 2"', 'globe-valves/5.jpg']
     ] },
-  { slug: 'check-valves', name: 'Check Valves', fam: 'valves',
+  { slug: 'check-valves', name: 'CHECK VALVE', fam: 'valves',
     desc: 'Non-return protection — swing, spring, wafer and dual-plate designs.',
     cover: 'check-valves/edit-mv3wsefe.jpg',
     items: [
@@ -54,7 +54,7 @@ window.FT_CATS = [
       ['SS Check Valve Vertical', ['1000 WOG'], '½" – 4"', 'check-valves/edit-mv3wsefe.jpg'],
       ['C.I Dual-Plate Check Valve', ['PN16', 'DI/SS DISC'], '2" – 12"', 'check-valves/edit-mv2t5wrf.jpg']
     ] },
-  { slug: 'ball-valves', name: 'Ball Valves', fam: 'valves',
+  { slug: 'ball-valves', name: 'BALL VALVE', fam: 'valves',
     desc: 'Quarter-turn shut-off from 600 to 3000 WOG — 1PC, 2PC and 3PC designs in bronze, brass, S.S, C.S and C.I.',
     cover: 'ball-valves/edit-mv2dxfry.jpg',
     items: [
@@ -74,7 +74,7 @@ window.FT_CATS = [
       ['SS Ball Valve, 3PC', ['3000#', 'NPT', 'BSPT'], '¼" – 2"', 'ball-valves/ktn-43.jpg'],
       ['Hydraulic HIGH PRESSURE Ball Valve', ['600#', 'NPT'], '¼" – 2"', 'ball-valves/edit-mv2dw070.jpg']
     ] },
-  { slug: 'y-strainers', name: 'Y Strainers', fam: 'valves',
+  { slug: 'y-strainers', name: 'Y STRAINER', fam: 'valves',
     desc: 'Line protection for pumps, meters and valves — screwed and flanged, ½" to 12".',
     cover: 'y-strainers/edit-mv590k9m.jpg',
     items: [
@@ -87,50 +87,49 @@ window.FT_CATS = [
       ['C.I Y Strainer F/T', ['PN16'], '1½" – 8"', 'y-strainers/edit-mv592dlo.jpg'],
       ['Forged Steel Y Strainer A105', ['800 WOG', 'NPT'], '½" – 2"', 'y-strainers/edit-mv599aau.jpg']
     ] },
-  { slug: 'safety-valves', name: 'Safety Valves', fam: 'valves',
-    desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever.',
-    cover: 'safety-valves/edit-mv2ecfs7.jpg',
+  { slug: 'safety-valves', name: 'SAFETY VALVE', fam: 'valves',
+    desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever, plus brass air vents and air release valves.',
+    cover: 'safety-valves/edit-mv6mrp28.jpg',
     items: [
-      ['Bronze Safety Valve, with & without lever', ['20 BAR', 'NPT'], '1½" – 2"', 'safety-valves/edit-mv2ecfs7.jpg'],
-      ['Bronze Safety Valve, with & without lever', ['10 BAR', 'NPT'], '1½" – 2"', 'safety-valves/edit-mv2ecjco.jpg']
+      ['Safety Valve Without Lever', ['10bar', '20bar', 'NPT'], '½" – 2"', 'safety-valves/edit-mv6mrp28.jpg', 'Bronze'],
+      ['Safety Valve With Lever', ['10 BAR', 'NPT'], '½" – 2"', 'safety-valves/edit-mv2ecjco.jpg', 'Bronze'],
+      ['Air Vent', ['THREADED'], '½", ¾", 1"', 'brass-fittings-valves/brass-air-vent.jpg', 'Brass'],
+      ['Air Release Valve', ['THREADED'], '1"', 'safety-valves/edit-mv6mnsfe.jpg', 'Brass']
     ] },
-  { slug: 'butterfly-valves', name: 'Butterfly Valves', fam: 'valves',
+  { slug: 'butterfly-valves', name: 'BUTTERFLY VALVE', fam: 'valves',
     desc: 'Compact quarter-turn valves — lever and lug-type bodies, 1½" to 12".',
-    cover: 'butterfly-valves/edit-mv59dnvn.jpg',
+    cover: 'butterfly-valves/edit-mv6mx3am.jpg',
     items: [
-      ['C.I Butterfly Valve, DI Disc', ['PN16', 'LOCK & LEVER'], '1½" – 12"', 'butterfly-valves/edit-mv59dnvn.jpg'],
-      ['C.I Butterfly Valve, S.S Disc', ['PN16', 'LOCK & LEVER'], '1½" – 12"', 'butterfly-valves/2.jpg'],
-      ['C.I Butterfly Valve, S.S Disc, Lug Type', ['PN16', 'CL150'], '1½" – 12"', 'butterfly-valves/5.jpg']
+      ['Butterfly Valve, DI Disc', ['PN16', 'LOCK & LEVER'], '1½" – 12"', 'butterfly-valves/edit-mv6mx3am.jpg', 'Cast iron'],
+      ['Butterfly Valve, S.S Disc', ['PN16', 'LOCK & LEVER'], '1½" – 12"', 'butterfly-valves/2.jpg', 'Cast iron'],
+      ['Butterfly Valve, S.S Disc, Lug Type', ['PN16', 'CL150'], '1½" – 12"', 'butterfly-valves/5.jpg', 'Cast iron']
     ] },
-  { slug: 'quick-couplings', name: 'Quick Couplings', fam: 'couplings',
-    desc: 'Bauer, Miller, Storz and camlock couplings for fast, secure hose connections.',
+  { slug: 'quick-couplings', name: 'COUPLINGS (BAUER, MILLAR, STORZ)', fam: 'couplings',
+    desc: 'Bauer, Millar and Storz couplings for fast, secure hose connections.',
     cover: 'quick-couplings/edit-mv2eigwv.jpg',
     items: [
-      ['Bauer Coupling', [], '3" – 8"', 'quick-couplings/edit-mv2eigwv.jpg'],
-      ['Millar Coupling', [], '3" – 8"', 'quick-couplings/edit-mv2ejntv.jpg'],
-      ['Aluminium Storz Coupling', [], '1½" – 4"', 'quick-couplings/edit-mv45df09.jpg'],
-      ['SS Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv45141g.jpg'],
-      ['Brass Camlock Coupling', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv44lj6l.jpg'],
-      ['Aluminium Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv2ekofo.jpg'],
-      ['PVC Camlock Coupling', ['NPT', 'BSPT'], '1" – 3"', 'quick-couplings/edit-mv44y1xi.jpg'],
-      ['Aluminium Reducing Camlock Coupling', [], '2" – 4"', 'quick-couplings/9.jpg'],
-      ['Brass Camlock Leg', [], '2" – 6"', 'quick-couplings/10.jpg']
+      ['BAUER COUPLING', [], '3" – 8"', 'quick-couplings/edit-mv2eigwv.jpg', 'Galvanised'],
+      ['MILLAR COUPLING', [], '3" – 8"', 'quick-couplings/edit-mv6dhilk.jpg', 'Galvanised'],
+      ['STORZ COUPLING', [], '1½" – 4"', 'quick-couplings/edit-mv6dnofp.jpg', 'Aluminium']
     ] },
-  { slug: 'qrc-couplings-ludecke', name: 'QRC Couplings — Ludecke', fam: 'couplings',
-    desc: 'Brass quick-release (QRC) couplings for air lines, plus single and double bolt hose clamps.',
-    cover: 'qrc-couplings-ludecke/1.jpg',
+  { slug: 'qrc-couplings-ludecke', name: 'LUDECKE QRC COUPLINGS BRASS AND CP.', fam: 'couplings',
+    desc: 'Quick-release (QRC) couplings for air lines, in brass and in carbon steel and stainless.',
+    cover: 'qrc-couplings-ludecke/edit-mv6no9lw.jpg',
     items: [
-      ['Brass QRC Hose Body', ['LUDECKE'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/1.jpg'],
-      ['Brass QRC Male Body', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/2.jpg'],
-      ['Brass QRC Hose Plug', ['LUDECKE'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/3.jpg'],
-      ['Brass QRC Female Plug', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/4.jpg'],
-      ['Brass QRC Female Body', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/5.jpg'],
-      ['Brass QRC Male Plug', ['LUDECKE'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/6.jpg'],
-      ['Double Bolt Clamp', [], 'SL 29 – SL 675', 'qrc-couplings-ludecke/7.jpg'],
-      ['Single Bolt Clamp', ['CS ZINC PLATED'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv2fnn47.jpg'],
-      ['Single Bolt Clamp', ['SS'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv2frv8b.jpg']
+      ['QRC Coupling Hose End', ['LUDECKE - GERMANY'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/1.jpg', 'Brass'],
+      ['QRC Coupling Hose End', ['CHINA'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/edit-mv6dv9yp.jpg', 'Carbon steel & Stainless'],
+      ['QRC Coupling Male Thread', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/2.jpg', 'Brass'],
+      ['QRC Coupling Male Thread', ['CHINA'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv6e4amy.jpg', 'Carbon steel & Stainless'],
+      ['QRC Hose Plug', ['LUDECKE - GERMANY'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/3.jpg', 'Brass'],
+      ['QRC Hose Plug', ['CHINA'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/edit-mv6dyfhq.jpg', 'Carbon steel & Stainless'],
+      ['QRC Female Plug', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/4.jpg', 'Brass'],
+      ['QRC Female Plug', ['CHINA'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv6e86cm.jpg', 'Carbon steel & Stainless'],
+      ['QRC Female Body', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/5.jpg', 'Brass'],
+      ['QRC Female Body', ['CHINA'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv6ecun3.jpg', 'Carbon steel & Stainless'],
+      ['QRC Male Plug', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/6.jpg', 'Brass'],
+      ['QRC Male Plug', ['CHINA'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv6e8v1m.jpg', 'Carbon steel & Stainless']
     ] },
-  { slug: 'union-flexible-connectors', name: 'Union & Flexible Connectors', fam: 'couplings',
+  { slug: 'union-flexible-connectors', name: 'Flexible Connectors', fam: 'couplings',
     desc: 'Galvanised flexible unions and single-bellow flange connectors that absorb movement and vibration.',
     cover: 'union-flexible-connectors/1.jpg',
     items: [
@@ -145,24 +144,24 @@ window.FT_CATS = [
       ['Blanking Union', ['OILFIELD'], '', 'hammer-union-spares/blanking-union/2.jpg'],
       ['Hose Connector', ['OILFIELD'], '', 'hammer-union-spares/hose-connector/3.jpg']
     ] },
-  { slug: 'ms-forged-low-pressure-bw-fittings', name: 'M.S Forged, Low Pressure & B/W Fittings', fam: 'fittings',
+  { slug: 'ms-forged-low-pressure-bw-fittings', name: 'M.S PIPES & BUTT-WELD FITTINGS', fam: 'fittings',
     desc: 'M.S and C.S pipe, butt-weld elbows, tees, reducers and caps, swage nipples and long nipples.',
     cover: 'ms-forged-low-pressure-bw-fittings/edit-mv2hv11p.jpg',
     items: [
-      ['M.S & C.S PIPES', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv527vu7.jpg'],
-      ['M.S B/W Elbow 45° SHORT & LONG', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4z0xpm.jpg'],
-      ['M.S B/W Elbow 90° SHORT & LONG', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yujvr.jpg'],
-      ['M.S B/W Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4z1jaa.jpg'],
-      ['M.S B/W Reducer Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yxkgs.jpg'],
-      ['M.S B/W End Cap', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/bw-end-cap.jpg'],
-      ['M.S B/W Concentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yzj2v.jpg'],
-      ['M.S B/W Eccentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yyr0y.jpg'],
-      ['M.S B/W ELBOW', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zcpm2.jpg'],
-      ['M.S Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zjccp.jpg'],
-      ['M.S Long A105', ['SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 8" × 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv52c2f4.jpg']
+      ['M.S & C.S PIPES', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv527vu7.jpg', 'Mild steel'],
+      ['Elbow 45° Short & Long Radius', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4z0xpm.jpg', 'Mild steel'],
+      ['Elbow 90° Short & Long Radius', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yujvr.jpg', 'Mild steel'],
+      ['Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv6nzq1x.jpg', 'Mild steel'],
+      ['Reducer Tee', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv6o1f8r.jpg', 'Mild steel'],
+      ['End Cap', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/bw-end-cap.jpg', 'Mild steel'],
+      ['Concentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yzj2v.jpg', 'Mild steel'],
+      ['Eccentric Reducer', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yyr0y.jpg', 'Mild steel'],
+      ['ELBOW', ['SCH STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zcpm2.jpg', 'Mild steel'],
+      ['Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zjccp.jpg', 'Carbon steel'],
+      ['Long Nipple', ['SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 8" × 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv6ny199.jpg']
     ] },
-  { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S Forged, Low Pressure & B/W Fittings', fam: 'fittings',
-    desc: 'S.S threaded fittings, nipples, threadolets and weldolets, 1000 to 3000 psi, ⅛" to 4".',
+  { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S Forged Fittings (Thread & SW)', fam: 'fittings',
+    desc: 'S.S threaded fittings, nipples and threadolets, 1000 to 3000 psi, ⅛" to 4".',
     cover: 'ss-forged-low-pressure-bw-fittings/edit-mv2icvgo.jpg',
     items: [
       ['S.S Threaded Elbow-45°', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv513s63.jpg'],
@@ -178,8 +177,7 @@ window.FT_CATS = [
       ['S.S Threaded Socket', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv5a1ihj.jpg'],
       ['S.S King Nipple', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51s908.jpg'],
       ['S.S Hex Nipple', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv54gaa4.jpg'],
-      ['S.S Threadolet', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59zi84.jpg'],
-      ['S.S Weldolet', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv54prik.jpg']
+      ['S.S Threadolet', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59zi84.jpg']
     ] },
   { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
     desc: 'CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
@@ -274,7 +272,8 @@ window.FT_CATS = [
       ['C.S thread Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv559u9x.jpg'],
       ['C.S & S.S Socket-Weld Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv55ljvp.jpg'],
       ['C.S & S.S Socket-Weld Plug', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv55rml1.jpg'],
-      ['C.S King Nipple', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg']
+      ['C.S King Nipple', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg'],
+      ['S.S Weldolet', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv54prik.jpg']
     ] },
   { slug: 'threaded-forged-fittings', name: 'Threaded Forged Fittings', fam: 'fittings',
     desc: 'Forged C.S threaded fittings, Class 1000 to 6000.',
@@ -316,72 +315,95 @@ window.FT_CATS = [
       ['G.I Pipe', ['SH40', 'CL-B', 'CL-C'], '½" – 6"', 'gi-pipe-fittings/edit-mv5fgznx.jpg']
     ] },
   { slug: 'camlock-couplings', name: 'Camlock Couplings', fam: 'couplings',
-    desc: 'Cam and groove couplings by type: adapters, couplers, caps, plugs, doubles and reducers in aluminium.',
-    cover: 'camlock-couplings/edit-mv5fltgi.jpg',
+    desc: 'Cam and groove couplings by type: adapters, couplers, caps, plugs, doubles and reducers in aluminium, stainless, brass and PVC.',
+    cover: 'camlock-couplings/edit-mv6mj4lh.jpg',
     items: [
-      ['Aluminium Camlock Type A', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv5fltgi.jpg'],
-      ['Aluminium Camlock Type B, Female Coupler × Male Thread', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv5fl63e.jpg'],
-      ['Aluminium Camlock Type C, Female Coupler × Hose Shank', [], '½" – 6"', 'camlock-couplings/edit-mv5fnc6a.jpg'],
-      ['Aluminium Camlock Type D, Female Coupler × Female Thread', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv5fohwc.jpg'],
-      ['Aluminium Camlock Type E, Male Adapter × Hose Shank', [], '½" – 6"', 'camlock-couplings/edit-mv5fq7pz.jpg'],
-      ['Aluminium Camlock Type F, Male Adapter × Male Thread', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/aluminium-camlock-type-f-male-adapter-male-thread.jpg'],
-      ['Aluminium Camlock Type DC, Dust Cap (fits Male Adapters)', [], '½" – 6"', 'camlock-couplings/edit-mv5ft8mv.jpg'],
-      ['Aluminium Camlock Type DP, Dust Plug (fits Female Couplers)', [], '½" – 6"', 'camlock-couplings/edit-mv5fsrif.jpg'],
-      ['Aluminium Camlock Type AA, Double Adapter (Male × Male)', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv5fu0zm.jpg'],
-      ['Aluminium Camlock Type DD, Double Coupler (Female × Female)', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv5fw2px.jpg'],
-      ['Aluminium Camlock Type DA, Female Coupler × Male Adapter', [], '2" × 1½" – 6" × 4"', 'camlock-couplings/edit-mv5fwpw3.jpg'],
-      ['Aluminium Camlock Type AR, Reducing Adapter', [], '3" × 2" – 3" × 4"', 'camlock-couplings/aluminium-camlock-type-ar-reducing-adapter.jpg'],
-      ['Aluminium Camlock Type DR, Reducing Coupler', [], '2" × 1½" – 3" × 2"', 'camlock-couplings/aluminium-camlock-type-dr-reducing-coupler.jpg'],
-      ['Aluminium API Tank Truck Adaptor', [], '6" × 4"', '']
+      ['Camlock Type A', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv6mgxnv.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type B', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv6kr5dy.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type C', [], '½" – 6"', 'camlock-couplings/edit-mv6kt5un.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type D', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv6kso4z.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type E', [], '½" – 6"', 'camlock-couplings/edit-mv6ktv39.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type F', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv6kyhys.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type DC', [], '½" – 6"', 'camlock-couplings/edit-mv6l10yd.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type DP', [], '½" – 6"', 'camlock-couplings/edit-mv6l2j2w.jpg', 'Aluminium, Stainless, Brass, PVC'],
+      ['Camlock Type CR', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv6l5yvp.jpg', 'Aluminium'],
+      ['Camlock Type ER', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv6laegd.jpg', 'Other'],
+      ['Camlock Type AA', [], '1½" × 1½" – 4" × 4"', 'camlock-couplings/edit-mv6lbxcf.jpg'],
+      ['Camlock Type DD', [], '1½" × 1½" – 4" × 4"', 'camlock-couplings/edit-mv6le5rk.jpg'],
+      ['Camlock Type DA', [], '2" × 1½" – 4" × 3"', 'camlock-couplings/edit-mv6l8dh1.jpg'],
+      ['Camlock Type AR', [], '3" × 2" – 3" × 4"', 'camlock-couplings/aluminium-camlock-type-ar-reducing-adapter.jpg'],
+      ['Camlock Type DR', [], '2" × 1½" – 3" × 2"', 'camlock-couplings/aluminium-camlock-type-dr-reducing-coupler.jpg'],
+      ['API Tank Truck Adaptor', [], '6" × 4"', 'camlock-couplings/edit-mv6liqvo.jpg'],
+      ['Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'camlock-couplings/edit-mv6mau6e.jpg', 'Brass'],
+      ['Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv2ekofo.jpg', 'Aluminium'],
+      ['Camlock Coupling', ['NPT', 'BSPT'], '1" – 3"', 'quick-couplings/edit-mv44y1xi.jpg', 'PVC'],
+      ['Reducing Camlock Coupling', [], '2" – 4"', 'camlock-couplings/edit-mv6m9idc.jpg', 'Stainless']
     ] },
   { slug: 'hoses', name: 'Industrial Hoses', fam: 'couplings',
-    desc: 'Composite hose assemblies with camlock or flanged ends, S.S braided hose and PVC suction hose.',
-    cover: 'hoses/composite-hose-camlock-ends.jpg',
+    desc: 'Composite hose assemblies with camlock or flanged ends, oil and water suction hose, and PVC suction, braided, clear, steel wire and lay flat hose.',
+    cover: 'hoses/edit-mv6hkgko.jpg',
     items: [
-      ['Composite Hose, Camlock Ends', ['M/F CAMLOCK'], '1½" – 4" · 2 – 30 m', 'hoses/composite-hose-camlock-ends.jpg'],
-      ['Composite Hose, Flanged Ends', ['CL150', 'F/T'], '2" · 1 – 4.5 m', 'hoses/composite-hose-flanged-ends.jpg'],
-      ['S.S Single-Braided Hose', ['SS316 TUBE', 'SS304 BRAID'], '3" · 5 m', 'hoses/s-s-single-braided-hose.jpg'],
-      ['Green PVC Suction Hose', [], '2½"', 'hoses/green-pvc-suction-hose.jpg']
+      ['Composite Hose, Camlock Ends', ['M/F CAMLOCK'], '1½" – 4" · 2 – 30 mtr', 'hoses/edit-mv6hkgko.jpg', 'Aluminium, Stainless'],
+      ['Composite Hose, Flanged Ends', ['PN16', 'CL150'], '2" · 1 – 4.5 m', 'hoses/edit-mv6hl87z.jpg', 'Mild steel, Stainless'],
+      ['Green Suction Hose', [], '1" – 4"', 'hoses/edit-mv6j37n6.jpg', 'PVC'],
+      ['Oil Suction & Discharge Hose', ['150psi (10bar)', '300psi (20bar)'], '1" – 4"', '', 'Rubber'],
+      ['Water Suction & Discharge Hose', ['150psi (10bar)', '300psi (20bar)'], '1" – 4"', 'hoses/edit-mv6j597l.jpg'],
+      ['Green PVC Suction Hose', [], '2½"', 'hoses/edit-mv6j8g5v.jpg'],
+      ['Braided Hose', ['300psi (20bar)'], '¼" – 1"', 'hoses/edit-mv6jn3zf.jpg', 'PVC'],
+      ['Clear Hose', ['300psi (20bar)'], '¼" – 1"', 'hoses/edit-mv6jk137.jpg', 'PVC'],
+      ['Steel Wire Hose', ['4bar - 8bar'], '½" – 4"', 'hoses/edit-mv6jszei.jpg', 'PVC'],
+      ['Lay Flat Hose', ['2bar - 4bar'], '2" – 6"', 'hoses/edit-mv6jvx75.jpg', 'PVC']
     ] },
-  { slug: 'brass-fittings-valves', name: 'Brass Fittings & Valves', fam: 'fittings',
-    desc: 'Brass and bronze threaded fittings, valves and accessories: air vents, tank connectors, float and solenoid valves, test points.',
-    cover: 'brass-fittings-valves/brass-air-release-valve.jpg',
+  { slug: 'brass-fittings-valves', name: 'SS AND BRASS PIPE FITTING', fam: 'fittings',
+    desc: 'SS and brass threaded fittings from ⅛" to 2": nipples, bushes, sockets, elbows, tees, plugs and caps, plus tank connectors, solenoid valves and test points.',
+    cover: 'brass-fittings-valves/edit-mv6hbtdh.jpg',
     items: [
-      ['Brass Air Release Valve', ['THREADED'], '1"', 'brass-fittings-valves/brass-air-release-valve.jpg'],
-      ['Brass Air Vent', ['THREADED'], '½", ¾", 1"', 'brass-fittings-valves/brass-air-vent.jpg'],
-      ['Brass Float Valve with PVC Ball', ['THREADED'], '2"', ''],
-      ['Brass Float Valve with Copper Ball', ['THREADED'], '4"', 'brass-fittings-valves/brass-float-valve-with-copper-ball.jpg'],
-      ['Brass Hex Nipple', ['THREADED'], '⅜", ½"', 'brass-fittings-valves/brass-hex-nipple.jpg'],
-      ['Brass Reducing Bush', ['THREADED'], '½" × ¼", ½" × ⅜", ¾" × ½", 1" × ¾"', 'brass-fittings-valves/brass-reducing-bush.jpg'],
-      ['Brass Round Bar', [], '50 mm × 1 ft', 'brass-fittings-valves/brass-round-bar.jpg'],
-      ['Brass Socket', ['THREADED'], '¼", ¾"', 'brass-fittings-valves/brass-socket.jpg'],
-      ['Brass Solenoid Valve', ['THREADED'], '¾", 1"', 'brass-fittings-valves/brass-solenoid-valve.jpg'],
-      ['Brass Tank Connector', ['THREADED'], '½" – 4"', 'brass-fittings-valves/brass-tank-connector.jpg'],
-      ['Brass Tee', ['THREADED'], '⅜", ½"', 'brass-fittings-valves/brass-tee.jpg'],
+      ['Hex Nipple', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6g1y0m.jpg', 'Stainless, Brass'],
+      ['Reducer Hex Nipple', ['THREADED'], '¼" × ⅛" – 2" × 1½"', 'brass-fittings-valves/edit-mv6hbtdh.jpg', 'Stainless, Brass'],
+      ['Reducing Bush', ['THREADED'], '¼" × ⅛" – 2" × 1½"', 'brass-fittings-valves/brass-reducing-bush.jpg', 'Stainless, Brass'],
+      ['Reducing Bush', ['THREADED'], '¼" × ⅛" – 2" × 1½"', 'brass-fittings-valves/edit-mv6g7a1p.jpg', 'Stainless, Brass'],
+      ['Socket', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6g6w4l.jpg', 'Stainless, Brass'],
+      ['Elbow', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6g9bqt.jpg', 'Stainless, Brass'],
+      ['Tee', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6gb5yu.jpg', 'Stainless, Brass'],
+      ['King Nipple', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6gcqjg.jpg', 'Stainless, Brass'],
+      ['Female King Nipple', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6gglaw.jpg', 'Stainless, Brass'],
+      ['Male/Female Nipple', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6gn2ph.jpg', 'Stainless, Brass'],
+      ['Hose Mender', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6gzq3k.jpg', 'Stainless, Brass'],
+      ['End Plug', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6h1sza.jpg', 'Stainless, Brass'],
+      ['End Cap', ['THREADED'], '⅛" – 2"', 'brass-fittings-valves/edit-mv6h31o1.jpg', 'Stainless, Brass'],
+      ['Brass Solenoid Valve', ['THREADED'], '¾", 1"', 'brass-fittings-valves/brass-solenoid-valve.jpg', 'Brass'],
+      ['Brass Tank Connector', ['THREADED'], '½" – 4"', 'brass-fittings-valves/edit-mv6gqw0g.jpg', 'Stainless, Brass'],
+      ['Male Tee', ['THREADED'], '½"', 'brass-fittings-valves/edit-mv6h68q1.jpg', 'Stainless, Brass'],
+      ['Male Elbow', ['THREADED'], '½"', 'brass-fittings-valves/edit-mv6h7aa1.jpg', 'Stainless, Brass'],
       ['Brass Test Point', ['THREADED'], '¼", ½"', 'brass-fittings-valves/brass-test-point.jpg']
     ] },
-  { slug: 'foot-valves', name: 'Foot Valves', fam: 'valves',
-    desc: 'Brass net-type and cast iron foot valves, threaded or flanged PN16.',
-    cover: 'foot-valves/brass-foot-valve-net-type.jpg',
+  { slug: 'foot-valves', name: 'FOOT AND FLOAT VALVE', fam: 'valves',
+    desc: 'Brass, SS net-type, cast iron and PVC foot valves, threaded or flanged PN16, plus float valves with copper or PVC ball.',
+    cover: 'foot-valves/edit-mv6f9iuw.jpg',
     items: [
-      ['Brass Foot Valve, Net Type', ['THREADED'], '½" – 4"', 'foot-valves/brass-foot-valve-net-type.jpg'],
-      ['C.I Foot Valve', ['PN16', 'F/T'], '10"', 'foot-valves/c-i-foot-valve.jpg'],
-      ['C.I Foot Valve with Rubber Flap', ['NPT'], '4"', 'foot-valves/c-i-foot-valve-with-rubber-flap.jpg']
+      ['Foot Valve Net Type', ['BSPT'], '½" – 4"', 'foot-valves/edit-mv6fbjh2.jpg', 'Brass, Stainless'],
+      ['Foot Valve', ['BSPT'], '½" – 4"', 'foot-valves/edit-mv6f9iuw.jpg', 'Brass'],
+      ['Foot Valve Flanged With Leather Flap', ['PN16'], '4" – 8"', 'foot-valves/c-i-foot-valve.jpg', 'Cast iron'],
+      ['Foot Valve with Rubber Flap', ['NPT'], '2" – 8"', 'foot-valves/c-i-foot-valve-with-rubber-flap.jpg', 'Cast iron'],
+      ['Foot Valve', ['NPT'], '1" – 6"', 'foot-valves/edit-mv6flko4.jpg', 'PVC'],
+      ['Float Valve with Copper Ball', ['THREADED'], '4"', 'foot-valves/edit-mv6fvvvb.jpg', 'Brass, Copper'],
+      ['Float Valve with PVC Ball', ['THREADED'], '½" – 2"', 'foot-valves/edit-mv6fw7mm.jpg', 'Brass']
     ] },
-  { slug: 'cock-valves', name: 'Cock Valves', fam: 'valves',
-    desc: 'Brass and stainless steel drain cocks, tank level cocks and cock valves.',
-    cover: 'cock-valves/brass-drain-cock.jpg',
+  { slug: 'cock-valves', name: 'HOSE CLAMP', fam: 'couplings',
+    desc: 'Single and double bolt hose clamps in zinc plated carbon steel or stainless, plus an S.S cock valve.',
+    cover: 'qrc-couplings-ludecke/edit-mv6epth9.jpg',
     items: [
-      ['Brass Drain Cock', ['THREADED'], '½"', 'cock-valves/brass-drain-cock.jpg'],
-      ['Brass Tank Level Cock', ['THREADED'], '12 mm × ½" – 25 mm × 1"', 'cock-valves/brass-tank-level-cock.jpg'],
-      ['S.S Cock Valve', ['THREADED'], '½" × 12 mm', 'cock-valves/s-s-cock-valve.jpg'],
-      ['S.S Cock Valve, Hex Type', ['THREADED'], '½"', 'cock-valves/s-s-cock-valve-hex-type.jpg']
+      ['S.S Cock Valve', ['THREADED'], '½" × 12 mm', 'cock-valves/s-s-cock-valve.jpg', 'Stainless'],
+      ['Double Bolt Clamp', [], 'SL 29 – SL 675', 'qrc-couplings-ludecke/edit-mv6epth9.jpg', 'Carbon steel'],
+      ['Single Bolt Clamp', ['ZINC PLATED'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv6ern5d.jpg', 'Carbon steel'],
+      ['Single Bolt Clamp', ['SS'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv6eudqq.jpg', 'Stainless']
     ] },
-  { slug: 'acrylic-tubes', name: 'Acrylic Tubes', fam: 'sealing',
-    desc: 'Clear acrylic tubes with 2 mm wall, for level gauges and sight glasses.',
+  { slug: 'acrylic-tubes', name: 'ACRYLIC TUBE AND FITTING', fam: 'sealing',
+    desc: 'Clear acrylic tubes with 2 mm wall for level gauges and sight glasses, plus brass tank level cocks.',
     cover: 'acrylic-tubes/clear-acrylic-tube.jpg',
     items: [
-      ['Clear Acrylic Tube', ['2 MM WALL'], '8 mm – 75 mm', 'acrylic-tubes/clear-acrylic-tube.jpg']
+      ['Clear Acrylic Tube', ['2 MM WALL'], '8 mm – 75 mm', 'acrylic-tubes/clear-acrylic-tube.jpg', 'Acrylic'],
+      ['Tank Level Cock', ['THREADED'], '12 mm × ½" – 25 mm × 1"', 'cock-valves/edit-mv6f027a.jpg', 'Brass']
     ] }
 ];
 
