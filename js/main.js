@@ -228,12 +228,21 @@
   /* ================= Quote basket (line key -> qty) ================= */
   const rfq = new Map();
   try {
-    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q]) => {
-      const o = itemOf(k); if (!o) return;
+    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name]) => {
+      let o = itemOf(k);
+      // the product list gets reordered: a saved line follows its product by name, not by its old place in the list
+      if (name && (!o || o.name !== name)) {
+        const bar = k.indexOf('|'), pick = bar < 0 ? '' : k.slice(bar), slug = slugAlias(k.split(':')[0]);
+        const c = [catBySlug(slug)].concat(CATS).find(x => x && x.items.some(it => it[0] === name));
+        o = c ? itemOf(c.slug + ':' + c.items.findIndex(it => it[0] === name) + pick) : null;
+        if (o) k = o.id + pick;
+      }
+      if (!o) return;
       rfq.set(o.pick === null ? keyOf(o, defaultPick(o)) : k, Math.max(1, +q || 1));
     });
   } catch (e) {}
-  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq])); } catch (e) {} };
+  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq].map(([k, q]) => { const o = itemOf(k); return [k, q, o ? o.name : '']; }))); } catch (e) {} };
+  if (rfq.size) saveRfq();   // older saved quotes get product names added, so they survive list changes
   const hasAny = id => [...rfq.keys()].some(k => k.startsWith(id + '|'));
   const sizeOfLine = o => { const w = sizeWords(o, o.pick); return w ? ' (' + w + ')' : ''; };
   const lineText = (o, q) => '• ' + o.name + sizeOfLine(o) + ' × ' + q;
@@ -1145,8 +1154,19 @@
     if (rfq.size) lines.push('', 'Items:', ...[...rfq].map(([id, q]) => lineText(itemOf(id), q)));
     return lines.join('\n');
   }
+  // the floating Call / WhatsApp buttons step aside while product cards or the form sit under them (every card has its own WhatsApp button)
+  (() => {
+    const zones = [$('#katRail'), $('.kat'), $('#form')].filter(Boolean);
+    if (!$('#fabs') || !zones.length || !('IntersectionObserver' in window)) return;
+    const on = new Set();
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => e.isIntersecting ? on.add(e.target) : on.delete(e.target));
+      document.body.classList.toggle('fabs-off', on.size > 0);
+    }, { rootMargin: '-45% 0px 0px 0px' });
+    zones.forEach(z => io.observe(z));
+  })();
   function validForm() {
-    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
+    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => /^\+?[\d\s()\-]{7,20}$/.test(v.trim()) && v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
     let first = null;
     checks.forEach(([s, fn]) => {
       const el = $(s, form); if (!el) return;

@@ -8,8 +8,8 @@ img{display:block;max-width:100%}
 .wrap{width:100%;max-width:1480px;margin:0 auto;padding:0 var(--pad)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 22px;border-radius:99px;font-weight:600;font-size:18px;white-space:nowrap;transition:background .2s,transform .2s}
 .btn svg{width:22px;height:22px}
-.btn--wa{background:var(--wa);color:#fff}
-.btn--wa:hover{background:#1fb457}
+.btn--wa{background:#128c4a;color:#fff}
+.btn--wa:hover{background:#0f7a40}
 .btn--dark{background:var(--text);color:#fff;flex:1;min-width:0;padding:0 14px;font-size:16.5px}
 .btn--dark:hover{background:var(--red)}
 .btn--round{width:52px;padding:0;flex:none}
