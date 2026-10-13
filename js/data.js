@@ -95,7 +95,7 @@ window.FT_CATS = [
       ['Bronze Safety Valve, with & without lever', ['10 BAR', 'NPT'], '1½" – 2"', 'safety-valves/edit-mv2ecjco.jpg']
     ] },
   { slug: 'butterfly-valves', name: 'Butterfly Valves', fam: 'valves',
-    desc: 'Compact large-bore control — lever, gear and lug-type bodies up to 24".',
+    desc: 'Compact quarter-turn valves — lever and lug-type bodies, 1½" to 12".',
     cover: 'butterfly-valves/edit-mv59dnvn.jpg',
     items: [
       ['C.I Butterfly Valve, DI Disc', ['PN16', 'LOCK & LEVER'], '1½" – 12"', 'butterfly-valves/edit-mv59dnvn.jpg'],
@@ -117,7 +117,7 @@ window.FT_CATS = [
       ['Brass Camlock Leg', [], '2" – 6"', 'quick-couplings/10.jpg']
     ] },
   { slug: 'qrc-couplings-ludecke', name: 'QRC Couplings — Ludecke', fam: 'couplings',
-    desc: 'Precision brass quick-release couplings from Ludecke, Germany.',
+    desc: 'Brass quick-release (QRC) couplings for air lines, plus single and double bolt hose clamps.',
     cover: 'qrc-couplings-ludecke/1.jpg',
     items: [
       ['Brass QRC Hose Body', ['LUDECKE'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/1.jpg'],
@@ -257,7 +257,7 @@ window.FT_CATS = [
       ['S.S Long Nipple', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 8" × 12"', 'butt-weld-fittings/edit-mv520ula.jpg']
     ] },
   { slug: 'socket-weld-fittings', name: 'Socket-Weld Fittings', fam: 'fittings',
-    desc: 'Forged C.S and S.S socket-weld fittings to ASME B16.11, Class 1000 to 6000.',
+    desc: 'Forged C.S and S.S socket-weld fittings, Class 1000 to 6000.',
     cover: 'socket-weld-fittings/edit-mv57boqn.jpg',
     items: [
       ['C.S Socket-Weld Elbow 45°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv57boqn.jpg'],
@@ -277,7 +277,7 @@ window.FT_CATS = [
       ['C.S King Nipple', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'SW', 'B16.11'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg']
     ] },
   { slug: 'threaded-forged-fittings', name: 'Threaded Forged Fittings', fam: 'fittings',
-    desc: 'Forged C.S and S.S threaded fittings to ASME B16.11, Class 1000 to 6000.',
+    desc: 'Forged C.S threaded fittings, Class 1000 to 6000.',
     cover: 'threaded-forged-fittings/edit-mv55vf0m.jpg',
     items: [
       ['C.S Threaded Elbow, 45°', ['CL1000', 'CL2000', 'CL3000', 'CL6000', 'B16.11'], '½" – 4"', 'threaded-forged-fittings/edit-mv55vf0m.jpg'],
@@ -316,7 +316,7 @@ window.FT_CATS = [
       ['G.I Pipe', ['SH40', 'CL-B', 'CL-C'], '½" – 6"', 'gi-pipe-fittings/edit-mv5fgznx.jpg']
     ] },
   { slug: 'camlock-couplings', name: 'Camlock Couplings', fam: 'couplings',
-    desc: 'Cam and groove couplings by type: adapters, couplers, caps, plugs, doubles and reducers in aluminium, brass and PP.',
+    desc: 'Cam and groove couplings by type: adapters, couplers, caps, plugs, doubles and reducers in aluminium.',
     cover: 'camlock-couplings/edit-mv5fltgi.jpg',
     items: [
       ['Aluminium Camlock Type A', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv5fltgi.jpg'],

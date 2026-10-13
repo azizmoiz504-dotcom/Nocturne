@@ -180,7 +180,7 @@ function extraPage(pg, lang = 'en') {
     '<thead><tr>' + tb.head.map(h => '<th scope="col">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' +
     tb.rows.map(r => '<tr>' + r.map((c, i) => i ? '<td>' + esc(c) + '</td>' : '<th scope="row">' + esc(c) + '</th>').join('') + '</tr>').join('') + '</tbody></table></div>';
   const body = '<div class="wrap">' +
-    '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + up + 'index.html">' + T.home + '</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
+    '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + (lang === 'ar' ? '' : up) + 'index.html">' + T.home + '</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
     '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + esc(pg.h1) + '</h1>' +
       (pg.lead ? '<p class="lead">' + esc(pg.lead) + '</p>' : '') + '</header>' +
     (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + esc(s.h2) + '</h2>' : '') +
@@ -213,7 +213,7 @@ for (const pg of AR.pages || []) { fs.mkdirSync(path.dirname(pg.path), { recursi
 // Forwarding pages for old addresses (old links and bookmarks keep working; Google follows the canonical)
 const forward = (from, to) => {
   const rel = path.relative(path.dirname(from), to).split(path.sep).join('/');
-  fs.writeFileSync(from, '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="robots" content="noindex, follow">\n<title>Moved | Fakhri Tools</title>\n' +
+  fs.writeFileSync(from, '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Moved | Fakhri Tools</title>\n' +
     '<link rel="canonical" href="' + SITE + to + '">\n<meta http-equiv="refresh" content="0; url=' + rel + '">\n<script>location.replace("' + rel + '" + location.hash)</script>\n</head>\n<body><p>This page has moved: <a href="' + rel + '">' + SITE + to + '</a></p></body>\n</html>\n');
 };
 CATS.forEach(c => { if (PG(c) !== c.slug) forward('products/' + c.slug + '.html', 'products/' + PG(c) + '.html'); });
