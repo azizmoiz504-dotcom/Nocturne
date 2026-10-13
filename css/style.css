@@ -1568,3 +1568,19 @@ body.is-filtering main{z-index:130}
 .kr,.kr img{-webkit-user-drag:none}
 /* short screens (phones held sideways, small phones): more compact valve labels so they all fit */
 @media (max-height:700px) and (max-width:1100px){.vlabel__txt{padding:3px 8px}.vlabel__txt b{font-size:15px}.vlabel__txt small{display:none}.vlabel__line{width:14px}}
+
+/* floating Call / WhatsApp buttons step aside over the product cards and the form (they covered card buttons) */
+body.fabs-off .fabs{opacity:0;pointer-events:none;transform:translateY(24px)}
+.fabs{transition:bottom .6s var(--ease),opacity .4s,transform .5s var(--ease)}
+/* phones: every button, box and size picker is at least 44px tall, easy to tap */
+@media (max-width:899.98px){
+  .kc__add{height:44px}
+  .kc__wa{width:44px;height:44px}
+  .kc .pk select,.kc .pk input{height:44px}
+  .kchip{min-height:44px;padding-top:9px;padding-bottom:9px}
+  .kat-reset{min-height:44px;padding:0 14px}
+  #search{min-height:44px}
+  .kc__name button{padding:8px 0;margin:-8px 0}
+}
+/* a clear outline shows where you are when using the Tab key */
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
