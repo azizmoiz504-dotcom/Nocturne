@@ -1264,8 +1264,11 @@
     ScrollTrigger.batch('.kr', { start: 'top 96%', once: true, onEnter: b => gsap.to(b, { opacity: 1, x: 0, duration: 0.9, ease: 'expo.out', stagger: 0.04 }) });
 
     const mm = gsap.matchMedia();
-    const artEls = $$('.sector__art *').filter(e => e.tagName !== 'g');
+    const artEls = $$('.sector__art *').filter(e => e.tagName !== 'g' && !e.closest('defs') && !e.classList.contains('flow'));
     artEls.forEach(e => { e.setAttribute('pathLength', '1'); e.style.strokeDasharray = '1'; e.style.strokeDashoffset = '1'; });
+    // the moving red "flow" dashes appear once a drawing has finished drawing itself
+    gsap.set('.sector__art .flow', { opacity: 0 });
+    const showFlow = p => { if (!p.flowOn) { p.flowOn = true; gsap.to($$('.sector__art .flow', p), { opacity: 1, duration: 0.8 }); } };
     mm.add('(min-width: 900px)', () => {
       const track = $('.sectors__track'), sec = $('.sectors'), bar = $('.sectors__progress i');
       const dist = () => track.scrollWidth - innerWidth;
@@ -1274,16 +1277,16 @@
         scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + dist(), pin: true, anticipatePin: 1, scrub: 0.7, invalidateOnRefresh: true, onUpdate: s => { bar.style.transform = 'scaleX(' + s.progress + ')'; } }
       });
       $$('.sector:not(.sector--intro)').forEach(p => {
-        const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g');
-        gsap.to(els, { strokeDashoffset: 0, ease: 'none', stagger: 0.015, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 100%', end: 'left 82%', scrub: true } });
+        const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g' && !e.closest('defs') && !e.classList.contains('flow'));
+        gsap.to(els, { strokeDashoffset: 0, ease: 'none', stagger: 0.015, onUpdate() { if (this.progress() > 0.95) showFlow(p); }, scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 100%', end: 'left 82%', scrub: true } });
         gsap.from($$('h3, p, .tags', p), { y: 50, opacity: 0, stagger: 0.08, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left 92%' } });
         gsap.fromTo($('.sector__num', p), { x: 160 }, { x: -80, ease: 'none', scrollTrigger: { trigger: p, containerAnimation: tw, start: 'left right', end: 'right left', scrub: true } });
       });
     });
     mm.add('(max-width: 899px)', () => {
       $$('.sector:not(.sector--intro)').forEach(p => {
-        const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g');
-        gsap.to(els, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.out', stagger: 0.01, scrollTrigger: { trigger: $('.sector__art', p), start: 'top 92%', once: true } });
+        const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g' && !e.closest('defs') && !e.classList.contains('flow'));
+        gsap.to(els, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.out', stagger: 0.01, onComplete: () => showFlow(p), scrollTrigger: { trigger: $('.sector__art', p), start: 'top 92%', once: true } });
       });
     });
 
