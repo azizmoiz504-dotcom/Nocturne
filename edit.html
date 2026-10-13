@@ -19,6 +19,12 @@
   .btn:hover { filter:brightness(1.08); }
   .spacer { flex:1; }
   .count { font-size:16px; opacity:.85; }
+  .notice { margin:14px 22px 0; padding:12px 18px; border-radius:14px; background:#fff; font-size:18px; border:2px solid #b9e4c9; }
+  .notice b { color:#11703a; }
+  .notice.warn { border-color:var(--red); background:#fff5f5; }
+  .notice.warn b { color:var(--red); }
+  .notice button { margin:8px 10px 0 0; border:0; border-radius:999px; padding:9px 18px; font-weight:700; cursor:pointer; background:var(--ink); color:#fff; }
+  .notice button.ghost { background:#fff; color:var(--ink); border:1.5px solid var(--line); }
   details.help { background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; color:var(--muted); font-size:17px; }
   details.help summary { cursor:pointer; color:var(--ink); font-weight:700; }
   details.help b { color:var(--ink); }
@@ -72,11 +78,13 @@
   <button class="btn ghost" id="reset">Start over</button>
   <button class="btn red" id="save">Save changes file</button>
 </header>
+<div class="notice" id="notice"></div>
+<div class="notice warn" id="older" hidden></div>
 <details class="help" open>
   <summary>How to use the editor</summary>
   <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
   <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
-  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own.</p>
+  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own (for more than one, separate them with commas, e.g. "Brass, Stainless").</p>
   <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
   When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done". Your work is kept in this browser if you close the page.</p>
 </details>
@@ -105,45 +113,22 @@ function startEditor() {
   const cp = it => { const o = [it[0], it[1].slice(), it[2], it[3]]; if (it[4]) o.push(it[4]); return o; };
   const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(cp) })), images: {} });
   // materials match the website's Material filter
-  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
   const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
   const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
   const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  let state, history = [], sel = -1, clip = null, added = 0;
+  const OLD = 'ft-editor-older';
+  let state, history = [], sel = -1, clip = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-  if (!state || !state.cats) state = fresh();
-  else if (state.ver !== VER) {
-    if (state.ver && !state.dirty) state = fresh();   // nothing unsaved here: just load the new website list
-    else {
-      // keep the owner's unsaved work and add whatever the website gained since they started
-      // the gasket category was renamed (no "CAF" anywhere on the site): move unsaved work across
-      const REN = [['gaskets-caf-canf-sheets', 'gaskets-sheets'], ['CAF / CNAF Rubber Gasket, Ring & Full Face', 'CNAF & Rubber Gasket, Ring & Full Face'], ['CAF, CNAF & Metallic Gasket Sheet', 'CNAF & Metallic Gasket Sheet'], ['Gaskets & CAF / CNAF Sheets', 'Gaskets & CNAF Sheets'],
-        // spelling fixes made on the website (2026-10-12)
-        ['Aluminum ', 'Aluminium '], ['1Pcs Body', '1PC Body'], ['2Pcs Body', '2PC Body'], ['Forged steel Y Strainer', 'Forged Steel Y Strainer'], ['Brass Vertical Spring Check Valve, Vertical', 'Brass Vertical Spring Check Valve'],
-        ['G.I Eqal Tee', 'G.I Equal Tee'], ['C.S KIM NIPPLE', 'C.S King Nipple'], ['S.S Swag Nipple', 'S.S Swage Nipple']];
-      const ren = v => typeof v === 'string' ? REN.reduce((s, [a, b]) => s.split(a).join(b), v) : v;
-      state.cats.forEach(x => { x.slug = ren(x.slug); x.name = ren(x.name); x.cover = ren(x.cover); x.items = x.items.map(it => { const o = cp(it); o[0] = ren(o[0]); o[1] = o[1].filter(t => t !== 'CAF'); o[3] = ren(o[3]); return o; }); });
-      state.base = (state.base || []).map(ren);
-      const base = new Set(state.base || []);
-      window.FT_CATS.forEach((c, at) => {
-        let mine = state.cats.find(x => x.slug === c.slug);
-        const isNew = !mine;
-        if (!mine) { mine = { slug: c.slug, name: c.name, cover: c.cover, items: [] }; state.cats.splice(Math.min(at, state.cats.length), 0, mine); }
-        c.items.forEach(it => {
-          if (base.has(keyOf(c.slug, it)) || mine.items.some(x => x[0] === it[0])) return;
-          // copies saved before this check existed: only bring in the photo-less cards from the product guide, so renamed cards don't come back twice
-          if (!state.base && !isNew && it[3]) return;
-          mine.items.push(cp(it)); added++;
-        });
-      });
-      // photos the website gained since (e.g. new product photos) fill any card of the same name that has none
-      window.FT_CATS.forEach(c => {
-        const mine = state.cats.find(x => x.slug === c.slug); if (!mine) return;
-        mine.items.forEach(it => { if (it[3]) return; const s = c.items.find(x => x[0] === it[0] && x[3]); if (s) { it[3] = s[3]; added++; } });
-        if (!mine.cover && c.cover) mine.cover = c.cover;
-      });
-      state.ver = VER; state.base = siteKeys();
+  // Whenever the website's product list has changed (Claude applied a changes file), the editor starts from
+  // the newest website list. Older unsaved work is never mixed in (mixing it brought back old photos and made
+  // double products); it is put aside so it can still be downloaded and sent to Claude.
+  if (!state || !state.cats || state.ver !== VER) {
+    if (state && state.cats && state.dirty) {
+      const aside = { at: new Date().toISOString(), state };
+      try { localStorage.removeItem(KEY); localStorage.setItem(OLD, JSON.stringify(aside)); } catch (e) { window.ftOlder = aside; }
     }
+    state = fresh();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
   let ci = 0;
@@ -151,7 +136,8 @@ function startEditor() {
   const cat = () => state.cats[ci];
   const src = p => !p ? '' : p.startsWith('new:') ? state.images[p] : IMG + p;
   const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
-  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Browser storage full: press Save changes file now'); } };
+  let shown = null;   // which notice is on screen, so it only redraws when that changes
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Browser storage full: press Save changes file now'); } if (shown !== null && shown !== noticeKind()) showNotice(); };
   const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
   const change = fn => { snap(); fn(); state.dirty = true; persist(); render(); };
 
@@ -183,7 +169,7 @@ function startEditor() {
         '<label>Specs (comma between each)</label><input data-f="1">' +
         '<label>Size range</label><input data-f="2">' +
         '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => m === 'Other' ? '<option value="Other"' + (own ? ' selected' : '') + '>Other: type your own…</option>' : '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
-        '<input data-matown placeholder="Type the material, e.g. Copper" maxlength="40"' + (own ? '' : ' hidden') + '>' +
+        '<input data-matown placeholder="e.g. PVC, or Brass, Stainless" maxlength="40"' + (own ? '' : ' hidden') + '>' +
         '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
         '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
         '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
@@ -311,12 +297,41 @@ function startEditor() {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
     a.download = 'fakhri-product-changes.json'; a.click();
-    state.dirty = false; persist();
+    state.dirty = false; state.saved = true; persist();
     toast('Saved to Downloads as fakhri-product-changes.json');
   };
+  // what the person is looking at: the newest website list, or their unsaved work on top of it
+  const older = () => { if (window.ftOlder) return window.ftOlder; try { const o = JSON.parse(localStorage.getItem(OLD)); return o && o.state ? o : null; } catch (e) { return null; } };
+  const when = iso => { try { return new Date(iso).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+  function noticeKind() { return state.dirty ? 'dirty' : state.saved ? 'saved' : 'site'; }
+  function showNotice() {
+    const n = window.FT_CATS.reduce((a, c) => a + c.items.length, 0);
+    shown = noticeKind();
+    $('#notice').innerHTML = shown === 'dirty'
+      ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Save changes file</b> when you finish.'
+      : shown === 'saved'
+        ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Send it to Claude. After Claude says it is live, refresh this page to see the new website list.'
+        : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
+    const o = older(), box = $('#older');
+    box.hidden = !o;
+    if (o) box.innerHTML = '<b>Older unsaved changes were put aside.</b> This browser had changes from ' + when(o.at) + ' that were never saved, and the website has been updated since. They are NOT in the list below. Download them only if Claude asks for them.' +
+      '<br><button type="button" id="olderGet">Download older changes</button><button type="button" class="ghost" id="olderDel">Delete them</button>';
+  }
+  document.addEventListener('click', e => {
+    if (e.target.id === 'olderGet') {
+      const o = older(); if (!o) return;
+      const used = new Set(o.state.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
+      const out = { kind: 'fakhri-product-edits', saved: o.at, older: true, cats: o.state.cats, images: Object.fromEntries(Object.entries(o.state.images || {}).filter(([k]) => used.has(k))) };
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+      a.download = 'fakhri-product-changes-OLDER.json'; a.click();
+      toast('Saved to Downloads as fakhri-product-changes-OLDER.json');
+    }
+    if (e.target.id === 'olderDel' && confirm('Delete the older unsaved changes from this browser?')) { window.ftOlder = null; try { localStorage.removeItem(OLD); } catch (err) {} showNotice(); }
+  });
   fillCats();
   render();
-  if (added) setTimeout(() => toast(added + ' new products or photos from the website were added to your list'), 400);
+  showNotice();
 }
 </script>
 </body>

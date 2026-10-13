@@ -18,14 +18,22 @@ for (const [id, url] of Object.entries(edits.images || {})) {
   saved[id] = rel;
 }
 const photo = p => saved[p] || p;
+// optional 5th field: the material the owner picked or typed in the editor (empty = read from the name).
+// Typed names are matched to the website's Material filter names ("SS, BRASS" -> "Stainless, Brass"); several are kept comma-separated.
+const SYN = { 'ss': 'Stainless', 's.s': 'Stainless', 'stainless': 'Stainless', 'stainless steel': 'Stainless', 'brass': 'Brass', 'bronze': 'Bronze', 'aluminum': 'Aluminium', 'aluminium': 'Aluminium', 'pvc': 'PVC', 'ms': 'Mild steel', 'm.s': 'Mild steel', 'mild steel': 'Mild steel', 'cs': 'Carbon steel', 'c.s': 'Carbon steel', 'carbon steel': 'Carbon steel', 'ci': 'Cast iron', 'c.i': 'Cast iron', 'cast iron': 'Cast iron', 'gi': 'Galvanised', 'g.i': 'Galvanised', 'galvanised': 'Galvanised', 'galvanized': 'Galvanised', 'copper': 'Copper', 'rubber': 'Rubber', 'acrylic': 'Acrylic', 'other': 'Other' };
+const material = v => {
+  if (typeof v !== 'string') return '';
+  const t = v.replace(/[<>"`\\]/g, '').replace(/\s+/g, ' ').trim();
+  if (!t || t === 'Carbon steel & Stainless') return t;
+  const parts = t.split(/\s*(?:,|&|\/|\+|\band\b)\s*/i).filter(Boolean), m = parts.map(p => SYN[p.toLowerCase()]);
+  return (m.every(Boolean) ? [...new Set(m)].join(', ') : t).slice(0, 40);
+};
 const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.trim(); };
 for (const e of edits.cats) {
   let c = W.FT_CATS.find(c => c.slug === e.slug);
   if (!c && e.name && e.fam && W.FT_FAMILIES.some(f => f.id === e.fam)) W.FT_CATS.push(c = { slug: e.slug, name: e.name, fam: e.fam, desc: e.desc || '' });
   if (!c) throw new Error('Unknown category ' + e.slug);
-  // optional 5th field: the material the owner picked in the editor (empty = read from the name)
-  const MAT_OK = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
-  c.items = e.items.map(it => { const row = [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]; const m = typeof it[4] === 'string' ? (MAT_OK.find(x => x.toLowerCase() === it[4].trim().toLowerCase()) || it[4].replace(/[<>"&`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40)) : ''; if (m) row.push(m); return row; });
+  c.items = e.items.map(it => { const row = [str(it[0]), it[1].map(str), str(it[2]), photo(str(it[3]))]; const m = material(it[4]); if (m) row.push(m); return row; });
   if (typeof e.name === 'string' && e.name.trim()) c.name = e.name.trim();
   c.cover = photo(e.cover);
   if (!/^[a-z0-9-]+$/.test(c.slug)) throw new Error('Bad slug ' + c.slug);

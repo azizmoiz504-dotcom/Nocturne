@@ -120,7 +120,7 @@
   const coverOf = c => c.imgs[0] ? IMG + c.imgs[0] : '';
   const imgTag = (src, alt) => src ? '<img data-ph src="' + src + '" alt="' + (alt || '').replace(/"/g, '&quot;') + '" loading="lazy" decoding="async" >' : PH;
   // names are written both ways ("S.S" and "SS316L", "C.I" and "CI"); forged steel A105 is carbon steel
-  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i]];
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
   function materialOf(name) {
     let best = null, at = 1e9;
     MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } });
@@ -784,7 +784,8 @@
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = matOf(o) || 'Other';
-    o.mats = o.matSet ? (o.matSet === 'Carbon steel & Stainless' ? ['Carbon steel', 'Stainless'] : [o.matSet]) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
+    // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
+    o.mats = o.matSet ? [...new Set(o.matSet.split(/\s*(?:,|&)\s*/).filter(Boolean))] : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
