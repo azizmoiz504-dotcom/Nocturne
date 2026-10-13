@@ -247,7 +247,31 @@ main{position:relative;z-index:1}
 .sector__art{width:100%;max-width:420px;height:auto;margin-top:auto;color:var(--steel-2);overflow:visible}
 .sector__art *{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .sector__art .acc{stroke:var(--red);stroke-width:2}
-.sector__art .blades{transform-origin:327px 78px;animation:spin 5s linear infinite}
+/* industries drawings move gently; pivots are given as % of the 480 x 300 drawing so the 75% computer copy keeps them */
+.sector__art g{transform-box:view-box}
+.sector__art .blades{transform-origin:90.833% 34.667%;animation:spin 6s linear infinite}
+.sector__art .sea{animation:sea 3.6s linear infinite}
+@keyframes sea{to{transform:translateX(30px)}}
+.sector__art .bob{transform-origin:50% 70%;animation:bob 4.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-2.25px) rotate(-.6deg)}70%{transform:translateY(1px) rotate(.5deg)}}
+.sector__art .steam{animation:rise 3.4s ease-in-out infinite}
+.sector__art .steam.d2{animation-delay:-1.2s}
+.sector__art .steam.d3{animation-delay:-2.3s}
+@keyframes rise{0%{transform:translateY(4.5px);opacity:0}35%{opacity:1}100%{transform:translateY(-10.5px);opacity:0}}
+.sector__art .flicker{transform-box:fill-box;transform-origin:50% 100%;animation:flicker 1.3s ease-in-out infinite}
+@keyframes flicker{0%,100%{transform:scale(1,1)}25%{transform:scale(.9,1.15)}50%{transform:scale(1.05,.88)}75%{transform:scale(.95,1.08)}}
+.sector__art .sway{transform-origin:38.75% 25.333%;animation:sway 3s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.sector__art .beam{transform-origin:45.833% 41.667%;animation:beam 1.8s ease-in-out infinite alternate}
+@keyframes beam{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+.sector__art .rod{animation:rod 1.8s ease-in-out infinite alternate}
+@keyframes rod{from{transform:translateY(9.75px)}to{transform:translateY(-9.75px)}}
+.sector__art .crank{transform-origin:67.083% 68.667%;animation:spin 3.6s linear infinite}
+.sector__art .wheel{transform-origin:68.75% 39.333%;animation:wheel 3.2s ease-in-out infinite alternate}
+.sector__art .wheel.w2{transform-origin:84.167% 39.333%;animation-delay:-1.6s}
+@keyframes wheel{to{transform:rotate(90deg)}}
+.sector__art .flow{stroke:var(--red);stroke-width:2;stroke-dasharray:3 17;animation:flowd 1.4s linear infinite}
+@keyframes flowd{to{stroke-dashoffset:-20}}
 .sector h3{font-family:var(--f-display);font-weight:700;font-size:clamp(33px,5vw,60px);letter-spacing:.005em;line-height:1;margin-top:21px}
 .sector p{max-width:390px;margin-top:10.5px;color:var(--steel-2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16.5px;list-style:none}
@@ -712,7 +736,8 @@ main{position:relative;z-index:1}
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion:reduce){
-  .grain,.flowlines .flow,.scrollcue__wheel,.sector__art .blades{animation:none}
+  .grain,.flowlines .flow,.scrollcue__wheel{animation:none}
+  .sector__art *{animation:none!important}
   *{transition-duration:.01ms!important}
 }
 .fab-wa,.progress{transition:bottom .6s var(--ease),opacity .4s,transform .5s var(--ease)}
