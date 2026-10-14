@@ -1325,6 +1325,12 @@
       });
     });
 
+    // the Industries drawings only animate while they are on screen (no work for the computer anywhere else on the page)
+    if ('IntersectionObserver' in window) {
+      const artIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-idle', !e.isIntersecting)));
+      $$('.sector__art').forEach(a => artIO.observe(a));
+    }
+
     const steps = $$('.anatomy__steps p');
     ScrollTrigger.create({
       trigger: '#anatomy', start: 'top top', end: '+=240%', pin: true, anticipatePin: 1,

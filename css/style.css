@@ -270,6 +270,7 @@ main{position:relative;z-index:1}
 .sector__art .wheel.w2{transform-origin:84.167% 39.333%;animation-delay:-1.6s}
 @keyframes wheel{to{transform:rotate(90deg)}}
 .sector__art .flow{stroke:var(--red);stroke-width:2;stroke-dasharray:3 17;animation:flowd 1.4s linear infinite}
+.sector__art.is-idle *{animation-play-state:paused!important}
 @keyframes flowd{to{stroke-dashoffset:-20}}
 .sector h3{font-family:var(--f-display);font-weight:700;font-size:clamp(44px,5vw,80px);letter-spacing:.005em;line-height:1;margin-top:28px}
 .sector p{max-width:520px;margin-top:14px;color:var(--steel-2)}
