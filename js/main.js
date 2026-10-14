@@ -1030,7 +1030,9 @@
       img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + n.replace(/-/g, '‑') + '</span>';
       $('.btile__foot .mono', t).textContent = 'Brand';
     };
-    if (img.complete && !img.naturalWidth) toWord(); else img.addEventListener('error', toWord, { once: true });
+    // very wide logos (long company names) may use the whole tile width, or they come out tiny on phones
+    const shape = () => img.classList.toggle('is-wide', img.naturalWidth > img.naturalHeight * 4);
+    if (img.complete && !img.naturalWidth) toWord(); else { img.addEventListener('error', toWord, { once: true }); if (img.complete) shape(); else img.addEventListener('load', shape, { once: true }); }
   });
   applyLinks($('#brandsGrid'));
   $('#brandsGrid').addEventListener('click', e => {
