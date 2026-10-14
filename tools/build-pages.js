@@ -36,11 +36,17 @@ const PAGE_URL = {
   'gi-pipe-fittings': 'gi-pipes-fittings',
   'ss-ms-flanges-forging-casting': 'flanges',
   'qrc-couplings-ludecke': 'qrc-couplings',
-  'instrumentation-fittings-pressure-gas': 'instrumentation-pressure-gauges'
+  'instrumentation-fittings-pressure-gas': 'instrumentation-fittings',
+  'universal-couplings-flange-adapter': 'pressure-gauges'
 };
 const PG = c => PAGE_URL[c.slug] || c.slug;
+// a category without a main photo shows its first product's photo (as the catalogue does)
+const COV = c => c.cover || (c.items[0] && c.items[0][3]) || '';
 // Old addresses of extra pages that moved
-const MOVED = { 'products/valves-hub.html': 'products/valves.html' };
+const MOVED = { 'products/valves-hub.html': 'products/valves.html',
+  // 2026-10-14: the gauge got its own section and the universal couplings moved in with the flexible connectors
+  'products/instrumentation-pressure-gauges.html': 'products/instrumentation-fittings.html',
+  'products/universal-couplings-flange-adapter.html': 'products/union-flexible-connectors.html' };
 // First option that fits Google's ~60-character title width; cut() shortens at a word for descriptions.
 const fit = (...opts) => opts.find(o => o.length <= 60) || opts[opts.length - 1];
 const cut = (s, n) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n - 1)).replace(/[,;:.—-]$/, '') + '…';
@@ -148,7 +154,7 @@ function hubPage() {
     '<header class="hero"><p class="eyebrow">' + total + ' products · ' + CATS.length + ' categories</p><h1>Pipes, fittings, flanges and valves in Al Quoz, Dubai</h1>' +
       '<p class="lead">Every product we offer at our B2B trade counter in Al Quoz Industrial Area 3. Open a category to see sizes and specs, then ask for a quote on WhatsApp.</p></header>' +
     FAMS.map(f => '<section class="fam"><h2>' + esc(f.name) + '</h2><div class="cats">' +
-      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (c.cover ? '<img src="../' + IMG + c.cover + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') +
+      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') +
     '</div></section>').join('') + '</div>';
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
@@ -167,7 +173,7 @@ const PAGES = SEO._pages || [];
 function tiles(slugs, heading, up) {
   const cats = (slugs || []).map(s => CATS.find(c => c.slug === s)).filter(Boolean);
   return !cats.length ? '' : '<section class="fam"><h2>' + esc(heading || 'Shop these categories') + '</h2><div class="cats">' + cats.map(c =>
-    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (c.cover ? '<img src="' + up + IMG + c.cover + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') + '</div></section>';
+    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="' + up + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') + '</div></section>';
 }
 const UI = {
   en: { home: 'Home', faq: 'Questions buyers ask', ask: 'Send us your list', askP: 'Sizes, rating, end connection and quantity. We reply with stock and a price.', send: 'Send on WhatsApp', products: 'Products', shop: 'Shop these categories', hello: 'Hello Fakhri Tools, I would like a quote.' },

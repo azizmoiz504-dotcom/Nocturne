@@ -1226,6 +1226,8 @@ body.has-quote .fabs{bottom:14px}
 .kc__name button:hover{color:var(--red)}
 .kc__size{display:flex;align-items:baseline;gap:8px;font-size:20px;font-weight:600;color:var(--paper-ink)}
 .kc__size .mono{font-size:15px;letter-spacing:.1em;color:var(--paper-mute);text-transform:uppercase}
+.kc__material{font-size:17px;font-weight:500;line-height:1.25}
+.kc__material .mono{flex:none}
 .kc__chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
 .kc__chips span{font-family:var(--f-mono);font-size:15.5px;letter-spacing:.05em;padding:2px 7px;border-radius:6px;background:var(--paper-2)}
 .kc__foot{display:flex;gap:8px;padding:12px 14px 14px}
@@ -1292,6 +1294,8 @@ body.has-quote .fabs{bottom:14px}
   .kc__cat{font-size:13.5px}
   .kc__name{font-size:21px}
   .kc__size{font-size:18px}
+  .kc__material{font-size:15px;display:block}
+  .kc__material .mono{margin-right:6px}
   .kc__chips{display:none}
   .kc__mat{top:8px;left:8px;font-size:13px;padding:3px 7px}
   .kc__peek{display:none}
