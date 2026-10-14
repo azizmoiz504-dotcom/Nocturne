@@ -1118,6 +1118,7 @@ body.has-quote .fabs{bottom:66px}
 }
 .btile__mark img{width:82%;height:69px;max-width:none;max-height:none;object-fit:contain}
 @media (max-width:450px){.btile__mark img{width:88%;height:49.5px}}
+.btile__mark img.is-wide{width:100%}
 
 /* Call/WhatsApp buttons always sit in the bottom-right corner; on phones the quote bar moves left to make room */
 body.has-quote .fabs{bottom:10.5px}
