@@ -23,12 +23,12 @@ const photo = p => saved[p] || p;
 const SYN = { 'ss': 'Stainless', 's.s': 'Stainless', 'stainless': 'Stainless', 'stainless steel': 'Stainless', 'brass': 'Brass', 'bronze': 'Bronze', 'aluminum': 'Aluminium', 'aluminium': 'Aluminium', 'pvc': 'PVC', 'ms': 'Mild steel', 'm.s': 'Mild steel', 'mild steel': 'Mild steel', 'cs': 'Carbon steel', 'c.s': 'Carbon steel', 'carbon steel': 'Carbon steel', 'ci': 'Cast iron', 'c.i': 'Cast iron', 'cast iron': 'Cast iron', 'gi': 'Galvanised', 'g.i': 'Galvanised', 'galvanised': 'Galvanised', 'galvanized': 'Galvanised', 'copper': 'Copper', 'rubber': 'Rubber', 'acrylic': 'Acrylic', 'other': 'Other' };
 const material = v => {
   if (typeof v !== 'string') return '';
-  const t = v.replace(/[<>"`\\]/g, '').replace(/\s+/g, ' ').trim();
+  const t = v.replace(/[<>"`\\]/g, '').replace(/\s+/g, ' ').trim().replace(/\.+$/, '');
   if (!t || t === 'Carbon steel & Stainless') return t;
   const parts = t.split(/\s*(?:,|&|\/|\+|\band\b)\s*/i).filter(Boolean), m = parts.map(p => SYN[p.toLowerCase()]);
   return (m.every(Boolean) ? [...new Set(m)].join(', ') : t).slice(0, 40);
 };
-const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.trim(); };
+const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.replace(/\s+/g, ' ').trim(); };
 for (const e of edits.cats) {
   let c = W.FT_CATS.find(c => c.slug === e.slug);
   if (!c && e.name && e.fam && W.FT_FAMILIES.some(f => f.id === e.fam)) W.FT_CATS.push(c = { slug: e.slug, name: e.name, fam: e.fam, desc: e.desc || '' });

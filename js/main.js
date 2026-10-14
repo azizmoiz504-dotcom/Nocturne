@@ -128,6 +128,15 @@
   }
   // the material the owner set in the editor wins; otherwise it is read from the name
   const matOf = o => o.matSet || materialOf(o.name);
+  // a typed material ("Stainless Steel CF8M (316)", "F304/304L, F316/316L") goes under the plain filter line it belongs to
+  const GRADES = [['Stainless', /\b(?:F?3[01]\d[LH]?|CF[38]M?|A403|A182|A312)\b/i], ['Carbon steel', /\b(?:WCB|A105N?|A234|A106)\b/i]];
+  const matGroups = s => [...new Set(s.split(/\s*(?:,|&)\s*/).filter(Boolean).map(p => materialOf(p) || (GRADES.find(([, r]) => r.test(p)) || [])[0] || p))];
+  const groupOf = it => it[4] ? matGroups(it[4])[0] : materialOf(it[0]);
+  // the material as shown on the card and in quick view
+  const ownMat = o => o.matSet !== 'Other' ? o.matSet : '';
+  const matText = o => ownMat(o) || (/^C\.S & S\.S/.test(o.name) ? 'Carbon steel, Stainless' : materialOf(o.name) || '');
+  // quote lines and WhatsApp messages carry the material when the product name doesn't say it ("Gate Valve F/T – Cast iron")
+  const fullName = o => ownMat(o) && !materialOf(o.name) ? o.name + ' – ' + o.matSet : o.name;
   const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + s + '</span>').join('') + '</div>' : '';
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
@@ -247,7 +256,7 @@
   if (rfq.size) saveRfq();   // older saved quotes get product names added, so they survive list changes
   const hasAny = id => [...rfq.keys()].some(k => k.startsWith(id + '|'));
   const sizeOfLine = o => { const w = sizeWords(o, o.pick); return w ? ' (' + w + ')' : ''; };
-  const lineText = (o, q) => '• ' + o.name + sizeOfLine(o) + ' × ' + q;
+  const lineText = (o, q) => '• ' + fullName(o) + sizeOfLine(o) + ' × ' + q;
   function quoteMessage() {
     if (!rfq.size) return 'Hello Fakhri Tools, I would like a quote.';
     return 'Hello Fakhri Tools, I would like a quote for:\n' + [...rfq].map(([k, q]) => lineText(itemOf(k), q)).join('\n');
@@ -271,7 +280,7 @@
     const added = !rfq.has(key);
     if (added) rfq.set(key, 1); else rfq.delete(key);
     saveRfq(); syncRfq(true);
-    toast((added ? 'Added to quote — ' : 'Removed — ') + o.name + sizeOfLine(o));
+    toast((added ? 'Added to quote — ' : 'Removed — ') + fullName(o) + sizeOfLine(o));
     if (added && srcEl) requestAnimationFrame(() => flyToBar(srcEl));
   }
   function addAll(c, srcEl) {
@@ -326,7 +335,7 @@
       const o = itemOf(k);
       const li = document.createElement('li');
       li.innerHTML = '<span></span><button type="button" aria-label="Remove">×</button>';
-      li.firstChild.textContent = o.name + sizeOfLine(o) + ' × ' + q;
+      li.firstChild.textContent = fullName(o) + sizeOfLine(o) + ' × ' + q;
       li.lastChild.addEventListener('click', () => setQty(k, 0));
       list.appendChild(li);
     });
@@ -464,12 +473,12 @@
     $('#qvState').hidden = !lines.length;
     if (lines.length) $('#qvState b').textContent = 'In your quote: ' + lines.map(([k, q]) => (sizeWords(o, itemOf(k).pick) || o.name) + ' × ' + q).join(' · ');
     const p = readPick($('#qvPick'), o);
-    $('#qvWa').dataset.waMsg = 'Hello Fakhri Tools, please send me a quote for: ' + o.name + (p.ok && sizeWords(o, p.v) ? ' (' + sizeWords(o, p.v) + ')' : (o.size ? ' (' + o.size + ')' : '')) + '.'; applyLinks(qv);
+    $('#qvWa').dataset.waMsg = 'Hello Fakhri Tools, please send me a quote for: ' + fullName(o) + (p.ok && sizeWords(o, p.v) ? ' (' + sizeWords(o, p.v) + ')' : (o.size ? ' (' + o.size + ')' : '')) + '.'; applyLinks(qv);
   }
   function fillQV(key) {
     const o = itemOf(key); if (!o) return;
     qvId = o.id;
-    const mat = matOf(o), sp = sizeSpec(o);
+    const mat = matText(o), sp = sizeSpec(o);
     $('#qvMedia').innerHTML = imgTag(o.img, o.name);
     $('#qvCat').textContent = famName(o.c.fam) + ' / ' + o.c.name;
     $('#qvName').textContent = o.name;
@@ -511,7 +520,7 @@
     const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, Math.round(+$('#qvQty').value) || 1));
     const isNew = !rfq.has(key);
     rfq.set(key, q); saveRfq(); syncRfq(isNew);
-    toast((isNew ? 'Added to quote — ' : 'Updated — ') + o.name + sizeOfLine(itemOf(key)) + ' × ' + q);
+    toast((isNew ? 'Added to quote — ' : 'Updated — ') + fullName(o) + sizeOfLine(itemOf(key)) + ' × ' + q);
     if (isNew) requestAnimationFrame(() => flyToBar($('#qvMedia')));
   });
   document.addEventListener('click', e => {
@@ -530,7 +539,7 @@
       '</div>';
   }
   function cardHTML(c, i) {
-    const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = materialOf(o.name);
+    const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = groupOf(c.items[i]);
     return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
       '<button class="pc__media" data-qv="' + o.id + '" data-cursor="View"><span class="pc__no mono">' + pad(i + 1) + '</span>' +
       (mat ? '<span class="pc__mat mono">' + mat + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
@@ -557,7 +566,7 @@
     srIdx = idx;
     const c = CATS[idx];
     filt.mat = 'all'; filt.spec = 'all';
-    const mats = [...new Set(c.items.map(it => materialOf(it[0])).filter(Boolean))];
+    const mats = [...new Set(c.items.map(groupOf).filter(Boolean))];
     const specCount = new Map();
     c.items.forEach(it => it[1].forEach(s => specCount.set(s, (specCount.get(s) || 0) + 1)));
     const specs = [...specCount].sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 10);
@@ -785,7 +794,7 @@
     const o = itemOf(c.slug + ':' + i);
     o.mat = matOf(o) || 'Other';
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
-    o.mats = o.matSet ? [...new Set(o.matSet.split(/\s*(?:,|&)\s*/).filter(Boolean))] : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
+    o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
@@ -807,7 +816,7 @@
   const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el.getBoundingClientRect().top + scrollY - navOff(), { duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navOff(), behavior: 'smooth' }); };
   const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
   const kGrid = $('#katGrid'), kSide = $('#katSide');
-  const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + o.name + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
+  const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + fullName(o) + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
 
   // what passes every filter except the one named in `skip` (so each group shows honest counts)
   function pass(o, skip) {
@@ -863,12 +872,13 @@
     return '<span class="kc__np"><b>' + esc(head) + '</b>' + (rest.length ? '<em>' + esc(rest.join(', ')) + '</em>' : '') + '<span class="mono">Photo on WhatsApp</span></span>';
   }
   function kcardHTML(o, cur) {
-    const one = fixedSize(o), on = one && rfq.has(keyOf(o, sizeSpec(o).v));
+    const one = fixedSize(o), on = one && rfq.has(keyOf(o, sizeSpec(o).v)), mat = matText(o);
     return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
         (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
+        (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span>' + esc(mat) + '</div>' : '') +
         (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
         (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
       '</div>' +
