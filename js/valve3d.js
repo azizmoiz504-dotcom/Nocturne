@@ -3,12 +3,24 @@
   const canvas = document.getElementById('gl');
   const api = { ready: false, intro() {}, setAnatomy() {} };
   window.FT3D = api;
-  if (!window.THREE || !canvas) return;
+  // without 3D (old phone, graphics switched off) the page still needs to know when the hero is off screen,
+  // so the moving background lines stop there too
+  const noGL = () => {
+    const vis = new Map(), els = [document.getElementById('top'), document.getElementById('anatomy')].filter(Boolean);
+    if (!els.length || !window.IntersectionObserver) return;
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => vis.set(e.target, e.isIntersecting));
+      document.body.classList.toggle('off-stage', ![...vis.values()].some(Boolean));
+    });
+    els.forEach(el => io.observe(el));
+  };
+  if (!window.THREE || !canvas) { noGL(); return; }
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  } catch (e) { canvas.remove(); return; }
+    // sharp (retina) screens don't need edge smoothing, and skipping it saves a lot of graphics work
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: (window.devicePixelRatio || 1) < 1.5, alpha: true, powerPreference: 'high-performance' });
+  } catch (e) { canvas.remove(); noGL(); return; }
 
   const isSmall = () => innerWidth < 900;
   let pr = Math.min(window.devicePixelRatio || 1, isSmall() ? 1.25 : 1.5);
@@ -202,7 +214,7 @@
   if (labelHost) labelHost.inert = true;
 
   // --- State ---
-  const st = { anaP: 0, mx: 0, my: 0, intro: 0, introT: null };
+  const st = { anaP: 0, mx: 0, my: 0, intro: 0, introT: null, busyT: 0 };
   const cur = { x: 2.6, y: 0, ry: -0.6, rx: 0.2, s: 0.3, ex: 0, z: 14 };
   const v = new THREE.Vector3();
   const heroEl = document.getElementById('top');
@@ -215,7 +227,9 @@
   window.addEventListener('pointermove', e => {
     st.mx = e.clientX / innerWidth * 2 - 1;
     st.my = e.clientY / innerHeight * 2 - 1;
+    st.busyT = performance.now();
   }, { passive: true });
+  window.addEventListener('scroll', () => { st.busyT = performance.now(); }, { passive: true });
 
   let heroVis = true, anaVis = false, heroH = 1, stageOn = true;
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -223,12 +237,17 @@
   }));
   io.observe(heroEl); io.observe(anaEl);
   const measure = () => { heroH = Math.max(1, heroEl.offsetHeight); };
+  // the canvas is 100vw × 100vh (style.css #gl), so on phones the address bar coming and going doesn't change it:
+  // the drawing size follows the canvas box and is only redone when that box really changes
+  let cw = 0, ch = 0;
   function resize() {
-    const w = innerWidth, h = innerHeight;
+    measure();
+    const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
+    if (w === cw && h === ch) return;
+    cw = w; ch = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    measure();
   }
   resize();
   let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(resize, 120); });
@@ -248,10 +267,13 @@
 
   function frame(now) {
     requestAnimationFrame(frame);
+    // while nothing moves (no scrolling, no mouse, intro done) the slow idle turn only needs 30 frames a second
+    const busy = now - st.busyT < 900 || (st.introT && now - st.introT < 2600);
+    if (!busy && now - last < 30) return;
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
     const t = now / 1000, tm = still ? 0 : t;   // tm: the slow idle turn, which stops when "reduce motion" is on
     // phones held sideways (short screens) use the side-by-side layout, so the valve sits beside the text
-    const W = innerWidth, H = innerHeight, mobile = W < 900 && H > 500;
+    const W = cw, H = ch, mobile = W < 900 && H > 500;
 
     const on = heroVis || anaVis;
     if (on !== stageOn) { stageOn = on; document.body.classList.toggle('off-stage', !on); }
@@ -261,8 +283,8 @@
     if (bc.contains('is-shop') || bc.contains('is-menu')) return;
 
     // adaptive resolution: if frames are slow, render fewer pixels
-    if (dt > 0) { slowAvg = slowAvg * 0.95 + dt * 0.05; }
-    if (++frameN % 90 === 0 && slowAvg > 0.024 && pr > 0.8) { pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(innerWidth, innerHeight, false); }
+    if (dt > 0 && busy) { slowAvg = slowAvg * 0.95 + dt * 0.05; }
+    if (++frameN % 90 === 0 && slowAvg > 0.024 && pr > 0.8) { pr = Math.max(0.75, pr - 0.25); renderer.setPixelRatio(pr); renderer.setSize(cw, ch, false); }
 
     const halfW = Math.tan(15 * Math.PI / 180) * 14 * camera.aspect;
     const intro = st.introT ? ease(clamp((now - st.introT) / 2200, 0, 1)) : 0;

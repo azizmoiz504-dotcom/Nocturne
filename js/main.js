@@ -6,7 +6,7 @@
   // category page file name (a few have a shorter address; see tools/build-pages.js PAGE_URL)
   const pageOf = c => (window.FT_PAGE_URL && window.FT_PAGE_URL[c.slug]) || c.slug;
   // Category photos: the cover first, then each product's own photo.
-  CATS.forEach(c => { c.imgs = [...new Set([c.cover || c.items[0][3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
+  CATS.forEach(c => { c.imgs = [...new Set([c.cover || (c.items[0] || [])[3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const pad = n => String(n).padStart(2, '0');
@@ -137,7 +137,7 @@
   const matText = o => ownMat(o) || (/^C\.S & S\.S/.test(o.name) ? 'Carbon steel, Stainless' : materialOf(o.name) || '');
   // quote lines and WhatsApp messages carry the material when the product name doesn't say it ("Gate Valve F/T – Cast iron")
   const fullName = o => ownMat(o) && !materialOf(o.name) ? o.name + ' – ' + o.matSet : o.name;
-  const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + s + '</span>').join('') + '</div>' : '';
+  const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + esc(s) + '</span>').join('') + '</div>' : '';
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
   /* ================= Sizes: every product gets a proper size picker ================= */
@@ -160,7 +160,10 @@
     if (dot.length > 1) { s = dot[0]; if (/–/.test(dot[1])) len = dot[1]; else note = dot[1]; }
     if (!s) sp = { t: 'text', hint: '' };
     else if (/ – any size$/.test(s)) { const l = ladder(s.split(' – ')[0], 'any', o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: l[0] + ' – ' + l[l.length - 1] }; }
-    else if ((m = s.match(RX_PAIR))) {
+    else if ((m = s.match(RX_PAIR)) && m[1] === m[2] && m[3] === m[4]) {   // 1½" × 1½" – 4" × 4": both ends are always the same size
+      const l = ladder(m[1], m[3], o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: m[1] + ' – ' + m[3] };
+    }
+    else if (m) {
       const L = ladder(m[1], m[3], o.c.fam), S = ladder(m[2], m[4], o.c.fam);
       if (L && S) sp = { t: 'pair', L, S, lt: rung(m[1]) > rung(m[2]) && rung(m[3]) > rung(m[4]) };
     }
@@ -238,22 +241,44 @@
 
   /* ================= Quote basket (line key -> qty) ================= */
   const rfq = new Map();
-  try {
-    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name]) => {
-      let o = itemOf(k);
-      // the product list gets reordered: a saved line follows its product by name, not by its old place in the list
-      if (name && (!o || o.name !== name)) {
-        const bar = k.indexOf('|'), pick = bar < 0 ? '' : k.slice(bar), slug = slugAlias(k.split(':')[0]);
-        const c = [catBySlug(slug)].concat(CATS).find(x => x && x.items.some(it => it[0] === name));
-        o = c ? itemOf(c.slug + ':' + c.items.findIndex(it => it[0] === name) + pick) : null;
-        if (o) k = o.id + pick;
+  // a saved size the product no longer offers becomes "size to confirm", so the list never shows one size and sends another
+  function cleanPick(o, pick) {
+    const sp = sizeSpec(o), [base, len] = String(pick).split(' · ');
+    let b = base;
+    if (sp.t === 'one') b = sp.v;
+    else if (sp.t === 'sel') { if (/^(.+) × \1$/.test(b)) b = b.split(' × ')[0]; if (b !== '?' && !sp.opts.includes(b)) b = '?'; }
+    else if (sp.t === 'pair' && b !== '?') { const [x, y] = b.split(' × '); if (!(x === '?' || sp.L.includes(x)) || !(y === '?' || sp.S.includes(y))) b = '?'; }
+    return len && sp.len ? (b || '?') + ' · ' + len : b;
+  }
+  // the product list gets edited: a saved line follows its product by name and material (nearest to its old place,
+  // because several products share a name), first in its own section, then anywhere
+  function findSaved(k, name, mat) {
+    const o = itemOf(k);
+    if (!name || (o && o.name === name && (mat === undefined || o.matSet === mat))) return o;
+    const bar = k.indexOf('|'), pick = bar < 0 ? '' : k.slice(bar), head = (bar < 0 ? k : k.slice(0, bar)).split(':');
+    const slug = slugAlias(head[0]), was = +head[1] || 0, home = catBySlug(slug);
+    for (const strict of [true, false]) {
+      for (const c of [home].concat(CATS.filter(x => x !== home))) {
+        if (!c) continue;
+        let best = -1;
+        c.items.forEach((it, i) => { if (it[0] === name && (!strict || mat === undefined || (it[4] || '') === mat) && (best < 0 || Math.abs(i - was) < Math.abs(best - was))) best = i; });
+        if (best > -1) return itemOf(c.slug + ':' + best + pick);
       }
-      if (!o) return;
-      rfq.set(o.pick === null ? keyOf(o, defaultPick(o)) : k, Math.max(1, +q || 1));
+    }
+    return null;
+  }
+  let lostLines = 0;
+  try {
+    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name, mat]) => {
+      const o = findSaved(String(k), name, mat);
+      if (!o) { lostLines++; return; }
+      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick));
+      rfq.set(key, Math.min(99999, (rfq.get(key) || 0) + Math.max(1, Math.round(+q) || 1)));
     });
   } catch (e) {}
-  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq].map(([k, q]) => { const o = itemOf(k); return [k, q, o ? o.name : '']; }))); } catch (e) {} };
-  if (rfq.size) saveRfq();   // older saved quotes get product names added, so they survive list changes
+  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq].map(([k, q]) => { const o = itemOf(k); return [k, q, o ? o.name : '', o ? o.matSet : '']; }))); } catch (e) {} };
+  if (rfq.size || lostLines) saveRfq();   // older saved quotes get product names added, so they survive list changes
+  if (lostLines) setTimeout(() => toast((lostLines === 1 ? '1 product' : lostLines + ' products') + ' in your saved quote changed on our list, please add ' + (lostLines === 1 ? 'it' : 'them') + ' again'), 4600);
   const hasAny = id => [...rfq.keys()].some(k => k.startsWith(id + '|'));
   const sizeOfLine = o => { const w = sizeWords(o, o.pick); return w ? ' (' + w + ')' : ''; };
   const lineText = (o, q) => '• ' + fullName(o) + sizeOfLine(o) + ' × ' + q;
@@ -262,10 +287,14 @@
     return 'Hello Fakhri Tools, I would like a quote for:\n' + [...rfq].map(([k, q]) => lineText(itemOf(k), q)).join('\n');
   }
 
-  function setQty(key, q) {
-    q = Math.round(+q || 0);
+  // "1,000", "1 000" and "10 pcs" all count; a box with no number in it keeps the old quantity
+  const parseQty = v => { const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
+  function setQty(key, q, typed) {
+    if (typeof q !== 'number') q = parseQty(q);
+    if (q === null) { syncRfq(false); return; }
+    q = Math.round(q);
     if (q <= 0) rfq.delete(key); else rfq.set(key, Math.min(99999, q));
-    saveRfq(); syncRfq(false);
+    saveRfq(); syncRfq(false, typed && q > 0);
   }
   // change the size of a line that is already in the quote (keeps its place in the list)
   function reKey(oldKey, newKey) {
@@ -323,7 +352,7 @@
     // only rewrite the label when it changes: replacing it under the mouse would swallow the click
     const l = $('.lbl', b); if (l && l.dataset.on !== String(on)) { l.dataset.on = on; l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>'; }
   }
-  function syncRfq(bump) {
+  function syncRfq(bump, keepSheet) {
     const n = rfq.size;
     $('#rfqCount').textContent = n; $$('.js-rfq-n').forEach(e => { e.textContent = n; });
     if (bump) { const b = $('#rfqBtn'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
@@ -346,7 +375,7 @@
     document.body.classList.toggle('has-quote', n > 0);
     $('#qbarCount').textContent = n + (n === 1 ? ' item' : ' items');
     $('#qbarThumbs').innerHTML = [...rfq.keys()].slice(-4).reverse().map(k => '<i>' + imgTag(itemOf(k).img) + '</i>').join('');
-    if (qs.classList.contains('is-open')) renderSheet();
+    if (qs.classList.contains('is-open')) { if (keepSheet) $$('#qsList .qs__row').forEach(r => { const i = $('.qty input', r); if (i && rfq.has(r.dataset.id)) i.value = rfq.get(r.dataset.id); }); else renderSheet(); }
     if (qvId) syncQV();
   }
   document.addEventListener('click', e => {
@@ -388,6 +417,14 @@
   $('#rfqClear').addEventListener('click', () => { rfq.clear(); saveRfq(); syncRfq(true); });
 
 
+  // the Back button closes an open window (quick view, quote list, filters, phone menu) instead of leaving the site:
+  // each window adds a history step when it opens, and takes it away again when it is closed any other way
+  function ovOpen(name) {
+    if (history.state && history.state.ov === name) return;
+    try { history.scrollRestoration = 'manual'; } catch (e) {}   // going back must not jump the page
+    history.pushState({ ov: name }, '');
+  }
+  function ovClosed(name) { if (history.state && history.state.ov === name) history.back(); }
   // page scrolling comes back only when no overlay, menu or filter sheet is still open
   function unlock() {
     if (!lenis) return;
@@ -414,18 +451,25 @@
   const qs = $('#qs');
   function renderSheet() {
     const n = rfq.size;
+    const a = document.activeElement, was = a && a.closest && a.closest('#qsList .qs__row');
+    const back = was && { id: was.dataset.id, i: $$('#qsList .qs__row').indexOf(was), sel: a.dataset.q ? '[data-q="' + a.dataset.q + '"]' : a.dataset.pk ? '[data-pk="' + a.dataset.pk + '"]' : a.classList.contains('qs__rm') ? '.qs__rm' : a.classList.contains('qs__img') ? '.qs__img' : '.qty input' };
     $('#qsCount').textContent = n;
     $('#qsList').innerHTML = n ? [...rfq].map(([k, q]) => {
       const o = itemOf(k);
       return '<div class="qs__row" data-id="' + esc(k) + '" data-pick-root="' + o.id + '">' +
         '<button class="qs__img" data-qv="' + esc(k) + '">' + imgTag(o.img) + '</button>' +
-        '<div class="qs__info"><span class="mono">' + o.c.name + '</span><b>' + esc(o.name) + '</b>' +
+        '<div class="qs__info"><span class="mono">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b>' +
           (fixedSize(o) ? (o.size ? '<small>' + esc(o.size) + '</small>' : '') : pickerHTML(o, o.pick)) + '</div>' +
         '<div class="qty"><button type="button" data-q="-1" aria-label="Less">−</button><input type="text" inputmode="numeric" value="' + q + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></div>' +
         '<button class="qs__rm" type="button" aria-label="Remove">×</button></div>';
     }).join('') : '<div class="qs__empty"><b>Your quote is empty.</b><p>Browse the catalogue, pick a size and tap “Add to quote”. Quantities can be changed here.</p><div class="qs__empty-btns"><button class="btn btn--red" id="qsBrowse" type="button">Browse the catalogue</button><a class="btn btn--ghost" href="tel:+97142850135">Call +971 4 285 0135</a></div></div>';
     $$('.qs__row', $('#qsList')).forEach(r => tidyPair(r, itemOf(r.dataset.id)));
     $('.qs__foot').hidden = n === 0;
+    if (back) {
+      const rows = $$('#qsList .qs__row'), r = rows.find(x => x.dataset.id === back.id) || rows[Math.min(back.i, rows.length - 1)];
+      const el = r ? $(back.sel, r) || $('.qs__rm', r) : $('.qv__close', qs);
+      if (el) el.focus({ preventScroll: true });
+    }
   }
   function openSheet() {
     closeMenu();
@@ -433,13 +477,15 @@
     renderSheet();
     qs.classList.add('is-open'); qs.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    ovOpen('qs');
     focusIn(qs, '.qv__close');
     gsap.fromTo('.qs__row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.04, delay: 0.15 });
   }
-  function closeSheet() {
+  function closeSheet(fromBack) {
     if (!qs.classList.contains('is-open')) return;
     qs.classList.remove('is-open'); qs.setAttribute('aria-hidden', 'true');
     unlock(); focusOut(qs);
+    if (fromBack !== true) ovClosed('qs');
   }
   $$('[data-qs-close]', qs).forEach(b => b.addEventListener('click', closeSheet));
   $('#qsList').addEventListener('click', e => {
@@ -451,7 +497,7 @@
     if (e.target.closest('.qs__rm')) setQty(id, 0);
   });
   $('#qsList').addEventListener('change', e => {
-    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value);
+    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value, true);
   });
   // if a showroom was open, scroll once it has finished closing (the page underneath is measured then)
   const afterShowroom = fn => { const was = sr.classList.contains('is-open'); closeSheet(); hardCloseShowroom(); setTimeout(fn, was && !reduce ? 950 : 80); };
@@ -500,24 +546,26 @@
     fillQV(key);
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    if (!wasOpen) ovOpen('qv');
     if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
     gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
-  function closeQV() {
+  function closeQV(fromBack) {
     if (!qv.classList.contains('is-open')) return;
     qv.classList.remove('is-open'); qv.setAttribute('aria-hidden', 'true'); qvId = null;
     unlock(); focusOut(qv);
+    if (fromBack !== true) ovClosed('qv');
   }
   function stepQV(d) { const o = itemOf(qvId); if (o) openQV(o.c.slug + ':' + ((o.i + d + o.c.items.length) % o.c.items.length)); }
   $$('[data-qv-close]', qv).forEach(b => b.addEventListener('click', closeQV));
   $('#qvPrev').addEventListener('click', () => stepQV(-1));
   $('#qvNext').addEventListener('click', () => stepQV(1));
-  $$('.qv [data-step]').forEach(b => b.addEventListener('click', () => { const i = $('#qvQty'); i.value = Math.max(1, (+i.value || 1) + (+b.dataset.step)); }));
+  $$('.qv [data-step]').forEach(b => b.addEventListener('click', () => { const i = $('#qvQty'); i.value = Math.min(99999, Math.max(1, (parseQty(i.value) || 1) + (+b.dataset.step))); }));
   $('#qvAdd').addEventListener('click', () => {
     const o = itemOf(qvId), p = readPick($('#qvPick'), o);
     if (!p.ok) return flagPick($('#qvPick'));
-    const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, Math.round(+$('#qvQty').value) || 1));
+    const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, parseQty($('#qvQty').value) || 1));
     const isNew = !rfq.has(key);
     rfq.set(key, q); saveRfq(); syncRfq(isNew);
     toast((isNew ? 'Added to quote — ' : 'Updated — ') + fullName(o) + sizeOfLine(itemOf(key)) + ' × ' + q);
@@ -533,17 +581,17 @@
     const o = itemOf(c.slug + ':' + i), on = hasAny(o.id);
     return '<div class="prow" data-fly>' +
       '<button class="prow__img" data-qv="' + o.id + '">' + imgTag(o.img) + '</button>' +
-      '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + c.name + '</span>' : '') + '<h4>' + o.name + '</h4>' +
-      (o.size ? '<div class="prow__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
+      '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + esc(c.name) + '</span>' : '') + '<h4>' + esc(o.name) + '</h4>' +
+      (o.size ? '<div class="prow__size">' + esc(o.size) + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
       '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
       '</div>';
   }
   function cardHTML(c, i) {
     const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = groupOf(c.items[i]);
-    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
+    return '<article class="pc" data-fly data-mat="' + esc(mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
       '<button class="pc__media" data-qv="' + o.id + '" data-cursor="View"><span class="pc__no mono">' + pad(i + 1) + '</span>' +
-      (mat ? '<span class="pc__mat mono">' + mat + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
-      '<div class="pc__body"><h4>' + o.name + '</h4>' + (o.size ? '<div class="pc__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
+      (mat ? '<span class="pc__mat mono">' + esc(mat) + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
+      '<div class="pc__body"><h4>' + esc(o.name) + '</h4>' + (o.size ? '<div class="pc__size">' + esc(o.size) + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
       '<div class="pc__foot"><button class="pc__quick mono" data-qv="' + o.id + '">Quick view</button>' +
       '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button></div>' +
       '</article>';
@@ -560,7 +608,7 @@
   let srIdx = -1;
   const filt = { mat: 'all', spec: 'all' };
 
-  $('#srTabs').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + c.name + '</button>').join('');
+  $('#srTabs').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + esc(c.name) + '</button>').join('');
 
   function renderShowroom(idx) {
     srIdx = idx;
@@ -578,14 +626,14 @@
       '<header class="sr__hero">' +
         '<div class="sr__copy">' +
           '<div class="sr__crumbs mono"><button data-sr-close>Catalogue</button><i>/</i><span>' + famName(c.fam) + '</span><i>/</i><b>' + pad(idx + 1) + ' of ' + CATS.length + '</b></div>' +
-          '<h2 class="sr__title">' + c.name + '</h2>' +
+          '<h2 class="sr__title">' + esc(c.name) + '</h2>' +
           '<p class="sr__desc">' + c.desc + '</p>' +
           '<div class="sr__facts"><div><b>' + pad(c.items.length) + '</b><small class="mono">Products</small></div>' +
             '<div><b>' + pad(Math.max(1, mats.length)) + '</b><small class="mono">Materials</small></div>' +
             '<div><b>' + pad(specCount.size) + '</b><small class="mono">Specs & ratings</small></div></div>' +
           '<div class="sr__ctas" data-fly><img class="sr__flysrc" src="' + coverOf(c) + '" alt="" >' +
             '<button class="btn btn--red magnetic" data-addall>Quote the full range <svg><use href="#arrow"/></svg></button>' +
-            '<a class="btn btn--ghost magnetic" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I would like a quote for your ' + c.name + '."><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div>' +
+            '<a class="btn btn--ghost magnetic" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I would like a quote for your ' + esc(c.name) + '."><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div>' +
         '</div>' +
         '<div class="sr__stage">' +
           '<div class="sr__orb"><svg class="sr__ring" viewBox="0 0 200 200"><defs><path id="srRing" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#srRing">Fakhri Tools · Al Quoz Industrial Area 3 · Dubai · Get a quote · Call · WhatsApp ·</textPath></text></svg>' +
@@ -600,10 +648,10 @@
         '<span class="sr__showing mono" id="srShowing">Showing ' + c.items.length + ' of ' + c.items.length + '</span>' +
       '</div>' +
       '<div class="sr__grid" id="srGrid">' + c.items.map((_, i) => cardHTML(c, i)).join('') + '</div>' +
-      '<section class="sr__related"><div class="sr__rel-head"><span class="mono">Complete the line</span><h3>Everything that goes with ' + c.name.toLowerCase().replace(/ — .*/, '') + '.</h3><p>Gaskets, flanges, fittings and instruments — ask for them all in one quote.</p></div>' +
+      '<section class="sr__related"><div class="sr__rel-head"><span class="mono">Complete the line</span><h3>Everything that goes with ' + esc(c.name.toLowerCase().replace(/ — .*/, '')) + '.</h3><p>Gaskets, flanges, fittings and instruments — ask for them all in one quote.</p></div>' +
         '<div class="sr__rel-grid">' + related.map(r => '<button class="rel" data-cat="' + r.slug + '"><span class="rel__img">' + imgTag(coverOf(r), r.name) + '</span><span class="mono">' + pad(r.items.length) + ' products</span><b>' + r.name + '</b><i><svg><use href="#arrow"/></svg></i></button>').join('') + '</div>' +
       '</section>' +
-      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + next.name + '</b><span class="sr__next-img">' + imgTag(coverOf(next), next.name) + '</span></button>';
+      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + esc(next.name) + '</b><span class="sr__next-img">' + imgTag(coverOf(next), next.name) + '</span></button>';
 
     applyLinks(srContent);
     $$('#srTabs button').forEach(b => b.classList.toggle('is-on', b.dataset.cat === c.slug));
@@ -747,11 +795,11 @@
   /* ---------------- Mega menu + footer list ---------------- */
   const nav = $('#nav');
   $('#megaIn').innerHTML = FAMS.map(f =>
-    '<div><h6>' + f.name + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
-      '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
+    '<div><h6>' + esc(f.name) + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
+      '<button data-cat="' + c.slug + '">' + esc(c.name) + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
   // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
-  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + pageOf(c) + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + pageOf(c) + '.html" data-cat="' + c.slug + '">' + esc(c.name) + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
 
   const megaBtn = $('#megaBtn');
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
@@ -766,16 +814,16 @@
   }
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); } }
+  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
     $('#burger').setAttribute('aria-expanded', String(on));
-    if (on) lenis && lenis.stop(); else unlock();
+    if (on) { lenis && lenis.stop(); ovOpen('menu'); } else { unlock(); ovClosed('menu'); }
   });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeTop();
-    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) {
+    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('#qv.is-open, #qs.is-open, #showroom.is-open') && !document.body.classList.contains('is-menu') && !document.body.classList.contains('is-filtering')) {
       e.preventDefault(); scrollToEl('#catalogue'); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);
     }
   });
@@ -783,10 +831,16 @@
   /* ---------------- Catalogue: filters on the left, every product on the right ---------------- */
   // search text is matched in one plain form: 1/2 = ½, 1-1/2 or 1 1/2 = 1½, C.S = CS, aluminum = aluminium
   const FRAC = { '1/8': '⅛', '1/4': '¼', '3/8': '⅜', '1/2': '½', '3/4': '¾' };
-  const qn = s => String(s).toLowerCase()
+  const qn = s => String(s).toLowerCase().replace(/[”″“]/g, '"')
     .replace(/(^|\s)(\d{1,2})[\s-]+(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, n, f) => sp + n + FRAC[f])
     .replace(/(^|[^\d\/])(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, f) => sp + FRAC[f])
+    .replace(/([\d⅛¼⅜½¾])"?\s*[x×*]\s*(?=[\d⅛¼⅜½¾])/g, '$1×')   // 4x3, 4" x 3" and 4" × 3" are written the same way
     .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium');
+  // a size or number is matched whole: ½ doesn't find 1½ or 2½, and 2 doesn't find 2½ or 24
+  const NUM = '0-9⅛¼⅜½¾', reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokTest = t => /^[0-9⅛¼⅜½¾]/.test(t) || /[0-9⅛¼⅜½¾]$/.test(t)
+    ? (r => h => r.test(h))(new RegExp((/^[0-9⅛¼⅜½¾]/.test(t) ? '(?:^|[^' + NUM + '])' : '') + reEsc(t) + (/[0-9⅛¼⅜½¾]$/.test(t) ? '(?![' + NUM + '])' : '')))
+    : h => h.includes(t);
   // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
   const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
   const ALL = [];
@@ -795,7 +849,7 @@
     o.mat = matOf(o) || 'Other';
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
     o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
-    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
+    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
@@ -820,20 +874,21 @@
 
   // what passes every filter except the one named in `skip` (so each group shows honest counts)
   function pass(o, skip) {
-    if (skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
-    if (skip !== 'mats' && kf.mats.size && !o.mats.some(m => kf.mats.has(m))) return false;
-    if (skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
-    if (kf.q) { const toks = kf.q.split(/\s+/); if (!toks.every(t => o.hay.includes(t))) return false; }
+    if (skip !== 'all' && skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
+    if (skip !== 'all' && skip !== 'mats' && kf.mats.size && !o.mats.some(m => kf.mats.has(m))) return false;
+    if (skip !== 'all' && skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
+    if (kf.q) { if (kf.qT !== kf.q) { kf.qT = kf.q; kf.qTests = kf.q.split(/\s+/).filter(Boolean).map(tokTest); } if (!kf.qTests.every(f => f(o.hay))) return false; }
     return true;
   }
-  const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
+  // ticking a filter clears the others (one filter at a time), so each count says what that click will show: only the search narrows it
+  const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, 'all')) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
 
   // category rail with photos
   // real links to each category page (search engines follow them); a click filters the list on this page instead
   $('#katRail').innerHTML = '<a class="kr is-on" href="products/index.html" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></a>' +
-    CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
+    CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + esc(c.name) + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
   $('#katRail').addEventListener('click', e => {
-    const b = e.target.closest('[data-pick]'); if (!b) return;
+    const b = e.target.closest('[data-pick]'); if (!b || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
     e.preventDefault();
     kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
     kf.limit = PAGE; renderKat(true);
@@ -856,8 +911,8 @@
     FAMS.forEach(f => {
       const cs = CATS.filter(c => c.fam === f.id);
       const open = cs.some(c => kf.cats.has(c.slug));
-      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
-        cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
+      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + esc(f.name) + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
+        cs.map(c => box('cats', c.slug, esc(c.name), cc.get(c.slug))).join('') + '</div></details>';
     });
     h += '<details class="kgroup" data-g="mat"' + ((kOpenG.has('mat') ? kOpenG.get('mat') : kf.mats.size > 0) ? ' open' : '') + '><summary>Material</summary><div class="kgroup__list">' +
       matList().map(m => box('mats', m, esc(m), mc.get(m))).join('') + '</div></details>';
@@ -876,7 +931,7 @@
     return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
         (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
-      '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
+      '<div class="kc__body"><span class="kc__cat mono">' + esc(o.c.name) + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
         (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span>' + esc(mat) + '</div>' : '') +
         (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
@@ -890,12 +945,27 @@
     '<p>Send your list or a photo on WhatsApp. We reply with prices before the counter opens.</p>' +
     '<a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, please price this list for me:"><svg><use href="#wa"/></svg> Send my list</a></aside>';
 
+  const kMoreBar = (hits, shown) => {
+    $('#katMore').innerHTML = hits.length > shown.length ?
+      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more product' + (hits.length - shown.length === 1 ? '' : 's') + '</button>' :
+      (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
+  };
   let kFirst = true;
-  function renderKat(animate) {
+  // more = "Show more": the cards already on screen stay as they are and only the new ones are added
+  function renderKat(animate, more) {
     const hits = ALL.filter(o => pass(o));
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
     const shown = hits.slice(0, kf.limit);
+    const pageH = document.documentElement.scrollHeight;
+    const had = more ? $$('.kc:not(.kc--promo)', kGrid).length : 0;
+    if (more && had >= 7 && had < shown.length) {
+      const kids = kGrid.children.length;
+      kGrid.insertAdjacentHTML('beforeend', shown.slice(had).map(o => kcardHTML(o)).join(''));
+      [...kGrid.children].slice(kids).forEach(applyLinks); kMoreBar(hits, shown); applyLinks($('#katMore'));
+      if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
+      return;
+    }
     // sizes already picked on cards survive "Show more", filters, sort and search
     const keep = new Map();
     $$('[data-pick-root]', kGrid).forEach(r => {
@@ -910,9 +980,7 @@
       '<div class="kat-empty__btns"><button class="btn btn--ghost-dk" data-kclear>Clear filters</button><a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I’m looking for: "><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div></div>';
     $('#katCount').textContent = hits.length === ALL.length ? 'All ' + ALL.length + ' products' : hits.length + ' of ' + ALL.length + ' products';
     $('#katApplyN').textContent = hits.length;
-    $('#katMore').innerHTML = hits.length > shown.length ?
-      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more product' + (hits.length - shown.length === 1 ? '' : 's') + '</button>' :
-      (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
+    kMoreBar(hits, shown);
     $('#katFacets').innerHTML = facetsHTML();
     // active filter pills
     const pills = [];
@@ -933,7 +1001,8 @@
     applyLinks(kGrid); applyLinks($('#katMore'));
     if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
-    ScrollTrigger.refresh();
+    // the sections below only need their scroll positions worked out again if the page got longer or shorter
+    if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
   }
 
   // after a filter change the list gets shorter; if you were further down, go back to the top of the list so the results are in view
@@ -965,7 +1034,7 @@
   $('#katReset').addEventListener('click', clearKat);
   $('#catalogue').addEventListener('click', e => {
     if (e.target.closest('[data-kclear]')) return clearKat();
-    if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
+    if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false, true); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
     const p = e.target.closest('[data-pg]');
     if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); toListTop(); }
   });
@@ -986,7 +1055,11 @@
 
   // phones: filters slide up as a sheet
   // the phone sheet scrolls on its own; on laptops the wheel always scrolls the page smoothly, even over the filters
-  const kOpen = on => { kSide.toggleAttribute('data-lenis-prevent', on); kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
+  const kOpen = (on, fromBack) => {
+    const was = document.body.classList.contains('is-filtering');
+    kSide.toggleAttribute('data-lenis-prevent', on); kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on);
+    if (on) { lenis && lenis.stop(); if (!was) ovOpen('filt'); } else { unlock(); if (was && fromBack !== true) ovClosed('filt'); }
+  };
   $('#katFilterBtn').addEventListener('click', () => kOpen(true));
   $('#katSideClose').addEventListener('click', () => kOpen(false));
   $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });
@@ -994,31 +1067,15 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && kSide.classList.contains('is-open')) kOpen(false); });
   renderKat(false);
 
-  /* ---------------- Business details for search engines (facts from the owner's form) ---------------- */
-  const ld = document.createElement('script');
-  ld.type = 'application/ld+json';
-  ld.textContent = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'HardwareStore',
-    name: 'Fakhri Tools & Workshop Materials Trading LLC',
-    image: new URL('assets/share.jpg', location.href).href,
-    logo: new URL('assets/logo-stacked.png', location.href).href,
-    telephone: '+97142850135',
-    address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
-    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '07:30', closes: '18:00' }],
-    knowsLanguage: ['en', 'hi', 'ur', 'ar'],
-    paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque',
-    areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
-    hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves', itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name })) }
-  });
-  document.head.appendChild(ld);
+  // Business details for search engines are written into index.html by tools/build-pages.js (<!-- seo:ld -->), so they are there without JavaScript.
 
   /* ---------------- Brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
-    '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
+    '<button class="btile" data-brand="' + esc(b.name) + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
-      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
-      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
+      '<span class="btile__mark">' + (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + esc(b.name).replace(/-/g, '‑') + '</span>') + '</span>' +
+      '<span class="btile__foot"><span class="mono">' + (b.logo ? esc(b.name) : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
     '</button>').join('') +
     '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
       '<span class="btile__mark"><span class="btile__word is-long">Ask for your brand</span></span>' +
@@ -1027,7 +1084,7 @@
   $$('#brandsGrid .btile__mark img').forEach(img => {
     const toWord = () => {
       const t = img.closest('.btile'), n = t.dataset.brand;
-      img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + n.replace(/-/g, '‑') + '</span>';
+      img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + esc(n).replace(/-/g, '‑') + '</span>';
       $('.btile__foot .mono', t).textContent = 'Brand';
     };
     // very wide logos (long company names) may use the whole tile width, or they come out tiny on phones
@@ -1111,16 +1168,22 @@
   /* ---------------- Ticker tapes ---------------- */
   let tapes = [], tapesOn = true;
   new IntersectionObserver(es => { tapesOn = es[0].isIntersecting; }, { rootMargin: '100px' }).observe($('.tickers'));
-  function setupTapes() {
+  // rebuilt only when the width changes (on phones the address bar coming and going changes just the height),
+  // and each strip carries on from where it was instead of jumping
+  let tapesW = 0;
+  function setupTapes(force) {
+    if (!force && innerWidth === tapesW) return;
+    tapesW = innerWidth;
+    const was = tapes;
     tapes = [];
-    $$('.tape').forEach(t => {
+    $$('.tape').forEach((t, i) => {
       const tr = $('.tape__track', t);
       if (!tr._unit) tr._unit = tr.innerHTML;
       tr.innerHTML = tr._unit;
       const uw = tr.scrollWidth;
       const n = Math.ceil(innerWidth * 1.3 / uw) + 1;
       tr.innerHTML = tr._unit.repeat(n + 1);
-      tapes.push({ t, tr, uw, x: -Math.random() * uw, sp: +t.dataset.speed, dir: +t.dataset.dir });
+      tapes.push({ t, tr, uw, x: was[i] && uw ? was[i].x % uw : -Math.random() * uw, sp: +t.dataset.speed, dir: +t.dataset.dir });
     });
   }
   gsap.ticker.add((time, dt) => {
@@ -1325,6 +1388,12 @@
       });
     });
 
+    // the Industries drawings only animate while they are on screen (no work for the computer anywhere else on the page)
+    if ('IntersectionObserver' in window) {
+      const artIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-idle', !e.isIntersecting)));
+      $$('.sector__art, .sectors__hint').forEach(a => artIO.observe(a));
+    }
+
     const steps = $$('.anatomy__steps p');
     ScrollTrigger.create({
       trigger: '#anatomy', start: 'top top', end: '+=240%', pin: true, anticipatePin: 1,
@@ -1395,6 +1464,16 @@
       .add(finish, 4.0);
   }
 
+  // Back pressed (or a window closed itself): close every window above the step we are now on
+  window.addEventListener('popstate', () => {
+    const cur = history.state && history.state.ov;
+    if (cur !== 'qv') closeQV(true);
+    if (cur !== 'qs') closeSheet(true);
+    if (cur !== 'filt' && document.body.classList.contains('is-filtering')) kOpen(false, true);
+    if (cur !== 'menu') closeMenu(true);
+    if (!cur) try { history.scrollRestoration = 'auto'; } catch (e) {}
+  });
+
   /* ---------------- Boot ---------------- */
   applyLinks(document);
   syncRfq(false);
@@ -1405,9 +1484,11 @@
   if (deep) {
     const ds = slugAlias(deep[1]);
     if (catBySlug(ds)) setTimeout(() => showCat(ds), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
+    // the link has done its job: a reload (or a shared address) must not bring that category back after other filters
+    history.replaceState(history.state, '', location.pathname + location.search);
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });
+  fontsReady.then(() => { setupTapes(true); ScrollTrigger.refresh(); });
   let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { setupTapes(); }, 200); });
   window.addEventListener('load', () => ScrollTrigger.refresh());
 })();

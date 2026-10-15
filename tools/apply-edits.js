@@ -1,11 +1,22 @@
 /* Applies a "fakhri-product-changes.json" file saved from edit.html to js/data.js.
-   Usage (from the site folder): node tools/apply-edits.js path/to/fakhri-product-changes.json */
+   Usage (from the site folder): node tools/apply-edits.js path/to/fakhri-product-changes.json [--force]
+   The file replaces whole categories, so it must have been made from the website's CURRENT product list.
+   A file made from an older list (or an "older changes" file) would silently undo later changes: it is refused
+   unless --force is given (use --force only after merging such a file by hand). */
 const vm = require('vm'), fs = require('fs'), path = require('path');
-const edits = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const args = process.argv.slice(2), force = args.includes('--force'), file = args.find(a => a !== '--force');
+const edits = JSON.parse(fs.readFileSync(file, 'utf8'));
 if (edits.kind !== 'fakhri-product-edits') throw new Error('Not a product changes file');
 const src = fs.readFileSync('js/data.js', 'utf8');
 const ctx = { window: {} }; vm.runInNewContext(src, ctx);
 const W = ctx.window;
+// the same fingerprint edit.html writes into the file ("ver")
+const VER = (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(W.FT_CATS));
+if (edits.older && !force) throw new Error('This is an "older changes" file (unsaved work the editor put aside). Merge it by hand against the list it started from, then run with --force.');
+if (edits.ver && edits.ver !== VER && !force) throw new Error('This changes file was made from an older website product list (' + edits.ver + ', website is ' + VER + '). Applying it would undo the changes made since. Merge it by hand, then run with --force.');
+if (!edits.ver) console.warn('Note: this file has no list fingerprint (made by an older editor). Compare it with js/data.js before publishing.');
+const brandsAt = src.indexOf('/* Oilfield brands');
+if (brandsAt < 0) throw new Error('Could not find the "/* Oilfield brands" comment in js/data.js, so the brand list would be lost');
 
 // Save new photos next to the category's other photos
 const saved = {};
@@ -37,6 +48,7 @@ for (const e of edits.cats) {
   if (typeof e.name === 'string' && e.name.trim()) c.name = e.name.trim();
   c.cover = photo(e.cover);
   if (!/^[a-z0-9-]+$/.test(c.slug)) throw new Error('Bad slug ' + c.slug);
+  if (!c.items.length) throw new Error('Category "' + c.name + '" has no products left. Move a product back into it, or remove the category from js/data.js by hand.');
   for (const p of [c.cover, ...c.items.map(it => it[3])]) if (p && !fs.existsSync(path.join('assets/products', p))) throw new Error('Missing photo ' + p);
 }
 
@@ -50,7 +62,7 @@ out += 'window.FT_CATS = [\n' + W.FT_CATS.map(c =>
   '    desc: ' + q(c.desc) + ',\n' +
   '    cover: ' + q(c.cover) + ',\n' +
   '    items: [\n' + c.items.map(it => '      [' + q(it[0]) + ', [' + it[1].map(q).join(', ') + '], ' + q(it[2]) + ', ' + q(it[3]) + (it[4] ? ', ' + q(it[4]) : '') + ']').join(',\n') + '\n    ] }').join(',\n') + '\n];\n\n';
-out += src.slice(src.indexOf('/* Oilfield brands'));
+out += src.slice(brandsAt);
 fs.writeFileSync('js/data.js', out);
 fs.writeFileSync('index.html', fs.readFileSync('index.html', 'utf8').replace(/\d+ products\.<br>\d+ categories\./, total + ' products.<br>' + W.FT_CATS.length + ' categories.'));
 console.log('Applied:', total, 'products,', Object.keys(saved).length, 'new photos');

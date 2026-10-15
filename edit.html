@@ -80,6 +80,7 @@
 </header>
 <div class="notice" id="notice"></div>
 <div class="notice warn" id="older" hidden></div>
+<div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Save changes file</b> now and send it to Claude.</div>
 <details class="help" open>
   <summary>How to use the editor</summary>
   <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
@@ -126,7 +127,10 @@ function startEditor() {
   if (!state || !state.cats || state.ver !== VER) {
     if (state && state.cats && state.dirty) {
       const aside = { at: new Date().toISOString(), state };
-      try { localStorage.removeItem(KEY); localStorage.setItem(OLD, JSON.stringify(aside)); } catch (e) { window.ftOlder = aside; }
+      let list = [];
+      try { const o = JSON.parse(localStorage.getItem(OLD)); list = Array.isArray(o) ? o : o && o.state ? [o] : []; } catch (e) {}
+      list.push(aside);
+      try { localStorage.removeItem(KEY); localStorage.setItem(OLD, JSON.stringify(list)); } catch (e) { window.ftOlder = list; }
     }
     state = fresh();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
@@ -137,7 +141,21 @@ function startEditor() {
   const src = p => !p ? '' : p.startsWith('new:') ? state.images[p] : IMG + p;
   const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
   let shown = null;   // which notice is on screen, so it only redraws when that changes
-  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Browser storage full: press Save changes file now'); } if (shown !== null && shown !== noticeKind()) showNotice(); };
+  const usedPhotos = st => new Set(st.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
+  let pT = 0;
+  function writeNow() {
+    clearTimeout(pT); pT = 0;
+    // photos that were replaced are not needed any more (undo keeps its own copy), so they don't fill the browser's storage
+    const used = usedPhotos(state);
+    Object.keys(state.images).forEach(k => { if (!used.has(k)) delete state.images[k]; });
+    let ok = true;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { ok = false; }
+    $('#full').hidden = ok;
+  }
+  // typing is saved after a short pause, not on every key (with many photos one save takes a moment)
+  const persist = () => { clearTimeout(pT); pT = setTimeout(writeNow, 400); if (shown !== null && shown !== noticeKind()) showNotice(); };
+  addEventListener('pagehide', () => { if (pT) writeNow(); });
+  addEventListener('beforeunload', () => { if (pT) writeNow(); });
   const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
   const change = fn => { snap(); fn(); state.dirty = true; persist(); render(); };
 
@@ -292,16 +310,16 @@ function startEditor() {
   $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
   $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
   $('#save').onclick = () => {
-    const used = new Set(state.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
-    const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
+    const used = usedPhotos(state);
+    const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), ver: state.ver, cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
     a.download = 'fakhri-product-changes.json'; a.click();
-    state.dirty = false; state.saved = true; persist();
+    state.dirty = false; state.saved = true; persist(); writeNow();
     toast('Saved to Downloads as fakhri-product-changes.json');
   };
   // what the person is looking at: the newest website list, or their unsaved work on top of it
-  const older = () => { if (window.ftOlder) return window.ftOlder; try { const o = JSON.parse(localStorage.getItem(OLD)); return o && o.state ? o : null; } catch (e) { return null; } };
+  const older = () => { if (window.ftOlder) return window.ftOlder; try { const o = JSON.parse(localStorage.getItem(OLD)); return Array.isArray(o) ? o.filter(x => x && x.state) : o && o.state ? [o] : []; } catch (e) { return []; } };
   const when = iso => { try { return new Date(iso).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
   function noticeKind() { return state.dirty ? 'dirty' : state.saved ? 'saved' : 'site'; }
   function showNotice() {
@@ -313,19 +331,20 @@ function startEditor() {
         ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Send it to Claude. After Claude says it is live, refresh this page to see the new website list.'
         : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
     const o = older(), box = $('#older');
-    box.hidden = !o;
-    if (o) box.innerHTML = '<b>Older unsaved changes were put aside.</b> This browser had changes from ' + when(o.at) + ' that were never saved, and the website has been updated since. They are NOT in the list below. Download them only if Claude asks for them.' +
-      '<br><button type="button" id="olderGet">Download older changes</button><button type="button" class="ghost" id="olderDel">Delete them</button>';
+    box.hidden = !o.length;
+    if (o.length) box.innerHTML = '<b>Older unsaved changes were put aside.</b> This browser had changes from ' + o.map(x => when(x.at)).join(' and ') + ' that were never saved, and the website has been updated since. They are NOT in the list below. Download them only if Claude asks for them.' +
+      '<br>' + o.map((x, k) => '<button type="button" class="olderGet" data-k="' + k + '">Download older changes' + (o.length > 1 ? ' (' + escH(when(x.at)) + ')' : '') + '</button>').join('') + '<button type="button" class="ghost" id="olderDel">Delete ' + (o.length > 1 ? 'them all' : 'them') + '</button>';
   }
   document.addEventListener('click', e => {
-    if (e.target.id === 'olderGet') {
-      const o = older(); if (!o) return;
-      const used = new Set(o.state.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
-      const out = { kind: 'fakhri-product-edits', saved: o.at, older: true, cats: o.state.cats, images: Object.fromEntries(Object.entries(o.state.images || {}).filter(([k]) => used.has(k))) };
+    if (e.target.classList.contains('olderGet')) {
+      const all = older(), k = +e.target.dataset.k, o = all[k]; if (!o) return;
+      const used = usedPhotos(o.state);
+      const out = { kind: 'fakhri-product-edits', saved: o.at, older: true, ver: o.state.ver, cats: o.state.cats, images: Object.fromEntries(Object.entries(o.state.images || {}).filter(([k]) => used.has(k))) };
+      const name = 'fakhri-product-changes-OLDER' + (all.length > 1 ? '-' + (k + 1) : '') + '.json';
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
-      a.download = 'fakhri-product-changes-OLDER.json'; a.click();
-      toast('Saved to Downloads as fakhri-product-changes-OLDER.json');
+      a.download = name; a.click();
+      toast('Saved to Downloads as ' + name);
     }
     if (e.target.id === 'olderDel' && confirm('Delete the older unsaved changes from this browser?')) { window.ftOlder = null; try { localStorage.removeItem(OLD); } catch (err) {} showNotice(); }
   });
