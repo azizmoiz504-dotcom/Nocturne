@@ -870,20 +870,12 @@
     ALL.push(o);
   }));
   $('#search').placeholder = 'Search ' + ALL.length + ' products' + (innerWidth > 700 ? ': try "camlock", "CL150" or "316L"' : '');
-  const MAT_ORDER = ['Stainless', 'Carbon steel', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
-  // materials the owner typed in the editor get their own filter line, just above "Other"
-  const matList = () => {
-    const used = new Set(ALL.flatMap(o => o.mats)), own = [...used].filter(m => !MAT_ORDER.includes(m)).sort();
-    return MAT_ORDER.filter(m => m !== 'Other' && used.has(m)).concat(own, used.has('Other') ? ['Other'] : []);
-  };
-  const specFreq = new Map();
-  ALL.forEach(o => o.chips.forEach(s => specFreq.set(s, (specFreq.get(s) || 0) + 1)));
-  const SPECS = [...specFreq].filter(([, n]) => n >= 3).sort((a, b) => b[1] - a[1]).slice(0, 16).map(([s]) => s);
   const SPEC_LABEL = { 'F/T': 'Flanged (F/T)', SW: 'Socket weld (SW)', BW: 'Butt weld (BW)', NPT: 'NPT thread', BSPT: 'BSPT thread' };
   const PAGE = 24;
-  const navOff = () => (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 100) + 8;
+  // the top bar stays hidden over the catalogue, so the list lines up just under the top of the screen
+  const KAT_GAP = 16;
   // an exact page position, so a filter row appearing or disappearing above the list can't throw it off
-  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el.getBoundingClientRect().top + scrollY - navOff(), { duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navOff(), behavior: 'smooth' }); };
+  const scrollKat = () => { const el = $('.kat-main'); if (lenis) lenis.scrollTo(el.getBoundingClientRect().top + scrollY - KAT_GAP, { duration: 1.2, force: true }); else window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - KAT_GAP, behavior: 'smooth' }); };
   const kf = { cats: new Set(), mats: new Set(), specs: new Set(), q: '', sort: 'rec', limit: PAGE };
   const kGrid = $('#katGrid'), kSide = $('#katSide');
   const waPrice = (o, v) => { const w = v !== undefined && v !== null ? sizeWords(o, v) : o.size; return 'Hello Fakhri Tools, please send me a price for: ' + fullName(o) + (w ? ' (' + w + ')' : '') + '. Quantity: '; };
@@ -912,29 +904,16 @@
     if (top < 0 || top > innerHeight * 0.6) scrollKat();
   });
 
-  const kOpenG = new Map();
-  // one filter group open at a time on laptops, so the filter column stays short and never has to scroll on its own
-  $('#katFacets').addEventListener('click', e => {
-    const sm = e.target.closest('summary'); if (!sm) return;
-    const d = sm.parentNode, opening = !d.open;
-    kOpenG.set(d.dataset.g, opening);
-    if (opening && deskQ.matches) $$('#katFacets details[open]').forEach(x => { if (x !== d) { x.open = false; kOpenG.set(x.dataset.g, false); } });
-  });
+  // every category group is always open, so the whole category list shows at once
   function facetsHTML() {
-    const cc = countBy('cats', o => o.c.slug), mc = countBy('mats', o => o.mats), sc = countBy('specs', o => o.chips);
+    const cc = countBy('cats', o => o.c.slug);
     const box = (group, val, label, n) => '<label class="kf' + (n ? '' : ' is-zero') + '"><input type="checkbox" data-g="' + group + '" value="' + esc(val) + '"' + (kf[group].has(val) ? ' checked' : '') + '><i></i><span>' + label + '</span><em class="mono">' + (n || 0) + '</em></label>';
-    let h = '';
-    FAMS.forEach(f => {
+    return FAMS.map(f => {
       const cs = CATS.filter(c => c.fam === f.id);
-      const open = cs.some(c => kf.cats.has(c.slug));
-      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + esc(f.name) + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
-        cs.map(c => box('cats', c.slug, esc(c.name), cc.get(c.slug))).join('') + '</div></details>';
-    });
-    h += '<details class="kgroup" data-g="mat"' + ((kOpenG.has('mat') ? kOpenG.get('mat') : kf.mats.size > 0) ? ' open' : '') + '><summary>Material</summary><div class="kgroup__list">' +
-      matList().map(m => box('mats', m, esc(m), mc.get(m))).join('') + '</div></details>';
-    h += '<details class="kgroup" data-g="spec"' + ((kOpenG.has('spec') ? kOpenG.get('spec') : kf.specs.size > 0) ? ' open' : '') + '><summary>Connection &amp; rating</summary><div class="kgroup__chips">' +
-      SPECS.map(s => '<button class="kchip' + (kf.specs.has(s) ? ' is-on' : '') + (sc.get(s) ? '' : ' is-zero') + '" data-spec="' + esc(s) + '">' + esc(SPEC_LABEL[s] || s) + ' <em>' + (sc.get(s) || 0) + '</em></button>').join('') + '</div></details>';
-    return h;
+      if (!cs.length) return '';
+      return '<div class="kgroup" data-g="' + f.id + '"><p class="kgroup__h">' + esc(f.name) + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></p><div class="kgroup__list">' +
+        cs.map(c => box('cats', c.slug, esc(c.name), cc.get(c.slug))).join('') + '</div></div>';
+    }).join('');
   }
 
   function noPhoto(o) {
@@ -1031,7 +1010,7 @@
   }
 
   // after a filter change the list gets shorter; if you were further down, go back to the top of the list so the results are in view
-  const toListTop = () => { if (!kSide.classList.contains('is-open') && $('.kat-main').getBoundingClientRect().top < navOff() - 20) scrollKat(); };
+  const toListTop = () => { if (!kSide.classList.contains('is-open') && $('.kat-main').getBoundingClientRect().top < 0) scrollKat(); };
   $('#katFacets').addEventListener('change', e => {
     const t = e.target; if (!t.dataset.g) return;
     const had = document.activeElement === t, g = t.dataset.g, val = t.value;
@@ -1041,17 +1020,11 @@
     // keyboard users keep their place in the filter list
     if (had) { const el = $$('#katFacets input[data-g="' + g + '"]').find(x => x.value === val); if (el) el.focus({ preventScroll: true }); }
   });
-  $('#katFacets').addEventListener('click', e => {
-    const b = e.target.closest('[data-spec]'); if (!b) return;
-    const s = b.dataset.spec; if (kf.specs.has(s)) kf.specs.delete(s); else { kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.specs.add(s); }
-    kf.limit = PAGE; renderKat(true); toListTop();
-  });
   // open one category in the product list (empty slug = all products) and bring the list into view
   function showCat(slug) {
     closeMega(); closeMenu();
     kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); kf.q = ''; $('#search').value = ''; kf.limit = PAGE;
     if (slug && catBySlug(slug)) kf.cats.add(slug);
-    kOpenG.clear();
     renderKat(true);
     afterShowroom(scrollKat);
   }
@@ -1067,13 +1040,20 @@
   $('#search').addEventListener('input', e => { clearTimeout(kT); kT = setTimeout(() => { kf.q = qn(e.target.value.trim().replace(/[<>&"]/g, '')); kf.limit = PAGE; renderKat(true); }, 140); });
   $('#katSort').addEventListener('change', e => { kf.sort = e.target.value; renderKat(true); });
 
-  // laptops: the filter column scrolls with the page and then sticks once its bottom is in view (no scroll box inside a scroll box)
+  // laptops: a filter column taller than the screen moves with the page; scrolling down it stops once its bottom is in view,
+  // scrolling up once its top is in view (no scroll box inside a scroll box)
   const deskQ = matchMedia('(min-width: 900px)');   // computers get the 75% stylesheet, where the side filter column starts at 826px
+  let sideTop = KAT_GAP, sideMin = KAT_GAP;
   function fitSide() {
     if (!deskQ.matches) { kSide.style.top = ''; return; }
-    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 80;
-    const room = innerHeight - navH - 24;
-    kSide.style.top = (kSide.offsetHeight <= room ? navH + 24 : innerHeight - kSide.offsetHeight - 20) + 'px';
+    sideMin = Math.min(KAT_GAP, innerHeight - kSide.offsetHeight - KAT_GAP);
+    sideTop = clamp(sideTop, sideMin, KAT_GAP);
+    kSide.style.top = sideTop + 'px';
+  }
+  function slideSide(dy) {
+    if (sideMin === KAT_GAP || !deskQ.matches) return;
+    const t = clamp(sideTop - dy, sideMin, KAT_GAP);
+    if (t !== sideTop) { sideTop = t; kSide.style.top = t + 'px'; }
   }
   if ('ResizeObserver' in window) new ResizeObserver(fitSide).observe(kSide);
   // the phone filter sheet is closed when the window becomes computer-sized (the page stayed locked)
@@ -1307,11 +1287,18 @@
   if (!CFG.email) $('[data-send="email"]', form).hidden = true;
 
   /* ---------------- Nav state ---------------- */
-  let lastY = 0;
+  let lastY = 0, navH = 80;
+  const katSec = $('#catalogue');
+  const readNavH = () => { navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 80; };
+  readNavH(); addEventListener('resize', readNavH);
   function onScroll(y) {
+    // the top bar stays out of the way the whole time the product list is under it, scrolling up too
+    const kr = katSec.getBoundingClientRect(), inKat = kr.top < navH && kr.bottom > navH;
     nav.classList.toggle('is-scrolled', y > 40);
     const down = y > lastY;
-    if (y > 500 && down && !nav.classList.contains('is-mega') && Math.abs(y - lastY) > 2) nav.classList.add('is-hidden');
+    slideSide(y - lastY);
+    if (inKat && !nav.classList.contains('is-mega')) nav.classList.add('is-hidden');
+    else if (y > 500 && down && !nav.classList.contains('is-mega') && Math.abs(y - lastY) > 2) nav.classList.add('is-hidden');
     else if (!down) nav.classList.remove('is-hidden');
     lastY = y;
   }
