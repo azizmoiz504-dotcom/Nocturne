@@ -249,7 +249,8 @@ function startEditor() {
   const nameIn = $('#catName');
   nameIn.addEventListener('focus', snap);
   nameIn.addEventListener('input', () => { const v = nameIn.value.trim(); if (!v) return; cat().name = v; state.dirty = true; persist(); if (selEl.options[ci]) selEl.options[ci].text = v + ' (' + cat().items.length + ')'; });
-  nameIn.addEventListener('blur', () => { if (!nameIn.value.trim()) nameIn.value = cat().name; render(); });
+  // no redraw here: it removed the box you had just clicked, so that first click and typing were lost (this section's name isn't shown on its own cards)
+  nameIn.addEventListener('blur', () => { if (!nameIn.value.trim()) nameIn.value = cat().name; });
   const ph = $('#coverPh');
   ph.addEventListener('click', () => { select('cover', false); toast('Main photo picked: press Ctrl+V to paste a photo'); });
   $('#coverPick').onclick = () => { select('cover', false); pickFile('cover'); };

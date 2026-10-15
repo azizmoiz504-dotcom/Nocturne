@@ -288,10 +288,11 @@
   }
 
   // "1,000", "1 000" and "10 pcs" all count; a box with no number in it keeps the old quantity
-  const parseQty = v => { const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
+  const parseQty = v => { if (/^\s*[-−]/.test(String(v))) return null;   // "-5" is not 5
+    const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
   function setQty(key, q, typed) {
     if (typeof q !== 'number') q = parseQty(q);
-    if (q === null) { syncRfq(false); return; }
+    if (q === null) { syncRfq(false, true); return; }   // a typo puts the old number back in place (keeps Tab moving to the next box)
     q = Math.round(q);
     if (q <= 0) rfq.delete(key); else rfq.set(key, Math.min(99999, q));
     saveRfq(); syncRfq(false, typed && q > 0);
@@ -550,7 +551,7 @@
     if (!wasOpen) ovOpen('qv');
     if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
-    gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
+    if ($('#qvMedia img')) gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
   function closeQV(fromBack) {
     if (!qv.classList.contains('is-open')) return;
@@ -813,9 +814,11 @@
     nav.addEventListener('mouseenter', () => clearTimeout(megaT));
     nav.addEventListener('mouseleave', () => { clearTimeout(megaT); megaT = setTimeout(closeMega, 400); });
   }
+  // a tap or click anywhere outside the menu closes it (touch laptops and tablets had no way to close it)
+  document.addEventListener('pointerdown', e => { if (nav.classList.contains('is-mega') && !nav.contains(e.target)) closeMega(); });
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
+  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { if ($('#mmenu').contains(document.activeElement)) $('#burger').focus({ preventScroll: true }); document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
     $('#burger').setAttribute('aria-expanded', String(on));
@@ -825,7 +828,7 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeTop();
     if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('#qv.is-open, #qs.is-open, #showroom.is-open') && !document.body.classList.contains('is-menu') && !document.body.classList.contains('is-filtering')) {
-      e.preventDefault(); scrollToEl('#catalogue'); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);
+      e.preventDefault(); scrollKat(); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);   // the search box lands just under the header, results below it
     }
   });
 
@@ -849,14 +852,19 @@
     ? (r => h => r.test(h))(new RegExp((/^[0-9⅛¼⅜½¾]/.test(t) ? '(?:^|[^' + NUM + '])' : '') + reEsc(t) + (/[0-9⅛¼⅜½¾]$/.test(t) ? '(?![' + NUM + '])' : '')))
     : (r => h => r.test(h))(new RegExp('(?:^|[^a-z0-9])' + reEsc(t)));
   // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
-  const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
+  // a reducer is found by its two ends too (4x3 finds a reducer offered from 1" × ½" to 6" × 4")
+  const sizesOf = o => {
+    const sp = sizeSpec(o), pairs = [];
+    if (sp.t === 'pair') sp.L.forEach(a => sp.S.forEach(b => { if (!sp.lt || rung(b) < rung(a)) pairs.push(a + ' × ' + b); }));
+    return (sp.opts || []).concat(sp.L || [], sp.S || [], pairs).join(' ');
+  };
   const ALL = [];
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = matOf(o) || 'Other';
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
     o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
-    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
+    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
     o.nameQ = qn(o.name); o.specQ = qn(o.chips.join(' ') + ' ' + o.matSet + ' ' + o.size + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
@@ -1016,7 +1024,7 @@
       const wa = $('[data-wa-msg]', r); if (wa) wa.dataset.waMsg = waPrice(o, v);
     });
     applyLinks(kGrid); applyLinks($('#katMore'));
-    if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
+    if (animate && !reduce && !kFirst && $('.kc', kGrid)) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
     // the sections below only need their scroll positions worked out again if the page got longer or shorter
     if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
@@ -1068,6 +1076,8 @@
     kSide.style.top = (kSide.offsetHeight <= room ? navH + 24 : innerHeight - kSide.offsetHeight - 20) + 'px';
   }
   if ('ResizeObserver' in window) new ResizeObserver(fitSide).observe(kSide);
+  // the phone filter sheet is closed when the window becomes computer-sized (the page stayed locked)
+  deskQ.addEventListener('change', e => { if (e.matches && document.body.classList.contains('is-filtering')) kOpen(false); });
   addEventListener('resize', fitSide);
 
   // phones: filters slide up as a sheet
@@ -1354,6 +1364,22 @@
     window.FT3D && window.FT3D.intro();
   }
 
+  // ScrollTriggers work out their positions in the order they were made, so one made later (the Industries pin is made
+  // again when the window crosses 900px) or before the pins (the menu highlights) got the wrong place on the page.
+  // Put them in page order: what is higher on the page (and a pin before other triggers on the same section) goes first.
+  let scrollReady = false;
+  function orderTriggers() {
+    const all = ScrollTrigger.getAll().slice(), at = t => t.trigger && t.trigger.compareDocumentPosition ? t.trigger : null;
+    all.sort((a, b) => {
+      const x = at(a), y = at(b);
+      if (x === y) return (b.pin ? 1 : 0) - (a.pin ? 1 : 0);
+      if (!x) return -1; if (!y) return 1;
+      return x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+    all.forEach((t, i) => { t.vars.refreshPriority = all.length - i; });
+    ScrollTrigger.sort();
+  }
+  const reorder = () => { if (scrollReady) requestAnimationFrame(() => { orderTriggers(); ScrollTrigger.refresh(); }); };
   function setupScroll() {
     // "reduce motion" is on: no pinned sections and no scroll-linked animation; everything is simply shown
     if (reduce) {
@@ -1388,8 +1414,9 @@
     artEls.forEach(e => { e.setAttribute('pathLength', '1'); e.style.strokeDasharray = '1'; e.style.strokeDashoffset = '1'; });
     // the moving red "flow" dashes appear once a drawing has finished drawing itself
     gsap.set('.sector__art .flow', { opacity: 0 });
-    const showFlow = p => { if (!p.flowOn) { p.flowOn = true; gsap.to($$('.sector__art .flow', p), { opacity: 1, duration: 0.8 }); } };
+    const showFlow = p => { const f = $$('.sector__art .flow', p); if (!p.flowOn && f.length) { p.flowOn = true; gsap.to(f, { opacity: 1, duration: 0.8 }); } };
     mm.add('(min-width: 900px)', () => {
+      reorder();
       const track = $('.sectors__track'), sec = $('.sectors'), bar = $('.sectors__progress i');
       const dist = () => track.scrollWidth - innerWidth;
       const tw = gsap.to(track, {
@@ -1404,6 +1431,7 @@
       });
     });
     mm.add('(max-width: 899px)', () => {
+      reorder();
       $$('.sector:not(.sector--intro)').forEach(p => {
         const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g' && !e.closest('defs') && !e.classList.contains('flow'));
         gsap.to(els, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.out', stagger: 0.01, onComplete: () => showFlow(p), scrollTrigger: { trigger: $('.sector__art', p), start: 'top 92%', once: true } });
@@ -1436,6 +1464,7 @@
     $$('.ms').forEach(m => ScrollTrigger.create({ trigger: m, start: 'top 65%', onEnter: () => m.classList.add('is-on'), onLeaveBack: () => m.classList.remove('is-on') }));
 
     gsap.from('.contact__grid > *', { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.contact__grid', start: 'top 85%' } });
+    orderTriggers(); scrollReady = true;
   }
 
   // reduced motion: the anatomy section shows its last step and the fully exploded valve

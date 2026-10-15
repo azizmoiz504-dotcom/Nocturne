@@ -142,3 +142,6 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30p
 /* Arabic: the FAQ arrow sits inside its box; links in text keep their colour */
 [dir=rtl] .faq summary{list-style-position:inside}
 .guide a[href^="tel:"],.guide a[href*="wa.me"],.faq a[href^="tel:"],.faq a[href*="wa.me"],.lead a{color:inherit;text-decoration:underline;text-underline-offset:2.25px;white-space:nowrap}
+/* product photos: every photo box is the same square, whatever the photo's own size (boxes were 246, 276 and 293.25px tall in one row) */
+.p__img{position:relative;min-height:0;overflow:hidden}
+.p__img img{position:absolute;left:9%;top:9%;width:82%;height:82%}

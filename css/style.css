@@ -237,7 +237,7 @@ main{position:relative;z-index:1}
 .sectors{position:relative;z-index:1;background:var(--ink);overflow:hidden;border-top:1px solid var(--line)}
 .sectors__track{display:flex;height:100vh;height:100svh;width:max-content;will-change:transform}
 .sector{width:min(78vw,760px);height:100%;flex:none;border-right:1px solid var(--line);padding:calc(var(--nav-h) + 40px) clamp(28px,4vw,64px) 60px;display:flex;flex-direction:column;position:relative;background:linear-gradient(180deg,transparent 60%,rgba(185,26,32,.04))}
-.sector--intro{width:min(92vw,820px);padding-left:max(var(--pad),calc((100vw - var(--maxw))/2 + var(--pad)));justify-content:center;background:none}
+.sector--intro{width:max(min(92vw,820px),calc((100vw - var(--maxw))/2 + var(--pad) + 560px));padding-left:max(var(--pad),calc((100vw - var(--maxw))/2 + var(--pad)));justify-content:center;background:none}
 .sector--intro p{max-width:440px;color:var(--steel-2);margin-top:28px;font-size:20px}
 .sectors__hint{display:flex;align-items:center;gap:10px;color:var(--red);margin-top:48px}
 .sectors__hint svg{width:18px;height:18px;animation:nudge 1.6s ease-in-out infinite}
