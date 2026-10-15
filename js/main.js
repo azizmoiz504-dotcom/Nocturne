@@ -493,7 +493,7 @@
     const row = e.target.closest('.qs__row'); if (!row) return;
     const id = row.dataset.id;
     const step = e.target.closest('[data-q]');
-    if (step) setQty(id, (rfq.get(id) || 0) + (+step.dataset.q));
+    if (step) setQty(id, Math.max(1, (rfq.get(id) || 0) + (+step.dataset.q)));   // − stops at 1; × removes the line
     if (e.target.closest('.qs__rm')) setQty(id, 0);
   });
   $('#qsList').addEventListener('change', e => {
@@ -544,6 +544,7 @@
   function openQV(key) {
     const wasOpen = qv.classList.contains('is-open');
     fillQV(key);
+    $('.qv__card', qv).scrollTop = 0;   // each product starts at its photo and name
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
     if (!wasOpen) ovOpen('qv');
@@ -835,12 +836,18 @@
     .replace(/(^|\s)(\d{1,2})[\s-]+(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, n, f) => sp + n + FRAC[f])
     .replace(/(^|[^\d\/])(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, f) => sp + FRAC[f])
     .replace(/([\d⅛¼⅜½¾])"?\s*[x×*]\s*(?=[\d⅛¼⅜½¾])/g, '$1×')   // 4x3, 4" x 3" and 4" × 3" are written the same way
-    .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium');
+    .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium')
+    .replace(/([a-z])-(?=[a-z])/g, '$1 ')                     // y-strainer = y strainer, butt-weld = butt weld
+    .replace(/(^|[^a-z])(ss|cs|ms|gi|ci)(?=\d)/g, '$1$2 ')     // ss316 = ss 316
+    .replace(/(\d)#/g, '$1')                                  // 150# = 150 (finds CL150)
+    .replace(/(^|[^a-z0-9])dn ?(\d{2,3})(?!\d)/g, (m, sp, d) => sp + (DN[d] || 'dn' + d));   // DN50 = 2"
+  // metric pipe sizes (DN) and the inch size they are sold as
+  const DN = { 15: '½"', 20: '¾"', 25: '1"', 32: '1¼"', 40: '1½"', 50: '2"', 65: '2½"', 80: '3"', 100: '4"', 125: '5"', 150: '6"', 200: '8"', 250: '10"', 300: '12"', 350: '14"', 400: '16"', 450: '18"', 500: '20"', 600: '24"' };
   // a size or number is matched whole: ½ doesn't find 1½ or 2½, and 2 doesn't find 2½ or 24
   const NUM = '0-9⅛¼⅜½¾', reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const tokTest = t => /^[0-9⅛¼⅜½¾]/.test(t) || /[0-9⅛¼⅜½¾]$/.test(t)
     ? (r => h => r.test(h))(new RegExp((/^[0-9⅛¼⅜½¾]/.test(t) ? '(?:^|[^' + NUM + '])' : '') + reEsc(t) + (/[0-9⅛¼⅜½¾]$/.test(t) ? '(?![' + NUM + '])' : '')))
-    : h => h.includes(t);
+    : (r => h => r.test(h))(new RegExp('(?:^|[^a-z0-9])' + reEsc(t)));
   // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
   const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
   const ALL = [];
@@ -850,6 +857,7 @@
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
     o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
     o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
+    o.nameQ = qn(o.name); o.specQ = qn(o.chips.join(' ') + ' ' + o.matSet + ' ' + o.size + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
@@ -933,8 +941,8 @@
         (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + esc(o.c.name) + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
-        (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span>' + esc(mat) + '</div>' : '') +
-        (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
+        (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span> ' + esc(mat) + '</div>' : '') +
+        (one ? '<div class="kc__size"><span class="mono">Size</span> ' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
         (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
       '</div>' +
       '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
@@ -951,11 +959,19 @@
       (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
   };
   let kFirst = true;
+  const kPicks = new Map();
   // more = "Show more": the cards already on screen stay as they are and only the new ones are added
   function renderKat(animate, more) {
     const hits = ALL.filter(o => pass(o));
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
+    else if (kf.q) {   // Recommended + a search: products whose own name has the words first, then their specs, then the rest
+      // a size on its own (2, ½", 4×3) doesn't reorder the list: "2" must not put "2PC" valves first
+      const words = kf.q.split(/\s+/).filter(Boolean), sz = /^[\d⅛¼⅜½¾×"]+$/;
+      const sc = o => kf.qTests.reduce((n, f, i) => n + (sz.test(words[i]) ? 0 : f(o.nameQ) ? 3 : f(o.specQ) ? 1 : 0), 0);
+      hits.forEach(o => { o.qs = sc(o); });
+      hits.sort((a, b) => b.qs - a.qs || a.rank - b.rank);
+    }
     const shown = hits.slice(0, kf.limit);
     const pageH = document.documentElement.scrollHeight;
     const had = more ? $$('.kc:not(.kc--promo)', kGrid).length : 0;
@@ -966,13 +982,14 @@
       if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
       return;
     }
-    // sizes already picked on cards survive "Show more", filters, sort and search
-    const keep = new Map();
+    // sizes already picked on cards survive "Show more", filters, sort and search,
+    // also when the card was out of the list for a while (kPicks remembers them)
     $$('[data-pick-root]', kGrid).forEach(r => {
-      if (!$$('[data-pk]', r).some(el => el.value)) return;
-      const o = itemOf(r.dataset.pickRoot), p = o && readPick(r, o);
-      if (p && p.ok) keep.set(o.id, p.v);
+      const o = itemOf(r.dataset.pickRoot); if (!o) return;
+      const p = $$('[data-pk]', r).some(el => el.value) && readPick(r, o);
+      if (p && p.ok) kPicks.set(o.id, p.v); else kPicks.delete(o.id);
     });
+    const keep = new Map(shown.filter(o => kPicks.has(o.id)).map(o => [o.id, kPicks.get(o.id)]));
     let html = shown.map(o => kcardHTML(o, keep.get(o.id)));
     if (shown.length >= 7) html.splice(7, 0, promoHTML());
     kGrid.innerHTML = hits.length ? html.join('') :

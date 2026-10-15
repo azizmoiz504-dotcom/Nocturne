@@ -508,7 +508,7 @@ main{position:relative;z-index:1}
 .qv.is-open{visibility:visible;pointer-events:auto}
 .qv__scrim{position:absolute;inset:0;background:rgba(4,12,19,.6);opacity:0;transition:opacity .4s}
 .qv.is-open .qv__scrim{opacity:1}
-.qv__card{position:relative;width:min(780px,100%);max-height:calc(100vh - 30px);overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);color:var(--paper-ink);border-radius:22.5px;box-shadow:0 45px 90px -30px rgba(0,0,0,.7)}
+.qv__card{position:relative;width:min(780px,100%);max-height:calc(100vh - 30px);max-height:calc(100dvh - 30px);overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);color:var(--paper-ink);border-radius:22.5px;box-shadow:0 45px 90px -30px rgba(0,0,0,.7)}
 .qv__close{position:absolute;right:12px;top:12px;z-index:3;width:33px;height:33px;border-radius:50%;background:#fff;color:var(--paper-ink);border:1px solid var(--line-dk);transition:background .3s,color .3s,transform .5s var(--ease)}
 .qv__close:hover{background:var(--red);color:#fff;transform:rotate(90deg)}
 .qv__media{position:relative;min-height:330px;background:radial-gradient(circle at 50% 42%,#fff,#e9ebef 75%);display:grid;place-items:center;overflow:hidden}
@@ -687,8 +687,8 @@ main{position:relative;z-index:1}
 .form__rfq-head{display:flex;justify-content:space-between;color:var(--steel-2);margin-bottom:7.5px}
 .form__rfq-head button{color:var(--red);font-family:var(--f-mono);font-size:12.75px;letter-spacing:.1em;text-transform:uppercase}
 .form__rfq ul{list-style:none;display:flex;flex-wrap:wrap;gap:4.5px}
-.form__rfq li{display:flex;align-items:center;gap:6px;font-size:12.75px;padding:4.5px 4.5px 4.5px 9px;border-radius:74.25px;background:rgba(255,255,255,.07)}
-.form__rfq li button{width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.1);font-size:12.375px;line-height:1}
+.form__rfq li{display:flex;align-items:center;gap:6px;font-size:12.75px;padding:3px 3px 3px 9px;border-radius:74.25px;background:rgba(255,255,255,.07)}
+.form__rfq li button{flex:none;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.1);font-size:14.25px;line-height:1}
 .form__rfq li button:hover{background:var(--red)}
 .form__done{position:absolute;inset:0;border-radius:inherit;background:var(--ink-3);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:9px;padding:22.5px}
 .form__done svg{width:60px;height:60px;fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1309,6 +1309,7 @@ body.has-quote .fabs{bottom:10.5px}
   .kc__add .lbl{overflow:hidden;text-overflow:ellipsis}
   .kc__wa{width:30px;height:30px}
   .kc--promo{grid-column:1/-1;padding:15px}
+  .kat-grid{grid-auto-flow:row dense}   /* the full-width promo leaves no hole beside the card before it */
   .kat-sort .mono{display:none}
   .kat-count{order:3;width:100%}
 }
@@ -1593,3 +1594,15 @@ body.fabs-off .fabs{opacity:0;pointer-events:none;transform:translateY(18px)}
 }
 /* a clear outline shows where you are when using the Tab key */
 :focus-visible{outline:1.5px solid var(--red);outline-offset:2.25px}
+
+/* small phones: the quick view's "Add to quote" / "Update quantity" fits its button (it was cut off at 270px and less) */
+@media (max-width:322.5px){
+  .qv{padding:7.5px}
+  .qv__card{max-height:calc(100vh - 15px);max-height:calc(100dvh - 15px)}
+  .qv__buy .btn{padding:0 9px;gap:4.5px;font-size:12.75px;line-height:1.1;text-align:center;white-space:normal}
+  .qv__buy .btn svg{display:none}
+  .qv__buy .qty button{width:30px}
+  .qv__buy .qty input{width:33px}
+}
+/* a long material ("F304/304L, F316/316L") wraps inside the card instead of running out of it */
+.kc__material{overflow-wrap:break-word;min-width:0}
