@@ -945,12 +945,27 @@
     '<p>Send your list or a photo on WhatsApp. We reply with prices before the counter opens.</p>' +
     '<a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, please price this list for me:"><svg><use href="#wa"/></svg> Send my list</a></aside>';
 
+  const kMoreBar = (hits, shown) => {
+    $('#katMore').innerHTML = hits.length > shown.length ?
+      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more product' + (hits.length - shown.length === 1 ? '' : 's') + '</button>' :
+      (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
+  };
   let kFirst = true;
-  function renderKat(animate) {
+  // more = "Show more": the cards already on screen stay as they are and only the new ones are added
+  function renderKat(animate, more) {
     const hits = ALL.filter(o => pass(o));
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
     const shown = hits.slice(0, kf.limit);
+    const pageH = document.documentElement.scrollHeight;
+    const had = more ? $$('.kc:not(.kc--promo)', kGrid).length : 0;
+    if (more && had >= 7 && had < shown.length) {
+      const kids = kGrid.children.length;
+      kGrid.insertAdjacentHTML('beforeend', shown.slice(had).map(o => kcardHTML(o)).join(''));
+      [...kGrid.children].slice(kids).forEach(applyLinks); kMoreBar(hits, shown); applyLinks($('#katMore'));
+      if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
+      return;
+    }
     // sizes already picked on cards survive "Show more", filters, sort and search
     const keep = new Map();
     $$('[data-pick-root]', kGrid).forEach(r => {
@@ -965,9 +980,7 @@
       '<div class="kat-empty__btns"><button class="btn btn--ghost-dk" data-kclear>Clear filters</button><a class="btn btn--red" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I’m looking for: "><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div></div>';
     $('#katCount').textContent = hits.length === ALL.length ? 'All ' + ALL.length + ' products' : hits.length + ' of ' + ALL.length + ' products';
     $('#katApplyN').textContent = hits.length;
-    $('#katMore').innerHTML = hits.length > shown.length ?
-      '<div class="kat-more__bar"><i style="width:' + (shown.length / hits.length * 100) + '%"></i></div><span class="mono">Showing ' + shown.length + ' of ' + hits.length + '</span><button class="btn btn--dark" data-kmore>Show ' + Math.min(PAGE, hits.length - shown.length) + ' more product' + (hits.length - shown.length === 1 ? '' : 's') + '</button>' :
-      (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
+    kMoreBar(hits, shown);
     $('#katFacets').innerHTML = facetsHTML();
     // active filter pills
     const pills = [];
@@ -988,7 +1001,8 @@
     applyLinks(kGrid); applyLinks($('#katMore'));
     if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
-    ScrollTrigger.refresh();
+    // the sections below only need their scroll positions worked out again if the page got longer or shorter
+    if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
   }
 
   // after a filter change the list gets shorter; if you were further down, go back to the top of the list so the results are in view
@@ -1020,7 +1034,7 @@
   $('#katReset').addEventListener('click', clearKat);
   $('#catalogue').addEventListener('click', e => {
     if (e.target.closest('[data-kclear]')) return clearKat();
-    if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
+    if (e.target.closest('[data-kmore]')) { kf.limit += PAGE; const n = $$('.kc:not(.kc--promo)', kGrid).length; renderKat(false, true); if (!reduce) gsap.fromTo($$('.kc:not(.kc--promo)', kGrid).slice(n), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.025 }); return; }
     const p = e.target.closest('[data-pg]');
     if (p) { if (p.dataset.pg === 'q') { kf.q = ''; $('#search').value = ''; } else kf[p.dataset.pg].delete(p.dataset.pv); kf.limit = PAGE; renderKat(true); toListTop(); }
   });
@@ -1154,16 +1168,22 @@
   /* ---------------- Ticker tapes ---------------- */
   let tapes = [], tapesOn = true;
   new IntersectionObserver(es => { tapesOn = es[0].isIntersecting; }, { rootMargin: '100px' }).observe($('.tickers'));
-  function setupTapes() {
+  // rebuilt only when the width changes (on phones the address bar coming and going changes just the height),
+  // and each strip carries on from where it was instead of jumping
+  let tapesW = 0;
+  function setupTapes(force) {
+    if (!force && innerWidth === tapesW) return;
+    tapesW = innerWidth;
+    const was = tapes;
     tapes = [];
-    $$('.tape').forEach(t => {
+    $$('.tape').forEach((t, i) => {
       const tr = $('.tape__track', t);
       if (!tr._unit) tr._unit = tr.innerHTML;
       tr.innerHTML = tr._unit;
       const uw = tr.scrollWidth;
       const n = Math.ceil(innerWidth * 1.3 / uw) + 1;
       tr.innerHTML = tr._unit.repeat(n + 1);
-      tapes.push({ t, tr, uw, x: -Math.random() * uw, sp: +t.dataset.speed, dir: +t.dataset.dir });
+      tapes.push({ t, tr, uw, x: was[i] && uw ? was[i].x % uw : -Math.random() * uw, sp: +t.dataset.speed, dir: +t.dataset.dir });
     });
   }
   gsap.ticker.add((time, dt) => {
@@ -1371,7 +1391,7 @@
     // the Industries drawings only animate while they are on screen (no work for the computer anywhere else on the page)
     if ('IntersectionObserver' in window) {
       const artIO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('is-idle', !e.isIntersecting)));
-      $$('.sector__art').forEach(a => artIO.observe(a));
+      $$('.sector__art, .sectors__hint').forEach(a => artIO.observe(a));
     }
 
     const steps = $$('.anatomy__steps p');
@@ -1468,7 +1488,7 @@
     history.replaceState(history.state, '', location.pathname + location.search);
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });
+  fontsReady.then(() => { setupTapes(true); ScrollTrigger.refresh(); });
   let rsT; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { setupTapes(); }, 200); });
   window.addEventListener('load', () => ScrollTrigger.refresh());
 })();

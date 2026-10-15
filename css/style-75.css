@@ -45,7 +45,7 @@ input,textarea{font:inherit;color:inherit}
 
 /* word / split helpers */
 .sw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
-.sw > span{display:inline-block;will-change:transform}
+.sw > span{display:inline-block}
 [data-words] .w{opacity:.14;transition:none}
 
 /* ---------- Grain + cursor ---------- */
@@ -181,7 +181,7 @@ main{position:relative;z-index:1}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(185,26,32,.7)}70%{box-shadow:0 0 0 9px rgba(185,26,32,0)}100%{box-shadow:0 0 0 0 rgba(185,26,32,0)}}
 .hero__title{font-family:var(--f-display);font-weight:800;font-size:clamp(48px,10.6vw,150px);line-height:.84;letter-spacing:.005em;margin-left:-.04em}
 .hero__title .line{display:block;overflow:hidden;padding-bottom:.06em}
-.hero__title .line > span{display:inline-block;will-change:transform}
+.hero__title .line > span{display:inline-block}
 .hero__title em{font-style:normal;color:var(--red);display:inline-block}
 .hero__sub{max-width:390px;margin-top:24px;font-size:clamp(14.25px,1.3vw,15.75px);color:var(--steel-2);line-height:1.55}
 .hero__ctas{display:flex;flex-wrap:wrap;gap:10.5px;margin-top:27px}
@@ -272,6 +272,7 @@ main{position:relative;z-index:1}
 @keyframes wheel{to{transform:rotate(90deg)}}
 .sector__art .flow{stroke:var(--red);stroke-width:2;stroke-dasharray:3 17;animation:flowd 1.4s linear infinite}
 .sector__art.is-idle *{animation-play-state:paused!important}
+.sectors__hint.is-idle svg{animation-play-state:paused}
 @keyframes flowd{to{stroke-dashoffset:-20}}
 .sector h3{font-family:var(--f-display);font-weight:700;font-size:clamp(33px,5vw,60px);letter-spacing:.005em;line-height:1;margin-top:21px}
 .sector p{max-width:390px;margin-top:10.5px;color:var(--steel-2)}
@@ -941,7 +942,8 @@ body.is-shop .fab-wa,body.is-shop .progress{opacity:0;pointer-events:none}
 .cursor.is-label .cursor__ring{box-shadow:0 7.5px 22.5px -7.5px rgba(0,0,0,.5)}
 /* nothing behind the page paints while the hero and valve are off-screen */
 body.off-stage .atmos,body.off-stage #gl{visibility:hidden}
-body.off-stage .flowlines .flow{animation-play-state:paused}
+body.off-stage .flowlines .flow,body.off-stage .scrollcue__wheel,body.off-stage .pulse::after{animation-play-state:paused}
+.showroom:not(.is-open) .sr__ring,.qv:not(.is-open) .qv__media::before{animation-play-state:paused}
 /* hidden valve labels must not catch clicks */
 .anatomy__labels:not(.is-on) .vlabel{pointer-events:none}
 /* header button never wraps */
