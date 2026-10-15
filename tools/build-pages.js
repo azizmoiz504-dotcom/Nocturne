@@ -27,6 +27,18 @@ CATS.forEach(c => c.items.forEach(it => {
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 const wa = text => 'https://wa.me/' + CFG.whatsappDigits + '?text=' + encodeURIComponent(text);
 const famName = id => FAMS.find(f => f.id === id).name;
+const nProducts = n => n + (n === 1 ? ' product' : ' products');
+// Material, worked out the same way as the cards on the home page (js/main.js materialOf, matText, fullName):
+// the material set in the editor (item[4]) wins, otherwise it is read from the name.
+const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
+function materialOf(name) {
+  let best = null, at = 1e9;
+  MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } });
+  return best;
+}
+const ownMat = it => it[4] && it[4] !== 'Other' ? it[4] : '';
+const matText = it => ownMat(it) || (/^C\.S & S\.S/.test(it[0]) ? 'Carbon steel, Stainless' : materialOf(it[0]) || '');
+const fullName = it => ownMat(it) && !materialOf(it[0]) ? it[0] + ' – ' + it[4] : it[0];
 // Page addresses: a few categories get a shorter address with the words people search for.
 // The category's slug in js/data.js (and the editor) stays the same; only the page file name changes.
 // The old address keeps working: it becomes a small page that forwards to the new one.
@@ -108,22 +120,23 @@ const STORE = { '@type': 'HardwareStore', '@id': SITE + '#store',
 function catPage(c, idx) {
   const s = SEO[c.slug] || {};
   const items = c.items.map((it, i) => {
-    const [name, specs, size, img] = it;
+    const [name, specs, size, img] = it, mat = matText(it);
     const sizeTxt = size ? ' (' + size + ')' : '';
     return '<article class="p">' +
       '<div class="p__img">' + (img ? '<img src="../' + IMG + img + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</div>' +
       '<div class="p__body"><h2>' + esc(name) + '</h2>' +
+        (mat ? '<p class="p__size p__mat"><span>Material</span>' + esc(mat) + '</p>' : '') +
         (size ? '<p class="p__size"><span>Sizes</span>' + esc(size) + '</p>' : '') +
         (specs.length ? '<ul class="p__specs">' + specs.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>' : '') + '</div>' +
       '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '"><span class="lg">Pick size &amp; add</span><span class="sm">Add</span> to quote</a>' +
-        '<a class="btn btn--wa btn--round" href="' + wa('Hello Fakhri Tools, please send me a price for: ' + name + sizeTxt + '. Size and quantity: ') + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
+        '<a class="btn btn--wa btn--round" href="' + wa('Hello Fakhri Tools, please send me a price for: ' + fullName(it) + sizeTxt + '. Size and quantity: ') + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
     '</article>';
   }).join('');
   const others = CATS.filter(o => o.slug !== c.slug);
   const body =
     '<div class="wrap">' +
       '<nav class="crumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><i>/</i><a href="index.html">Products</a><i>/</i><span>' + esc(c.name) + '</span></nav>' +
-      '<header class="hero"><p class="eyebrow">' + esc(famName(c.fam)) + ' · ' + c.items.length + ' products</p>' +
+      '<header class="hero"><p class="eyebrow">' + esc(famName(c.fam)) + ' · ' + nProducts(c.items.length) + '</p>' +
         '<h1>' + esc(s.h1 || c.name + ' in Al Quoz, Dubai') + '</h1>' +
         '<p class="lead">' + esc(c.desc) + ' Ask Fakhri Tools for a quote on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3.</p>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li><li>Pipe threading, hose cutting and hydraulic hose crimping at the counter</li></ul></header>' +
@@ -154,7 +167,7 @@ function hubPage() {
     '<header class="hero"><p class="eyebrow">' + total + ' products · ' + CATS.length + ' categories</p><h1>Pipes, fittings, flanges and valves in Al Quoz, Dubai</h1>' +
       '<p class="lead">Every product we offer at our B2B trade counter in Al Quoz Industrial Area 3. Open a category to see sizes and specs, then ask for a quote on WhatsApp.</p></header>' +
     FAMS.map(f => '<section class="fam"><h2>' + esc(f.name) + '</h2><div class="cats">' +
-      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') +
+      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') +
     '</div></section>').join('') + '</div>';
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
@@ -173,7 +186,7 @@ const PAGES = SEO._pages || [];
 function tiles(slugs, heading, up) {
   const cats = (slugs || []).map(s => CATS.find(c => c.slug === s)).filter(Boolean);
   return !cats.length ? '' : '<section class="fam"><h2>' + esc(heading || 'Shop these categories') + '</h2><div class="cats">' + cats.map(c =>
-    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="' + up + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + c.items.length + ' products</em></a>').join('') + '</div></section>';
+    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="' + up + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') + '</div></section>';
 }
 const UI = {
   en: { home: 'Home', faq: 'Questions buyers ask', ask: 'Send us your list', askP: 'Sizes, rating, end connection and quantity. We reply with stock and a price.', send: 'Send on WhatsApp', products: 'Products', shop: 'Shop these categories', hello: 'Hello Fakhri Tools, I would like a quote.' },

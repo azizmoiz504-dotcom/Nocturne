@@ -1053,23 +1053,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && kSide.classList.contains('is-open')) kOpen(false); });
   renderKat(false);
 
-  /* ---------------- Business details for search engines (facts from the owner's form) ---------------- */
-  const ld = document.createElement('script');
-  ld.type = 'application/ld+json';
-  ld.textContent = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'HardwareStore',
-    name: 'Fakhri Tools & Workshop Materials Trading LLC',
-    image: new URL('assets/share.jpg', location.href).href,
-    logo: new URL('assets/logo-stacked.png', location.href).href,
-    telephone: '+97142850135',
-    address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
-    openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '07:30', closes: '18:00' }],
-    knowsLanguage: ['en', 'hi', 'ur', 'ar'],
-    paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque',
-    areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
-    hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves', itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name })) }
-  });
-  document.head.appendChild(ld);
+  // Business details for search engines are written into index.html by tools/build-pages.js (<!-- seo:ld -->), so they are there without JavaScript.
 
   /* ---------------- Brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
