@@ -288,10 +288,11 @@
   }
 
   // "1,000", "1 000" and "10 pcs" all count; a box with no number in it keeps the old quantity
-  const parseQty = v => { const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
+  const parseQty = v => { if (/^\s*[-−]/.test(String(v))) return null;   // "-5" is not 5
+    const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
   function setQty(key, q, typed) {
     if (typeof q !== 'number') q = parseQty(q);
-    if (q === null) { syncRfq(false); return; }
+    if (q === null) { syncRfq(false, true); return; }   // a typo puts the old number back in place (keeps Tab moving to the next box)
     q = Math.round(q);
     if (q <= 0) rfq.delete(key); else rfq.set(key, Math.min(99999, q));
     saveRfq(); syncRfq(false, typed && q > 0);
@@ -493,7 +494,7 @@
     const row = e.target.closest('.qs__row'); if (!row) return;
     const id = row.dataset.id;
     const step = e.target.closest('[data-q]');
-    if (step) setQty(id, (rfq.get(id) || 0) + (+step.dataset.q));
+    if (step) setQty(id, Math.max(1, (rfq.get(id) || 0) + (+step.dataset.q)));   // − stops at 1; × removes the line
     if (e.target.closest('.qs__rm')) setQty(id, 0);
   });
   $('#qsList').addEventListener('change', e => {
@@ -544,12 +545,13 @@
   function openQV(key) {
     const wasOpen = qv.classList.contains('is-open');
     fillQV(key);
+    $('.qv__card', qv).scrollTop = 0;   // each product starts at its photo and name
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
     if (!wasOpen) ovOpen('qv');
     if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
-    gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
+    if ($('#qvMedia img')) gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
   function closeQV(fromBack) {
     if (!qv.classList.contains('is-open')) return;
@@ -812,9 +814,11 @@
     nav.addEventListener('mouseenter', () => clearTimeout(megaT));
     nav.addEventListener('mouseleave', () => { clearTimeout(megaT); megaT = setTimeout(closeMega, 400); });
   }
+  // a tap or click anywhere outside the menu closes it (touch laptops and tablets had no way to close it)
+  document.addEventListener('pointerdown', e => { if (nav.classList.contains('is-mega') && !nav.contains(e.target)) closeMega(); });
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
+  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { if ($('#mmenu').contains(document.activeElement)) $('#burger').focus({ preventScroll: true }); document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
     $('#burger').setAttribute('aria-expanded', String(on));
@@ -824,7 +828,7 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeTop();
     if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('#qv.is-open, #qs.is-open, #showroom.is-open') && !document.body.classList.contains('is-menu') && !document.body.classList.contains('is-filtering')) {
-      e.preventDefault(); scrollToEl('#catalogue'); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);
+      e.preventDefault(); scrollKat(); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);   // the search box lands just under the header, results below it
     }
   });
 
@@ -835,21 +839,33 @@
     .replace(/(^|\s)(\d{1,2})[\s-]+(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, n, f) => sp + n + FRAC[f])
     .replace(/(^|[^\d\/])(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, f) => sp + FRAC[f])
     .replace(/([\d⅛¼⅜½¾])"?\s*[x×*]\s*(?=[\d⅛¼⅜½¾])/g, '$1×')   // 4x3, 4" x 3" and 4" × 3" are written the same way
-    .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium');
+    .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium')
+    .replace(/([a-z])-(?=[a-z])/g, '$1 ')                     // y-strainer = y strainer, butt-weld = butt weld
+    .replace(/(^|[^a-z])(ss|cs|ms|gi|ci)(?=\d)/g, '$1$2 ')     // ss316 = ss 316
+    .replace(/(\d)#/g, '$1')                                  // 150# = 150 (finds CL150)
+    .replace(/(^|[^a-z0-9])dn ?(\d{2,3})(?!\d)/g, (m, sp, d) => sp + (DN[d] || 'dn' + d));   // DN50 = 2"
+  // metric pipe sizes (DN) and the inch size they are sold as
+  const DN = { 15: '½"', 20: '¾"', 25: '1"', 32: '1¼"', 40: '1½"', 50: '2"', 65: '2½"', 80: '3"', 100: '4"', 125: '5"', 150: '6"', 200: '8"', 250: '10"', 300: '12"', 350: '14"', 400: '16"', 450: '18"', 500: '20"', 600: '24"' };
   // a size or number is matched whole: ½ doesn't find 1½ or 2½, and 2 doesn't find 2½ or 24
   const NUM = '0-9⅛¼⅜½¾', reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const tokTest = t => /^[0-9⅛¼⅜½¾]/.test(t) || /[0-9⅛¼⅜½¾]$/.test(t)
     ? (r => h => r.test(h))(new RegExp((/^[0-9⅛¼⅜½¾]/.test(t) ? '(?:^|[^' + NUM + '])' : '') + reEsc(t) + (/[0-9⅛¼⅜½¾]$/.test(t) ? '(?![' + NUM + '])' : '')))
-    : h => h.includes(t);
+    : (r => h => r.test(h))(new RegExp('(?:^|[^a-z0-9])' + reEsc(t)));
   // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
-  const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
+  // a reducer is found by its two ends too (4x3 finds a reducer offered from 1" × ½" to 6" × 4")
+  const sizesOf = o => {
+    const sp = sizeSpec(o), pairs = [];
+    if (sp.t === 'pair') sp.L.forEach(a => sp.S.forEach(b => { if (!sp.lt || rung(b) < rung(a)) pairs.push(a + ' × ' + b); }));
+    return (sp.opts || []).concat(sp.L || [], sp.S || [], pairs).join(' ');
+  };
   const ALL = [];
   CATS.forEach(c => c.items.forEach((it, i) => {
     const o = itemOf(c.slug + ':' + i);
     o.mat = matOf(o) || 'Other';
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
     o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
-    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
+    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
+    o.nameQ = qn(o.name); o.specQ = qn(o.chips.join(' ') + ' ' + o.matSet + ' ' + o.size + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
@@ -933,8 +949,8 @@
         (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
       '<div class="kc__body"><span class="kc__cat mono">' + esc(o.c.name) + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
-        (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span>' + esc(mat) + '</div>' : '') +
-        (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
+        (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span> ' + esc(mat) + '</div>' : '') +
+        (one ? '<div class="kc__size"><span class="mono">Size</span> ' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
         (o.chips.length ? '<div class="kc__chips">' + o.chips.slice(0, 4).map(s => '<span>' + esc(s) + '</span>').join('') + (o.chips.length > 4 ? '<span>+' + (o.chips.length - 4) + '</span>' : '') + '</div>' : '') +
       '</div>' +
       '<div class="kc__foot"><button class="add kc__add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
@@ -951,11 +967,19 @@
       (hits.length > PAGE ? '<span class="mono">That’s all ' + hits.length + ' products</span>' : '');
   };
   let kFirst = true;
+  const kPicks = new Map();
   // more = "Show more": the cards already on screen stay as they are and only the new ones are added
   function renderKat(animate, more) {
     const hits = ALL.filter(o => pass(o));
     if (kf.sort === 'az') hits.sort((a, b) => a.name.localeCompare(b.name));
     else if (kf.sort === 'za') hits.sort((a, b) => b.name.localeCompare(a.name));
+    else if (kf.q) {   // Recommended + a search: products whose own name has the words first, then their specs, then the rest
+      // a size on its own (2, ½", 4×3) doesn't reorder the list: "2" must not put "2PC" valves first
+      const words = kf.q.split(/\s+/).filter(Boolean), sz = /^[\d⅛¼⅜½¾×"]+$/;
+      const sc = o => kf.qTests.reduce((n, f, i) => n + (sz.test(words[i]) ? 0 : f(o.nameQ) ? 3 : f(o.specQ) ? 1 : 0), 0);
+      hits.forEach(o => { o.qs = sc(o); });
+      hits.sort((a, b) => b.qs - a.qs || a.rank - b.rank);
+    }
     const shown = hits.slice(0, kf.limit);
     const pageH = document.documentElement.scrollHeight;
     const had = more ? $$('.kc:not(.kc--promo)', kGrid).length : 0;
@@ -966,13 +990,14 @@
       if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
       return;
     }
-    // sizes already picked on cards survive "Show more", filters, sort and search
-    const keep = new Map();
+    // sizes already picked on cards survive "Show more", filters, sort and search,
+    // also when the card was out of the list for a while (kPicks remembers them)
     $$('[data-pick-root]', kGrid).forEach(r => {
-      if (!$$('[data-pk]', r).some(el => el.value)) return;
-      const o = itemOf(r.dataset.pickRoot), p = o && readPick(r, o);
-      if (p && p.ok) keep.set(o.id, p.v);
+      const o = itemOf(r.dataset.pickRoot); if (!o) return;
+      const p = $$('[data-pk]', r).some(el => el.value) && readPick(r, o);
+      if (p && p.ok) kPicks.set(o.id, p.v); else kPicks.delete(o.id);
     });
+    const keep = new Map(shown.filter(o => kPicks.has(o.id)).map(o => [o.id, kPicks.get(o.id)]));
     let html = shown.map(o => kcardHTML(o, keep.get(o.id)));
     if (shown.length >= 7) html.splice(7, 0, promoHTML());
     kGrid.innerHTML = hits.length ? html.join('') :
@@ -999,7 +1024,7 @@
       const wa = $('[data-wa-msg]', r); if (wa) wa.dataset.waMsg = waPrice(o, v);
     });
     applyLinks(kGrid); applyLinks($('#katMore'));
-    if (animate && !reduce && !kFirst) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
+    if (animate && !reduce && !kFirst && $('.kc', kGrid)) gsap.fromTo($$('.kc', kGrid).slice(0, 12), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.03 });
     kFirst = false;
     // the sections below only need their scroll positions worked out again if the page got longer or shorter
     if (document.documentElement.scrollHeight !== pageH) ScrollTrigger.refresh();
@@ -1051,6 +1076,8 @@
     kSide.style.top = (kSide.offsetHeight <= room ? navH + 24 : innerHeight - kSide.offsetHeight - 20) + 'px';
   }
   if ('ResizeObserver' in window) new ResizeObserver(fitSide).observe(kSide);
+  // the phone filter sheet is closed when the window becomes computer-sized (the page stayed locked)
+  deskQ.addEventListener('change', e => { if (e.matches && document.body.classList.contains('is-filtering')) kOpen(false); });
   addEventListener('resize', fitSide);
 
   // phones: filters slide up as a sheet
@@ -1240,11 +1267,16 @@
     const io = new IntersectionObserver(es => {
       es.forEach(e => e.isIntersecting ? on.add(e.target) : on.delete(e.target));
       document.body.classList.toggle('fabs-off', on.size > 0);
+      // the quote bar also steps aside over the form: the form lists the quote items itself, and the bar covered its send button
+      document.body.classList.toggle('at-form', on.has($('#form')));
     }, { rootMargin: '-45% 0px 0px 0px' });
     zones.forEach(z => io.observe(z));
   })();
   function validForm() {
-    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => /^\+?[\d\s()\-]{7,20}$/.test(v.trim()) && v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
+    // a mobile typed in Arabic digits (٠٥٠…) or with dots (050.123.4567) is fine: digits are written the plain way first
+    const mob = $('#fMobile', form);
+    if (mob) mob.value = mob.value.replace(/[٠-٩]/g, d => d.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, d => d.charCodeAt(0) - 0x6F0);
+    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => /^\+?[\d\s().\-]{7,20}$/.test(v.trim()) && v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
     let first = null;
     checks.forEach(([s, fn]) => {
       const el = $(s, form); if (!el) return;
@@ -1332,6 +1364,22 @@
     window.FT3D && window.FT3D.intro();
   }
 
+  // ScrollTriggers work out their positions in the order they were made, so one made later (the Industries pin is made
+  // again when the window crosses 900px) or before the pins (the menu highlights) got the wrong place on the page.
+  // Put them in page order: what is higher on the page (and a pin before other triggers on the same section) goes first.
+  let scrollReady = false;
+  function orderTriggers() {
+    const all = ScrollTrigger.getAll().slice(), at = t => t.trigger && t.trigger.compareDocumentPosition ? t.trigger : null;
+    all.sort((a, b) => {
+      const x = at(a), y = at(b);
+      if (x === y) return (b.pin ? 1 : 0) - (a.pin ? 1 : 0);
+      if (!x) return -1; if (!y) return 1;
+      return x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+    all.forEach((t, i) => { t.vars.refreshPriority = all.length - i; });
+    ScrollTrigger.sort();
+  }
+  const reorder = () => { if (scrollReady) requestAnimationFrame(() => { orderTriggers(); ScrollTrigger.refresh(); }); };
   function setupScroll() {
     // "reduce motion" is on: no pinned sections and no scroll-linked animation; everything is simply shown
     if (reduce) {
@@ -1366,8 +1414,9 @@
     artEls.forEach(e => { e.setAttribute('pathLength', '1'); e.style.strokeDasharray = '1'; e.style.strokeDashoffset = '1'; });
     // the moving red "flow" dashes appear once a drawing has finished drawing itself
     gsap.set('.sector__art .flow', { opacity: 0 });
-    const showFlow = p => { if (!p.flowOn) { p.flowOn = true; gsap.to($$('.sector__art .flow', p), { opacity: 1, duration: 0.8 }); } };
+    const showFlow = p => { const f = $$('.sector__art .flow', p); if (!p.flowOn && f.length) { p.flowOn = true; gsap.to(f, { opacity: 1, duration: 0.8 }); } };
     mm.add('(min-width: 900px)', () => {
+      reorder();
       const track = $('.sectors__track'), sec = $('.sectors'), bar = $('.sectors__progress i');
       const dist = () => track.scrollWidth - innerWidth;
       const tw = gsap.to(track, {
@@ -1382,6 +1431,7 @@
       });
     });
     mm.add('(max-width: 899px)', () => {
+      reorder();
       $$('.sector:not(.sector--intro)').forEach(p => {
         const els = $$('.sector__art *', p).filter(e => e.tagName !== 'g' && !e.closest('defs') && !e.classList.contains('flow'));
         gsap.to(els, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.out', stagger: 0.01, onComplete: () => showFlow(p), scrollTrigger: { trigger: $('.sector__art', p), start: 'top 92%', once: true } });
@@ -1414,6 +1464,7 @@
     $$('.ms').forEach(m => ScrollTrigger.create({ trigger: m, start: 'top 65%', onEnter: () => m.classList.add('is-on'), onLeaveBack: () => m.classList.remove('is-on') }));
 
     gsap.from('.contact__grid > *', { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.contact__grid', start: 'top 85%' } });
+    orderTriggers(); scrollReady = true;
   }
 
   // reduced motion: the anatomy section shows its last step and the fully exploded valve
@@ -1480,10 +1531,12 @@
   bindAnchors();
   setupScroll();
   runLoader();
-  const deep = location.hash.match(/^#products\/(.+)$/);
+  // #products/<slug> opens a category; #products/<slug>/<n> (the "Add to quote" buttons on the product pages) also opens that product
+  const deep = location.hash.match(/^#products\/([^/]+)(?:\/(\d+))?$/);
   if (deep) {
-    const ds = slugAlias(deep[1]);
-    if (catBySlug(ds)) setTimeout(() => showCat(ds), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
+    const ds = slugAlias(deep[1]), wait = reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED);
+    if (catBySlug(ds)) setTimeout(() => showCat(ds), wait);
+    if (catBySlug(ds) && deep[2] && itemOf(ds + ':' + deep[2])) setTimeout(() => openQV(ds + ':' + deep[2]), wait + 1300);
     // the link has done its job: a reload (or a shared address) must not bring that category back after other filters
     history.replaceState(history.state, '', location.pathname + location.search);
   }

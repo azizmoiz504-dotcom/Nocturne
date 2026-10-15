@@ -236,7 +236,17 @@
     if (e.target === heroEl) heroVis = e.isIntersecting; else anaVis = e.isIntersecting;
   }));
   io.observe(heroEl); io.observe(anaEl);
-  const measure = () => { heroH = Math.max(1, heroEl.offsetHeight); };
+  // phones: the gap between the top bar and the hero text (page positions), so the valve fits in it
+  // (on shorter phones its handwheel used to sit under the top bar)
+  const heroText = document.querySelector('.hero__eyebrow') || heroEl;
+  let gapTop = 120, gapBot = 400;
+  const measure = () => {
+    heroH = Math.max(1, heroEl.offsetHeight);
+    const nav = document.querySelector('.nav');
+    if (nav) gapTop = nav.offsetTop + nav.offsetHeight + 10;
+    let y = 0; for (let e = heroText; e; e = e.offsetParent) y += e.offsetTop;   // layout position (the intro animation moves the text for a while)
+    gapBot = y - 14;
+  };
   // the canvas is 100vw × 100vh (style.css #gl), so on phones the address bar coming and going doesn't change it:
   // the drawing size follows the canvas box and is only redone when that box really changes
   let cw = 0, ch = 0;
@@ -301,11 +311,14 @@
       wheelSpin.rotation.y = -p * Math.PI * 3;
     } else {
       const hp = clamp(window.scrollY / heroH, 0, 1);
+      // phones: centred in the gap above the text, and smaller if the gap is short (the valve is about 5.5 units tall per unit of size)
+      const ppu = H / (2 * Math.tan(15 * Math.PI / 180) * 14), room = Math.max(90, gapBot - gapTop);
+      const mobY = clamp((H / 2 - (gapTop + gapBot) / 2) / ppu, 0.6, 1.75), mobS = Math.min(0.39, room * 0.94 / (5.5 * ppu));
       tg = {
-        x: mobile ? 0.15 : halfW * 0.46, y: (mobile ? 1.75 : -0.15) + hp * 2.2,
+        x: mobile ? 0.15 : halfW * 0.46, y: (mobile ? mobY : -0.15) + hp * 2.2,
         ry: -0.55 + Math.sin(tm * 0.3) * 0.22 + hp * 1.6 + st.mx * 0.25,
         rx: 0.16 + st.my * 0.1 + hp * 0.35,
-        s: (mobile ? 0.39 : 0.86 * clamp(camera.aspect / 1.55, 0.78, 1)) * (0.35 + 0.65 * intro), ex: 0, z: 14
+        s: (mobile ? mobS : 0.86 * clamp(camera.aspect / 1.55, 0.78, 1)) * (0.35 + 0.65 * intro), ex: 0, z: 14
       };
       wheelSpin.rotation.y = -(window.scrollY * 0.006) - tm * 0.25;
     }
@@ -321,8 +334,11 @@
 
     renderer.render(scene, camera);
 
-    // labels
-    const show = anaVis && !heroVis && cur.ex > 0.82;
+    // labels: they sit in the anatomy section but are placed in screen pixels (the valve is on the fixed canvas),
+    // so they are shifted by the section's own position, and they fade out as soon as the section starts to leave
+    // (they used to slide off the valve when the section scrolled away)
+    const anaY = anaVis ? anaEl.getBoundingClientRect().top : 0;
+    const show = anaVis && !heroVis && cur.ex > 0.82 && anaY > -H * 0.1;
     if (show !== labelsOn) { labelHost.classList.toggle('is-on', show); labelHost.inert = !show; labelsOn = show; bc.toggle('is-anatomy', show); }
     if (show) {
       valve.updateMatrixWorld();
@@ -358,7 +374,7 @@
       });
       anchors.forEach(a => {
         a.el.classList.toggle('is-left', a.left);
-        a.el.style.transform = 'translate(' + (a.left ? 'calc(' + a.x + 'px - 100%)' : a.x + 'px') + ',' + a.y + 'px) translateY(-50%)';
+        a.el.style.transform = 'translate(' + (a.left ? 'calc(' + a.x + 'px - 100%)' : a.x + 'px') + ',' + (a.y - anaY) + 'px) translateY(-50%)';
       });
     }
   }

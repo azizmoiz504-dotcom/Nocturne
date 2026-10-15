@@ -237,7 +237,7 @@ main{position:relative;z-index:1}
 .sectors{position:relative;z-index:1;background:var(--ink);overflow:hidden;border-top:1px solid var(--line)}
 .sectors__track{display:flex;height:100vh;height:100svh;width:max-content;will-change:transform}
 .sector{width:min(78vw,760px);height:100%;flex:none;border-right:1px solid var(--line);padding:calc(var(--nav-h) + 40px) clamp(28px,4vw,64px) 60px;display:flex;flex-direction:column;position:relative;background:linear-gradient(180deg,transparent 60%,rgba(185,26,32,.04))}
-.sector--intro{width:min(92vw,820px);padding-left:max(var(--pad),calc((100vw - var(--maxw))/2 + var(--pad)));justify-content:center;background:none}
+.sector--intro{width:max(min(92vw,820px),calc((100vw - var(--maxw))/2 + var(--pad) + 560px));padding-left:max(var(--pad),calc((100vw - var(--maxw))/2 + var(--pad)));justify-content:center;background:none}
 .sector--intro p{max-width:440px;color:var(--steel-2);margin-top:28px;font-size:20px}
 .sectors__hint{display:flex;align-items:center;gap:10px;color:var(--red);margin-top:48px}
 .sectors__hint svg{width:18px;height:18px;animation:nudge 1.6s ease-in-out infinite}
@@ -507,7 +507,7 @@ main{position:relative;z-index:1}
 .qv.is-open{visibility:visible;pointer-events:auto}
 .qv__scrim{position:absolute;inset:0;background:rgba(4,12,19,.6);opacity:0;transition:opacity .4s}
 .qv.is-open .qv__scrim{opacity:1}
-.qv__card{position:relative;width:min(1040px,100%);max-height:calc(100vh - 40px);overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);color:var(--paper-ink);border-radius:30px;box-shadow:0 60px 120px -40px rgba(0,0,0,.7)}
+.qv__card{position:relative;width:min(1040px,100%);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);color:var(--paper-ink);border-radius:30px;box-shadow:0 60px 120px -40px rgba(0,0,0,.7)}
 .qv__close{position:absolute;right:16px;top:16px;z-index:3;width:44px;height:44px;border-radius:50%;background:#fff;color:var(--paper-ink);border:1px solid var(--line-dk);transition:background .3s,color .3s,transform .5s var(--ease)}
 .qv__close:hover{background:var(--red);color:#fff;transform:rotate(90deg)}
 .qv__media{position:relative;min-height:440px;background:radial-gradient(circle at 50% 42%,#fff,#e9ebef 75%);display:grid;place-items:center;overflow:hidden}
@@ -686,8 +686,8 @@ main{position:relative;z-index:1}
 .form__rfq-head{display:flex;justify-content:space-between;color:var(--steel-2);margin-bottom:10px}
 .form__rfq-head button{color:var(--red);font-family:var(--f-mono);font-size:17px;letter-spacing:.1em;text-transform:uppercase}
 .form__rfq ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-.form__rfq li{display:flex;align-items:center;gap:8px;font-size:17px;padding:6px 6px 6px 12px;border-radius:99px;background:rgba(255,255,255,.07)}
-.form__rfq li button{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.1);font-size:16.5px;line-height:1}
+.form__rfq li{display:flex;align-items:center;gap:8px;font-size:17px;padding:4px 4px 4px 12px;border-radius:99px;background:rgba(255,255,255,.07)}
+.form__rfq li button{flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);font-size:19px;line-height:1}
 .form__rfq li button:hover{background:var(--red)}
 .form__done{position:absolute;inset:0;border-radius:inherit;background:var(--ink-3);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:30px}
 .form__done svg{width:80px;height:80px;fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1308,6 +1308,7 @@ body.has-quote .fabs{bottom:14px}
   .kc__add .lbl{overflow:hidden;text-overflow:ellipsis}
   .kc__wa{width:40px;height:40px}
   .kc--promo{grid-column:1/-1;padding:20px}
+  .kat-grid{grid-auto-flow:row dense}   /* the full-width promo leaves no hole beside the card before it */
   .kat-sort .mono{display:none}
   .kat-count{order:3;width:100%}
 }
@@ -1592,3 +1593,18 @@ body.fabs-off .fabs{opacity:0;pointer-events:none;transform:translateY(24px)}
 }
 /* a clear outline shows where you are when using the Tab key */
 :focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+/* small phones: the quick view's "Add to quote" / "Update quantity" fits its button (it was cut off at 360px and less) */
+@media (max-width:430px){
+  .qv{padding:10px}
+  .qv__card{max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
+  .qv__buy .btn{padding:0 12px;gap:6px;font-size:17px;line-height:1.1;text-align:center;white-space:normal}
+  .qv__buy .btn svg{display:none}
+  .qv__buy .qty button{width:40px}
+  .qv__buy .qty input{width:44px}
+}
+/* a long material ("F304/304L, F316/316L") wraps inside the card instead of running out of it */
+.kc__material{overflow-wrap:break-word;min-width:0}
+/* the quote bar steps aside over the contact form (it covered the form's send button; the form lists the items itself) */
+body.at-form .qbar.is-on{transform:translate(-50%,160%)}
+@media (max-width:600px){body.at-form .qbar.is-on{transform:translate(0,160%)}}
