@@ -6,7 +6,7 @@
   // category page file name (a few have a shorter address; see tools/build-pages.js PAGE_URL)
   const pageOf = c => (window.FT_PAGE_URL && window.FT_PAGE_URL[c.slug]) || c.slug;
   // Category photos: the cover first, then each product's own photo.
-  CATS.forEach(c => { c.imgs = [...new Set([c.cover || c.items[0][3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
+  CATS.forEach(c => { c.imgs = [...new Set([c.cover || (c.items[0] || [])[3]].concat(c.items.map(it => it[3])).filter(Boolean))]; });
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const pad = n => String(n).padStart(2, '0');
@@ -137,7 +137,7 @@
   const matText = o => ownMat(o) || (/^C\.S & S\.S/.test(o.name) ? 'Carbon steel, Stainless' : materialOf(o.name) || '');
   // quote lines and WhatsApp messages carry the material when the product name doesn't say it ("Gate Valve F/T – Cast iron")
   const fullName = o => ownMat(o) && !materialOf(o.name) ? o.name + ' – ' + o.matSet : o.name;
-  const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + s + '</span>').join('') + '</div>' : '';
+  const chipsHTML = arr => arr.length ? '<div class="prow__chips">' + arr.map(s => '<span>' + esc(s) + '</span>').join('') + '</div>' : '';
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
   /* ================= Sizes: every product gets a proper size picker ================= */
@@ -160,7 +160,10 @@
     if (dot.length > 1) { s = dot[0]; if (/–/.test(dot[1])) len = dot[1]; else note = dot[1]; }
     if (!s) sp = { t: 'text', hint: '' };
     else if (/ – any size$/.test(s)) { const l = ladder(s.split(' – ')[0], 'any', o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: l[0] + ' – ' + l[l.length - 1] }; }
-    else if ((m = s.match(RX_PAIR))) {
+    else if ((m = s.match(RX_PAIR)) && m[1] === m[2] && m[3] === m[4]) {   // 1½" × 1½" – 4" × 4": both ends are always the same size
+      const l = ladder(m[1], m[3], o.c.fam); if (l) sp = { t: 'sel', opts: l, ph: m[1] + ' – ' + m[3] };
+    }
+    else if (m) {
       const L = ladder(m[1], m[3], o.c.fam), S = ladder(m[2], m[4], o.c.fam);
       if (L && S) sp = { t: 'pair', L, S, lt: rung(m[1]) > rung(m[2]) && rung(m[3]) > rung(m[4]) };
     }
@@ -238,22 +241,44 @@
 
   /* ================= Quote basket (line key -> qty) ================= */
   const rfq = new Map();
-  try {
-    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name]) => {
-      let o = itemOf(k);
-      // the product list gets reordered: a saved line follows its product by name, not by its old place in the list
-      if (name && (!o || o.name !== name)) {
-        const bar = k.indexOf('|'), pick = bar < 0 ? '' : k.slice(bar), slug = slugAlias(k.split(':')[0]);
-        const c = [catBySlug(slug)].concat(CATS).find(x => x && x.items.some(it => it[0] === name));
-        o = c ? itemOf(c.slug + ':' + c.items.findIndex(it => it[0] === name) + pick) : null;
-        if (o) k = o.id + pick;
+  // a saved size the product no longer offers becomes "size to confirm", so the list never shows one size and sends another
+  function cleanPick(o, pick) {
+    const sp = sizeSpec(o), [base, len] = String(pick).split(' · ');
+    let b = base;
+    if (sp.t === 'one') b = sp.v;
+    else if (sp.t === 'sel') { if (/^(.+) × \1$/.test(b)) b = b.split(' × ')[0]; if (b !== '?' && !sp.opts.includes(b)) b = '?'; }
+    else if (sp.t === 'pair' && b !== '?') { const [x, y] = b.split(' × '); if (!(x === '?' || sp.L.includes(x)) || !(y === '?' || sp.S.includes(y))) b = '?'; }
+    return len && sp.len ? (b || '?') + ' · ' + len : b;
+  }
+  // the product list gets edited: a saved line follows its product by name and material (nearest to its old place,
+  // because several products share a name), first in its own section, then anywhere
+  function findSaved(k, name, mat) {
+    const o = itemOf(k);
+    if (!name || (o && o.name === name && (mat === undefined || o.matSet === mat))) return o;
+    const bar = k.indexOf('|'), pick = bar < 0 ? '' : k.slice(bar), head = (bar < 0 ? k : k.slice(0, bar)).split(':');
+    const slug = slugAlias(head[0]), was = +head[1] || 0, home = catBySlug(slug);
+    for (const strict of [true, false]) {
+      for (const c of [home].concat(CATS.filter(x => x !== home))) {
+        if (!c) continue;
+        let best = -1;
+        c.items.forEach((it, i) => { if (it[0] === name && (!strict || mat === undefined || (it[4] || '') === mat) && (best < 0 || Math.abs(i - was) < Math.abs(best - was))) best = i; });
+        if (best > -1) return itemOf(c.slug + ':' + best + pick);
       }
-      if (!o) return;
-      rfq.set(o.pick === null ? keyOf(o, defaultPick(o)) : k, Math.max(1, +q || 1));
+    }
+    return null;
+  }
+  let lostLines = 0;
+  try {
+    (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name, mat]) => {
+      const o = findSaved(String(k), name, mat);
+      if (!o) { lostLines++; return; }
+      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick));
+      rfq.set(key, Math.min(99999, (rfq.get(key) || 0) + Math.max(1, Math.round(+q) || 1)));
     });
   } catch (e) {}
-  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq].map(([k, q]) => { const o = itemOf(k); return [k, q, o ? o.name : '']; }))); } catch (e) {} };
-  if (rfq.size) saveRfq();   // older saved quotes get product names added, so they survive list changes
+  const saveRfq = () => { try { localStorage.setItem('ft-rfq', JSON.stringify([...rfq].map(([k, q]) => { const o = itemOf(k); return [k, q, o ? o.name : '', o ? o.matSet : '']; }))); } catch (e) {} };
+  if (rfq.size || lostLines) saveRfq();   // older saved quotes get product names added, so they survive list changes
+  if (lostLines) setTimeout(() => toast((lostLines === 1 ? '1 product' : lostLines + ' products') + ' in your saved quote changed on our list, please add ' + (lostLines === 1 ? 'it' : 'them') + ' again'), 4600);
   const hasAny = id => [...rfq.keys()].some(k => k.startsWith(id + '|'));
   const sizeOfLine = o => { const w = sizeWords(o, o.pick); return w ? ' (' + w + ')' : ''; };
   const lineText = (o, q) => '• ' + fullName(o) + sizeOfLine(o) + ' × ' + q;
@@ -262,10 +287,14 @@
     return 'Hello Fakhri Tools, I would like a quote for:\n' + [...rfq].map(([k, q]) => lineText(itemOf(k), q)).join('\n');
   }
 
-  function setQty(key, q) {
-    q = Math.round(+q || 0);
+  // "1,000", "1 000" and "10 pcs" all count; a box with no number in it keeps the old quantity
+  const parseQty = v => { const m = String(v).replace(/[\s,']/g, '').match(/\d+/); return m ? +m[0] : null; };
+  function setQty(key, q, typed) {
+    if (typeof q !== 'number') q = parseQty(q);
+    if (q === null) { syncRfq(false); return; }
+    q = Math.round(q);
     if (q <= 0) rfq.delete(key); else rfq.set(key, Math.min(99999, q));
-    saveRfq(); syncRfq(false);
+    saveRfq(); syncRfq(false, typed && q > 0);
   }
   // change the size of a line that is already in the quote (keeps its place in the list)
   function reKey(oldKey, newKey) {
@@ -323,7 +352,7 @@
     // only rewrite the label when it changes: replacing it under the mouse would swallow the click
     const l = $('.lbl', b); if (l && l.dataset.on !== String(on)) { l.dataset.on = on; l.innerHTML = on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>'; }
   }
-  function syncRfq(bump) {
+  function syncRfq(bump, keepSheet) {
     const n = rfq.size;
     $('#rfqCount').textContent = n; $$('.js-rfq-n').forEach(e => { e.textContent = n; });
     if (bump) { const b = $('#rfqBtn'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
@@ -346,7 +375,7 @@
     document.body.classList.toggle('has-quote', n > 0);
     $('#qbarCount').textContent = n + (n === 1 ? ' item' : ' items');
     $('#qbarThumbs').innerHTML = [...rfq.keys()].slice(-4).reverse().map(k => '<i>' + imgTag(itemOf(k).img) + '</i>').join('');
-    if (qs.classList.contains('is-open')) renderSheet();
+    if (qs.classList.contains('is-open')) { if (keepSheet) $$('#qsList .qs__row').forEach(r => { const i = $('.qty input', r); if (i && rfq.has(r.dataset.id)) i.value = rfq.get(r.dataset.id); }); else renderSheet(); }
     if (qvId) syncQV();
   }
   document.addEventListener('click', e => {
@@ -414,18 +443,25 @@
   const qs = $('#qs');
   function renderSheet() {
     const n = rfq.size;
+    const a = document.activeElement, was = a && a.closest && a.closest('#qsList .qs__row');
+    const back = was && { id: was.dataset.id, i: $$('#qsList .qs__row').indexOf(was), sel: a.dataset.q ? '[data-q="' + a.dataset.q + '"]' : a.dataset.pk ? '[data-pk="' + a.dataset.pk + '"]' : a.classList.contains('qs__rm') ? '.qs__rm' : a.classList.contains('qs__img') ? '.qs__img' : '.qty input' };
     $('#qsCount').textContent = n;
     $('#qsList').innerHTML = n ? [...rfq].map(([k, q]) => {
       const o = itemOf(k);
       return '<div class="qs__row" data-id="' + esc(k) + '" data-pick-root="' + o.id + '">' +
         '<button class="qs__img" data-qv="' + esc(k) + '">' + imgTag(o.img) + '</button>' +
-        '<div class="qs__info"><span class="mono">' + o.c.name + '</span><b>' + esc(o.name) + '</b>' +
+        '<div class="qs__info"><span class="mono">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b>' +
           (fixedSize(o) ? (o.size ? '<small>' + esc(o.size) + '</small>' : '') : pickerHTML(o, o.pick)) + '</div>' +
         '<div class="qty"><button type="button" data-q="-1" aria-label="Less">−</button><input type="text" inputmode="numeric" value="' + q + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></div>' +
         '<button class="qs__rm" type="button" aria-label="Remove">×</button></div>';
     }).join('') : '<div class="qs__empty"><b>Your quote is empty.</b><p>Browse the catalogue, pick a size and tap “Add to quote”. Quantities can be changed here.</p><div class="qs__empty-btns"><button class="btn btn--red" id="qsBrowse" type="button">Browse the catalogue</button><a class="btn btn--ghost" href="tel:+97142850135">Call +971 4 285 0135</a></div></div>';
     $$('.qs__row', $('#qsList')).forEach(r => tidyPair(r, itemOf(r.dataset.id)));
     $('.qs__foot').hidden = n === 0;
+    if (back) {
+      const rows = $$('#qsList .qs__row'), r = rows.find(x => x.dataset.id === back.id) || rows[Math.min(back.i, rows.length - 1)];
+      const el = r ? $(back.sel, r) || $('.qs__rm', r) : $('.qv__close', qs);
+      if (el) el.focus({ preventScroll: true });
+    }
   }
   function openSheet() {
     closeMenu();
@@ -451,7 +487,7 @@
     if (e.target.closest('.qs__rm')) setQty(id, 0);
   });
   $('#qsList').addEventListener('change', e => {
-    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value);
+    const row = e.target.closest('.qs__row'); if (row && e.target.tagName === 'INPUT' && !e.target.dataset.pk) setQty(row.dataset.id, e.target.value, true);
   });
   // if a showroom was open, scroll once it has finished closing (the page underneath is measured then)
   const afterShowroom = fn => { const was = sr.classList.contains('is-open'); closeSheet(); hardCloseShowroom(); setTimeout(fn, was && !reduce ? 950 : 80); };
@@ -513,11 +549,11 @@
   $$('[data-qv-close]', qv).forEach(b => b.addEventListener('click', closeQV));
   $('#qvPrev').addEventListener('click', () => stepQV(-1));
   $('#qvNext').addEventListener('click', () => stepQV(1));
-  $$('.qv [data-step]').forEach(b => b.addEventListener('click', () => { const i = $('#qvQty'); i.value = Math.max(1, (+i.value || 1) + (+b.dataset.step)); }));
+  $$('.qv [data-step]').forEach(b => b.addEventListener('click', () => { const i = $('#qvQty'); i.value = Math.min(99999, Math.max(1, (parseQty(i.value) || 1) + (+b.dataset.step))); }));
   $('#qvAdd').addEventListener('click', () => {
     const o = itemOf(qvId), p = readPick($('#qvPick'), o);
     if (!p.ok) return flagPick($('#qvPick'));
-    const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, Math.round(+$('#qvQty').value) || 1));
+    const key = keyOf(o, p.v), q = Math.max(1, Math.min(99999, parseQty($('#qvQty').value) || 1));
     const isNew = !rfq.has(key);
     rfq.set(key, q); saveRfq(); syncRfq(isNew);
     toast((isNew ? 'Added to quote — ' : 'Updated — ') + fullName(o) + sizeOfLine(itemOf(key)) + ' × ' + q);
@@ -533,17 +569,17 @@
     const o = itemOf(c.slug + ':' + i), on = hasAny(o.id);
     return '<div class="prow" data-fly>' +
       '<button class="prow__img" data-qv="' + o.id + '">' + imgTag(o.img) + '</button>' +
-      '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + c.name + '</span>' : '') + '<h4>' + o.name + '</h4>' +
-      (o.size ? '<div class="prow__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
+      '<button class="prow__main" data-qv="' + o.id + '">' + (withCat ? '<span class="prow__cat">' + esc(c.name) + '</span>' : '') + '<h4>' + esc(o.name) + '</h4>' +
+      (o.size ? '<div class="prow__size">' + esc(o.size) + '</div>' : '') + chipsHTML(o.chips) + '</button>' +
       '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button>' +
       '</div>';
   }
   function cardHTML(c, i) {
     const o = itemOf(c.slug + ':' + i), on = hasAny(o.id), mat = groupOf(c.items[i]);
-    return '<article class="pc" data-fly data-mat="' + (mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
+    return '<article class="pc" data-fly data-mat="' + esc(mat || '') + '" data-specs="' + esc(o.chips.join('|')) + '">' +
       '<button class="pc__media" data-qv="' + o.id + '" data-cursor="View"><span class="pc__no mono">' + pad(i + 1) + '</span>' +
-      (mat ? '<span class="pc__mat mono">' + mat + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
-      '<div class="pc__body"><h4>' + o.name + '</h4>' + (o.size ? '<div class="pc__size">' + o.size + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
+      (mat ? '<span class="pc__mat mono">' + esc(mat) + '</span>' : '') + imgTag(o.img, o.name) + '</button>' +
+      '<div class="pc__body"><h4>' + esc(o.name) + '</h4>' + (o.size ? '<div class="pc__size">' + esc(o.size) + '</div>' : '') + chipsHTML(o.chips) + '</div>' +
       '<div class="pc__foot"><button class="pc__quick mono" data-qv="' + o.id + '">Quick view</button>' +
       '<button class="add' + (on ? ' is-added' : '') + '" data-add="' + o.id + '"><span class="plus">+</span><span class="lbl">' + (on ? 'Added' : 'Add<span class="lbl__x"> to quote</span>') + '</span></button></div>' +
       '</article>';
@@ -560,7 +596,7 @@
   let srIdx = -1;
   const filt = { mat: 'all', spec: 'all' };
 
-  $('#srTabs').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + c.name + '</button>').join('');
+  $('#srTabs').innerHTML = CATS.map(c => '<button data-cat="' + c.slug + '">' + esc(c.name) + '</button>').join('');
 
   function renderShowroom(idx) {
     srIdx = idx;
@@ -578,14 +614,14 @@
       '<header class="sr__hero">' +
         '<div class="sr__copy">' +
           '<div class="sr__crumbs mono"><button data-sr-close>Catalogue</button><i>/</i><span>' + famName(c.fam) + '</span><i>/</i><b>' + pad(idx + 1) + ' of ' + CATS.length + '</b></div>' +
-          '<h2 class="sr__title">' + c.name + '</h2>' +
+          '<h2 class="sr__title">' + esc(c.name) + '</h2>' +
           '<p class="sr__desc">' + c.desc + '</p>' +
           '<div class="sr__facts"><div><b>' + pad(c.items.length) + '</b><small class="mono">Products</small></div>' +
             '<div><b>' + pad(Math.max(1, mats.length)) + '</b><small class="mono">Materials</small></div>' +
             '<div><b>' + pad(specCount.size) + '</b><small class="mono">Specs & ratings</small></div></div>' +
           '<div class="sr__ctas" data-fly><img class="sr__flysrc" src="' + coverOf(c) + '" alt="" >' +
             '<button class="btn btn--red magnetic" data-addall>Quote the full range <svg><use href="#arrow"/></svg></button>' +
-            '<a class="btn btn--ghost magnetic" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I would like a quote for your ' + c.name + '."><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div>' +
+            '<a class="btn btn--ghost magnetic" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, I would like a quote for your ' + esc(c.name) + '."><svg><use href="#wa"/></svg> Ask on WhatsApp</a></div>' +
         '</div>' +
         '<div class="sr__stage">' +
           '<div class="sr__orb"><svg class="sr__ring" viewBox="0 0 200 200"><defs><path id="srRing" d="M100,100 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0"/></defs><text><textPath href="#srRing">Fakhri Tools · Al Quoz Industrial Area 3 · Dubai · Get a quote · Call · WhatsApp ·</textPath></text></svg>' +
@@ -600,10 +636,10 @@
         '<span class="sr__showing mono" id="srShowing">Showing ' + c.items.length + ' of ' + c.items.length + '</span>' +
       '</div>' +
       '<div class="sr__grid" id="srGrid">' + c.items.map((_, i) => cardHTML(c, i)).join('') + '</div>' +
-      '<section class="sr__related"><div class="sr__rel-head"><span class="mono">Complete the line</span><h3>Everything that goes with ' + c.name.toLowerCase().replace(/ — .*/, '') + '.</h3><p>Gaskets, flanges, fittings and instruments — ask for them all in one quote.</p></div>' +
+      '<section class="sr__related"><div class="sr__rel-head"><span class="mono">Complete the line</span><h3>Everything that goes with ' + esc(c.name.toLowerCase().replace(/ — .*/, '')) + '.</h3><p>Gaskets, flanges, fittings and instruments — ask for them all in one quote.</p></div>' +
         '<div class="sr__rel-grid">' + related.map(r => '<button class="rel" data-cat="' + r.slug + '"><span class="rel__img">' + imgTag(coverOf(r), r.name) + '</span><span class="mono">' + pad(r.items.length) + ' products</span><b>' + r.name + '</b><i><svg><use href="#arrow"/></svg></i></button>').join('') + '</div>' +
       '</section>' +
-      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + next.name + '</b><span class="sr__next-img">' + imgTag(coverOf(next), next.name) + '</span></button>';
+      '<button class="sr__next" data-cat="' + next.slug + '"><span class="mono">Next category — ' + pad(((idx + 1) % CATS.length) + 1) + '</span><b>' + esc(next.name) + '</b><span class="sr__next-img">' + imgTag(coverOf(next), next.name) + '</span></button>';
 
     applyLinks(srContent);
     $$('#srTabs button').forEach(b => b.classList.toggle('is-on', b.dataset.cat === c.slug));
@@ -747,11 +783,11 @@
   /* ---------------- Mega menu + footer list ---------------- */
   const nav = $('#nav');
   $('#megaIn').innerHTML = FAMS.map(f =>
-    '<div><h6>' + f.name + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
-      '<button data-cat="' + c.slug + '">' + c.name + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
+    '<div><h6>' + esc(f.name) + '</h6>' + CATS.filter(c => c.fam === f.id).map(c =>
+      '<button data-cat="' + c.slug + '">' + esc(c.name) + '<small>' + pad(c.items.length) + '</small></button>').join('') + '</div>').join('') +
     '<div class="mega__feature"><b>Get a quote</b><p>Call, WhatsApp or visit the counter in Al Quoz. Mon–Sat 7:30am–6:00pm, Sunday closed.</p><a href="#contact" data-scroll>Get a quote <svg><use href="#arrow"/></svg></a></div>';
   // footer links go to the plain product pages (products/<slug>.html) so search engines can follow them
-  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + pageOf(c) + '.html" data-cat="' + c.slug + '">' + c.name + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
+  $('#footCats').innerHTML = CATS.map(c => '<a href="products/' + pageOf(c) + '.html" data-cat="' + c.slug + '">' + esc(c.name) + '</a>').join('') + '<a href="products/index.html" data-cat=""><b>All products</b></a>';
 
   const megaBtn = $('#megaBtn');
   function openMega() { nav.classList.add('is-mega'); megaBtn.setAttribute('aria-expanded', 'true'); }
@@ -831,7 +867,7 @@
   // category rail with photos
   // real links to each category page (search engines follow them); a click filters the list on this page instead
   $('#katRail').innerHTML = '<a class="kr is-on" href="products/index.html" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></a>' +
-    CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + c.name + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
+    CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + esc(c.name) + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
   $('#katRail').addEventListener('click', e => {
     const b = e.target.closest('[data-pick]'); if (!b) return;
     e.preventDefault();
@@ -856,8 +892,8 @@
     FAMS.forEach(f => {
       const cs = CATS.filter(c => c.fam === f.id);
       const open = cs.some(c => kf.cats.has(c.slug));
-      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + f.name + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
-        cs.map(c => box('cats', c.slug, c.name, cc.get(c.slug))).join('') + '</div></details>';
+      h += '<details class="kgroup" data-g="' + f.id + '"' + ((kOpenG.has(f.id) ? kOpenG.get(f.id) : open) ? ' open' : '') + '><summary>' + esc(f.name) + '<em class="mono">' + cs.reduce((a, c) => a + (cc.get(c.slug) || 0), 0) + '</em></summary><div class="kgroup__list">' +
+        cs.map(c => box('cats', c.slug, esc(c.name), cc.get(c.slug))).join('') + '</div></details>';
     });
     h += '<details class="kgroup" data-g="mat"' + ((kOpenG.has('mat') ? kOpenG.get('mat') : kf.mats.size > 0) ? ' open' : '') + '><summary>Material</summary><div class="kgroup__list">' +
       matList().map(m => box('mats', m, esc(m), mc.get(m))).join('') + '</div></details>';
@@ -876,7 +912,7 @@
     return '<article class="kc" data-fly data-pick-root="' + o.id + '">' +
       '<button class="kc__media" data-qv="' + o.id + '" data-cursor="View" aria-label="Quick view: ' + esc(o.name) + '">' +
         (o.img ? imgTag(o.img, o.name) : noPhoto(o)) + '<span class="kc__peek mono">Quick view</span></button>' +
-      '<div class="kc__body"><span class="kc__cat mono">' + o.c.name + '</span>' +
+      '<div class="kc__body"><span class="kc__cat mono">' + esc(o.c.name) + '</span>' +
         '<h3 class="kc__name"><button data-qv="' + o.id + '">' + esc(o.name) + '</button></h3>' +
         (mat ? '<div class="kc__size kc__material"><span class="mono">Material</span>' + esc(mat) + '</div>' : '') +
         (one ? '<div class="kc__size"><span class="mono">Size</span>' + esc(o.size) + '</div>' : pickerHTML(o, cur)) +
@@ -1015,10 +1051,10 @@
   /* ---------------- Brands ---------------- */
   const BRANDS = window.FT_BRANDS || [];
   $('#brandsGrid').innerHTML = BRANDS.map((b, i) =>
-    '<button class="btile" data-brand="' + b.name + '" data-cursor="Quote">' +
+    '<button class="btile" data-brand="' + esc(b.name) + '" data-cursor="Quote">' +
       '<span class="btile__no mono">' + pad(i + 1) + '</span>' +
-      '<span class="btile__mark">' + (b.logo ? '<img src="' + b.logo + '" alt="' + b.name + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + b.name.replace(/-/g, '‑') + '</span>') + '</span>' +
-      '<span class="btile__foot"><span class="mono">' + (b.logo ? b.name : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
+      '<span class="btile__mark">' + (b.logo ? '<img src="' + esc(b.logo) + '" alt="' + esc(b.name) + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="btile__word' + (b.name.length > 12 ? ' is-long' : '') + '">' + esc(b.name).replace(/-/g, '‑') + '</span>') + '</span>' +
+      '<span class="btile__foot"><span class="mono">' + (b.logo ? esc(b.name) : 'Brand') + '</span><b>Get a quote <svg><use href="#arrow"/></svg></b></span>' +
     '</button>').join('') +
     '<a class="btile btile--ask" href="#" data-wa-link data-wa-msg="Hello Fakhri Tools, do you supply this brand: "><span class="btile__no mono">Not listed?</span>' +
       '<span class="btile__mark"><span class="btile__word is-long">Ask for your brand</span></span>' +
@@ -1027,7 +1063,7 @@
   $$('#brandsGrid .btile__mark img').forEach(img => {
     const toWord = () => {
       const t = img.closest('.btile'), n = t.dataset.brand;
-      img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + n.replace(/-/g, '‑') + '</span>';
+      img.parentNode.innerHTML = '<span class="btile__word' + (n.length > 12 ? ' is-long' : '') + '">' + esc(n).replace(/-/g, '‑') + '</span>';
       $('.btile__foot .mono', t).textContent = 'Brand';
     };
     // very wide logos (long company names) may use the whole tile width, or they come out tiny on phones
