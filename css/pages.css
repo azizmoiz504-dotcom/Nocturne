@@ -132,3 +132,12 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 [dir=rtl] .tbl caption,[dir=rtl] .tbl th,[dir=rtl] .tbl td{text-align:right}
 [dir=rtl] .crumbs i{display:inline-block;transform:scaleX(-1)}
 [dir=rtl] .hero h1,[dir=rtl] .guide h2,[dir=rtl] .faq h2,[dir=rtl] .fam h2,[dir=rtl] .ask h2,[dir=rtl] .more h2{font-family:system-ui,'Segoe UI',Tahoma,sans-serif;text-transform:none;letter-spacing:0;line-height:1.25}
+
+/* product cards: the label and its value wrap inside the card on small phones */
+.p{min-width:0}
+.p__size{overflow-wrap:break-word}
+/* phones: "Add to quote" is one label that fits on one or two lines */
+@media (max-width:480px){.p__foot .btn--dark{padding:6px 10px}}
+/* Arabic: the FAQ arrow sits inside its box; links in text keep their colour */
+[dir=rtl] .faq summary{list-style-position:inside}
+.guide a[href^="tel:"],.guide a[href*="wa.me"],.faq a[href^="tel:"],.faq a[href*="wa.me"],.lead a{color:inherit;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}

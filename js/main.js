@@ -1497,10 +1497,12 @@
   bindAnchors();
   setupScroll();
   runLoader();
-  const deep = location.hash.match(/^#products\/(.+)$/);
+  // #products/<slug> opens a category; #products/<slug>/<n> (the "Add to quote" buttons on the product pages) also opens that product
+  const deep = location.hash.match(/^#products\/([^/]+)(?:\/(\d+))?$/);
   if (deep) {
-    const ds = slugAlias(deep[1]);
-    if (catBySlug(ds)) setTimeout(() => showCat(ds), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
+    const ds = slugAlias(deep[1]), wait = reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED);
+    if (catBySlug(ds)) setTimeout(() => showCat(ds), wait);
+    if (catBySlug(ds) && deep[2] && itemOf(ds + ':' + deep[2])) setTimeout(() => openQV(ds + ':' + deep[2]), wait + 1300);
     // the link has done its job: a reload (or a shared address) must not bring that category back after other filters
     history.replaceState(history.state, '', location.pathname + location.search);
   }

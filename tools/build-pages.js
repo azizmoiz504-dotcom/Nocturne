@@ -28,6 +28,20 @@ const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;'
 const wa = text => 'https://wa.me/' + CFG.whatsappDigits + '?text=' + encodeURIComponent(text);
 const famName = id => FAMS.find(f => f.id === id).name;
 const nProducts = n => n + (n === 1 ? ' product' : ' products');
+// Page text: phone numbers become tap-to-call / WhatsApp links (links = true), and on Arabic pages
+// phone numbers and inch sizes stay left to right (they showed backwards: "0135 285 4 971+", 12" with the mark in front)
+function fmt(s, lang, links) {
+  const keep = [];
+  let h = esc(s).replace(/\+971(?: \d+){3}/g, n => {
+    const d = n.replace(/\D/g, ''), dir = lang === 'ar' ? ' dir="ltr"' : '';
+    keep.push(!links ? '<bdi dir="ltr">' + n + '</bdi>'
+      : d === CFG.whatsappDigits ? '<a href="' + wa(UI[lang].hello) + '" target="_blank" rel="noopener"' + dir + '>' + n + '</a>'
+      : '<a href="tel:+' + d + '"' + dir + '>' + n + '</a>');
+    return '\u0000' + (keep.length - 1) + '\u0000';
+  });
+  if (lang === 'ar') h = h.replace(/[\d⅛¼⅜½¾]+(?:[.,]\d+)?&quot;/g, m => '<bdi dir="ltr">' + m + '</bdi>');
+  return h.replace(/\u0000(\d+)\u0000/g, (m, i) => keep[+i]);
+}
 // Material, worked out the same way as the cards on the home page (js/main.js materialOf, matText, fullName):
 // the material set in the editor (item[4]) wins, otherwise it is read from the name.
 const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
@@ -125,10 +139,10 @@ function catPage(c, idx) {
     return '<article class="p">' +
       '<div class="p__img">' + (img ? '<img src="../' + IMG + img + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</div>' +
       '<div class="p__body"><h2>' + esc(name) + '</h2>' +
-        (mat ? '<p class="p__size p__mat"><span>Material</span>' + esc(mat) + '</p>' : '') +
-        (size ? '<p class="p__size"><span>Sizes</span>' + esc(size) + '</p>' : '') +
+        (mat ? '<p class="p__size p__mat"><span>Material</span> ' + esc(mat) + '</p>' : '') +
+        (size ? '<p class="p__size"><span>Sizes</span> ' + esc(size) + '</p>' : '') +
         (specs.length ? '<ul class="p__specs">' + specs.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>' : '') + '</div>' +
-      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '"><span class="lg">Pick size &amp; add</span><span class="sm">Add</span> to quote</a>' +
+      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '/' + i + '"><span><span class="lg">Pick size &amp; add</span><span class="sm">Add</span> to quote</span></a>' +
         '<a class="btn btn--wa btn--round" href="' + wa('Hello Fakhri Tools, please send me a price for: ' + fullName(it) + sizeTxt + '. Size and quantity: ') + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
     '</article>';
   }).join('');
@@ -141,8 +155,8 @@ function catPage(c, idx) {
         '<p class="lead">' + esc(c.desc) + ' Ask Fakhri Tools for a quote on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3.</p>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li><li>Pipe threading, hose cutting and hydraulic hose crimping at the counter</li></ul></header>' +
       '<section class="grid" aria-label="' + esc(c.name) + '">' + items + '</section>' +
-      (s.intro && s.intro.length ? '<section class="guide"><h2>' + esc(s.guideTitle || 'Choosing ' + c.name.toLowerCase()) + '</h2>' + s.intro.map(p => '<p>' + esc(p) + '</p>').join('') + '</section>' : '') +
-      (s.faq && s.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + s.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>').join('') + '</section>' : '') +
+      (s.intro && s.intro.length ? '<section class="guide"><h2>' + esc(s.guideTitle || 'Choosing ' + c.name.toLowerCase()) + '</h2>' + s.intro.map(p => '<p>' + fmt(p, 'en', true) + '</p>').join('') + '</section>' : '') +
+      (s.faq && s.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + s.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + fmt(a, 'en', true) + '</p></details>').join('') + '</section>' : '') +
       tiles(s.cats, s.catsTitle, '../') +
       '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
         '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I am looking for this part (' + c.name + '): ') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
@@ -197,17 +211,17 @@ function extraPage(pg, lang = 'en') {
   const depth = pg.path.includes('/') ? 1 : 0, up = depth ? '../' : '';
   const table = tb => '<div class="tbl"><table>' + (tb.caption ? '<caption>' + esc(tb.caption) + '</caption>' : '') +
     '<thead><tr>' + tb.head.map(h => '<th scope="col">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' +
-    tb.rows.map(r => '<tr>' + r.map((c, i) => i ? '<td>' + esc(c) + '</td>' : '<th scope="row">' + esc(c) + '</th>').join('') + '</tr>').join('') + '</tbody></table></div>';
+    tb.rows.map(r => '<tr>' + r.map((c, i) => i ? '<td>' + fmt(c, lang, true) + '</td>' : '<th scope="row">' + fmt(c, lang) + '</th>').join('') + '</tr>').join('') + '</tbody></table></div>';
   const body = '<div class="wrap">' +
     '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + (lang === 'ar' ? '' : up) + 'index.html">' + T.home + '</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
-    '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + esc(pg.h1) + '</h1>' +
-      (pg.lead ? '<p class="lead">' + esc(pg.lead) + '</p>' : '') + '</header>' +
-    (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + esc(s.h2) + '</h2>' : '') +
-      (s.p || []).map(x => '<p>' + esc(x) + '</p>').join('') +
-      (s.list && s.list.length ? '<ul>' + s.list.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
+    '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + fmt(pg.h1, lang) + '</h1>' +
+      (pg.lead ? '<p class="lead">' + fmt(pg.lead, lang, true) + '</p>' : '') + '</header>' +
+    (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + fmt(s.h2, lang) + '</h2>' : '') +
+      (s.p || []).map(x => '<p>' + fmt(x, lang, true) + '</p>').join('') +
+      (s.list && s.list.length ? '<ul>' + s.list.map(x => '<li>' + fmt(x, lang, true) + '</li>').join('') + '</ul>' : '') +
       (s.table ? table(s.table) : '') + '</section>').join('') +
     tiles(pg.cats, pg.catsTitle || T.shop, up) +
-    (pg.faq && pg.faq.length ? '<section class="faq"><h2>' + T.faq + '</h2>' + pg.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + esc(a) + '</p></details>').join('') + '</section>' : '') +
+    (pg.faq && pg.faq.length ? '<section class="faq"><h2>' + T.faq + '</h2>' + pg.faq.map(([q, a]) => '<details><summary>' + fmt(q, lang) + '</summary><p>' + fmt(a, lang, true) + '</p></details>').join('') + '</section>' : '') +
     '<section class="ask"><div><h2>' + esc(pg.askTitle || T.ask) + '</h2><p>' + T.askP + '</p></div>' +
       '<a class="btn btn--wa" href="' + wa(pg.wa || T.hello) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>' + T.send + '</span></a></section>' +
     '<section class="more"><h2>' + T.products + '</h2><div class="more__list">' + CATS.map(o => '<a href="' + up + 'products/' + PG(o) + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
