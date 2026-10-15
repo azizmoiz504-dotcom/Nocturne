@@ -843,6 +843,7 @@
     .replace(/([a-z])-(?=[a-z])/g, '$1 ')                     // y-strainer = y strainer, butt-weld = butt weld
     .replace(/(^|[^a-z])(ss|cs|ms|gi|ci)(?=\d)/g, '$1$2 ')     // ss316 = ss 316
     .replace(/(\d)#/g, '$1')                                  // 150# = 150 (finds CL150)
+    .replace(/(\d)(wog|psi)\b/g, '$1 $2')                     // 800WOG = 800 WOG
     .replace(/(^|[^a-z0-9])dn ?(\d{2,3})(?!\d)/g, (m, sp, d) => sp + (DN[d] || 'dn' + d));   // DN50 = 2"
   // metric pipe sizes (DN) and the inch size they are sold as
   const DN = { 15: '½"', 20: '¾"', 25: '1"', 32: '1¼"', 40: '1½"', 50: '2"', 65: '2½"', 80: '3"', 100: '4"', 125: '5"', 150: '6"', 200: '8"', 250: '10"', 300: '12"', 350: '14"', 400: '16"', 450: '18"', 500: '20"', 600: '24"' };
