@@ -1257,11 +1257,16 @@
     const io = new IntersectionObserver(es => {
       es.forEach(e => e.isIntersecting ? on.add(e.target) : on.delete(e.target));
       document.body.classList.toggle('fabs-off', on.size > 0);
+      // the quote bar also steps aside over the form: the form lists the quote items itself, and the bar covered its send button
+      document.body.classList.toggle('at-form', on.has($('#form')));
     }, { rootMargin: '-45% 0px 0px 0px' });
     zones.forEach(z => io.observe(z));
   })();
   function validForm() {
-    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => /^\+?[\d\s()\-]{7,20}$/.test(v.trim()) && v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
+    // a mobile typed in Arabic digits (٠٥٠…) or with dots (050.123.4567) is fine: digits are written the plain way first
+    const mob = $('#fMobile', form);
+    if (mob) mob.value = mob.value.replace(/[٠-٩]/g, d => d.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, d => d.charCodeAt(0) - 0x6F0);
+    const checks = [['#fName', v => v.trim().length > 1], ['#fMobile', v => /^\+?[\d\s().\-]{7,20}$/.test(v.trim()) && v.replace(/\D/g, '').length >= 7], ['#fEmail', v => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())]];
     let first = null;
     checks.forEach(([s, fn]) => {
       const el = $(s, form); if (!el) return;

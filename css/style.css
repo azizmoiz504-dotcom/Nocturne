@@ -1605,3 +1605,6 @@ body.fabs-off .fabs{opacity:0;pointer-events:none;transform:translateY(24px)}
 }
 /* a long material ("F304/304L, F316/316L") wraps inside the card instead of running out of it */
 .kc__material{overflow-wrap:break-word;min-width:0}
+/* the quote bar steps aside over the contact form (it covered the form's send button; the form lists the items itself) */
+body.at-form .qbar.is-on{transform:translate(-50%,160%)}
+@media (max-width:600px){body.at-form .qbar.is-on{transform:translate(0,160%)}}
