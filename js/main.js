@@ -417,6 +417,14 @@
   $('#rfqClear').addEventListener('click', () => { rfq.clear(); saveRfq(); syncRfq(true); });
 
 
+  // the Back button closes an open window (quick view, quote list, filters, phone menu) instead of leaving the site:
+  // each window adds a history step when it opens, and takes it away again when it is closed any other way
+  function ovOpen(name) {
+    if (history.state && history.state.ov === name) return;
+    try { history.scrollRestoration = 'manual'; } catch (e) {}   // going back must not jump the page
+    history.pushState({ ov: name }, '');
+  }
+  function ovClosed(name) { if (history.state && history.state.ov === name) history.back(); }
   // page scrolling comes back only when no overlay, menu or filter sheet is still open
   function unlock() {
     if (!lenis) return;
@@ -469,13 +477,15 @@
     renderSheet();
     qs.classList.add('is-open'); qs.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    ovOpen('qs');
     focusIn(qs, '.qv__close');
     gsap.fromTo('.qs__row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.04, delay: 0.15 });
   }
-  function closeSheet() {
+  function closeSheet(fromBack) {
     if (!qs.classList.contains('is-open')) return;
     qs.classList.remove('is-open'); qs.setAttribute('aria-hidden', 'true');
     unlock(); focusOut(qs);
+    if (fromBack !== true) ovClosed('qs');
   }
   $$('[data-qs-close]', qs).forEach(b => b.addEventListener('click', closeSheet));
   $('#qsList').addEventListener('click', e => {
@@ -536,14 +546,16 @@
     fillQV(key);
     qv.classList.add('is-open'); qv.setAttribute('aria-hidden', 'false');
     lenis && lenis.stop();
+    if (!wasOpen) ovOpen('qv');
     if (!wasOpen) focusIn(qv, '.qv__close');
     if (!wasOpen) gsap.fromTo('.qv__card', { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: 'expo.out' });
     gsap.fromTo('#qvMedia img', { scale: 0.8, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'expo.out' });
   }
-  function closeQV() {
+  function closeQV(fromBack) {
     if (!qv.classList.contains('is-open')) return;
     qv.classList.remove('is-open'); qv.setAttribute('aria-hidden', 'true'); qvId = null;
     unlock(); focusOut(qv);
+    if (fromBack !== true) ovClosed('qv');
   }
   function stepQV(d) { const o = itemOf(qvId); if (o) openQV(o.c.slug + ':' + ((o.i + d + o.c.items.length) % o.c.items.length)); }
   $$('[data-qv-close]', qv).forEach(b => b.addEventListener('click', closeQV));
@@ -802,16 +814,16 @@
   }
 
   /* ---------------- Mobile menu ---------------- */
-  function closeMenu() { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); } }
+  function closeMenu(fromBack) { if (document.body.classList.contains('is-menu')) { document.body.classList.remove('is-menu'); $('#burger').setAttribute('aria-expanded', 'false'); unlock(); if (fromBack !== true) ovClosed('menu'); } }
   $('#burger').addEventListener('click', () => {
     const on = document.body.classList.toggle('is-menu');
     $('#burger').setAttribute('aria-expanded', String(on));
-    if (on) lenis && lenis.stop(); else unlock();
+    if (on) { lenis && lenis.stop(); ovOpen('menu'); } else { unlock(); ovClosed('menu'); }
   });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeTop();
-    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) {
+    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !$('#qv.is-open, #qs.is-open, #showroom.is-open') && !document.body.classList.contains('is-menu') && !document.body.classList.contains('is-filtering')) {
       e.preventDefault(); scrollToEl('#catalogue'); setTimeout(() => $('#search').focus({ preventScroll: true }), 900);
     }
   });
@@ -819,10 +831,16 @@
   /* ---------------- Catalogue: filters on the left, every product on the right ---------------- */
   // search text is matched in one plain form: 1/2 = ½, 1-1/2 or 1 1/2 = 1½, C.S = CS, aluminum = aluminium
   const FRAC = { '1/8': '⅛', '1/4': '¼', '3/8': '⅜', '1/2': '½', '3/4': '¾' };
-  const qn = s => String(s).toLowerCase()
+  const qn = s => String(s).toLowerCase().replace(/[”″“]/g, '"')
     .replace(/(^|\s)(\d{1,2})[\s-]+(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, n, f) => sp + n + FRAC[f])
     .replace(/(^|[^\d\/])(1\/8|1\/4|3\/8|1\/2|3\/4)/g, (m, sp, f) => sp + FRAC[f])
+    .replace(/([\d⅛¼⅜½¾])"?\s*[x×*]\s*(?=[\d⅛¼⅜½¾])/g, '$1×')   // 4x3, 4" x 3" and 4" × 3" are written the same way
     .replace(/([a-z])\.(?=[a-z])/g, '$1').replace(/aluminum/g, 'aluminium');
+  // a size or number is matched whole: ½ doesn't find 1½ or 2½, and 2 doesn't find 2½ or 24
+  const NUM = '0-9⅛¼⅜½¾', reEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokTest = t => /^[0-9⅛¼⅜½¾]/.test(t) || /[0-9⅛¼⅜½¾]$/.test(t)
+    ? (r => h => r.test(h))(new RegExp((/^[0-9⅛¼⅜½¾]/.test(t) ? '(?:^|[^' + NUM + '])' : '') + reEsc(t) + (/[0-9⅛¼⅜½¾]$/.test(t) ? '(?![' + NUM + '])' : '')))
+    : h => h.includes(t);
   // every size in a range (½" – 4" also finds 1½"), so searching a size finds the product
   const sizesOf = o => { const sp = sizeSpec(o); return (sp.opts || []).concat(sp.L || [], sp.S || []).join(' '); };
   const ALL = [];
@@ -831,7 +849,7 @@
     o.mat = matOf(o) || 'Other';
     // a product can be in more than one material ("Brass, Stainless"): it shows under each of them
     o.mats = o.matSet ? matGroups(o.matSet) : /^C\.S & S\.S/.test(o.name) ? ['Carbon steel', 'Stainless'] : [o.mat];
-    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + sizesOf(o));
+    o.hay = qn(o.name + ' ' + o.chips.join(' ') + ' ' + o.size + ' ' + c.name + ' ' + famName(c.fam) + ' ' + o.mats.join(' ') + ' ' + o.matSet + ' ' + sizesOf(o));
     o.rank = ALL.length;
     ALL.push(o);
   }));
@@ -856,20 +874,21 @@
 
   // what passes every filter except the one named in `skip` (so each group shows honest counts)
   function pass(o, skip) {
-    if (skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
-    if (skip !== 'mats' && kf.mats.size && !o.mats.some(m => kf.mats.has(m))) return false;
-    if (skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
-    if (kf.q) { const toks = kf.q.split(/\s+/); if (!toks.every(t => o.hay.includes(t))) return false; }
+    if (skip !== 'all' && skip !== 'cats' && kf.cats.size && !kf.cats.has(o.c.slug)) return false;
+    if (skip !== 'all' && skip !== 'mats' && kf.mats.size && !o.mats.some(m => kf.mats.has(m))) return false;
+    if (skip !== 'all' && skip !== 'specs' && kf.specs.size && ![...kf.specs].every(s => o.chips.includes(s))) return false;
+    if (kf.q) { if (kf.qT !== kf.q) { kf.qT = kf.q; kf.qTests = kf.q.split(/\s+/).filter(Boolean).map(tokTest); } if (!kf.qTests.every(f => f(o.hay))) return false; }
     return true;
   }
-  const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, skip)) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
+  // ticking a filter clears the others (one filter at a time), so each count says what that click will show: only the search narrows it
+  const countBy = (skip, key) => { const m = new Map(); ALL.forEach(o => { if (pass(o, 'all')) [].concat(key(o)).forEach(k => m.set(k, (m.get(k) || 0) + 1)); }); return m; };
 
   // category rail with photos
   // real links to each category page (search engines follow them); a click filters the list on this page instead
   $('#katRail').innerHTML = '<a class="kr is-on" href="products/index.html" data-pick=""><span class="kr__img kr__img--all"><b>' + ALL.length + '</b></span><span class="kr__name">All products</span></a>' +
     CATS.map(c => '<a class="kr" href="products/' + pageOf(c) + '.html" data-pick="' + c.slug + '"><span class="kr__img">' + imgTag(coverOf(c), '') + '</span><span class="kr__name">' + esc(c.name) + '</span><span class="kr__n mono">' + c.items.length + '</span></a>').join('');
   $('#katRail').addEventListener('click', e => {
-    const b = e.target.closest('[data-pick]'); if (!b) return;
+    const b = e.target.closest('[data-pick]'); if (!b || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
     e.preventDefault();
     kf.cats.clear(); kf.mats.clear(); kf.specs.clear(); if (b.dataset.pick) kf.cats.add(b.dataset.pick);
     kf.limit = PAGE; renderKat(true);
@@ -1022,7 +1041,11 @@
 
   // phones: filters slide up as a sheet
   // the phone sheet scrolls on its own; on laptops the wheel always scrolls the page smoothly, even over the filters
-  const kOpen = on => { kSide.toggleAttribute('data-lenis-prevent', on); kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on); if (on) lenis && lenis.stop(); else unlock(); };
+  const kOpen = (on, fromBack) => {
+    const was = document.body.classList.contains('is-filtering');
+    kSide.toggleAttribute('data-lenis-prevent', on); kSide.classList.toggle('is-open', on); $('#katScrim').classList.toggle('is-on', on); document.body.classList.toggle('is-filtering', on);
+    if (on) { lenis && lenis.stop(); if (!was) ovOpen('filt'); } else { unlock(); if (was && fromBack !== true) ovClosed('filt'); }
+  };
   $('#katFilterBtn').addEventListener('click', () => kOpen(true));
   $('#katSideClose').addEventListener('click', () => kOpen(false));
   $('#katApply').addEventListener('click', () => { kOpen(false); scrollKat(); });
@@ -1437,6 +1460,16 @@
       .add(finish, 4.0);
   }
 
+  // Back pressed (or a window closed itself): close every window above the step we are now on
+  window.addEventListener('popstate', () => {
+    const cur = history.state && history.state.ov;
+    if (cur !== 'qv') closeQV(true);
+    if (cur !== 'qs') closeSheet(true);
+    if (cur !== 'filt' && document.body.classList.contains('is-filtering')) kOpen(false, true);
+    if (cur !== 'menu') closeMenu(true);
+    if (!cur) try { history.scrollRestoration = 'auto'; } catch (e) {}
+  });
+
   /* ---------------- Boot ---------------- */
   applyLinks(document);
   syncRfq(false);
@@ -1447,6 +1480,8 @@
   if (deep) {
     const ds = slugAlias(deep[1]);
     if (catBySlug(ds)) setTimeout(() => showCat(ds), reduce || loaderSeen ? 0 : Math.round(4100 / LOADER_SPEED));
+    // the link has done its job: a reload (or a shared address) must not bring that category back after other filters
+    history.replaceState(history.state, '', location.pathname + location.search);
   }
   const fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
   fontsReady.then(() => { setupTapes(); ScrollTrigger.refresh(); });

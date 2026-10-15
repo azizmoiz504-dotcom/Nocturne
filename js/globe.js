@@ -42,7 +42,9 @@
       proj.translate([W / 2, H / 2]).scale(R);
     }
     resize();
-    window.addEventListener('resize', resize);
+    // the phone's address bar showing or hiding fires resize too: only redo the canvas when its size really changed
+    let rzT, lastWH = W + 'x' + H;
+    window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { const r = canvas.getBoundingClientRect(); if (r.width + 'x' + r.height !== lastWH) { resize(); lastWH = W + 'x' + H; } }, 150); });
 
     // land outlines ship as a script (vendor/land-110m.js) so the globe also works when index.html is opened straight from disk
     Promise.resolve(window.FT_LAND)
@@ -65,19 +67,22 @@
       })
       .catch(() => { dots = []; });
 
-    d3.select(canvas).call(d3.drag()
+    // a mouse can turn the globe; on touch screens it turns by itself, so a swipe that starts on it still scrolls the page
+    if (!matchMedia('(hover: none)').matches) d3.select(canvas).call(d3.drag()
       .on('start', () => { dragging = true; })
       .on('drag', e => { rot[0] += e.dx * 0.32; rot[1] = Math.max(-70, Math.min(70, rot[1] - e.dy * 0.32)); })
       .on('end', () => { dragging = false; idleAt = performance.now(); }));
+    else canvas.style.cursor = 'auto';
 
     new IntersectionObserver(es => { inView = es[0].isIntersecting; }, { rootMargin: '100px' }).observe(canvas);
 
-    // phones and tablets redraw the globe at 30 frames a second so scrolling stays smooth
-    const minGap = matchMedia('(hover: none), (max-width: 900px)').matches ? 33 : 0;
+    // the slow turn is drawn 30 times a second (full speed only while a mouse drags it), so scrolling stays smooth
+    const touch = matchMedia('(hover: none), (max-width: 900px)').matches;
+    const covered = () => document.body.classList.contains('is-menu') || !!document.querySelector('#qv.is-open, #qs.is-open, #showroom.is-open');
     let lastDraw = 0;
     function draw(now) {
       requestAnimationFrame(draw);
-      if (!inView || !W || now - lastDraw < minGap) return;
+      if (!inView || !W || now - lastDraw < (dragging && !touch ? 0 : 33) || covered()) return;
       lastDraw = now;
       const t = now / 1000;
       if (!dragging && now - idleAt > 2500) {
