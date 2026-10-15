@@ -30,14 +30,11 @@ for (const [id, url] of Object.entries(edits.images || {})) {
 }
 const photo = p => saved[p] || p;
 // optional 5th field: the material the owner picked or typed in the editor (empty = read from the name).
-// Typed names are matched to the website's Material filter names ("SS, BRASS" -> "Stainless, Brass"); several are kept comma-separated.
-const SYN = { 'ss': 'Stainless', 's.s': 'Stainless', 'stainless': 'Stainless', 'stainless steel': 'Stainless', 'brass': 'Brass', 'bronze': 'Bronze', 'aluminum': 'Aluminium', 'aluminium': 'Aluminium', 'pvc': 'PVC', 'ms': 'Mild steel', 'm.s': 'Mild steel', 'mild steel': 'Mild steel', 'cs': 'Carbon steel', 'c.s': 'Carbon steel', 'carbon steel': 'Carbon steel', 'ci': 'Cast iron', 'c.i': 'Cast iron', 'cast iron': 'Cast iron', 'gi': 'Galvanised', 'g.i': 'Galvanised', 'galvanised': 'Galvanised', 'galvanized': 'Galvanised', 'copper': 'Copper', 'rubber': 'Rubber', 'acrylic': 'Acrylic', 'other': 'Other' };
+// It is kept exactly as typed (the Material filter that needed fixed names is gone); a literal "other" means none.
 const material = v => {
   if (typeof v !== 'string') return '';
   const t = v.replace(/[<>"`\\]/g, '').replace(/\s+/g, ' ').trim().replace(/\.+$/, '');
-  if (!t || t === 'Carbon steel & Stainless') return t;
-  const parts = t.split(/\s*(?:,|&|\/|\+|\band\b)\s*/i).filter(Boolean), m = parts.map(p => SYN[p.toLowerCase()]);
-  return (m.every(Boolean) ? [...new Set(m)].join(', ') : t).slice(0, 40);
+  return /^other$/i.test(t) ? 'Other' : t.slice(0, 40);
 };
 const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.replace(/\s+/g, ' ').trim(); };
 for (const e of edits.cats) {

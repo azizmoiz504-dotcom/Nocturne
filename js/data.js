@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (28 categories, 247 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (28 categories, 250 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -12,63 +12,66 @@ window.FT_FAMILIES = [
 window.FT_CATS = [
   { slug: 'gate-valves', name: 'GATE VALVE', fam: 'valves',
     desc: 'Full-bore isolation for on/off service — stainless CF8M, carbon steel, cast iron, forged steel, brass and bronze, screwed, socket-weld or flanged, plus knife edge gate valves.',
-    cover: 'gate-valves/edit-mv58e54t.jpg',
+    cover: 'gate-valves/edit-mv983iuz.jpg',
     items: [
-      ['Gate Valve F/T', ['PN16', 'CL150'], '½" – 12"', 'gate-valves/edit-mv58e54t.jpg', 'Stainless Steel CF8M (316)'],
-      ['Gate Valve WCB BODY F/T', ['CL150', 'CL300'], '1" – 12"', 'gate-valves/edit-mv58i186.jpg', 'Carbon steel'],
-      ['Gate Valve F/T', ['PN16', 'PN25', 'BRASS', 'RUBBER SEAT'], '1" – 16"', 'gate-valves/6.jpg', 'Cast iron'],
-      ['Knife Edge Gate Valve F/T', ['CL150'], '2" – 12"', 'gate-valves/9.jpg', 'Cast iron'],
-      ['Gate Valve', ['800 WOG', 'SW', 'NPT'], '½" – 2"', 'gate-valves/edit-mv3tb17b.jpg', 'Forged Steel ASTM A105N'],
-      ['Gate Valve', ['600 WOG', 'SW', 'NPT'], '½" – 2"', 'gate-valves/edit-mv80lk5l.jpg', 'Stainless Steel CF8M (316)'],
-      ['Gate Valve', ['NPT', 'BSPT'], '½" – 4"', 'gate-valves/1.jpg', 'Brass, Bronze'],
-      ['Stainless Steel Gate Valve', ['200#', 'NPT', 'BSPT'], '½" – 4"', 'gate-valves/3.jpg', 'Stainless Steel CF8M (316)']
+      ['S.S GATE VALVE F/T', ['PN16', 'CL150'], '½" – 12"', 'gate-valves/edit-mv983iuz.jpg', 'SS304, SS316 (ASTM A351 & ASTM A182)'],
+      ['C.S GATE VALVE F/T', ['CL150', 'CL300'], '1" – 12"', 'gate-valves/edit-mv988gmw.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
+      ['CI GATE VALVE', ['PN10-PN16'], '1" – 16"', 'gate-valves/edit-mv98b9hk.jpg', 'CAST IRON (ASTM A126 & EN-GJL-250)'],
+      ['DI GATE VALVE', ['PN16-PN25'], '1" – 16"', 'gate-valves/edit-mv98b9hk.jpg', 'DUCTILE IRON (EN-GJS-400-15)'],
+      ['KNIFE EDGE GATE VALVE', ['PN10', 'PN16', 'CL150 (WAFER/LUG/FLANGE)'], '2" – 12"', 'gate-valves/9.jpg', 'CI/DI/CS/SS (BLADE SS304 & SS316)'],
+      ['C.S FORGED GATE VALVE', ['600-800WOG', 'CLASS 800 (SW & NPT)'], '½" – 2"', 'gate-valves/edit-mv3tb17b.jpg', 'FORGED CARBON STEEL (ASTM A105)'],
+      ['S.S FORGED GATE VALVE', ['600-800WOG', 'CLASS 800', '(SW & NPT)'], '½" – 2"', 'gate-valves/edit-mv80lk5l.jpg', 'FORGED SS304 & SS316 (ASTM A182)'],
+      ['BRASS GATE VALVE THREAD TYPE', ['PN10-PN25 (NPT & BSPT)'], '½" – 4"', 'gate-valves/edit-mv9exrlz.jpg', 'BRASS (ASTM B124)'],
+      ['BRONZE GATE VALVE THREAD TYPE', ['PN16-PN25 (NPT & BSPT)'], '½" – 4"', 'gate-valves/1.jpg', 'BRONZE (ASTM B62)'],
+      ['S.S GATE VALVE THREAD TYPE', ['PN10-PN25', '200#', '(NPT & BSPT)'], '½" – 4"', 'gate-valves/edit-mv9f0fz3.jpg', 'SS304 & SS316 (ASTM A351)']
     ] },
   { slug: 'globe-valves', name: 'GLOBE VALVE', fam: 'valves',
     desc: 'Throttling and flow regulation — S.S, C.S, forged steel and C.I bodies from ½" to 12".',
     cover: 'globe-valves/edit-mv816abf.jpg',
     items: [
-      ['Globe Valve F/T', ['PN16', 'CL150'], '½" – 6"', 'globe-valves/edit-mv816abf.jpg', 'Stainless Steel CF8M (316)'],
-      ['Globe Valve WCB F/T', ['CL150', 'CL300'], '½" – 12"', 'globe-valves/edit-mv8135rk.jpg', 'Carbon steel'],
-      ['Globe Valve F/T', ['PN16'], '½" – 8"', 'globe-valves/edit-mv80p7o4.jpg', 'Cast iron'],
-      ['Globe Valve Low Pressure', ['200#', 'NPT', 'BSPT'], '½" – 4"', 'globe-valves/4.jpg', 'Stainless Steel CF8M (316)'],
-      ['Globe Valve', ['PN16', '600', '800 WOG', 'SW', 'NPT'], '½" – 2"', 'globe-valves/edit-mv7wrsul.jpg', 'Stainless Steel CF8M (316)'],
-      ['Globe Valve', ['800 WOG', 'SW', 'NPT'], '½" – 2"', 'globe-valves/edit-mv81egi6.jpg', 'Forged Steel ASTM A105N']
+      ['S.S GLOBE VALVE F/T', ['PN16', 'CL150'], '½" – 6"', 'globe-valves/edit-mv816abf.jpg', 'SS304, SS316 (ASTM A351 & ASTM A182)'],
+      ['C.S GLOBE VALVE F/T', ['CL150', 'CL300'], '½" – 12"', 'globe-valves/edit-mv8135rk.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
+      ['C.I GLOBE VALVE F/T', ['PN10-PN16'], '½" – 8"', 'globe-valves/edit-mv80p7o4.jpg', 'CAST IRON (ASTM A126 & EN-GJL-250)'],
+      ['S.S GLOBE VALVE THREAD TYPE', ['200#', 'BSP & NPT'], '½" – 4"', 'globe-valves/edit-mv9k1anl.jpg', 'SS304, SS316 (ASTM A351)'],
+      ['SS FORGED GLOBE VALVE THREAD TYPE', ['600-800WOG', 'CLASS 800', '(SW & NPT)'], '½" – 2"', 'globe-valves/edit-mv9jxoc2.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['Globe Valve', ['600-800WOG', 'CLASS 800 (SW & NPT)'], '½" – 2"', 'globe-valves/edit-mv9jz1ps.jpg', 'FORGED CARBON STEEL (ASTM A105)']
     ] },
   { slug: 'check-valves', name: 'CHECK VALVE', fam: 'valves',
     desc: 'Non-return protection — swing, spring, piston, wafer disk and dual-disk designs.',
     cover: 'check-valves/edit-mv7zjkou.jpg',
     items: [
-      ['Swing Check Valve WCB F/T', ['CL150', 'CL300'], '1½" – 12"', 'check-valves/edit-mv2d3shk.jpg', 'Carbon steel'],
-      ['Swing Check Valve F/T', ['PN16'], '1½" – 8"', 'check-valves/edit-mv2d1bik.jpg', 'Cast iron'],
-      ['SS Check Valve', ['CL150', 'CL300', 'F/T'], '½" – 12"', 'check-valves/cs-check.jpg', 'Stainless Steel CF8M (316)'],
-      ['Vertical Check Valve', ['PN63', '1000 WOG'], '½" – 4"', 'check-valves/edit-mv7zjkou.jpg', 'Stainless Steel CF8M (316)'],
-      ['Vertical Spring Check Valve', ['NPT', 'BSPT'], '½" – 4"', 'check-valves/edit-mv7zr6cr.jpg', 'Brass'],
-      ['Check Valve Swing Type', ['NPT', 'BSPT'], '½" – 4"', 'check-valves/1.jpg', 'Brass, Bronze'],
-      ['Swing Check Valve', ['PN16', 'NPT'], '½" – 4"', 'check-valves/edit-mv7zpcfk.jpg', 'Stainless Steel CF8M (316)'],
-      ['Check Valve, Piston Type', ['800 WOG', 'NPT', 'SW'], '½" – 2"', 'check-valves/6.jpg', 'Forged Steel ASTM A105N'],
-      ['Wafer Type Disk Check Valve', ['PN40 ≤ DN100', 'PN25 > DN100'], '½" – 8"', 'check-valves/edit-mv7xbldl.jpg', 'Stainless Steel CF8M (316)'],
-      ['Wafer Type Disk Check Valve', ['PN10', 'PN16'], '1½" – 8"', 'check-valves/edit-mv7zavwl.jpg', 'Stainless Steel CF8M (316)'],
-      ['C.I Wafer Type Check Valve', ['PN10', 'PN16'], '1½" – 8"', 'check-valves/edit-mv7zdkwb.jpg', 'Cast iron'],
-      ['Wafer Type Dual-Disk Check Valve', ['PN16', 'DI & SS DISC'], '2" – 12"', 'check-valves/edit-mv7x9764.jpg', 'Cast iron'],
-      ['Wafer Type Dual-Disk Check Valve', ['PN25'], '2" – 12"', 'check-valves/edit-mv7xf59u.jpg', 'Stainless Steel CF8M (316)']
+      ['C.S CHECK VALVE F/T', ['CL150', 'CL300'], '1" – 12"', 'check-valves/edit-mv2d3shk.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
+      ['C.I CHECK VALVE F/T', ['PN10', 'PN16'], '1" – 8"', 'check-valves/edit-mv2d1bik.jpg', 'CAST IRON (ASTM A126 & EN-GJL-250)'],
+      ['S.S CHECK VALVE F/T', ['CL150', 'CL300'], '1" – 12"', 'check-valves/cs-check.jpg', 'SS304, SS316 (ASTM A351 & ASTM A182)'],
+      ['S.S CHECK VALVE VERTICAL SPRING TYPE', ['PN16-PN25', '1000WOG (BSP & NPT)'], '½" – 4"', 'check-valves/edit-mv7zjkou.jpg', 'SS304, SS316 (ASTM A351)'],
+      ['BRASS CHECK VALVE VERTICAL SPRING TYPE', ['PN10-PN25 (BSP & NPT)'], '½" – 4"', 'check-valves/edit-mv7zr6cr.jpg', 'BRASS (ASTM B124)'],
+      ['BRASS CHECK VALVE SWING TYPE', ['PN10-PN25 (BSP & NPT)'], '½" – 4"', 'check-valves/edit-mv9nlzjl.jpg', 'BRASS (ASTM B124)'],
+      ['S.S CHECK VALVE SWING TYPE', ['200#', 'PN10-PN25 (BSP & NPT)'], '½" – 4"', 'check-valves/edit-mv7zpcfk.jpg', 'SS304, SS316 (ASTM A351)'],
+      ['S.S FORGED CHECK VALVE PISTON TYPE', ['800 WOG', '(BSP & NPT & SW)'], '½" – 4"', 'check-valves/edit-mv9mq6l0.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['C.S CHECK VALVE PISTON TYPE', ['800 WOG', '(BSP & NPT & SW)'], '½" – 2"', 'check-valves/6.jpg', 'CARBON STEEL (ASTM A105)'],
+      ['C.I CHECK VALVE DUAL-DISK WAFER TYPE', ['PN10-PN16', 'DI & SS DISC'], '2" – 12"', 'check-valves/edit-mv9nit1s.jpg', 'CAST IRON'],
+      ['S.S CHECK VALVE DUAL-DISK WAFER TYPE', ['PN16-PN25'], '2" – 12"', 'check-valves/edit-mv7xf59u.jpg', 'SS304, SS316'],
+      ['S.S DISK CHECK VALVE WAFER TYPE', ['PN40 ≤ DN100', 'PN25 > DN100'], '½" – 8"', 'check-valves/edit-mv7xbldl.jpg', 'SS304, SS316'],
+      ['M.S CHECK VALVE WAFER TYPE', ['PN10', 'PN16'], '1½" – 8"', 'check-valves/edit-mv9nawqv.jpg', 'MILD STEEL'],
+      ['S.S CHECK VALVE WAFER TYPE', ['PN10', 'PN16'], '1½" – 8"', 'check-valves/edit-mv7zavwl.jpg', 'SS304, SS316']
     ] },
   { slug: 'ball-valves', name: 'BALL VALVE', fam: 'valves',
     desc: 'Quarter-turn shut-off — 1PC, 2PC, 3PC and 3-way designs in stainless CF8M, carbon steel, cast iron, mild steel, brass and bronze, plus high-pressure hydraulic ball valves and S.S needle valves.',
     cover: 'ball-valves/edit-mv2dxfry.jpg',
     items: [
-      ['Ball Valve 3PC', ['CL150', 'F/T'], '½" – 6"', 'ball-valves/edit-mv58nyck.jpg', 'Carbon steel'],
-      ['Ball Valve 2PC F/T', ['PN16', 'CL150', 'CL300'], '½" – 12"', 'ball-valves/edit-mv820aqz.jpg', 'Stainless Steel CF8M (316)'],
-      ['Ball Valve WCB 2PC F/T', ['CL150', 'CL300'], '½" – 12"', 'ball-valves/edit-mv823r5a.jpg', 'Carbon steel'],
-      ['Ball Valve F/T 2PC', ['PN16'], '½" – 6"', 'ball-valves/edit-mv81v9zz.jpg', 'Cast iron'],
-      ['Ball Valve 1PC Body', ['1000 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/edit-mv8266l4.jpg', 'Stainless Steel CF8M (316)'],
-      ['Ball Valve', ['NPT'], '¼" – 6"', 'ball-valves/edit-mv2d9dgh.jpg', 'Brass, Bronze'],
-      ['Ball Valve', ['NPT', 'BSPT'], '¼" – 6"', 'ball-valves/edit-mv82cz93.jpg', 'Cast iron'],
-      ['Ball Valve 3WAY', ['1000 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/edit-mv40dohy.jpg', 'Stainless Steel CF8M (316)'],
-      ['Ball Valve 3PC', ['1000 WOG', '3000 WOG', 'NPT', 'BSPT', 'SW'], '¼" – 4"', 'ball-valves/edit-mv82eape.jpg', 'Stainless Steel CF8M (316)'],
-      ['Ball Valve 2PC', ['1000 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/edit-mv82h4lu.jpg', 'Stainless Steel CF8M (316)'],
-      ['Ball Valve 2PC Body', ['1000 WOG', 'NPT', 'BSPT'], '½" – 4"', 'ball-valves/edit-mv82rk4n.jpg', 'Mild steel'],
-      ['MS Ball Valve 1PC Body', ['1000PSI', 'NPT', 'BSPT'], '½" – 2"', 'ball-valves/edit-mv82tl1u.jpg'],
-      ['Ball Valve 3PCS Body', ['800#', 'NPT', 'BSPT', 'SW'], '½" – 4"', 'ball-valves/edit-mv82x9tw.jpg', 'Mild steel'],
+      ['C.S BALL VALVE 3PCS BODY F/T', ['CL150', 'F/T'], '½" – 6"', 'ball-valves/edit-mv58nyck.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
+      ['S.S BALL VALVE 2PCS F/T', ['PN16', 'CL150', 'CL300'], '½" – 12"', 'ball-valves/edit-mv820aqz.jpg', 'SS304, SS316 (ASTM A351 & A182)'],
+      ['C.S BALL VALVE 2PCS F/T', ['CL150', 'CL300'], '½" – 12"', 'ball-valves/edit-mv823r5a.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
+      ['C.I BALL VALVE 2PCS F/T', ['PN16'], '½" – 6"', 'ball-valves/edit-mv81v9zz.jpg', 'CAST IRON (ASTM A126 & EN-GJL-250)'],
+      ['S.S BALL VALVE 1PCS BODY', ['1000 WOG', '(BSP & NPT)'], '¼" – 4"', 'ball-valves/edit-mv8266l4.jpg', 'SS304 & SS316'],
+      ['BRASS BALL VALVE', ['PN10-PN25 (BSP & NPT)'], '¼" – 6"', 'ball-valves/edit-mv2d9dgh.jpg', 'BRASS (ASTM B124)'],
+      ['ZINC BALL VALVE', ['PN16 (BSP & NPT)'], '¼" – 6"', 'ball-valves/edit-mv9ohr8c.jpg', 'CAST IRON'],
+      ['S.S BALL VALVE 3WAY', ['1000 WOG', 'NPT', 'BSPT'], '¼" – 4"', 'ball-valves/edit-mv40dohy.jpg', 'SS304 & SS316 (ASTM A351)'],
+      ['S.S BALL VALVE 3PCS', ['1000-3000WOG', '(NPT & BSPT & SW)'], '¼" – 4"', 'ball-valves/edit-mv82eape.jpg', 'SS304 & SS316 (ASTM A351 & A182)'],
+      ['S.S BALL VALVE 2PCS BODY', ['1000 WOG', '(BSP & NPT)'], '¼" – 4"', 'ball-valves/edit-mv82h4lu.jpg', 'SS304 & SS316 (ASTM A351)'],
+      ['C.S BALL VALVE 2PCS BODY', ['1000 WOG', 'NPT', 'BSPT'], '½" – 4"', 'ball-valves/edit-mv82rk4n.jpg', 'CARBON STEEL (ASTM A216 & A105)'],
+      ['M.S BALL VALVE 1PCS BODY', ['1000PSI', 'NPT', 'BSPT'], '½" – 2"', 'ball-valves/edit-mv82tl1u.jpg', 'MILD STEEL'],
+      ['M.S BALL VALVE 3PCS BODY', ['CLASS 800', '(BSP & NPT & SW)'], '½" – 4"', 'ball-valves/edit-mv82x9tw.jpg', 'CARBON STEEL & MILD STEEL'],
       ['Hydraulic HIGH PRESSURE Ball Valve', ['600#', 'NPT'], '¼" – 2"', 'ball-valves/edit-mv82zuek.jpg', 'Carbon steel'],
       ['S.S Needle Valve', ['1000#', '3000#', '6000#', '10000#', 'F/F', 'M/F', 'NPT'], '¼" – 1"', 'instrumentation-fittings-pressure-gas/edit-mv2ky4g0.jpg']
     ] },
@@ -159,7 +162,7 @@ window.FT_CATS = [
       ['Swage Nipples', ['1000#', '3000#', 'NPT'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zjccp.jpg', 'Carbon steel'],
       ['Long Nipple', ['SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 8" × 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv6ny199.jpg', 'Mild steel']
     ] },
-  { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S Forged Fittings (Threaded)', fam: 'fittings',
+  { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S FORGED FITTING (THREADED)', fam: 'fittings',
     desc: 'S.S threaded fittings, nipples and threadolets, 1000 to 3000 psi, ⅛" to 4".',
     cover: 'ss-forged-low-pressure-bw-fittings/edit-mv2icvgo.jpg',
     items: [
@@ -230,7 +233,7 @@ window.FT_CATS = [
     items: [
       ['Pressure Gauge, Full S.S Body, Liquid Filled', ['4" DIAL', '2½" DIAL', '0–15,000 PSI'], '½" / ¼" bottom connection', 'instrumentation-fittings-pressure-gas/3.jpg']
     ] },
-  { slug: 'butt-weld-fittings', name: 'S.S Butt-Weld Fittings', fam: 'fittings',
+  { slug: 'butt-weld-fittings', name: 'S.S BUTT WELD FITTING', fam: 'fittings',
     desc: 'S.S ASTM A403 butt-weld fittings to ASME B16.9 in SCH10, SCH40 and SCH80: elbows, tees, reducers, caps, crosses, swage and long nipples, plus S.S ERW and seamless pipe.',
     cover: 'butt-weld-fittings/c-s-s-s-butt-weld-elbow-90-short-radius.jpg',
     items: [
@@ -247,7 +250,7 @@ window.FT_CATS = [
       ['SS Cross', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 12"', 'butt-weld-fittings/edit-mv89u21n.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
       ['SS Long Nipple', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 8" × 12"', 'butt-weld-fittings/edit-mv520ula.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L']
     ] },
-  { slug: 'socket-weld-fittings', name: 'Socket-Weld Fittings', fam: 'fittings',
+  { slug: 'socket-weld-fittings', name: 'C.S FORGED FITTING (SOCKET-WELD)', fam: 'fittings',
     desc: 'Forged C.S ASTM A105 socket-weld fittings to ASME B16.11, Class 3000, 6000 and 9000.',
     cover: 'socket-weld-fittings/edit-mv8afrxm.jpg',
     items: [
@@ -264,7 +267,7 @@ window.FT_CATS = [
       ['C.S Socket-Weld Plug ASTM A105', ['ASME B16.11', 'CL3000', 'CL6000', 'CL9000'], '½" – 4"', 'socket-weld-fittings/edit-mv55ljvp.jpg'],
       ['C.S King Nipple', ['ASME B16.11', 'CL3000', 'CL6000', 'CL9000'], '½" – 4"', 'socket-weld-fittings/edit-mv5cwj6e.jpg']
     ] },
-  { slug: 'threaded-forged-fittings', name: 'Threaded Forged Fittings', fam: 'fittings',
+  { slug: 'threaded-forged-fittings', name: 'C.S FORGED FITTING (THREADED)', fam: 'fittings',
     desc: 'Forged C.S threaded fittings, Class 1000 to 6000.',
     cover: 'threaded-forged-fittings/edit-mv55vf0m.jpg',
     items: [
