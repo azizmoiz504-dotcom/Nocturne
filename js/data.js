@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (27 categories, 265 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (27 categories, 263 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -56,7 +56,7 @@ window.FT_CATS = [
       ['S.S CHECK VALVE WAFER TYPE', ['PN10', 'PN16'], '1½" – 8"', 'check-valves/edit-mv7zavwl.jpg', 'SS304, SS316']
     ] },
   { slug: 'ball-valves', name: 'BALL VALVE', fam: 'valves',
-    desc: 'Quarter-turn shut-off — 1PC, 2PC, 3PC and 3-way designs in stainless CF8M, carbon steel, cast iron, mild steel, brass and bronze, plus high-pressure hydraulic ball valves and S.S needle valves.',
+    desc: 'Quarter-turn shut-off — 1PC, 2PC, 3PC and 3-way designs in SS304/SS316, carbon steel, cast iron, mild steel and brass, plus high-pressure hydraulic ball valves and S.S needle valves.',
     cover: 'ball-valves/edit-mv2dxfry.jpg',
     items: [
       ['C.S BALL VALVE 3PCS BODY F/T', ['CL150', 'F/T'], '½" – 6"', 'ball-valves/edit-mv58nyck.jpg', 'CARBON STEEL (ASTM A216 WCB & A105)'],
@@ -90,7 +90,7 @@ window.FT_CATS = [
       ['C.S FORGED Y STRAINER THREAD TYPE', ['800WOG', '(BSP & NPT)'], '½" – 2"', 'y-strainers/edit-mv599aau.jpg', 'CARBON STEEL (A105)']
     ] },
   { slug: 'safety-valves', name: 'SAFETY VALVE', fam: 'valves',
-    desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever, plus brass air release valves.',
+    desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever, plus brass and S.S air vents.',
     cover: 'safety-valves/edit-mv6mrp28.jpg',
     items: [
       ['SAFETY VALVE WITHOUT LEVER', ['10BAR', '20BAR', 'NPT'], '½" – 2"', 'safety-valves/edit-mv6mrp28.jpg', 'BRONZE (ASTM B62)'],
@@ -108,9 +108,9 @@ window.FT_CATS = [
     ] },
   { slug: 'quick-couplings', name: 'COUPLINGS (LUDECKE, BAUER, MILLAR, STORZ, UNIVERSAL)', fam: 'couplings',
     desc: 'QRC quick-release couplings in brass, C.S or S.S, Bauer, Millar and Storz hose couplings, and ductile iron universal couplings and flange adapters, 2" to 24".',
-    cover: 'quick-couplings/edit-mv2eigwv.jpg',
+    cover: 'quick-couplings/edit-mvaxwxv0.jpg',
     items: [
-      ['QRC Coupling Hose End', ['LUDECKE - GERMANY'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/edit-mv84qp13.jpg', 'BRASS'],
+      ['QRC Coupling Hose End', ['LUDECKE - GERMANY'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'quick-couplings/edit-mvaxerp9.jpg', 'BRASS'],
       ['QRC Coupling Male Thread', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv84j6xz.jpg', 'BRASS'],
       ['QRC Female Body', ['LUDECKE - GERMANY'], '¼", ⅜", ½"', 'qrc-couplings-ludecke/edit-mv84hscv.jpg', 'BRASS'],
       ['QRC Hose Plug', ['LUDECKE - GERMANY'], '¼", 5/16", ⅜", ½", 6 mm, 8 mm, 10 mm, 12 mm', 'qrc-couplings-ludecke/3.jpg', 'BRASS'],
@@ -129,12 +129,12 @@ window.FT_CATS = [
       ['D.I UNIVERSAL PIPE JOINING COUPLING', ['PN10-PN16'], '2" – 24"', 'universal-couplings-flange-adapter/1.jpg', 'DUCTILE IRON'],
       ['D.I UNIVERSAL FLANGE ADAPTER', ['PN10-PN16'], '2" – 24"', 'universal-couplings-flange-adapter/2.jpg', 'DUCTILE IRON']
     ] },
-  { slug: 'union-flexible-connectors', name: 'HAMMER UNION & FLEXIBLE CONNECTOR', fam: 'couplings',
+  { slug: 'union-flexible-connectors', name: 'FLEXIBLE CONNECTOR', fam: 'couplings',
     desc: 'Galvanised flexible unions and single-bellow flange connectors that absorb movement and vibration.',
-    cover: 'union-flexible-connectors/1.jpg',
+    cover: 'union-flexible-connectors/edit-mvaxa56y.jpg',
     items: [
-      ['G.I Flexible Connector Union Type', [], '½" – 3"', 'union-flexible-connectors/1.jpg'],
-      ['G.I Flexible Connector F/T', ['CL150', 'PN16'], '1" – 16"', 'union-flexible-connectors/edit-mv59gr5y.jpg']
+      ['G.I FLEXIBLE CONNECTOR UNION TYPE', [], '½" – 3"', 'union-flexible-connectors/1.jpg', 'GALVANIZED IRON'],
+      ['G.I FLEXIBLE CONNECTOR F/T', ['CL150', 'PN16'], '1" – 16"', 'union-flexible-connectors/edit-mv59gr5y.jpg', 'GALVANIZED IRON']
     ] },
   { slug: 'hammer-union', name: 'Hammer Union', fam: 'couplings',
     desc: 'Wing-nut hammer unions, blanking unions and hose connectors for high-pressure oilfield lines.',
@@ -168,27 +168,26 @@ window.FT_CATS = [
       ['M.S ECCENTRIC REDUCER', ['SCH - STD', 'SCH40', 'SCH80', 'SCH160'], '¾" × ½" – 24" × 22"', 'ms-forged-low-pressure-bw-fittings/edit-mv4yyr0y.jpg', 'CARBON STEEL (ASTM A234 WPB)'],
       ['M.S ELBOW 180°', ['SCH - STD', 'SCH40', 'SCH80', 'SCH160'], '½" – 24"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zcpm2.jpg', 'CARBON STEEL (ASTM A234 WPB)'],
       ['C.S SWAGE NIPPLE CONCENTRIC', ['MSS SP-95 (BSP & NPT)'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zjccp.jpg', 'CARBON STEEL (ASTM A234 WPB)'],
-      ['C.S SWAGE NIPPLE ECCENTRIC', ['MSS SP-95 (BSP & NPT)'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mv4zjccp.jpg', 'CARBON STEEL (ASTM A234 WPB)'],
+      ['C.S SWAGE NIPPLE ECCENTRIC', ['MSS SP-95 (BSP & NPT)'], '¾" × ½" – 8" × 6"', 'ms-forged-low-pressure-bw-fittings/edit-mvay8jmk.jpg', 'CARBON STEEL (ASTM A234 WPB)'],
       ['Long Nipple', ['SMLS', 'ERW', 'SCH40', 'SCH80', 'SCH160'], '¼" – 8" × 12"', 'ms-forged-low-pressure-bw-fittings/edit-mv6ny199.jpg', 'CARBON STEEL (ASTM A234 WPB)']
     ] },
   { slug: 'ss-forged-low-pressure-bw-fittings', name: 'S.S FORGED FITTING (THREADED)', fam: 'fittings',
     desc: 'S.S threaded fittings, nipples and threadolets, 1000 to 3000 psi, ⅛" to 4".',
     cover: 'ss-forged-low-pressure-bw-fittings/edit-mv2icvgo.jpg',
     items: [
-      ['S.S Threaded Socket', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv853i42.jpg'],
-      ['S.S Threaded Half Coupling', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59soyh.jpg'],
-      ['S.S Threaded Elbow-45°', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv513s63.jpg'],
-      ['S.S Threaded Elbow-90°', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv514fuc.jpg'],
-      ['S.S Threaded Reducing Elbow-90°', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv514fuc.jpg'],
-      ['S.S Threaded Equal Tee', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59omvq.jpg'],
-      ['S.S Threaded Reducing Tee', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59o35c.jpg'],
-      ['S.S Threaded Cross', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59mmtq.jpg'],
-      ['S.S Hex Nipple', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv54gaa4.jpg'],
-      ['S.S Threaded Union', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51dnq5.jpg'],
-      ['S.S Threaded End Cap', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59u8el.jpg'],
-      ['S.S Threaded End Plug', ['1000Psi', '2000Psi', '3000Psi'], '⅛" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51hetr.jpg'],
-      ['S.S Threadolet', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59zi84.jpg'],
-      ['S.S King Nipple', ['1000Psi', '2000Psi', '3000Psi'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51s908.jpg']
+      ['S.S FORGED SOCKET THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv853i42.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED ELBOW-45° THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv513s63.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED HALF COUPLING THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59soyh.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED ELBOW-90° THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv514fuc.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED EQUAL TEE THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59omvq.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED REDUCING TEE THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mvb4vswa.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED CROSS THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59mmtq.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED HEX NIPPLE THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv54gaa4.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED UNION THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51dnq5.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED END CAP THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59u8el.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED END PLUG THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51hetr.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S FORGED THREADOLET', ['2000PSI', '3000PSI', '6000PSI (BSP/NPT)'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv59zi84.jpg', 'SS304, SS316 (ASTM A182)'],
+      ['S.S KING NIPPLE', ['1000PSI', '2000PSI', '3000PSI'], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51s908.jpg', 'SS304, SS316']
     ] },
   { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
     desc: 'CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
@@ -201,8 +200,7 @@ window.FT_CATS = [
       ['Graphited & PTFE Gland Packing', [], '6 mm – 25 mm', 'gaskets-sheets/edit-mv5ald9j.jpg'],
       ['Camlock Rubber Washer', [], '', 'gaskets-sheets/edit-mv85hp5p.jpg'],
       ['Chicago Rubber Washer', [], '', 'gaskets-sheets/edit-mv85lt07.jpg'],
-      ['RTJ Ring Gaskets', ['STAINLESS', 'SOFT IRON'], '', 'gaskets-sheets/7.jpg'],
-      ['RING GASKET (RTJ GASKET)', ['OILFIELD'], '', 'hammer-union/edit-mvap30fr.jpg']
+      ['RING GASKET (RTJ GASKET)', [], '', 'hammer-union/edit-mvap30fr.jpg', 'Carbon steel & Stainless']
     ] },
   { slug: 'ss-ms-flanges-forging-casting', name: 'S.S & M.S Flanges', fam: 'fittings',
     desc: 'S.S ASTM A182 F304/304L and F316/316L flanges and M.S ASTM A105 flanges — SORF, WNRF, SWRF, blind and threaded, ½" to 24".',
@@ -245,7 +243,7 @@ window.FT_CATS = [
     ] },
   { slug: 'butt-weld-fittings', name: 'S.S BUTT WELD FITTING', fam: 'fittings',
     desc: 'S.S ASTM A403 butt-weld fittings to ASME B16.9 in SCH10, SCH40 and SCH80: elbows, tees, reducers, caps, crosses, swage and long nipples, plus S.S ERW and seamless pipe.',
-    cover: 'butt-weld-fittings/c-s-s-s-butt-weld-elbow-90-short-radius.jpg',
+    cover: 'butt-weld-fittings/edit-mvb57zk0.jpg',
     items: [
       ['SS Pipe ERW & Seamless', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 12"', 'butt-weld-fittings/edit-mv50wch0.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
       ['SS Elbow 45° L/R & S/R', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv4zvnfq.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
