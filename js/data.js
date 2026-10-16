@@ -11,7 +11,7 @@ window.FT_FAMILIES = [
 
 window.FT_CATS = [
   { slug: 'gate-valves', name: 'GATE VALVE', fam: 'valves',
-    desc: 'Full-bore isolation for on/off service — stainless CF8M, carbon steel, cast iron, forged steel, brass and bronze, screwed, socket-weld or flanged, plus knife edge gate valves.',
+    desc: 'Full-bore isolation for on/off service — stainless SS304 and SS316, carbon steel, cast iron, ductile iron, forged steel, brass and bronze, screwed, socket-weld or flanged, plus knife edge gate valves.',
     cover: 'gate-valves/edit-mv983iuz.jpg',
     items: [
       ['S.S GATE VALVE F/T', ['PN16', 'CL150'], '½" – 12"', 'gate-valves/edit-mv983iuz.jpg', 'SS304, SS316 (ASTM A351 & ASTM A182)'],
