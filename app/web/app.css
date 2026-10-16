@@ -344,7 +344,7 @@ textarea.field{height:auto;min-height:84px;padding:12px 16px;resize:vertical}
 .cust.is-open .cust__h > svg{transform:rotate(180deg)}
 .cust__b{display:grid;gap:10px;padding:0 16px 16px}
 .lines{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
-.line{position:relative;display:flex;gap:12px;align-items:center;padding:10px;border-radius:18px;background:var(--ink-3);border:1px solid var(--line);transition:transform .35s var(--ease),opacity .35s}
+.line{position:relative;display:block;padding:10px 10px 10px;border-radius:18px;background:var(--ink-3);border:1px solid var(--line);transition:transform .35s var(--ease),opacity .35s}
 .line .ph{width:64px;height:64px;border-radius:13px;flex:none}
 .line .ph img{padding:5px}
 .line__t{flex:1;min-width:0}
@@ -488,3 +488,24 @@ input[type=date].field{color-scheme:dark}
 .order__thumbs .ph{width:46px;height:46px;border-radius:11px;flex:none}
 .order__thumbs .ph img{padding:3px}
 .order__thumbs i{width:46px;height:46px;border-radius:11px;background:var(--ink-5);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:14px;color:var(--steel-2)}
+
+/* ---------- choices (size / specs & ratings / material) ---------- */
+.pkg{margin-top:22px}
+.pk{margin-top:4px}
+.pk__fixed{padding:12px 14px;border-radius:13px;background:var(--ink-3);border:1px solid var(--line);color:#fff;font-weight:600;font-size:15px}
+.pk__n{margin-top:8px;font-size:13.5px;color:var(--steel)}
+.pcard__t small,.prow small,.line__t small{display:block;font:600 11.5px/1.2 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--steel)}
+.prow b{margin-top:3px}
+.line__top{display:flex;gap:12px;align-items:flex-start}
+.line__t b{margin-top:3px}
+.lp{display:block;margin-top:4px;font-size:13.5px;color:#fff;line-height:1.3}
+.lp i{font-style:normal;font:600 11.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-right:4px}
+.lp u{text-decoration:none;color:var(--amber)}
+.line__bot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.chg{height:42px;padding:0 18px;border-radius:12px;border:1.5px solid var(--line-2);font-weight:700;font-size:14.5px;color:#fff}
+.chg:active{transform:scale(.95)}
+.shead .mono{display:block;margin-bottom:4px}
+/* the faded Fakhri logo: only on photos in an opened product */
+.wm{position:absolute;top:74px;right:18px;width:26%;max-width:120px;min-width:70px;height:auto;opacity:.18;pointer-events:none;user-select:none;z-index:3}
+.pr__s .wm{top:78px;right:20px}
+#zoom .wm{top:76px;right:18px;z-index:2}

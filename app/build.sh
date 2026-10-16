@@ -17,10 +17,11 @@ W=$OUT/apk/assets/www
 cp web/index.html web/app.css web/app.js "$W/"
 cp "$SITE/js/data.js" "$W/data.js"
 cp "$SITE/js/config.js" "$W/config.js"
+cp "$SITE/js/choices.js" "$W/choices.js"
 mkdir -p "$W/fonts" "$W/brands" "$W/img"
 for f in barlow-400-latin barlow-500-latin barlow-600-latin barlow-700-latin barlow-condensed-600-latin barlow-condensed-700-latin barlow-condensed-800-latin barlow-semi-condensed-500-latin barlow-semi-condensed-600-latin; do cp "$SITE/fonts/$f.woff2" "$W/fonts/"; done
 cp "$SITE"/assets/brands/*.png "$W/brands/"
-cp "$SITE/assets/logo-lockup.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-512.png" "$W/img/"
+cp "$SITE/assets/logo-lockup.png" "$SITE/assets/logo-stacked.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-512.png" "$W/img/"
 
 # 2. every photo the list uses, made lighter for phones (cached between builds)
 node -e '

@@ -134,11 +134,18 @@
     return [b, len ? 'length ' + len : ''].filter(Boolean).join(', ');
   }
 
+  /* ================= specs & ratings and material choices (the website's js/choices.js) ================= */
+  const CH = window.FT_CHOICES || { specOpts: c => [...new Set(c || [])], matOpts: x => ({ opts: x ? [x] : [], note: '', full: x || '' }) };
+  const SPECS = new Map();
+  const specOpts = o => { if (!SPECS.has(o.id)) SPECS.set(o.id, CH.specOpts(o.specs)); return SPECS.get(o.id); };
+  const matOpts = o => CH.matOpts(o.mat);
+  const hasChoices = o => { const sp = sizeSpec(o); return sp.t === 'sel' || sp.t === 'pair' || (sp.t === 'text' && !!o.size) || !!sp.len || specOpts(o).length > 1 || matOpts(o).opts.length > 1; };
+
   /* ================= the cart ================= */
   // a line remembers the product by section + name + material, so it survives list updates
   let lines = store.get('ft-list', []).filter(l => l && l.n);
   let cust = store.get('ft-cust', {});
-  const lineKey = l => [l.k, l.n, l.m, l.s].join('|');
+  const lineKey = l => [l.k, l.n, l.m, l.s, (l.sp || []).join('¦'), l.mt || ''].join('|');
   function lineProduct(l) {
     const c = catBy(l.k);
     const hit = (c ? c.items.map((it, i) => byId.get(c.slug + ':' + i)) : []).find(o => o.name === l.n && o.matSet === l.m) || P.find(o => o.name === l.n && o.matSet === l.m) || P.find(o => o.name === l.n);
@@ -146,19 +153,39 @@
   }
   const saveLines = () => { store.set('ft-list', lines); updateBadge(); };
   const inList = o => lines.some(l => l.k === o.c.slug && l.n === o.name && l.m === o.matSet);
-  function addLines(o, sizes, q) {
-    sizes.forEach(s => {
-      const l = { k: o.c.slug, n: o.name, m: o.matSet, s, q };
-      const ex = lines.find(x => lineKey(x) === lineKey(l));
-      if (ex) ex.q = Math.min(99999, ex.q + q); else lines.push(l);
-    });
+  function addLines(o, pick, q) {
+    const l = { k: o.c.slug, n: o.name, m: o.matSet, s: pick.s, sp: pick.sp, mt: pick.mt, q };
+    const ex = lines.find(x => lineKey(x) === lineKey(l));
+    if (ex) ex.q = Math.min(99999, ex.q + q); else lines.push(l);
     saveLines();
     refreshMarks();
   }
-  function lineText(l, n) {
-    const o = lineProduct(l) || { name: l.n, mat: l.m, size: '' };
-    const sz = sizeWords(l.s, o);
-    return (n ? n + '. ' : '• ') + fullName(o) + (sz ? ' (' + sz + ')' : '') + ' × ' + l.q;
+  // a line written out the website's way: anything not chosen reads "to confirm" with the options
+  function describe(l, o) {
+    const sp = o ? sizeSpec(o) : { t: 'text' }, m = o ? matOpts(o) : { opts: l.m ? [l.m] : [], note: '', full: l.m || '' }, specs = o ? specOpts(o) : [];
+    let size = '';
+    if ((o && o.size) || (l.s && l.s !== '?')) {
+      const [base, len] = String(l.s || '?').split(' · ');
+      size = !base || base === '?' ? 'to confirm' + (o && o.size && sp.t !== 'one' ? ' (we offer ' + o.size.split(' · ')[0] + ')' : '') : base.replace(/\?/g, 'to confirm');
+      if (len) size += ', length ' + len;
+    }
+    const sps = l.sp || [];
+    const spec = sps.length ? sps.join(', ') : specs.length === 1 ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
+    const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : l.mt && m.opts.includes(l.mt) ? l.mt + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
+    return { size, spec, mat };
+  }
+  // only what was chosen, for short lists: (2" · PN16 · SS316)
+  const shortOf = l => { const o = lineProduct(l), d = describe(l, o), x = [d.size && !/^to confirm/.test(d.size) ? d.size : '', (l.sp || []).join(', '), l.mt].filter(Boolean).join(' · '); return x ? ' <em>(' + esc(x) + ')</em>' : ''; };
+  const groupOfLine = (l, o) => o ? o.c.name : ((catBy(l.k) || {}).name || '');
+  function itemBlock(l, n, plain) {
+    const o = lineProduct(l), d = describe(l, o), b = plain ? '' : '*';
+    return [b + (n ? n + '. ' : '') + l.n + b, 'Group: ' + groupOfLine(l, o), d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + l.q].filter(Boolean).join('\n');
+  }
+  const itemsText = (ls, plain) => ls.map((l, i) => itemBlock(l, ls.length > 1 ? i + 1 : 0, plain)).join('\n\n');
+  // the chosen parts on a cart line: Size / Specs / Material, "to confirm" in amber
+  function lineParts(l, o) {
+    const d = describe(l, o), part = (k, v) => v ? '<span class="lp"><i>' + k + '</i> ' + (/^to confirm/.test(v) ? '<u>' + esc(v) + '</u>' : esc(v)) + '</span>' : '';
+    return part('Size', d.size) + part('Specs', d.spec) + part('Material', d.mat);
   }
   const today = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const PAY = ['Cash', 'Card', 'Bank transfer', 'Cheque', 'Credit account'];
@@ -171,15 +198,15 @@
     out.push('Delivery: ' + (c.delivery === 'deliver' ? 'Deliver to the customer' : 'Customer collects from the Al Quoz shop'));
     if (c.by) out.push('Needed by: ' + new Date(c.by + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }));
     if (c.pay) out.push('Payment: ' + c.pay);
-    return out.join('\n') + '\n\n' + x.lines.map((l, i) => lineText(l, i + 1)).join('\n') + (c.note ? '\n\nNote: ' + c.note : '') + '\n\nPlease confirm price and stock.';
+    return out.join('\n') + '\n\nItems (' + x.lines.length + '):\n\n' + itemsText(x.lines) + (c.note ? '\n\nNote: ' + c.note : '') + '\n\nPlease confirm price and stock.';
   }
   function orderMsgCustomer(x) {
     return 'Hello' + (x.cust.person ? ' ' + x.cust.person : '') + ', thank you for your order with Fakhri Tools.\nOrder number: ' + x.no + '\n\n' +
-      x.lines.map((l, i) => lineText(l, i + 1)).join('\n') +
+      itemsText(x.lines) +
       '\n\nWe will confirm the price and stock on WhatsApp. Questions: WhatsApp ' + WA_SHOW + ' or call ' + PHONE + '.\n' + SHOP_NAME + '\n' + ADDRESS;
   }
   function listMsgCustomer() {
-    return 'Hello, here is the list from Fakhri Tools:\n\n' + lines.map((l, i) => lineText(l, i + 1)).join('\n') +
+    return 'Hello, here is the list from Fakhri Tools:\n\n' + itemsText(lines) +
       '\n\nFor prices and stock, message us on WhatsApp ' + WA_SHOW + ' or call ' + PHONE + '.\n' + SHOP_NAME + '\n' + ADDRESS;
   }
   function productText(o) {
@@ -242,9 +269,9 @@
   const prodCard = (o, d) => '<div class="pcard tile" style="animation-delay:' + d + 'ms" data-go="p/' + o.id.replace(':', '/') + '" role="button" tabindex="0">' +
     (inList(o) ? '<span class="listtag">In cart</span>' : '') +
     '<button class="qadd' + (inList(o) ? ' is-in' : '') + '" data-add="' + o.id + '" aria-label="Add to cart">' + (inList(o) ? I.check : I.plus) + '</button>' +
-    photo(o.img, o.name) + '<div class="pcard__t"><b>' + esc(o.name) + '</b>' + (o.mat ? '<span class="pcard__m">' + esc(o.mat) + '</span>' : '') + (o.size ? '<span class="pcard__s">' + esc(sizeShort(o)) + '</span>' : '') + '</div></div>';
+    photo(o.img, o.name) + '<div class="pcard__t"><small>' + esc(o.c.name) + '</small><b>' + esc(o.name) + '</b></div></div>';
   const prodRow = (o, mark) => '<button class="prow" data-go="p/' + o.id.replace(':', '/') + '">' + photo(o.img, o.name) +
-    '<div><b>' + (mark ? mark(o.name) : esc(o.name)) + '</b><span>' + esc([o.mat, o.c.name].filter(Boolean).join(' · ')) + '</span>' + (o.size ? '<em>' + esc(sizeShort(o)) + '</em>' : '') + '</div></button>';
+    '<div><small>' + esc(o.c.name) + '</small><b>' + (mark ? mark(o.name) : esc(o.name)) + '</b></div></button>';
   const bar = (title, right) => '<header class="bar"><button class="ib" data-back aria-label="Back">' + I.back + '</button><div class="bar__t">' + esc(title) + '</div>' + (right || '') + '</header>';
 
   // keep "In list" marks in step everywhere
@@ -598,6 +625,8 @@
   }
 
   /* ================= ONE PRODUCT ================= */
+  // the faded Fakhri logo sits on photos only in the opened product (cards stay clean), like the website
+  const WM = '<img class="wm" src="img/logo-stacked.png" alt="" aria-hidden="true" draggable="false">';
   function viewProduct(id) {
     const o = byId.get(id);
     if (!o) return null;
@@ -605,16 +634,10 @@
     const sp = sizeSpec(o);
     const sibs = o.c.items.map((_, i) => byId.get(o.c.slug + ':' + i)).filter(x => x !== o);
     const el = h('<section>' + bar(o.name, '<button class="ib" data-share aria-label="Share">' + I.share + '</button>') +
-      '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.name) + '</div>' + (o.img ? '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
+      '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.name) + '</div>' + (o.img ? WM : '') + (o.img ? '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
       '<div class="pbody">' +
         '<button class="crumb" data-go="c/' + o.c.slug + '">' + esc(o.c.name) + ' ' + I.chev + '</button>' +
         '<h1>' + esc(o.name) + '</h1>' +
-        '<dl class="facts">' +
-          (o.mat ? '<div class="fact"><dt>Material</dt><dd>' + esc(o.mat) + '</dd></div>' : '') +
-          (o.specs.length ? '<div class="fact"><dt>Type</dt><dd><div class="tags">' + o.specs.map(s => '<span>' + esc(s) + '</span>').join('') + '</div></dd></div>' : '') +
-          (o.size ? '<div class="fact"><dt>Sizes</dt><dd>' + esc(o.size) + '</dd></div>' : '') +
-          '<div class="fact"><dt>Range</dt><dd>' + esc(o.c.name) + '</dd></div>' +
-        '</dl>' +
         '<div id="pk"></div>' +
         '<div class="addrow"><div class="qty" id="qty"></div><button class="btn btn--red" id="addBtn">' + I.plus + 'Add to cart</button></div>' +
         '<div class="prow2"><button class="btn btn--wa" id="askShop">' + I.wa + 'Ask the shop</button><button class="btn btn--ghost" data-share>' + I.share + 'Share</button></div>' +
@@ -626,16 +649,14 @@
     const pk = picker(o); $('#pk', el).appendChild(pk.el);
     const q = qtyBox(1); $('#qty', el).replaceWith(q.el);
     $('#addBtn', el).addEventListener('click', () => {
-      const sizes = pk.read(); if (!sizes) return;
-      addLines(o, sizes, q.get());
-      flyToList($('.phero img', el) || $('.phero .ph', el));
-      toast(sizes.length > 1 ? sizes.length + ' sizes added to the cart' : 'Added to the cart', 'Open cart', () => switchTab('cart'));
-      pk.reset();
+      addLines(o, pk.read(), q.get());
+      flyToList($('.phero .ph img', el) || $('.phero .ph', el));
+      toast('Added to the cart', 'Open cart', () => switchTab('cart'));
+      pk.reset(); q.set(1);
     });
     $('#askShop', el).addEventListener('click', () => {
-      const sizes = pk.peek();
-      const sz = sizes.length ? ' (' + sizes.map(s => sizeWords(s, o)).join('; ') + ')' : '';
-      open(waLink(WA, 'Price check: ' + fullName(o) + sz + '. Quantity: ' + q.get() + (cust.name ? '. Customer: ' + cust.name : '')));
+      const p = pk.read(), l = { k: o.c.slug, n: o.name, m: o.matSet, s: p.s, sp: p.sp, mt: p.mt, q: q.get() };
+      open(waLink(WA, 'Hello Fakhri Tools, please send me a price for:\n\n' + itemBlock(l) + '\n\nThank you.'));
     });
     $$('[data-share]', el).forEach(b => b.addEventListener('click', () => share(o.name, productText(o), o.img)));
     $('#showBtn', el).addEventListener('click', () => { const all = o.c.items.map((_, i) => byId.get(o.c.slug + ':' + i)); present(all, all.indexOf(o), o.c.name); });
@@ -647,62 +668,66 @@
     return v;
   }
 
-  /* size picker: chips for every size the product comes in */
-  function picker(o) {
-    const sp = sizeSpec(o);
+  /* choice buttons, same rules as the website's product window: one size, any specs & ratings, one material.
+     Anything left open is sent as "to confirm". */
+  function picker(o, cur) {
+    const sp = sizeSpec(o), specs = specOpts(o), m = matOpts(o);
     const el = h('<div class="pk"></div>');
-    let sel = new Set(), a = '', b = '';
-    const hdr = (t, s) => '<div class="pk__h"><b>' + t + '</b>' + (s ? '<span>' + esc(s) + '</span>' : '') + '</div>';
-    const chip = (v, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-v="' + esc(v) + '">' + esc(v === '?' ? 'Not sure' : v) + '</button>';
+    let s = sp.t === 'one' ? sp.v : '', a = '', b = '', sps = new Set(specs.length === 1 ? specs : []), mt = '';
+    const hdr = (t, x) => '<div class="pk__h"><b>' + t + '</b>' + (x ? '<span>' + esc(x) + '</span>' : '') + '</div>';
+    const chip = (row, v, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-row="' + row + '" data-v="' + esc(v) + '">' + esc(v === '?' ? 'Not sure' : v) + '</button>';
     function draw() {
       let x = '';
-      if (sp.t === 'one') x = hdr('Size') + '<div class="sizes">' + chip(sp.v, true) + '</div>';
-      else if (sp.t === 'sel') x = hdr('Choose sizes', 'tap one or more') + '<div class="sizes" data-row="m">' + sp.opts.map(s => chip(s, sel.has(s))).join('') + chip('?', sel.has('?'), ' sz--ask') + '</div>';
+      if (sp.t === 'one') x = '<div class="pkg">' + hdr('Size') + '<div class="sizes">' + chip('one', sp.v, true) + '</div></div>';
+      else if (sp.t === 'sel') x = '<div class="pkg">' + hdr('Size', 'choose one') + '<div class="sizes">' + sp.opts.map(v => chip('s', v, s === v)).join('') + chip('s', '?', s === '?', ' sz--ask') + '</div></div>';
       else if (sp.t === 'pair') {
         const lim = sp.lt && a && a !== '?' ? rung(a) : 99;
-        x = hdr('Choose size', sp.lt ? 'big end, then small end' : 'both ends') +
-          '<p class="pk__sub">' + (sp.lt ? 'Big end' : 'First end') + '</p><div class="sizes" data-row="a">' + sp.L.map(s => chip(s, a === s)).join('') + chip('?', a === '?', ' sz--ask') + '</div>' +
-          '<p class="pk__sub">' + (sp.lt ? 'Small end' : 'Second end') + '</p><div class="sizes" data-row="b">' + sp.S.map(s => chip(s, b === s, sp.lt && rung(s) >= lim ? ' is-off' : '')).join('') + chip('?', b === '?', ' sz--ask') + '</div>';
-      } else x = hdr('Size', sp.hint ? 'range ' + sp.hint : '') + '<input class="field" data-t maxlength="40" placeholder="' + esc(sp.hint ? 'Type the size (' + sp.hint + ')' : 'Size, if the customer knows it') + '">';
+        x = '<div class="pkg">' + hdr('Size', sp.lt ? 'big end, then small end' : 'both ends') +
+          '<p class="pk__sub">' + (sp.lt ? 'Big end' : 'First end') + '</p><div class="sizes">' + sp.L.map(v => chip('a', v, a === v)).join('') + chip('a', '?', a === '?', ' sz--ask') + '</div>' +
+          '<p class="pk__sub">' + (sp.lt ? 'Small end' : 'Second end') + '</p><div class="sizes">' + sp.S.map(v => chip('b', v, b === v, sp.lt && rung(v) >= lim ? ' is-off' : '')).join('') + chip('b', '?', b === '?', ' sz--ask') + '</div></div>';
+      } else if (o.size || sp.len) x = '<div class="pkg">' + hdr('Size', sp.hint ? 'we offer ' + sp.hint : '') + '<input class="field" data-t maxlength="40" placeholder="' + esc(sp.hint ? 'Type the size (' + sp.hint + ')' : 'Size, if the customer knows it') + '"></div>';
       if (sp.len) x += '<p class="pk__sub">Length</p><input class="field" data-len maxlength="30" placeholder="Length (' + esc(sp.len) + ')">';
       if (sp.note) x += '<p class="note">' + esc(sp.note) + '</p>';
+      if (specs.length) x += '<div class="pkg">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(v => chip('sp', v, sps.has(v))).join('') + '</div></div>';
+      if (m.opts.length) x += '<div class="pkg">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + (m.opts.length > 1 ? '<div class="sizes">' + m.opts.map(v => chip('mt', v, mt === v)).join('') + '</div>' : '<p class="pk__fixed">' + esc(m.full) + '</p>') + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
       const keep = { t: $('[data-t]', el) && $('[data-t]', el).value, len: $('[data-len]', el) && $('[data-len]', el).value };
       el.innerHTML = x;
       if (keep.t && $('[data-t]', el)) $('[data-t]', el).value = keep.t;
       if (keep.len && $('[data-len]', el)) $('[data-len]', el).value = keep.len;
     }
     el.addEventListener('click', e => {
-      const c = e.target.closest('.sz'); if (!c || sp.t === 'one') return;
-      const row = c.parentNode.dataset.row, val = c.dataset.v;
-      if (row === 'm') {
-        if (val === '?') { const on = sel.has('?'); sel.clear(); if (!on) sel.add('?'); }
-        else { sel.delete('?'); sel.has(val) ? sel.delete(val) : sel.add(val); }
-      } else if (row === 'a') { a = a === val ? '' : val; if (sp.lt && a && a !== '?' && b && b !== '?' && rung(b) >= rung(a)) b = ''; }
+      const c = e.target.closest('.sz'); if (!c) return;
+      const row = c.dataset.row, val = c.dataset.v;
+      if (row === 'one') return;
+      if (row === 's') s = s === val ? '' : val;
+      else if (row === 'a') { a = a === val ? '' : val; if (sp.lt && a && a !== '?' && b && b !== '?' && rung(b) >= rung(a)) b = ''; }
       else if (row === 'b') b = b === val ? '' : val;
+      else if (row === 'sp') sps.has(val) ? sps.delete(val) : sps.add(val);
+      else if (row === 'mt') mt = mt === val ? '' : val;
       buzz(); draw();
     });
-    draw();
-    const lenOf = () => { const l = $('[data-len]', el); return l ? l.value.replace(/[|·]/g, ' ').trim() : ''; };
-    const withLen = s => { const l = lenOf(); return l ? (s || '?') + ' · ' + l : s; };
-    function peek() {
-      if (sp.t === 'one') return [withLen(sp.v)];
-      if (sp.t === 'sel') return [...sel].map(withLen);
-      if (sp.t === 'pair') { if (!a || !b) return []; return [withLen(a === '?' && b === '?' ? '?' : (sp.L.length === 1 ? sp.L[0] : a) + ' × ' + b)]; }
-      const t = $('[data-t]', el).value.replace(/[|·]/g, ' ').trim();
-      return [withLen(t || (o.size ? '?' : ''))];
-    }
+    if (cur) {
+      const [base, len] = String(cur.s || '').split(' · ');
+      if (sp.t === 'sel' && (sp.opts.includes(base) || base === '?')) s = base;
+      if (sp.t === 'pair' && base) { const [x, y] = base === '?' ? ['?', '?'] : base.split(' × '); a = x || ''; b = y || ''; }
+      sps = new Set((cur.sp || []).filter(v => specs.includes(v)));
+      mt = m.opts.includes(cur.mt) ? cur.mt : '';
+      draw();
+      const t = $('[data-t]', el); if (t && base && base !== '?') t.value = base;
+      const l = $('[data-len]', el); if (l && len) l.value = len;
+    } else draw();
     function read() {
-      const r = peek();
-      if (!r.length) {
-        const row = sp.t === 'pair' ? (a ? $('[data-row="b"]', el) : $('[data-row="a"]', el)) : $('.sizes', el);
-        if (row) { row.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'translateX(-5px)' }, { transform: 'none' }], { duration: 380 }); row.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
-        toast(sp.t === 'pair' ? (a ? 'Choose the second size' : 'Choose the sizes first') : 'Choose a size first (or "Not sure")');
-        return null;
-      }
-      return r;
+      let size = '';
+      if (sp.t === 'one') size = sp.v;
+      else if (sp.t === 'sel') size = s || (o.size ? '?' : '');
+      else if (sp.t === 'pair') size = !a && !b ? '?' : (a === '?' || !a) && (b === '?' || !b) ? '?' : (sp.L.length === 1 ? sp.L[0] : a || '?') + ' × ' + (b || '?');
+      else { const t = $('[data-t]', el); size = (t ? t.value.replace(/[|·¦]/g, ' ').trim() : '') || (o.size ? '?' : ''); }
+      const l = $('[data-len]', el), len = l ? l.value.replace(/[|·¦]/g, ' ').trim() : '';
+      if (len) size = (size || '?') + ' · ' + len;
+      return { s: size, sp: specs.filter(v => sps.has(v)), mt: m.opts.length > 1 ? mt : '' };
     }
-    function reset() { sel = new Set(); a = ''; b = ''; const t = $('[data-t]', el); if (t) t.value = ''; const l = $('[data-len]', el); if (l) l.value = ''; draw(); }
-    return { el, read, peek, reset };
+    function reset() { s = sp.t === 'one' ? sp.v : ''; a = ''; b = ''; mt = ''; sps = new Set(specs.length === 1 ? specs : []); const t = $('[data-t]', el); if (t) t.value = ''; const l = $('[data-len]', el); if (l) l.value = ''; draw(); }
+    return { el, read, reset };
   }
   function qtyBox(start, onChange) {
     let n = start;
@@ -732,26 +757,24 @@
   // the + on a card: products with one size go straight in, others ask for the size first
   function quickAdd(o, btn) {
     if (!o) return;
-    const sp = sizeSpec(o);
     const card = btn.closest('.pcard');
-    if ((sp.t === 'one' && !sp.len) || (sp.t === 'text' && !o.size && !sp.len)) {
-      addLines(o, [sp.t === 'one' ? sp.v : ''], 1);
+    if (!hasChoices(o)) {
+      addLines(o, picker(o).read(), 1);
       flyToList(card && $('.ph img', card));
       toast('Added: ' + o.name, 'Open cart', () => switchTab('cart'));
       return;
     }
     const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><b>' + esc(o.name) + '</b><span>' + esc(o.mat || o.c.name) + '</span></div></div><div id="spk"></div>' +
+    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div>' +
       '<div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div>' +
       '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id.replace(':', '/') + '">See full details</button></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
     $('#sadd', body).addEventListener('click', () => {
-      const sizes = pk.read(); if (!sizes) return;
-      addLines(o, sizes, q.get());
+      addLines(o, pk.read(), q.get());
       const src = card && $('.ph img', card);
       closeSheet();
       setTimeout(() => flyToList(src), 120);
-      toast(sizes.length > 1 ? sizes.length + ' sizes added' : 'Added: ' + o.name, 'Open cart', () => switchTab('cart'));
+      toast('Added: ' + o.name, 'Open cart', () => switchTab('cart'));
     });
     openSheet(body);
   }
@@ -860,8 +883,8 @@
         '<div class="view__pad"><div class="ptitle" style="padding:0"><p class="mono eyebrow" id="cartCount">' + (lines.length ? countWord(lines.length, 'item') + ' · ' + nfmt(count()) + ' pcs' : 'Empty') + '</p><h1 style="margin-top:10px">Cart</h1></div>' +
         (lines.length ? '<div class="lines">' + lines.map((l, i) => {
           const o = lineProduct(l);
-          const sz = sizeWords(l.s, o);
-          return '<div class="line" data-i="' + i + '">' + photo(o ? o.img : '', l.n) + '<div class="line__t"' + (o ? ' data-go="p/' + o.id.replace(':', '/') + '"' : '') + '><b>' + esc(l.n) + '</b><span>' + esc(o ? o.mat : l.m) + '</span>' + (sz ? '<em>' + esc(sz) + '</em>' : '') + (o ? '' : '<span style="color:var(--amber)">No longer in the catalogue</span>') + '</div><div class="line__q" data-q="' + i + '"></div><button class="line__x" data-del="' + i + '" aria-label="Remove">' + I.x + '</button></div>';
+          return '<div class="line" data-i="' + i + '"><div class="line__top">' + photo(o ? o.img : '', l.n) + '<div class="line__t"' + (o ? ' data-go="p/' + o.id.replace(':', '/') + '"' : '') + '><small>' + esc(groupOfLine(l, o)) + '</small><b>' + esc(l.n) + '</b>' + lineParts(l, o) + (o ? '' : '<span class="lp" style="color:var(--amber)">No longer in the catalogue</span>') + '</div></div>' +
+            '<div class="line__bot"><div class="line__q" data-q="' + i + '"></div>' + (o && hasChoices(o) ? '<button class="chg" data-chg="' + i + '">Change</button>' : '') + '</div><button class="line__x" data-del="' + i + '" aria-label="Remove">' + I.x + '</button></div>';
         }).join('') + '</div>' +
         '<button class="btn btn--ghost btn--full" style="margin-top:12px" data-browse>' + I.plus + 'Add more products</button>' +
         '<div class="sendbar"><button class="btn btn--red btn--full" data-checkout>' + I.box + 'Place order</button><div class="prow2"><button class="btn btn--wa" data-k="ask">' + I.wa + 'Price check</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'To customer</button></div></div>'
@@ -885,8 +908,23 @@
       }
       if (t.closest('[data-clearall]')) { confirmSheet('Empty the cart?', 'All ' + countWord(lines.length, 'item') + ' will be removed from the cart.', 'Empty cart', () => { lines = []; saveLines(); refreshMarks(); draw(); }); return; }
       if (t.closest('[data-checkout]')) { go('order'); return; }
+      const cg = t.closest('[data-chg]');
+      if (cg) {
+        const i = +cg.dataset.chg, l = lines[i], o = lineProduct(l); if (!o) return;
+        const pk = picker(o, l);
+        const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><button class="btn btn--red btn--full" style="margin-top:18px" id="ssave">' + I.check + 'Save changes</button></div>');
+        $('#spk', body).appendChild(pk.el);
+        $('#ssave', body).onclick = () => {
+          const pick = pk.read(), nl = Object.assign({}, l, { s: pick.s, sp: pick.sp, mt: pick.mt });
+          const dup = lines.findIndex((x, j) => j !== i && lineKey(x) === lineKey(nl));
+          if (dup > -1) { lines[dup].q = Math.min(99999, lines[dup].q + l.q); lines.splice(i, 1); } else lines[i] = nl;
+          saveLines(); refreshMarks(); closeSheet(); draw(); toast('Changed');
+        };
+        openSheet(body);
+        return;
+      }
       const k = t.closest('[data-k]');
-      if (k && k.dataset.k === 'ask') { open(waLink(WA, 'Price check, please:\n\n' + lines.map((l, i) => lineText(l, i + 1)).join('\n'))); return; }
+      if (k && k.dataset.k === 'ask') { open(waLink(WA, 'Hello Fakhri Tools, please send me a price for ' + (lines.length === 1 ? 'this item' : 'these ' + lines.length + ' items') + ':\n\n' + itemsText(lines) + '\n\nThank you.')); return; }
       if (k && k.dataset.k === 'cust') { sendTo('Send the list to the customer', listMsgCustomer(), cust.phone); return; }
     });
     draw();
@@ -938,7 +976,7 @@
           '<p class="flabel">3 · Payment</p><div class="segs2 segs2--wrap">' + PAY.map(p => opt('pay', p, p)).join('') + '</div>' +
           '<p class="flabel">4 · Note</p><textarea class="field" data-c="note" placeholder="Anything the shop should know (threading, cut lengths, timing)">' + esc(cust.note || '') + '</textarea>' +
           '<p class="flabel">5 · Items</p>' +
-          '<div class="kv osum">' + lines.map(l => { const o = lineProduct(l), sz = sizeWords(l.s, o); return '<div><span style="color:#fff">' + esc(l.n) + (sz ? ' <em>(' + esc(sz) + ')</em>' : '') + '</span><b>× ' + nfmt(l.q) + '</b></div>'; }).join('') + '<div><span>Total</span><b>' + countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs</b></div></div>' +
+          '<div class="kv osum">' + lines.map(l => '<div><span style="color:#fff">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '<div><span>Total</span><b>' + countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs</b></div></div>' +
           '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-tab="cart">Change items in the cart</button>' +
         '</div>' +
         '<div class="sendbar"><button class="btn btn--wa btn--full" data-place>' + I.wa + 'Send order to the shop</button><p class="fine">Opens WhatsApp to Mr Hussain (' + esc(WA_SHOW) + ') with the order typed in. Press send there.</p></div></div>');
@@ -1030,7 +1068,7 @@
     const c = x.cust;
     const body = h('<div><p class="mono" style="color:var(--red-2)">' + esc(x.no) + '</p><h3 style="margin-top:6px">' + esc(c.name || 'Order') + '</h3><p class="sub">' + new Date(x.at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</p>' +
       '<div class="kv">' + [['Contact', c.person], ['Phone', c.phone], ['Location', c.site], ['Delivery', c.delivery === 'deliver' ? 'Deliver' : 'Collect from shop'], ['Needed by', c.by], ['Payment', c.pay], ['Note', c.note]].filter(r => r[1]).map(r => '<div><span>' + r[0] + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
-      '<div class="kv osum">' + x.lines.map(l => '<div><span style="color:#fff">' + esc(l.n) + (l.s ? ' <em>(' + esc(sizeWords(l.s, lineProduct(l))) + ')</em>' : '') + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '</div>' +
+      '<div class="kv osum">' + x.lines.map(l => '<div><span style="color:#fff">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '</div>' +
       '<div class="prow2" style="margin-top:16px"><button class="btn btn--wa" data-k="wa">' + I.wa + 'Send again</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'To customer</button></div>' +
       '<div class="prow2"><button class="btn btn--ghost" data-k="repeat">' + I.sync + 'Repeat order</button><button class="btn btn--ghost" data-k="del">' + I.trash + 'Delete</button></div></div>');
     body.addEventListener('click', e => {
@@ -1114,7 +1152,7 @@
     if (!list.length) return;
     const p = $('#present');
     p.innerHTML = '<div class="pr__top"><span class="mono">' + esc(title) + ' · <b id="prN">1</b> / ' + list.length + '</span><button class="ib" data-close aria-label="Close">' + I.x + '</button></div><div class="pr__prog"><i></i></div>' +
-      '<div class="pr__track">' + list.map(o => '<div class="pr__s">' + photo(o.img, o.name) + '<div class="pr__info"><small>' + esc(o.c.name) + '</small><b>' + esc(o.name) + '</b>' + (o.mat ? '<p>' + esc(o.mat) + (o.specs.length ? ' · ' + esc(o.specs.join(', ')) : '') + '</p>' : (o.specs.length ? '<p>' + esc(o.specs.join(', ')) + '</p>' : '')) + (o.size ? '<em>Sizes: ' + esc(o.size) + '</em>' : '') + '</div></div>').join('') + '</div>' +
+      '<div class="pr__track">' + list.map(o => '<div class="pr__s">' + photo(o.img, o.name) + (o.img ? WM : '') + '<div class="pr__info"><small>' + esc(o.c.name) + '</small><b>' + esc(o.name) + '</b></div></div>').join('') + '</div>' +
       '<div class="pr__bot"><button class="btn btn--red" data-padd>' + I.plus + 'Add to cart</button><button class="btn btn--ghost" style="background:var(--ink)" data-pshare>' + I.share + 'Send</button></div>';
     $('#toast').classList.remove('is-on');
     p.hidden = false; document.body.classList.add('is-nobar', 'is-presenting'); p.classList.remove('is-clean');
@@ -1133,12 +1171,11 @@
     if (!reduce) p.animate([{ opacity: 0, transform: 'scale(1.04)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
   }
   function quickAddFromPresent(o) {
-    const sp = sizeSpec(o);
-    if ((sp.t === 'one' && !sp.len) || (sp.t === 'text' && !o.size && !sp.len)) { addLines(o, [sp.t === 'one' ? sp.v : ''], 1); updateBadge(true); buzz(); toast('Added: ' + o.name); return; }
+    if (!hasChoices(o)) { addLines(o, picker(o).read(), 1); updateBadge(true); buzz(); toast('Added: ' + o.name); return; }
     const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><b>' + esc(o.name) + '</b><span>' + esc(o.mat || o.c.name) + '</span></div></div><div id="spk"></div><div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div></div>');
+    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
-    $('#sadd', body).onclick = () => { const s = pk.read(); if (!s) return; addLines(o, s, q.get()); updateBadge(true); buzz(); closeSheet(); toast(s.length > 1 ? s.length + ' sizes added' : 'Added: ' + o.name); };
+    $('#sadd', body).onclick = () => { addLines(o, pk.read(), q.get()); updateBadge(true); buzz(); closeSheet(); toast('Added: ' + o.name); };
     openSheet(body);
   }
   function closePresent() {
