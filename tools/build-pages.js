@@ -61,7 +61,6 @@ const PAGE_URL = {
   'ss-forged-low-pressure-bw-fittings': 'stainless-steel-pipes-fittings',
   'gi-pipe-fittings': 'gi-pipes-fittings',
   'ss-ms-flanges-forging-casting': 'flanges',
-  'qrc-couplings-ludecke': 'qrc-couplings',
   'instrumentation-fittings-pressure-gas': 'instrumentation-fittings',
   'universal-couplings-flange-adapter': 'pressure-gauges'
 };
@@ -72,7 +71,10 @@ const COV = c => c.cover || (c.items[0] && c.items[0][3]) || '';
 const MOVED = { 'products/valves-hub.html': 'products/valves.html',
   // 2026-10-14: the gauge got its own section and the universal couplings moved in with the flexible connectors
   'products/instrumentation-pressure-gauges.html': 'products/instrumentation-fittings.html',
-  'products/universal-couplings-flange-adapter.html': 'products/union-flexible-connectors.html' };
+  // 2026-10-16: the QRC section and the universal couplings moved into the Couplings section
+  'products/universal-couplings-flange-adapter.html': 'products/quick-couplings.html',
+  'products/qrc-couplings.html': 'products/quick-couplings.html',
+  'products/qrc-couplings-ludecke.html': 'products/quick-couplings.html' };
 // First option that fits Google's ~60-character title width; cut() shortens at a word for descriptions.
 const fit = (...opts) => opts.find(o => o.length <= 60) || opts[opts.length - 1];
 const cut = (s, n) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n - 1)).replace(/[,;:.—-]$/, '') + '…';
