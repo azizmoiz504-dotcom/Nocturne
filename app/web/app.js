@@ -3,6 +3,42 @@
    One page; every screen is a "view" stacked inside its tab, like a native app.
    The product list is the website's own js/data.js (window.FT_CATS).
    ========================================================= */
+/* Older phones (built-in browser before 2020) ignore "gap" between items in a row.
+   There, the same space is added as margins instead. Newer phones skip this. */
+(() => {
+  const t = document.createElement('div');
+  t.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';
+  t.appendChild(document.createElement('div')); t.appendChild(document.createElement('div'));
+  document.documentElement.appendChild(t); const ok = t.scrollHeight === 1; t.remove();
+  if (ok) return;
+  const px = v => parseFloat(v) || 0;
+  let queued = false;
+  const fix = () => {
+    queued = false;
+    const all = document.body.getElementsByTagName('*');
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i]; if (el.__gapDone) continue;
+      const cs = getComputedStyle(el); el.__gapDone = true;
+      if (cs.display !== 'flex' && cs.display !== 'inline-flex') continue;
+      const cg = px(cs.columnGap), rg = px(cs.rowGap); if (!cg && !rg) continue;
+      const col = cs.flexDirection.indexOf('column') === 0, wrap = cs.flexWrap !== 'nowrap';
+      el.__gapFix = () => {
+        const kids = [].filter.call(el.children, k => getComputedStyle(k).position !== 'absolute' && getComputedStyle(k).display !== 'none');
+        kids.forEach((k, j) => {
+          const last = j === kids.length - 1;
+          if (col) { if (!last && rg) k.style.marginBottom = rg + 'px'; }
+          else { if ((!last || wrap) && cg) k.style.marginRight = cg + 'px'; if (wrap && rg) k.style.marginBottom = rg + 'px'; }
+        });
+        if (!col && wrap && rg) el.style.marginBottom = (px(cs.marginBottom) - rg) + 'px';
+      };
+      el.__gapFix();
+    }
+  };
+  const later = () => { if (!queued) { queued = true; requestAnimationFrame(fix); } };
+  const go = () => { new MutationObserver(ms => { ms.forEach(m => { if (m.target.__gapFix) m.target.__gapFix(); }); later(); }).observe(document.body, { childList: true, subtree: true }); later(); };
+  if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+})();
+
 (() => {
   'use strict';
   const N = window.FTNative || null;                 // the phone (null when opened in a browser)

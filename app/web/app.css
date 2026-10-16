@@ -43,7 +43,7 @@ svg{display:block}
 
 /* ---------- views ---------- */
 #stage{position:fixed;top:0;right:0;bottom:var(--tabs);left:0;overflow:hidden;contain:strict}
-.view{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;background:var(--ink);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;will-change:transform}
+.view{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;background:var(--ink);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none}
 .view::-webkit-scrollbar{display:none}
 .view.is-under{pointer-events:none}
 .view__pad{padding:0 var(--pad) 40px}

@@ -176,9 +176,11 @@ check(!String(fg).includes(PKG), 'Back on Home leaves the app');
 await d.shell('svc wifi disable'); await d.shell('svc data disable'); await wait(2000);
 pg = await launch();
 await wait(4000); await shot('25-offline-home');
-await tap('.view:last-child [data-go="cats"]', 1200);
-await tap(L + '[data-go="c/camlock-couplings"]', 1500); await shot('26-offline-range');
-const offImgs = await pg.evaluate(() => [...document.querySelectorAll('.view:last-child .ph img')].filter(i => i.complete && i.naturalWidth > 0).length);
+await tap('.view:last-child [data-go="cats"]', 2500);
+await tap(L + '[data-go="c/camlock-couplings"]', 2500);
+let offImgs = 0;
+for (let i = 0; i < 10 && offImgs <= 3; i++) { await wait(1000); offImgs = await pg.evaluate(() => [...document.querySelectorAll('.view:last-child .ph img')].filter(i => i.complete && i.naturalWidth > 0).length); }
+await shot('26-offline-range');
 check(offImgs > 3, 'photos show with no internet (' + offImgs + ')');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-orders') || '[]').length === 1), 'orders kept after closing the app');
 await d.shell('svc wifi enable'); await d.shell('svc data enable');
