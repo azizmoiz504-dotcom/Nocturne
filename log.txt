@@ -1,0 +1,44 @@
+22:01:48 devices List of devices attached emulator-5554 device 
+22:01:48 boot 1
+22:01:57 shot 00-opening
+22:02:00 shot 01-opening-2
+22:02:05 shot 02-home
+22:02:05 PASS home shows the ranges
+22:02:06 FAIL photos load from inside the app (3)
+22:02:08 shot 03-home-ranges
+22:02:09 shot 04-home-shop
+22:02:11 shot 05-home-end
+22:02:15 shot 06-search
+22:02:15 PASS search finds 2" elbows
+22:02:17 PASS phone Back button leaves search
+22:02:20 shot 07-ranges
+22:02:22 shot 08-range
+22:02:24 shot 09-range-products
+22:02:27 shot 10-product
+22:02:29 shot 11-sizes
+22:02:31 shot 12-added
+22:02:31 PASS product went into the cart
+22:02:34 shot 13-zoom
+22:02:36 PASS Back closes the zoom
+22:02:40 shot 14-share-sheet
+22:02:47 shot 15-show-customer
+22:02:49 shot 16-show-customer-3
+22:02:53 shot 17-quick-add
+22:02:57 shot 18-cart
+22:02:59 shot 19-order-form
+22:03:02 shot 20-order-form-filled
+22:03:06 shot 21-after-send
+22:03:11 shot 22-order-sent
+22:03:11 PASS order saved in Orders
+22:03:11 PASS cart empty after the order
+22:03:13 shot 23-orders
+22:03:14 shot 24-order-details
+22:03:16 PASS no screen scrolls sideways
+22:03:20 PASS checked the website for a newer list
+22:03:28 PASS Back on Home leaves the app
+22:03:37 shot 25-offline-home
+22:03:56 shot 26-offline-range
+22:03:56 FAIL photos show with no internet (3)
+22:03:56 PASS orders kept after closing the app
+22:03:56 FAILED: photos load from inside the app (3) | photos show with no internet (3)
+TEST SCRIPT FAILED
