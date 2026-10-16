@@ -331,18 +331,18 @@
     busy = true;
     const hero = fromImg && $('[data-hero]', v.el);
     const ease = 'cubic-bezier(.16,1,.3,1)';
-    let anim;
+    let anim, prevAnim;
     if (hero && fromImg.isConnected) {
       anim = v.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' });
       flyHero(fromImg, hero);
-      if (prev) prev.el.animate([{ opacity: 1, transform: 'none' }, { opacity: .2, transform: 'scale(.96)' }], { duration: 420, easing: ease, fill: 'forwards' });
+      if (prev) prevAnim = prev.el.animate([{ opacity: 1, transform: 'none' }, { opacity: .2, transform: 'scale(.96)' }], { duration: 420, easing: ease, fill: 'forwards' });
     } else {
       anim = v.el.animate([{ transform: 'translateX(100%)', boxShadow: '-30px 0 60px rgba(0,0,0,.6)' }, { transform: 'none', boxShadow: '0 0 0 rgba(0,0,0,0)' }], { duration: 460, easing: ease });
-      if (prev) prev.el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(-26%)', opacity: .35 }], { duration: 460, easing: ease, fill: 'forwards' });
+      if (prev) prevAnim = prev.el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(-26%)', opacity: .35 }], { duration: 460, easing: ease, fill: 'forwards' });
     }
     show(v, true);
     fromImg = null;
-    anim.onfinish = () => { busy = false; if (prev) { prev.el.getAnimations().forEach(a => a.cancel()); show(prev, false); } };
+    anim.onfinish = () => { busy = false; if (prev) { if (prevAnim) prevAnim.cancel(); show(prev, false); } };
   }
   function flyHero(src, dst) {
     const a = src.getBoundingClientRect(), img = $('img', dst);
@@ -603,7 +603,7 @@
       '<div class="view__pad">' + (groups.length > 1 ? '<div class="mats">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g || 'All') + ' <b>' + (g ? items.filter(o => o.group === g).length : items.length) + '</b></button>').join('') + '</div>' : '') +
       '<div class="pgrid" id="pgrid"></div></div></section>');
     // the hero wrapper takes the photo frame's shape for the zoom-in animation
-    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;inset:0;border-radius:0 0 32px 32px;overflow:hidden';
+    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;top:0;right:0;bottom:0;left:0;border-radius:0 0 32px 32px;overflow:hidden';
     const v = { el };
     const shown = () => items.filter(o => !cur || o.group === cur);
     function fill() { const g = $('#pgrid', el); g.innerHTML = shown().map((o, i) => prodCard(o, Math.min(i, 8) * 45)).join(''); wirePhotos(g); }
@@ -644,7 +644,7 @@
         '<button class="btn btn--ghost btn--full" style="margin-top:10px" id="showBtn">' + I.play + 'Show this to the customer</button>' +
         (sibs.length ? '<div class="h-sec"><h2>More in this range</h2><button data-go="c/' + o.c.slug + '">All ' + o.c.items.length + ' ' + I.chev + '</button></div><div class="rail">' + sibs.slice(0, 12).map(x => '<button class="mini" data-go="p/' + x.id.replace(':', '/') + '">' + photo(x.img, x.name) + '<b>' + esc(x.name) + '</b></button>').join('') + '</div>' : '') +
       '</div></section>');
-    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;inset:0;border-radius:0 0 34px 34px;overflow:hidden';
+    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;top:0;right:0;bottom:0;left:0;border-radius:0 0 34px 34px;overflow:hidden';
     const v = { el };
     const pk = picker(o); $('#pk', el).appendChild(pk.el);
     const q = qtyBox(1); $('#qty', el).replaceWith(q.el);
@@ -1183,7 +1183,7 @@
     document.body.classList.remove('is-nobar', 'is-presenting');
     const done = () => { p.hidden = true; p.innerHTML = ''; };
     if (reduce) return done();
-    p.animate([{ opacity: 1 }, { opacity: 0, transform: 'scale(.97)' }], { duration: 260, easing: 'ease-in' }).onfinish = done;
+    p.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.97)' }], { duration: 260, easing: 'ease-in' }).onfinish = done;
   }
 
   /* ================= online / updates ================= */
