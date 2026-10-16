@@ -1,0 +1,4 @@
+21:36:40 MemTotal:        4008360 kB MemFree:          232200 kB MemAvailable:    2066276 kB  21:36:40 up 1 min,  0 users,  load average: 16.77, 4.02, 1.34 
+21:36:45 MemTotal:        4008360 kB MemFree:          245504 kB MemAvailable:    1967116 kB  21:36:45 up 1 min,  0 users,  load average: 17.51, 4.39, 1.47 
+21:36:50 MemTotal:        4008360 kB MemFree:          264456 kB MemAvailable:    1841760 kB  21:36:50 up 1 min,  0 users,  load average: 18.19, 4.75, 1.60 
+21:36:55 error: closed 
