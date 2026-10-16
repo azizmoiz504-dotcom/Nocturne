@@ -518,14 +518,6 @@ main{position:relative;z-index:1}
 .qv__info{padding:clamp(21px,3.5vw,36px);display:flex;flex-direction:column}
 .qv__cat{color:var(--red);padding-right:37.5px}
 .qv__name{font-family:var(--f-display);font-weight:700;font-size:clamp(21px,2.8vw,31.5px);line-height:1.02;letter-spacing:.005em;margin-top:10.5px}
-.qv__size{margin-top:16.5px;padding:12px 13.5px;border-radius:12px;background:#fff;border:1px solid var(--line-dk);display:flex;justify-content:space-between;align-items:center;gap:9px}
-.qv__size small{color:var(--paper-mute)}
-.qv__size b{font-family:var(--f-mono);font-size:15px;font-weight:500;text-align:right}
-.qv__specs{margin-top:6px}
-.qv__specs > div{display:grid;grid-template-columns:90px 1fr;gap:9px;padding:9.75px 1.5px;border-bottom:1px solid var(--line-dk);align-items:start}
-.qv__specs dt{color:var(--paper-mute);padding-top:1.5px}
-.qv__specs dd{font-size:14.25px;font-weight:500}
-.qv__specs .prow__chips{margin-top:0}
 .qv__buy{display:flex;gap:7.5px;margin-top:18px;flex-wrap:wrap}
 .qv__buy .btn{flex:1;justify-content:center;min-width:135px}
 .qv__buy .btn.is-added{background:var(--paper-ink);box-shadow:none}
@@ -1106,19 +1098,6 @@ body.has-quote .fabs{bottom:66px}
 @media (min-width:1080.75px) and (max-width:1275px){.nav .nav__links a,.nav .nav__mega-btn{font-size:17.625px;padding:6.75px 6px}}
 @media (min-width:1275.75px){.nav .nav__links a,.nav .nav__mega-btn{font-size:18.375px;padding:6.75px 6px}}
 
-/* Quick view: bigger size, material, specs and how-to-buy text */
-.qv__size small,.qv__specs dt{font-size:16.875px}
-.qv__size b{font-size:18.75px}
-.qv__specs > div{grid-template-columns:127.5px 1fr;padding:11.25px 1.5px}
-.qv__specs dd{font-size:18.375px;line-height:1.35}
-.qv__specs .prow__chips span{font-size:15px;padding:3px 6.75px}
-@media (max-width:450px){
-  .qv__size small,.qv__specs dt{font-size:15px}
-  .qv__size b{font-size:19.125px}
-  .qv__specs > div{grid-template-columns:93.75px 1fr}
-  .qv__specs dd{font-size:16.875px}
-  .qv__specs .prow__chips span{font-size:14.25px}
-}
 .btile__mark img{width:82%;height:69px;max-width:none;max-height:none;object-fit:contain}
 @media (max-width:450px){.btile__mark img{width:88%;height:49.5px}}
 .btile__mark img.is-wide{width:100%}
@@ -1312,41 +1291,44 @@ body.has-quote .fabs{bottom:10.5px}
 .kc__np .mono{position:absolute;left:12%;bottom:10%;font-size:10.875px;letter-spacing:.12em;text-transform:uppercase;color:#1a9a4b}
 @media (max-width:450px){.kc__np{padding:14% 10% 10%}.kc__np b{font-size:17.625px}.kc__np em{font-size:14.25px}.kc__np .mono{font-size:9.375px}}
 
-/* size picker (cards, quick view, quote list) */
-.pk{display:flex;flex-direction:column;gap:3.75px;margin-top:3px}
-.pk__lab{font-size:11.25px;letter-spacing:.1em;color:var(--paper-mute)}
-.pk__ctl{display:flex;flex-wrap:wrap;gap:4.5px;align-items:center}
-.pk select,.pk input{flex:1 1 90px;min-width:0;height:33px;padding:0 25.5px 0 9px;border:1.125px solid #cfd5de;border-radius:9px;background:#fff;color:var(--paper-ink);font-family:var(--f-body);font-size:14.25px;font-weight:600;transition:border-color .2s,box-shadow .2s}
-.pk input{padding-right:9px;font-weight:500}
-.pk select{-webkit-appearance:none;appearance:none;cursor:pointer;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23071823' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 9px center}
-.pk select:hover,.pk input:hover{border-color:#9aa4b2}
-.pk select:focus,.pk input:focus{outline:0;border-color:var(--paper-ink);box-shadow:0 0 0 2.25px rgba(7,24,35,.12)}
-.pk select:invalid,.pk select:has(option[value=""]:checked){color:var(--paper-mute);font-weight:500}
-.pk option{color:var(--paper-ink);font-weight:500}
-.pk__pair{display:flex;align-items:center;gap:4.5px;flex:1 1 100%;min-width:0}
-.pk__pair select{flex:1 1 0}
-.pk__pair i{font-style:normal;font-weight:700;color:var(--paper-mute)}
-.pk__one{font-size:15px;font-weight:600;color:var(--paper-ink)}
-.pk--len input[data-pk="len"]{flex:1 1 100%}
-.pk__note{font-size:12px;color:var(--paper-mute)}
-.pk-err select:has(option[value=""]:checked),.pk-err .pk__ctl select:first-child{border-color:var(--red);box-shadow:0 0 0 2.25px rgba(185,26,32,.15)}
-.pk-err .pk{animation:pkShake .4s}
+/* product window: size, specs & ratings and material are picked with buttons */
+.qv__choices{display:flex;flex-direction:column;gap:15px;margin-top:18px}
+.chg{display:flex;flex-direction:column;gap:7.5px;padding-bottom:13.5px;border-bottom:1px solid var(--line-dk)}
+.chg__lab{display:flex;align-items:baseline;gap:4.5px 9px;flex-wrap:wrap}
+.chg__lab .mono{font-size:12.75px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-ink)}
+.chg__lab small{font-size:12.375px;color:var(--paper-mute)}
+.chg__opts{display:flex;flex-wrap:wrap;gap:6px}
+.chg__row{display:flex;flex-direction:column;gap:5.25px;width:100%}
+.chg__row > .mono{font-size:10.875px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-mute)}
+.chg__row > div{display:flex;flex-wrap:wrap;gap:6px}
+.cho{min-height:34.5px;min-width:39px;max-width:100%;padding:6.75px 12px;border-radius:9px;border:1.125px solid #cfd5de;background:#fff;color:var(--paper-ink);font-family:var(--f-mono);font-size:14.25px;font-weight:500;line-height:1.2;text-align:center;overflow-wrap:anywhere;transition:border-color .2s,background .2s,color .2s}
+.cho:hover:not(:disabled):not(.is-on){border-color:var(--paper-ink)}
+.cho.is-on{background:var(--paper-ink);border-color:var(--paper-ink);color:#fff}
+.cho:disabled{opacity:.3;cursor:not-allowed}
+.cho.is-fixed{display:inline-flex;align-items:center;justify-content:center;cursor:default}
+.cho[data-pk-a="?"]{font-family:var(--f-body);font-weight:600}
+.chg__opts input{flex:1 1 165px;min-width:0;height:37.5px;padding:0 10.5px;border:1.125px solid #cfd5de;border-radius:9px;background:#fff;color:var(--paper-ink);font-family:var(--f-body);font-size:14.25px;font-weight:500}
+.chg__opts input:focus{outline:0;border-color:var(--paper-ink);box-shadow:0 0 0 2.25px rgba(7,24,35,.12)}
+.chg__note{font-size:12.375px;color:var(--paper-mute)}
+.chg__none{font-size:13.5px;color:var(--paper-mute)}
+.chg--size.pk-err .chg__lab .mono{color:var(--red)}
+.chg--size.pk-err .cho:not(.is-on):not(:disabled){border-color:var(--red)}
+.chg--size.pk-err .chg__opts{animation:pkShake .4s}
 @keyframes pkShake{20%,60%{transform:translateX(-3.75px)}40%,80%{transform:translateX(3.75px)}}
-.kc .pk{margin-top:4.5px}
-.qv__size{flex-direction:column;align-items:stretch}
-.qv__size .pk__lab{display:none}
-.qv__size .pk select,.qv__size .pk input{height:39px;font-size:15.75px}
-.qs__info .pk{margin-top:4.5px;max-width:255px}
-.qs__info .pk__lab{display:none}
-.qs__info .pk select,.qs__info .pk input{height:30px;font-size:13.5px}
 @media (max-width:450px){
-  .kc .pk__lab{display:none}
-  .kc .pk select,.kc .pk input{height:30px;font-size:14.25px;padding-left:6.75px;padding-right:19.5px;background-position:right 6.75px center;border-radius:7.5px}
-  .kc .pk input{padding-right:6.75px}
-  .kc .pk__pair{flex-wrap:wrap;gap:4.5px}
-  .kc .pk__pair select{flex:1 1 100%}
-  .kc .pk__pair i{display:none}
+  .qv__choices{gap:12px;margin-top:15px}
+  .chg{padding-bottom:12px}
+  .cho{min-height:33px;padding:6px 9.75px;font-size:13.5px}
 }
+/* the faded Fakhri Tools logo on the photo in the product window (not on the cards) */
+.qv__media img.qv__wm{inset:auto;top:15px;right:15px;width:24%;height:auto;max-width:127.5px;min-width:63px;opacity:.18;mix-blend-mode:normal;pointer-events:none;user-select:none;z-index:2}
+@media (max-width:674.985px){.qv__media img.qv__wm{top:49.5px;right:12px}}
+/* quote list: what was chosen for each line, and a button to change it */
+.qs__info .qs__pick{display:flex;flex-wrap:wrap;gap:1.5px 10.5px;margin-top:3.75px;font-family:var(--f-body);font-size:12.75px;font-weight:500;line-height:1.35;color:var(--paper-ink)}
+.qs__pick i{font-style:normal;font-family:var(--f-mono);font-size:10.125px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-mute);margin-right:3px}
+.qs__pick .is-todo{color:var(--red)}
+.qs__info .qs__change{align-self:flex-start;margin-top:6px;padding:5.25px 10.5px;border-radius:74.25px;border:1px solid var(--line-dk);background:#fff;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-ink);transition:background .2s,color .2s}
+.qs__info .qs__change:hover{background:var(--paper-ink);color:#fff}
 
 /* round 3: bigger logo and header bar */
 .nav .nav__bar{height:61.5px;padding:0 9px 0 16.5px}

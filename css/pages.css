@@ -36,6 +36,7 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 .p__np{font-family:'Barlow Semi Condensed',sans-serif;font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:#1a9a4b}
 .p__body{flex:1;padding:16px 18px 6px;display:flex;flex-direction:column;gap:8px}
 .p h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:25px;line-height:1.05;text-transform:uppercase}
+.p__cat{font-family:'Barlow Semi Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
 .p__size{font-size:19px;font-weight:600}
 .p__size span{font-family:'Barlow Semi Condensed',sans-serif;font-size:14.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-right:8px;font-weight:500}
 .p__specs{list-style:none;display:flex;flex-wrap:wrap;gap:5px}

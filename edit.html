@@ -10,7 +10,7 @@
   :root { --ink:#0d1b26; --red:#c41e24; --line:#d3d9df; --bg:#eef1f4; --muted:#56636f; --soft:#f5f7f9; }
   * { box-sizing:border-box; }
   body { margin:0; font:18px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
-  select, button, input { font:inherit; color:inherit; }
+  select, button, input, textarea { font:inherit; color:inherit; }
   header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:14px 22px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
   header h1 { font-size:22px; margin:0 10px 0 0; letter-spacing:.01em; }
   header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 460px; min-width:220px; max-width:100%; font-size:19px; font-weight:600; color:var(--ink); background:#fff; }
@@ -56,9 +56,10 @@
   .img.empty .hint { position:static; background:none; font-size:16px; font-weight:600; text-align:center; padding:8px 12px; }
   .img .hint { position:absolute; bottom:8px; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:8px; font-size:13px; color:var(--muted); }
   label { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
-  .card input, .card select { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:18px; background:#fff; cursor:text; }
+  .card input, .card select, .card textarea { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:18px; background:#fff; cursor:text; }
+  .card textarea { display:block; min-height:96px; resize:vertical; line-height:1.4; font-family:inherit; color:inherit; }
   .card select { cursor:pointer; }
-  .card input:focus, .card select:focus, .catbox input:focus { outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,27,38,.12); }
+  .card input:focus, .card select:focus, .card textarea:focus, .catbox input:focus { outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,27,38,.12); }
   .card input[data-f="0"] { font-weight:700; }
   .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
   .row button { flex:1 1 auto; white-space:nowrap; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--soft); cursor:pointer; font-size:16px; font-weight:600; }
@@ -185,7 +186,7 @@ function startEditor() {
         '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] && it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
         '<div class="img"><img alt=""><span class="hint">drop or paste a photo</span></div>' +
         '<label>Name</label><input data-f="0">' +
-        '<label>Specs (comma between each)</label><input data-f="1">' +
+        '<label>Specs (comma between each)</label><textarea data-f="1" rows="3"></textarea>' +
         '<label>Size range</label><input data-f="2">' +
         '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => m === 'Other' ? '<option value="Other"' + (own ? ' selected' : '') + '>Other: type your own…</option>' : '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
         '<input data-matown placeholder="e.g. PVC, or Brass, Stainless" maxlength="40"' + (own ? '' : ' hidden') + '>' +
@@ -194,22 +195,23 @@ function startEditor() {
         '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
       if (it[3]) d.querySelector('img').src = src(it[3]);
       else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
-      const ins = d.querySelectorAll('input');
-      ins[0].value = it[0]; ins[1].value = it[1].join(', '); ins[2].value = it[2];
+      const box = f => d.querySelector('[data-f="' + f + '"]');
+      box(0).value = it[0]; box(1).value = it[1].join(', '); box(2).value = it[2];
       if (own && it[4] !== 'Other') d.querySelector('[data-matown]').value = it[4];
       g.appendChild(d);
     });
   }
 
   const grid = $('#grid');
-  grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input')) snap(); });
+  grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input, textarea')) snap(); });
   // a card can't be dragged while you press inside a box or dropdown (dragging stole the click before)
-  grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, select, button'); });
+  grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, textarea, select, button'); });
   grid.addEventListener('input', e => {
     if (e.target.matches('[data-matown]')) { const it = cat().items[+e.target.closest('.card').dataset.i]; it[4] = e.target.value.trim() || 'Other'; state.dirty = true; persist(); return; }
     const f = e.target.dataset.f; if (f === undefined) return;
     const it = cat().items[+e.target.closest('.card').dataset.i];
-    it[+f] = f === '1' ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : e.target.value;
+    // specs: a comma or a new line starts the next one; a comma inside a number (0–15,000 PSI) does not
+    it[+f] = f === '1' ? e.target.value.split(/\n|,(?!\d{3}\b)/).map(s => s.trim()).filter(Boolean) : e.target.value;
     state.dirty = true; persist();
   });
   grid.addEventListener('click', e => {
@@ -265,7 +267,7 @@ function startEditor() {
 
   // Drag to reorder
   let from = -1;
-  grid.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c || e.target.matches('input')) return; from = +c.dataset.i; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'card'); });
+  grid.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c || e.target.matches('input, textarea')) return; from = +c.dataset.i; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'card'); });
   grid.addEventListener('dragend', () => { from = -1; document.querySelectorAll('.dragging,.over,.drop').forEach(x => x.classList.remove('dragging', 'over', 'drop')); });
   grid.addEventListener('dragover', e => {
     const c = e.target.closest('.card'); if (!c) return;
@@ -305,9 +307,9 @@ function startEditor() {
   document.addEventListener('paste', e => {
     const f = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/'));
     if (f) { e.preventDefault(); if (sel === -1) return toast('Click a card or the main photo first, then paste'); setPhoto(sel, f.getAsFile()); return; }
-    if (!e.target.matches('input') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
+    if (!e.target.matches('input, textarea') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
   });
-  document.addEventListener('copy', e => { if (e.target.matches('input') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+  document.addEventListener('copy', e => { if (e.target.matches('input, textarea') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
 
   $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
   $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };

@@ -1,11 +1,11 @@
 /* Builds one plain, fast page per product category (products/<slug>.html) plus products/index.html,
-   straight from js/data.js, so search engines can read every product name, size and spec.
+   straight from js/data.js, so search engines can read every product name.
    Also writes sitemap.xml, robots.txt and 404.html, and refreshes the search-engine parts of index.html
    (store details for Google and the footer category links), so they never drift from the product list.
    Hand-written titles, descriptions and buyer guides per category live in tools/seo-content.json.
    Run from the site folder after any product change:  node tools/build-pages.js
    (tools/apply-edits.js runs it automatically.) */
-const vm = require('vm'), fs = require('fs'), path = require('path');
+const vm = require('vm'), fs = require('fs'), path = require('path'), { spawnSync } = require('child_process');
 
 // Keep "noindex" until the site has its own domain; then set INDEX = true and SITE to the domain.
 const INDEX = false;
@@ -14,7 +14,12 @@ const SITE = 'https://azizmoiz504-dotcom.github.io/Nocturne/';
 const ctx = { window: {} };
 vm.runInNewContext(fs.readFileSync('js/config.js', 'utf8'), ctx);
 vm.runInNewContext(fs.readFileSync('js/data.js', 'utf8'), ctx);
-const CFG = ctx.window.FT_CONFIG, FAMS = ctx.window.FT_FAMILIES, CATS = ctx.window.FT_CATS, IMG = ctx.window.FT_IMG;
+vm.runInNewContext(fs.readFileSync('js/choices.js', 'utf8'), ctx);
+const CFG = ctx.window.FT_CONFIG, FAMS = ctx.window.FT_FAMILIES, CATS = ctx.window.FT_CATS, IMG = ctx.window.FT_IMG, CHO = ctx.window.FT_CHOICES;
+// small copies of the product photos for the lists (tools/thumbs.py); a photo without one yet uses the full photo
+const th = spawnSync('python3', ['tools/thumbs.py'], { encoding: 'utf8' });
+if (th.status === 0) process.stdout.write(th.stdout); else console.warn('Small photos not made (python3 + Pillow needed): ' + ((th.stderr || th.error || '') + '').trim().split('\n').pop());
+const thumb = img => { const t = 'assets/thumbs/' + img.replace(/\.\w+$/, '.webp'); return IMG === 'assets/products/' && fs.existsSync(t) ? t : IMG + img; };
 // Optional hand-written SEO copy per category: { "<slug>": { title, desc, h1, intro: [paragraphs], faq: [[q, a], ...] } }
 const SEO = fs.existsSync('tools/seo-content.json') ? JSON.parse(fs.readFileSync('tools/seo-content.json', 'utf8')) : {};
 const total = CATS.reduce((a, c) => a + c.items.length, 0);
@@ -42,7 +47,7 @@ function fmt(s, lang, links) {
   if (lang === 'ar') h = h.replace(/[\d⅛¼⅜½¾]+(?:[.,]\d+)?&quot;/g, m => '<bdi dir="ltr">' + m + '</bdi>');
   return h.replace(/\u0000(\d+)\u0000/g, (m, i) => keep[+i]);
 }
-// Material, worked out the same way as the cards on the home page (js/main.js materialOf, matText, fullName):
+// Material, worked out the same way as on the home page (js/main.js materialOf, matText):
 // the material set in the editor (item[4]) wins, otherwise it is read from the name.
 const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
 function materialOf(name) {
@@ -52,7 +57,16 @@ function materialOf(name) {
 }
 const ownMat = it => it[4] && it[4] !== 'Other' ? it[4] : '';
 const matText = it => ownMat(it) || (/^C\.S & S\.S/.test(it[0]) ? 'Carbon steel, Stainless' : materialOf(it[0]) || '');
-const fullName = it => ownMat(it) && !materialOf(it[0]) ? it[0] + ' – ' + it[4] : it[0];
+// the WhatsApp message on a product page, laid out like the ones from the home page (js/main.js itemBlock):
+// name, group, then size, specs & ratings and material, each "to confirm" with the choices when there is more than one
+function priceMessage(c, it) {
+  const [name, chips, size] = it, base = (size || '').split(' · ')[0], specs = CHO.specOpts(chips), m = CHO.matOpts(matText(it));
+  const lines = ['*' + name + '*', 'Group: ' + c.name];
+  if (size) lines.push('Size: ' + (/–|TO|, | \/ /.test(base) ? 'to confirm (we offer ' + base + ')' : base));
+  if (specs.length) lines.push('Specs & ratings: ' + (specs.length === 1 ? specs[0] : 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '')));
+  if (m.opts.length) lines.push('Material: ' + (m.opts.length === 1 ? m.full : 'to confirm (' + m.opts.join(' / ') + ')'));
+  return 'Hello Fakhri Tools, please send me a price for:\n\n' + lines.join('\n') + '\nQuantity: ';
+}
 // Page addresses: a few categories get a shorter address with the words people search for.
 // The category's slug in js/data.js (and the editor) stays the same; only the page file name changes.
 // The old address keeps working: it becomes a small page that forwards to the new one.
@@ -136,16 +150,13 @@ const STORE = { '@type': 'HardwareStore', '@id': SITE + '#store',
 function catPage(c, idx) {
   const s = SEO[c.slug] || {};
   const items = c.items.map((it, i) => {
-    const [name, specs, size, img] = it, mat = matText(it);
-    const sizeTxt = size ? ' (' + size + ')' : '';
+    // like the cards on the home page: the group and the name; size, specs and material are chosen in the product window there
+    const [name, , , img] = it;
     return '<article class="p">' +
-      '<div class="p__img">' + (img ? '<img src="../' + IMG + img + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</div>' +
-      '<div class="p__body"><h2>' + esc(name) + '</h2>' +
-        (mat ? '<p class="p__size p__mat"><span>Material</span> ' + esc(mat) + '</p>' : '') +
-        (size ? '<p class="p__size"><span>Sizes</span> ' + esc(size) + '</p>' : '') +
-        (specs.length ? '<ul class="p__specs">' + specs.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul>' : '') + '</div>' +
-      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '/' + i + '"><span><span class="lg">Pick size &amp; add</span><span class="sm">Add</span> to quote</span></a>' +
-        '<a class="btn btn--wa btn--round" href="' + wa('Hello Fakhri Tools, please send me a price for: ' + fullName(it) + sizeTxt + '. Size and quantity: ') + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
+      '<div class="p__img">' + (img ? '<img src="../' + thumb(img) + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</div>' +
+      '<div class="p__body"><p class="p__cat">' + esc(c.name) + '</p><h2>' + esc(name) + '</h2></div>' +
+      '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '/' + i + '"><span><span class="lg">Choose &amp; add</span><span class="sm">Add</span> to quote</span></a>' +
+        '<a class="btn btn--wa btn--round" href="' + wa(priceMessage(c, it)) + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
     '</article>';
   }).join('');
   const others = CATS.filter(o => o.slug !== c.slug);
@@ -183,7 +194,7 @@ function hubPage() {
     '<header class="hero"><p class="eyebrow">' + total + ' products · ' + CATS.length + ' categories</p><h1>Pipes, fittings, flanges and valves in Al Quoz, Dubai</h1>' +
       '<p class="lead">Every product we offer at our B2B trade counter in Al Quoz Industrial Area 3. Open a category to see sizes and specs, then ask for a quote on WhatsApp.</p></header>' +
     FAMS.map(f => '<section class="fam"><h2>' + esc(f.name) + '</h2><div class="cats">' +
-      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') +
+      CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + thumb(COV(c)) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') +
     '</div></section>').join('') + '</div>';
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
@@ -202,7 +213,7 @@ const PAGES = SEO._pages || [];
 function tiles(slugs, heading, up) {
   const cats = (slugs || []).map(s => CATS.find(c => c.slug === s)).filter(Boolean);
   return !cats.length ? '' : '<section class="fam"><h2>' + esc(heading || 'Shop these categories') + '</h2><div class="cats">' + cats.map(c =>
-    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="' + up + IMG + COV(c) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') + '</div></section>';
+    '<a class="cat" href="' + up + 'products/' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="' + up + thumb(COV(c)) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') + '</div></section>';
 }
 const UI = {
   en: { home: 'Home', faq: 'Questions buyers ask', ask: 'Send us your list', askP: 'Sizes, rating, end connection and quantity. We reply with stock and a price.', send: 'Send on WhatsApp', products: 'Products', shop: 'Shop these categories', hello: 'Hello Fakhri Tools, I would like a quote.' },
