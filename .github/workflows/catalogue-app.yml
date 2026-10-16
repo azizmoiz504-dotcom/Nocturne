@@ -32,6 +32,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: Run on an Android 14 phone
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 30
+        env:
+          PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
         with:
           api-level: 34
           target: google_apis
@@ -42,7 +45,7 @@ jobs:
       - name: Save the screenshots
         if: always()
         run: |
-          mkdir -p app/ci/out && cd app/ci/out
+          mkdir -p app/ci/out && cd app/ci/out && rm -rf .git
           echo "commit $GITHUB_SHA run $GITHUB_RUN_ID" > run.txt
           git init -q && git checkout -q -b r && git add -A
           git -c user.name="catalogue test" -c user.email="test@users.noreply.github.com" commit -qm "Phone test results for $GITHUB_SHA"
