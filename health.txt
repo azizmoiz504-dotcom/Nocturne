@@ -1,0 +1,10 @@
+22:01:30 MemTotal:        4008360 kB MemFree:          233584 kB MemAvailable:    2048988 kB  22:01:30 up 0 min,  0 users,  load average: 13.18, 3.05, 1.01 
+22:01:35 MemTotal:        4008360 kB MemFree:          278648 kB MemAvailable:    1986616 kB  22:01:35 up 0 min,  0 users,  load average: 14.68, 3.53, 1.17 
+22:01:40 MemTotal:        4008360 kB MemFree:          237472 kB MemAvailable:    1795160 kB  22:01:40 up 0 min,  0 users,  load average: 15.51, 3.89, 1.30 
+22:01:46 MemTotal:        4008360 kB MemFree:          238228 kB MemAvailable:    1810852 kB  22:01:45 up 1 min,  0 users,  load average: 16.67, 4.32, 1.46 
+22:01:51 MemTotal:        4008360 kB MemFree:          245200 kB MemAvailable:    1778484 kB  22:01:50 up 1 min,  0 users,  load average: 16.78, 4.55, 1.54 
+22:01:56 MemTotal:        4008360 kB MemFree:          251928 kB MemAvailable:    1677736 kB  22:01:56 up 1 min,  0 users,  load average: 16.71, 4.74, 1.62 
+22:02:01 MemTotal:        4008360 kB MemFree:          239116 kB MemAvailable:    1662484 kB  22:02:01 up 1 min,  0 users,  load average: 17.70, 5.14, 1.77 
+22:02:06 MemTotal:        4008360 kB MemFree:          269372 kB MemAvailable:    1677092 kB  22:02:06 up 1 min,  0 users,  load average: 17.16, 5.24, 1.82 
+22:02:11 MemTotal:        4008360 kB MemFree:          319508 kB MemAvailable:    1672040 kB  22:02:11 up 1 min,  0 users,  load average: 16.83, 5.37, 1.88 
+22:02:16 error: closed 

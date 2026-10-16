@@ -1,0 +1,225 @@
+10-16 22:01:25.670 I/ActivityManager(  483): Start proc 3317:com.android.carrierdefaultapp/u0a87 for broadcast {com.android.carrierdefaultapp/com.android.carrierdefaultapp.CarrierDefaultBroadcastReceiver}
+10-16 22:01:25.788 D/CarrierSvcBindHelper(  989): onPackageAdded: com.fakhritools.catalogue
+10-16 22:01:25.791 D/CarrierSvcBindHelper(  989): onPackageModified: com.fakhritools.catalogue
+10-16 22:01:26.065 D/ImsResolver(  989): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-16 22:01:26.096 D/ImsResolver(  989): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-16 22:01:26.815 I/ActivityManager(  483): Start proc 3400:com.google.android.projection.gearhead:car/u0a108 for broadcast {com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.gmscorecompatstub.StubWirelessUuidRegistrationReceiver}
+10-16 22:01:27.607 W/ActivityManager(  483): Receiver with filter android.content.IntentFilter@fb16911 already registered for pid 2819, callerPackage is com.google.android.ims
+10-16 22:01:27.859 I/ActivityManager(  483): Background started FGS: Allowed [callingPackage: com.google.android.apps.messaging; callingUid: 10112; uidState: BFGS; intent: Intent { cmp=com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService (has extras) }; code:PROC_STATE_BFGS; tempAllowListReason:<null>; targetSdkVersion:33; callerTargetSdkVersion:33; startForegroundCount:0; bindFromPackage:null]
+10-16 22:01:27.861 W/ActivityManager(  483): Foreground service started from background can not have location/camera/microphone access: service com.google.android.apps.messaging/com.google.apps.tiktok.concurrent.InternalForegroundService
+10-16 22:01:27.875 I/ActivityManager(  483): Start proc 3470:com.android.remoteprovisioner/u0a150 for service {com.android.remoteprovisioner/com.android.remoteprovisioner.service.GenerateRkpKeyService}
+10-16 22:01:28.010 W/ActivityManager(  483): Unable to start service Intent { act=com.google.android.gms.home.service.START pkg=com.google.android.gms } U=0: not found
+10-16 22:01:28.292 W/ActivityManager(  483): Unbind failed: could not find connection for android.os.BinderProxy@8556c97
+10-16 22:01:29.188 I/AiAiEcho( 1581): EchoSearch: AppFetcherImpl is initialized with [19] apps [time=30, reason=com.fakhritools.catalogue is added]
+10-16 22:01:29.426 I/ActivityManager(  483): Start proc 3551:com.android.externalstorage/u0a72 for broadcast {com.android.externalstorage/com.android.externalstorage.MountReceiver}
+10-16 22:01:30.266 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{9c0f275 com.google.android.apps.messaging/10112} BLOCKED
+10-16 22:01:30.266 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{c85120a com.google.android.gm/10144} BLOCKED
+10-16 22:01:30.266 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{de3ea7b com.google.android.contacts/10122} BLOCKED
+10-16 22:01:30.267 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{19e8098 com.google.android.partnersetup/10103} BLOCKED
+10-16 22:01:30.279 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{93b40f1 com.android.remoteprovisioner/10150} BLOCKED
+10-16 22:01:30.281 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{76a44d6 com.google.android.apps.youtube.music/10121} BLOCKED
+10-16 22:01:30.287 I/AppsFilter(  483): interaction: PackageSetting{b5b5ac com.fakhritools.catalogue/10174} -> PackageSetting{d9dd862 com.google.android.cellbroadcastreceiver/10160} BLOCKED
+10-16 22:01:30.432 W/system_server(  483): Long monitor contention with owner ActivityManager (514) at void com.android.server.am.BroadcastQueue.processNextBroadcast(boolean)(BroadcastQueue.java:1156) waiters=1 in android.content.Intent com.android.server.am.ActivityManagerService.registerReceiverWithFeature(android.app.IApplicationThread, java.lang.String, java.lang.String, java.lang.String, android.content.IIntentReceiver, android.content.IntentFilter, java.lang.String, int, int) for 122ms
+10-16 22:01:30.454 I/ActivityManager(  483): Start proc 3599:com.google.android.apps.photos/u0a142 for broadcast {com.google.android.apps.photos/com.google.android.apps.photos.sdcard.envcache.ExternalStorageStateChangeBroadcastReceiver}
+10-16 22:01:30.710 I/BlockstoreStorage( 1313): Clearing Blockstore Data for package com.fakhritools.catalogue [CONTEXT service_id=258 ]
+10-16 22:01:30.720 I/FontLog ( 1060): Package com.fakhritools.catalogue has no metadata [CONTEXT service_id=132 ]
+10-16 22:01:31.253 I/ActivityManager(  483): Start proc 3700:com.android.providers.calendar/u0a83 for broadcast {com.android.providers.calendar/com.android.providers.calendar.CalendarUpgradeReceiver}
+10-16 22:01:31.710 I/ActivityManager(  483): com.google.android.packageinstaller is exempt from freezer
+10-16 22:01:31.720 I/ActivityManager(  483): Start proc 3738:com.google.android.packageinstaller/u0a80 for broadcast {com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver}
+10-16 22:01:32.311 I/ActivityManager(  483): Start proc 3757:com.google.android.settings.intelligence/u0a107 for broadcast {com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.contextualcards.impl.JobBootBroadcastReceiver}
+10-16 22:01:33.203 I/ActivityManager(  483): Start proc 3797:com.google.android.documentsui/u0a85 for broadcast {com.google.android.documentsui/com.android.documentsui.PreBootReceiver}
+10-16 22:01:33.426 I/ActivityManager(  483): Posting BOOT_COMPLETED user #0
+10-16 22:01:33.428 D/SystemServerTimingAsync(  483): ssm.onUnlockedUser-0_com.android.server.am.ActivityManagerService$Lifecycle
+10-16 22:01:33.428 V/SystemServerTimingAsync(  483): ssm.onUnlockedUser-0_com.android.server.am.ActivityManagerService$Lifecycle took to complete: 0ms
+10-16 22:01:33.433 D/SystemServerTimingAsync(  483): ssm.onUnlockedUser-0_com.android.server.webkit.WebViewUpdateService
+10-16 22:01:33.433 V/SystemServerTimingAsync(  483): ssm.onUnlockedUser-0_com.android.server.webkit.WebViewUpdateService took to complete: 0ms
+10-16 22:01:33.442 I/ActivityManager(  483): Start proc 3827:com.google.android.apps.docs/u0a129 for content provider {com.google.android.apps.docs/com.google.android.apps.docs.storagebackend.StorageBackendContentProvider}
+10-16 22:01:33.552 W/ActivityManager(  483): UserLifecycleEvent 6 received without an active userJourneySession.
+10-16 22:01:33.628 W/ActivityManager(  483): Slow operation: 72ms so far, now at startProcess: returned from zygote!
+10-16 22:01:33.631 W/ActivityManager(  483): Slow operation: 78ms so far, now at startProcess: done updating battery stats
+10-16 22:01:33.632 W/ActivityManager(  483): Slow operation: 79ms so far, now at startProcess: building log message
+10-16 22:01:33.632 I/ActivityManager(  483): Start proc 3830:com.android.traceur/u0a102 for broadcast {com.android.traceur/com.android.traceur.Receiver}
+10-16 22:01:33.632 W/ActivityManager(  483): Slow operation: 79ms so far, now at startProcess: starting to update pids map
+10-16 22:01:33.632 W/ActivityManager(  483): Slow operation: 79ms so far, now at startProcess: done updating pids map
+10-16 22:01:34.510 I/ActivityManager(  483): Start proc 3949:com.google.android.calendar/u0a123 for broadcast {com.google.android.calendar/com.google.android.calendar.SyncUpgradeReceiver}
+10-16 22:01:34.949 I/ActivityManager(  483): Start proc 4028:com.android.camera2/u0a141 for broadcast {com.android.camera2/com.android.camera.SetActivitiesCameraReceiver}
+10-16 22:01:35.219 I/ActivityManager(  483): Start proc 4052:com.android.dynsystem/1000 for broadcast {com.android.dynsystem/com.android.dynsystem.BootCompletedReceiver}
+10-16 22:01:35.275 I/ActivityManager(  483): Start proc 4068:com.android.dynsystem:dynsystem/1000 for service {com.android.dynsystem/com.android.dynsystem.DynamicSystemInstallationService}
+10-16 22:01:35.289 I/ActivityManager(  483): Start proc 4071:com.android.nfc/1027 for broadcast {com.android.nfc/com.android.nfc.NfcBootCompletedReceiver}
+10-16 22:01:35.416 I/ActivityManager(  483): Killing 4071:com.android.nfc/1027 (adj 0): change com.android.nfc
+10-16 22:01:35.441 V/ActivityManager(  483): Got obituary of 4071:com.android.nfc
+10-16 22:01:35.554 I/ActivityManager(  483): com.android.shell is exempt from freezer
+10-16 22:01:35.560 I/ActivityManager(  483): Start proc 4134:com.android.shell/2000 for broadcast {com.android.shell/com.android.shell.HeapDumpReceiver}
+10-16 22:01:35.845 I/ActivityManager(  483): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 4168
+10-16 22:01:35.849 D/CarrierSvcBindHelper(  989): onHandleForceStop: [com.fakhritools.catalogue]
+10-16 22:01:35.860 I/ActivityManager(  483): Start proc 4172:com.google.android.apps.maps/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.geofence.RestartDetectionBroadcastReceiver}
+10-16 22:01:35.895 I/ActivityTaskManager(  483): START u0 {flg=0x10000000 cmp=com.fakhritools.catalogue/.MainActivity} from uid 2000
+10-16 22:01:35.930 I/ActivityManager(  483): Start proc 4193:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}
+10-16 22:01:35.957 D/CoreBackPreview(  483): Window{59e07c u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@3bc15a, mPriority=0}
+10-16 22:01:36.350 W/ziparchive( 4193): Unable to open '/data/app/~~BHKIvhAjXJIdY2HMDXQjdg==/com.fakhritools.catalogue-mu4qWhASgzcOsFRNJmCPnQ==/base.dm': No such file or directory
+10-16 22:01:36.350 W/ziparchive( 4193): Unable to open '/data/app/~~BHKIvhAjXJIdY2HMDXQjdg==/com.fakhritools.catalogue-mu4qWhASgzcOsFRNJmCPnQ==/base.dm': No such file or directory
+10-16 22:01:36.367 D/nativeloader( 4193): Configuring classloader-namespace for other apk /data/app/~~BHKIvhAjXJIdY2HMDXQjdg==/com.fakhritools.catalogue-mu4qWhASgzcOsFRNJmCPnQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~BHKIvhAjXJIdY2HMDXQjdg==/com.fakhritools.catalogue-mu4qWhASgzcOsFRNJmCPnQ==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-16 22:01:36.435 V/GraphicsEnvironment( 4193): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-16 22:01:36.435 V/GraphicsEnvironment( 4193): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-16 22:01:36.471 I/WebViewFactory( 4193): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-16 22:01:36.478 D/nativeloader( 4193): Configuring classloader-namespace for other apk /data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/lib/x86_64:/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-16 22:01:36.479 D/nativeloader( 4193): Configuring classloader-namespace for other apk /data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/lib/x86_64:/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-16 22:01:36.684 I/cr_VariationsUtils( 4193): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-16 22:01:36.712 I/cr_VariationsUtils( 4193): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed"
+10-16 22:01:36.846 W/ActivityManager(  483): Slow operation: 97ms so far, now at startProcess: done updating battery stats
+10-16 22:01:36.846 W/ActivityManager(  483): Slow operation: 97ms so far, now at startProcess: building log message
+10-16 22:01:36.846 I/ActivityManager(  483): Start proc 4264:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-16 22:01:36.846 W/ActivityManager(  483): Slow operation: 97ms so far, now at startProcess: starting to update pids map
+10-16 22:01:36.846 W/ActivityManager(  483): Slow operation: 97ms so far, now at startProcess: done updating pids map
+10-16 22:01:36.862 I/cr_WebViewApkApp( 4264): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-16 22:01:36.906 W/ActivityManager(  483): Unable to start service Intent { cmp=com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService } U=0: not found
+10-16 22:01:36.907 W/ActivityManager(  483): Unbind failed: could not find connection for android.os.BinderProxy@816589c
+10-16 22:01:36.938 E/adbd    (  338): failed to connect to socket 'localabstract:webview_devtools_remote_4193': could not connect to localabstract address 'localabstract:webview_devtools_remote_4193'
+10-16 22:01:36.969 D/ConnectivityService(  483): requestNetwork for uid/pid:10174/4193 activeRequest: null callbackRequest: 109 [NetworkRequest [ REQUEST id=110, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-16 22:01:36.972 D/WifiNetworkFactory(  483): got request NetworkRequest [ REQUEST id=110, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-16 22:01:36.972 D/UntrustedWifiNetworkFactory(  483): got request NetworkRequest [ REQUEST id=110, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-16 22:01:36.972 D/OemPaidWifiNetworkFactory(  483): got request NetworkRequest [ REQUEST id=110, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-16 22:01:36.972 D/MultiInternetWifiNetworkFactory(  483): got request NetworkRequest [ REQUEST id=110, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-16 22:01:37.016 W/ActivityManager(  483): Slow operation: 267ms so far, now at startProcess: returned from zygote!
+10-16 22:01:37.023 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{ff699a8 com.google.android.as/10117} BLOCKED
+10-16 22:01:37.087 W/ActivityManager(  483): Slow operation: 53ms so far, now at startProcess: returned from zygote!
+10-16 22:01:37.087 W/ActivityManager(  483): Slow operation: 53ms so far, now at startProcess: done updating battery stats
+10-16 22:01:37.087 W/ActivityManager(  483): Slow operation: 53ms so far, now at startProcess: building log message
+10-16 22:01:37.087 I/ActivityManager(  483): Start proc 4293:com.google.android.webview:webview_apk/u0a124 for service {com.google.android.webview/org.chromium.android_webview.nonembedded.AwComponentUpdateService}
+10-16 22:01:37.087 W/ActivityManager(  483): Slow operation: 53ms so far, now at startProcess: starting to update pids map
+10-16 22:01:37.087 W/ActivityManager(  483): Slow operation: 53ms so far, now at startProcess: done updating pids map
+10-16 22:01:37.102 I/iew:webview_apk( 4293): Using CollectorTypeCC GC.
+10-16 22:01:37.103 W/iew:webview_apk( 4293): Unexpected CPU variant for x86: x86_64.
+10-16 22:01:37.103 W/iew:webview_apk( 4293): Known variants: atom, sandybridge, silvermont, kabylake, default
+10-16 22:01:37.139 D/CoreBackPreview(  483): Window{9686a1c u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@8cdd5c6, mPriority=0}
+10-16 22:01:37.279 W/iew:webview_apk( 4293): Entry not found
+10-16 22:01:37.279 D/nativeloader( 4293): Configuring classloader-namespace for other apk /data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/lib/x86_64:/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-16 22:01:37.280 D/nativeloader( 4293): Configuring classloader-namespace for other apk /data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/lib/x86_64:/data/app/~~tknXQezyhqa7LLT0r5qbjw==/com.google.android.webview-_RNX2MPHFi_ncZnSsUtU2g==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~kcdI5Z5dvpyexUwjQldZhA==/com.google.android.trichromelibrary_541412337-Mm3oDvjwtolTFM__wXQMfA==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-16 22:01:37.284 V/GraphicsEnvironment( 4293): ANGLE Developer option for 'com.google.android.webview' set to: 'default'
+10-16 22:01:37.297 V/GraphicsEnvironment( 4293): ANGLE GameManagerService for com.google.android.webview: false
+10-16 22:01:37.303 I/cr_WebViewApkApp( 4293): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:webview_apk
+10-16 22:01:37.622 W/ziparchive(  483): Unable to open '/data/app/~~BHKIvhAjXJIdY2HMDXQjdg==/com.fakhritools.catalogue-mu4qWhASgzcOsFRNJmCPnQ==/base.dm': No such file or directory
+10-16 22:01:37.788 I/GoogleInputMethodService( 1501): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-16 22:01:37.818 I/ActivityManager(  483): Start proc 4357:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-16 22:01:37.852 I/ActivityTaskManager(  483): Displayed com.fakhritools.catalogue/.MainActivity: +1s690ms
+10-16 22:01:37.981 W/cr_AWNetworkFetcherTask( 4293): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-16 22:01:38.005 W/ActivityManager(  483): Slow operation: 62ms so far, now at attachApplicationLocked: immediately before bindApplication
+10-16 22:01:38.012 W/ActivityManager(  483): Slow operation: 69ms so far, now at attachApplicationLocked: immediately after bindApplication
+10-16 22:01:38.018 W/ActivityManager(  483): Slow operation: 75ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+10-16 22:01:38.032 W/ActivityManager(  483): Slow operation: 89ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-16 22:01:38.062 W/ActivityManager(  483): Slow operation: 119ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-16 22:01:38.373 W/InputManager-JNI(  483): Input channel object '59e07c Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-16 22:01:38.374 D/CoreBackPreview(  483): Window{59e07c u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-16 22:01:38.399 W/cr_AWNetworkFetcherTask( 4293): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-16 22:01:38.399 W/cr_AWNetworkFetcherTask( 4293): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-16 22:01:38.476 W/cr_AWNetworkFetcherTask( 4293): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-16 22:01:38.561 I/ActivityManager(  483): reportOnUserCompletedEvent(0): stored=10, eligible=111
+10-16 22:01:38.569 D/SystemServerTimingAsync(  483): ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.am.ActivityManagerService$Lifecycle
+10-16 22:01:38.569 V/SystemServerTimingAsync(  483): ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.am.ActivityManagerService$Lifecycle took to complete: 0ms
+10-16 22:01:38.570 D/SystemServerTimingAsync(  483): ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.webkit.WebViewUpdateService
+10-16 22:01:38.570 V/SystemServerTimingAsync(  483): ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.webkit.WebViewUpdateService took to complete: 0ms
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{f2755f7 com.google.android.youtube/10138} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{3fb0c64 com.google.android.googlequicksearchbox/10119} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{902eecd com.google.android.apps.messaging/10112} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{a905382 com.android.camera2/10141} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{1715a93 com.google.android.apps.docs/10129} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{e03cc14 com.google.android.apps.maps/10140} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{78e8ad0 com.google.android.apps.photos/10142} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{d265c99 com.google.android.calendar/10123} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{2dcaac9 com.google.android.settings.intelligence/10107} BLOCKED
+10-16 22:01:42.600 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{47425ce com.android.remoteprovisioner/10150} BLOCKED
+10-16 22:01:42.615 I/ActivityManager(  483): Start proc 4536:com.google.android.configupdater/u0a105 for broadcast {com.google.android.configupdater/com.google.android.configupdater.MainReceiver}
+10-16 22:01:43.256 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{a460ac2 com.google.android.gm/10144} BLOCKED
+10-16 22:01:43.257 I/ActivityManager(  483): Killing 2454:com.google.android.gm/u0a144 (adj 0): change com.google.android.gm
+10-16 22:01:43.258 W/ActivityManager(  483): Scheduling restart of crashed service com.google.android.gm/androidx.work.impl.background.systemjob.SystemJobService in 1000ms for connection
+10-16 22:01:43.265 W/ActivityManager(  483): ProcessRecord{6b49bc0 0:com.google.android.gm/u0a144} is attached to a previous process 2454
+10-16 22:01:43.290 W/ActivityManager(  483): ProcessRecord{6b49bc0 0:com.google.android.gm/u0a144} is attached to a previous process 2454
+10-16 22:01:43.368 V/ActivityManager(  483): Got obituary of 2454:com.google.android.gm
+10-16 22:01:43.369 W/ActivityManager(  483): Slow operation: 104ms so far, now at startProcess: asking zygote to start proc
+10-16 22:01:43.375 W/ActivityManager(  483): Slow operation: 110ms so far, now at startProcess: returned from zygote!
+10-16 22:01:43.384 W/ActivityManager(  483): Slow operation: 119ms so far, now at startProcess: done updating battery stats
+10-16 22:01:43.384 W/ActivityManager(  483): Slow operation: 119ms so far, now at startProcess: building log message
+10-16 22:01:43.384 I/ActivityManager(  483): Start proc 4646:com.google.android.gm/u0a144 for broadcast {com.google.android.gm/com.google.android.libraries.internal.growth.growthkit.tiktok.GrowthKitBootCompletedListener_Receiver}
+10-16 22:01:43.384 W/ActivityManager(  483): Slow operation: 119ms so far, now at startProcess: starting to update pids map
+10-16 22:01:43.384 W/ActivityManager(  483): Slow operation: 119ms so far, now at startProcess: done updating pids map
+10-16 22:01:46.530 I/ActivityManager(  483): Start proc 4777:com.google.android.onetimeinitializer/u0a111 for broadcast {com.google.android.onetimeinitializer/com.google.android.onetimeinitializer.OneTimeInitializerReceiver}
+10-16 22:01:46.649 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.649 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.649 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.649 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.652 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-16 22:01:46.654 D/StrictMode( 3028): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-16 22:01:47.207 I/ActivityManager(  483): Killing 761:com.google.android.permissioncontroller/u0a171 (adj 0): change com.google.android.permissioncontroller
+10-16 22:01:47.209 W/ActivityManager(  483): Scheduling restart of crashed service com.google.android.permissioncontroller/com.android.permissioncontroller.role.service.RoleControllerServiceImpl in 1000ms for connection
+10-16 22:01:47.209 W/ActivityManager(  483): Scheduling restart of crashed service com.google.android.permissioncontroller/com.android.permissioncontroller.permission.service.PermissionControllerServiceImpl in 10999ms for connection
+10-16 22:01:47.212 W/ActivityManager(  483): ProcessRecord{31386fe 0:com.google.android.permissioncontroller/u0a171} is attached to a previous process 761
+10-16 22:01:47.280 V/ActivityManager(  483): Got obituary of 761:com.google.android.permissioncontroller
+10-16 22:01:47.284 W/ActivityManager(  483): Slow operation: 72ms so far, now at startProcess: asking zygote to start proc
+10-16 22:01:47.296 W/ActivityManager(  483): Slow operation: 84ms so far, now at startProcess: returned from zygote!
+10-16 22:01:47.296 W/ActivityManager(  483): Slow operation: 84ms so far, now at startProcess: done updating battery stats
+10-16 22:01:47.296 W/ActivityManager(  483): Slow operation: 84ms so far, now at startProcess: building log message
+10-16 22:01:47.296 I/ActivityManager(  483): Start proc 4826:com.google.android.permissioncontroller/u0a171 for broadcast {com.google.android.permissioncontroller/com.android.permissioncontroller.safetycenter.service.SafetyCenterBackgroundRefreshJobService$SetupSafetyCenterBackgroundRefreshReceiver}
+10-16 22:01:47.296 W/ActivityManager(  483): Slow operation: 84ms so far, now at startProcess: starting to update pids map
+10-16 22:01:47.308 W/ActivityManager(  483): Slow operation: 96ms so far, now at startProcess: done updating pids map
+10-16 22:01:47.484 I/ActivityManager(  483): Start proc 4849:com.google.android.projection.gearhead:shared/u0a108 for broadcast {com.google.android.projection.gearhead/com.google.android.apps.auto.components.app.fzero.FzeroReceiver}
+10-16 22:01:47.561 I/cr_CronetUrlRequestContext( 3028): destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@e8a738b
+10-16 22:01:47.693 W/ActivityManager(  483): Slow operation: 58ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked
+10-16 22:01:48.452 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{48b2440 com.google.android.settings.intelligence/10107} BLOCKED
+10-16 22:01:48.453 I/ActivityManager(  483): Killing 3757:com.google.android.settings.intelligence/u0a107 (adj 0): change com.google.android.settings.intelligence
+10-16 22:01:48.455 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{53c74be com.google.android.settings.intelligence/10107} BLOCKED
+10-16 22:01:48.456 W/ActivityManager(  483): ProcessRecord{6badcfb 0:com.google.android.settings.intelligence/u0a107} is attached to a previous process 3757
+10-16 22:01:48.475 V/ActivityManager(  483): Got obituary of 3757:com.google.android.settings.intelligence
+10-16 22:01:48.481 I/ActivityManager(  483): Start proc 4875:com.google.android.settings.intelligence/u0a107 for broadcast {com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryWidgetBootBroadcastReceiver}
+10-16 22:01:48.590 I/ActivityManager(  483): Killing 4875:com.google.android.settings.intelligence/u0a107 (adj -10000): change com.google.android.settings.intelligence
+10-16 22:01:48.702 W/ActivityManager(  483): Slow operation: 93ms so far, now at startProcess: done updating battery stats
+10-16 22:01:48.702 W/ActivityManager(  483): Slow operation: 93ms so far, now at startProcess: building log message
+10-16 22:01:48.702 I/ActivityManager(  483): Start proc 4879:com.google.android.settings.intelligence/u0a107 for broadcast {com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.contextualcards.impl.JobBootBroadcastReceiver}
+10-16 22:01:48.702 W/ActivityManager(  483): Slow operation: 93ms so far, now at startProcess: starting to update pids map
+10-16 22:01:48.702 W/ActivityManager(  483): Slow operation: 93ms so far, now at startProcess: done updating pids map
+10-16 22:01:49.411 I/ActivityManager(  483): Finished processing BOOT_COMPLETED for u0
+10-16 22:01:51.040 D/PrefCtrlListHelper( 1086): Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+10-16 22:01:51.181 I/ActivityManager(  483): Start proc 4968:com.android.emergency/u0a156 for content provider {com.android.emergency/com.android.emergency.EmergencySearchIndexablesProvider}
+10-16 22:01:51.246 I/ActivityManager(  483): Start proc 4980:com.google.android.gms.ui/u0a120 for content provider {com.google.android.gms/com.google.android.gms.accountsettings.content.SettingsSearchContentProvider}
+10-16 22:01:51.284 I/ActivityManager(  483): Start proc 4981:com.google.android.marvin.talkback/u0a145 for content provider {com.google.android.marvin.talkback/com.google.android.accessibility.talkback.preference.search.TalkBackSearchIndexablesProvider}
+10-16 22:01:52.887 I/AndroidRuntime( 4357): VM exiting with result code 0, cleanup skipped.
+10-16 22:01:52.894 I/ActivityManager(  483): Process com.google.android.apps.maps:server_recovery_process (pid 4357) has died: fg  RCVR
+10-16 22:01:52.919 I/ActivityManager(  483): Start proc 5060:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-16 22:01:53.059 I/AndroidRuntime( 5060): VM exiting with result code 0, cleanup skipped.
+10-16 22:01:53.094 I/ActivityManager(  483): Process com.google.android.apps.maps:server_recovery_process (pid 5060) has died: fg  RCVR
+10-16 22:01:53.180 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{7520a47 com.google.android.googlequicksearchbox/10119} BLOCKED
+10-16 22:01:53.180 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{6fa3274 com.google.android.gm/10144} BLOCKED
+10-16 22:01:53.180 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{d9f039d com.google.android.setupwizard/10116} BLOCKED
+10-16 22:01:53.180 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{9f2c64b com.google.android.projection.gearhead/10108} BLOCKED
+10-16 22:01:55.507 W/ActivityManager(  483): Unable to start service Intent { cmp=com.google.android.apps.tachyon/.clientapi.ClientApiService } U=0: not found
+10-16 22:01:56.721 I/ActivityManager(  483): Background started FGS: Allowed [callingPackage: com.google.android.googlequicksearchbox; callingUid: 10119; uidState: BFGS; intent: Intent { cmp=com.google.android.googlequicksearchbox/com.google.android.libraries.mdi.download.foreground.sting.ForegroundDownloadService (has extras) }; code:ACTIVITY_STARTER; tempAllowListReason:<broadcast:1000:android.intent.action.BOOT_COMPLETED,reason:,reasonCode:BOOT_COMPLETED,duration:20000,callingUid:1000>; targetSdkVersion:31; callerTargetSdkVersion:31; startForegroundCount:0; bindFromPackage:null]
+10-16 22:01:57.184 E/ActivityManager(  483): Cannot find package for uid: 1013
+10-16 22:01:57.796 W/ActivityManager(  483): Unable to start service Intent { cmp=com.google.android.apps.tachyon/.clientapi.ClientApiService } U=0: not found
+10-16 22:02:03.642 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{2f9488c com.google.android.googlequicksearchbox/10119} BLOCKED
+10-16 22:02:03.643 I/AppsFilter(  483): interaction: PackageSetting{2377dcb com.fakhritools.catalogue/10174} -> PackageSetting{86bbd5 com.google.android.gm/10144} BLOCKED
+10-16 22:02:06.564 W/ActivityManager(  483): Unable to start service Intent { act=com.google.android.play.core.splitinstall.BIND_SPLIT_INSTALL_SERVICE pkg=com.android.vending } U=0: not found
+10-16 22:02:08.493 I/ActivityManager(  483): Background started FGS: Allowed [callingPackage: com.google.android.inputmethod.latin; callingUid: 10135; uidState: IMPB; intent: Intent { cmp=com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.libs.dataservice.superpacks.SuperpacksForegroundTaskService }; code:CURRENT_INPUT_METHOD; tempAllowListReason:<null>; targetSdkVersion:33; callerTargetSdkVersion:33; startForegroundCount:0; bindFromPackage:null]
+10-16 22:02:08.500 W/ActivityManager(  483): Foreground service started from background can not have location/camera/microphone access: service com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.libs.dataservice.superpacks.SuperpacksForegroundTaskService
+10-16 22:02:12.251 I/ActivityManager(  483): Start proc 5384:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-16 22:02:12.386 W/ActivityManager(  483): Slow operation: 104ms so far, now at attachApplicationLocked: immediately before bindApplication
+10-16 22:02:12.398 W/ActivityManager(  483): Slow operation: 116ms so far, now at attachApplicationLocked: immediately after bindApplication
+10-16 22:02:12.411 W/ActivityManager(  483): Slow operation: 130ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+10-16 22:02:12.413 W/ActivityManager(  483): Slow operation: 131ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-16 22:02:12.414 W/ActivityManager(  483): Slow operation: 133ms so far, now at attachApplicationLocked: after sendPendingBroadcastsLocked

@@ -1,0 +1,28 @@
+22:01:35 devices List of devices attached emulator-5554 device 
+22:01:35 boot 1
+22:01:37 attach retry fetch failed
+22:01:42 shot 00-opening
+22:01:45 shot 01-opening-2
+22:01:49 shot 02-home
+22:01:49 PASS home shows the ranges
+22:01:50 FAIL photos load from inside the app (3)
+22:01:52 shot 03-home-ranges
+22:01:54 shot 04-home-shop
+22:01:56 shot 05-home-end
+22:02:01 shot 06-search
+22:02:01 PASS search finds 2" elbows
+22:02:03 PASS phone Back button leaves search
+22:02:06 shot 07-ranges
+22:02:09 shot 08-range
+22:02:11 shot 09-range-products
+file:///home/runner/work/Nocturne/Nocturne/app/ci/phone-test.mjs:24
+  const send = (method, params) => new Promise((res, rej) => { const i = ++id; pending.set(i, res); ws.send(JSON.stringify({ id: i, method, params })); setTimeout(() => { if (pending.has(i)) { pending.delete(i); rej(new Error('timeout ' + method)); } }, 20000); });
+                                                                                                                                                                                                                        ^
+
+Error: timeout Runtime.evaluate
+    at Timeout._onTimeout (file:///home/runner/work/Nocturne/Nocturne/app/ci/phone-test.mjs:24:217)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)
+
+Node.js v22.23.3
+TEST SCRIPT FAILED
