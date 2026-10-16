@@ -1,27 +1,50 @@
 // Taps through the catalogue app on a real Android phone (emulator) and saves a screenshot of each step.
-import { _android as android } from 'playwright';
+// Talks to the phone with adb and to the app's pages over the WebView's debugging connection.
+import { chromium } from 'playwright';
+import { execSync } from 'child_process';
+import fs from 'fs';
 const PKG = 'com.fakhritools.catalogue', out = 'out';
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 const fails = [];
 const check = (ok, what) => { log((ok ? 'PASS ' : 'FAIL ') + what); if (!ok) fails.push(what); };
-
-const [d] = await android.devices();
-log('device', d.model(), d.serial());
-const shot = async n => { await d.screenshot({ path: `${out}/${n}.png` }); log('shot', n); };
-const key = async k => { await d.shell('input keyevent ' + k); await wait(900); };
-
-async function launch() {
-  await d.shell('am force-stop ' + PKG);
-  await d.shell('am start -n ' + PKG + '/.MainActivity');
-  await wait(900);
-  const wv = await d.webView({ pkg: PKG }, { timeout: 60000 });
-  const pg = await wv.page();
-  pg.on('pageerror', e => { log('PAGE ERROR', e.message); fails.push('page error: ' + e.message); });
-  pg.on('console', m => { if (m.type() === 'error') log('console error', m.text()); });
-  return pg;
+setTimeout(() => { log('WATCHDOG: test took too long'); process.exit(2); }, 18 * 60 * 1000);
+const sh = (c, t = 30000) => { try { return execSync('adb ' + c, { timeout: t, encoding: 'utf8' }); } catch (e) { log('adb failed: ' + c + ' ' + e.message.split('\n')[0]); return ''; } };
+const d = { shell: async c => sh('shell ' + JSON.stringify(c)) };
+const shot = async n => { try { fs.writeFileSync(`${out}/${n}.png`, execSync('adb exec-out screencap -p', { timeout: 30000, maxBuffer: 64e6 })); log('shot', n); } catch (e) { log('shot failed', n); } };
+const key = async k => { sh('shell input keyevent ' + k); await wait(900); };
+let browser = null;
+async function attach() {
+  for (let i = 0; i < 30; i++) {
+    const pid = sh('shell pidof ' + PKG).trim();
+    if (pid) {
+      sh('forward --remove-all');
+      sh('forward tcp:9222 localabstract:webview_devtools_remote_' + pid);
+      try {
+        if (browser) await browser.close().catch(() => {});
+        browser = await chromium.connectOverCDP('http://127.0.0.1:9222', { timeout: 15000 });
+        const pages = browser.contexts().flatMap(c => c.pages());
+        const pg = pages.find(p => p.url().includes('app.fakhri.local')) || pages[0];
+        if (pg) {
+          pg.setDefaultTimeout(15000);
+          pg.on('pageerror', e => { log('PAGE ERROR', e.message); fails.push('page error: ' + e.message); });
+          pg.on('console', m => { if (m.type() === 'error') log('console error', m.text()); });
+          return pg;
+        }
+      } catch (e) { log('attach retry', e.message.split('\n')[0]); }
+    }
+    await wait(2000);
+  }
+  throw new Error('could not reach the app');
 }
-
+async function launch() {
+  sh('shell am force-stop ' + PKG);
+  sh('shell am start -n ' + PKG + '/.MainActivity');
+  await wait(900);
+  return attach();
+}
+log('devices', sh('devices').replace(/\s+/g, ' '));
+log('boot', sh('shell getprop sys.boot_completed').trim());
 let pg = await launch();
 await shot('00-opening');
 await wait(1000); await shot('01-opening-2');
@@ -68,7 +91,7 @@ check(await pg.evaluate(() => document.getElementById('zoom').hidden), 'Back clo
 // share a product (photo + text) opens the phone's share sheet
 await tap(L + '.bar [data-share]', 2500); await shot('14-share-sheet');
 await key(4); await wait(800);
-pg = await (await d.webView({ pkg: PKG })).page();
+pg = await attach();
 
 // show the customer
 await key(4); await wait(600);
@@ -90,7 +113,7 @@ await tap(L + '[data-val="deliver"]', 500); await tap(L + '[data-val="Cash"]', 5
 await scroll(600); await wait(600); await shot('20-order-form-filled');
 await tap(L + '[data-place]', 3500); await shot('21-after-send');   // WhatsApp is not on the emulator: the browser or a message shows
 await key(4); await wait(1500);
-pg = await (await d.webView({ pkg: PKG })).page();
+pg = await attach();
 await wait(800); await shot('22-order-sent');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-orders') || '[]').length === 1), 'order saved in Orders');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-list') || '[]').length === 0), 'cart empty after the order');
@@ -110,7 +133,7 @@ check(lc > 0, 'checked the website for a newer list');
 // Back from the root of Home leaves the app
 await tap('#tabs [data-tab="home"]', 900); await tap('#tabs [data-tab="home"]', 900);
 for (let i = 0; i < 4; i++) await key(4);
-const fg = await d.shell('dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity"');
+const fg = sh('shell dumpsys activity activities').split('\n').filter(l => /ResumedActivity/.test(l)).join(' ');
 check(!String(fg).includes(PKG), 'Back on Home leaves the app');
 
 // offline: everything still works
@@ -125,5 +148,5 @@ check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-orders') || '[
 await d.shell('svc wifi enable'); await d.shell('svc data enable');
 
 log(fails.length ? 'FAILED: ' + fails.join(' | ') : 'ALL CHECKS PASSED');
-await d.close();
+if (browser) await browser.close().catch(() => {});
 process.exit(fails.length ? 1 : 0);
