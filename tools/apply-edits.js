@@ -37,7 +37,18 @@ const material = v => {
   return /^other$/i.test(t) ? 'Other' : t.slice(0, 40);
 };
 const str = v => { if (typeof v !== 'string') throw new Error('Bad value'); return v.replace(/\s+/g, ' ').trim(); };
+// a section the owner emptied in the editor is removed, but only when every one of its products is still in another section
+// (found by photo or name), so nothing is lost by accident
+for (const e of edits.cats.filter(e => !e.items.length)) {
+  const c = W.FT_CATS.find(c => c.slug === e.slug); if (!c) continue;
+  const rest = edits.cats.filter(x => x !== e).flatMap(x => x.items), has = it => rest.some(r => photo(str(r[3])) === it[3] || str(r[0]) === it[0]);
+  const lost = c.items.filter(it => !has(it));
+  if (lost.length && !force) throw new Error('Section "' + c.name + '" was emptied but ' + lost.length + ' of its products are not in any other section (' + lost.map(it => it[0]).join('; ') + '). Check the file, then run with --force.');
+  W.FT_CATS.splice(W.FT_CATS.indexOf(c), 1);
+  console.log('Removed the emptied section "' + c.name + '" (its ' + c.items.length + ' products are in other sections)');
+}
 for (const e of edits.cats) {
+  if (!e.items.length) continue;
   let c = W.FT_CATS.find(c => c.slug === e.slug);
   if (!c && e.name && e.fam && W.FT_FAMILIES.some(f => f.id === e.fam)) W.FT_CATS.push(c = { slug: e.slug, name: e.name, fam: e.fam, desc: e.desc || '' });
   if (!c) throw new Error('Unknown category ' + e.slug);

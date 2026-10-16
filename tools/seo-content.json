@@ -193,19 +193,34 @@
     ]
   },
   "quick-couplings": {
-    "title": "Storz, Bauer & Millar Couplings in Dubai | Fakhri Tools",
-    "desc": "Aluminium Storz couplings 1-1/2\" to 4\" and galvanised Bauer and Millar couplings 3\" to 8\" for quick hose connections. Al Quoz, Dubai. Quote on WhatsApp.",
-    "h1": "Storz, Bauer and Millar coupling supplier in Dubai",
+    "title": "QRC, Storz, Bauer & Millar Couplings in Dubai | Fakhri",
+    "desc": "QRC quick-release couplings in brass or CS/SS, Storz, Bauer and Millar couplings, and DI universal couplings and flange adapters. Quote on WhatsApp.",
+    "h1": "QRC, Storz, Bauer and Millar coupling supplier in Dubai",
     "guideTitle": "How to choose a quick coupling",
     "intro": [
-      "We list aluminium Storz couplings from 1½\" to 4\", plus galvanised Bauer and Millar (Miller) couplings from 3\" to 8\" for quick hose connections.",
+      "We list QRC (quick-release) couplings, mostly used on compressed air lines. Hose ends and hose plugs come in ¼\", 5/16\", ⅜\" and ½\" and in 6, 8, 10 and 12 mm. Male thread couplings, female bodies, female plugs and male plugs come in ¼\", ⅜\" and ½\". Each part is listed in brass and in a carbon steel and stainless version.",
+      "We also list Storz couplings from 1½\" to 4\" in aluminium and stainless steel, plus galvanised Bauer and Millar (Miller) couplings from 3\" to 8\" for quick hose connections.",
       "Storz couplings are symmetrical: two of the same size lock together with no male or female half, which makes them common on water and pump hoses. Bauer couplings use a ball-and-socket style joint that allows some angle, which helps on long lines laid over uneven ground. Camlock couplings are on our camlock couplings page.",
-      "For a quote, WhatsApp the coupling type, size, hose end and the quantity."
+      "The body is the socket half, which usually stays on the supply side; the plug goes on the equipment or hose. Plugs and bodies must be from the same series to connect, so if you are adding to an existing set, send a photo of the plug you already use. Hose clamps are on our hose clamp page.",
+      "Ductile iron universal pipe joining couplings and universal flange adapters, PN10 to PN16, are listed from 2\" to 24\". A universal coupling joins two plain pipe ends without welding or threading, a common way to repair a damaged section or connect new pipe to old. A universal flange adapter turns a plain pipe end into a flanged end. Measure the actual outside diameter of the pipe before you order, because pipes of the same nominal size can differ by material.",
+      "For a quote, WhatsApp the coupling type, size, hose end and the quantity. For a QRC part, say body or plug and brass or steel. For a universal coupling or flange adapter, add the measured outside diameter and the pipe material."
     ],
     "faq": [
       [
         "What is the difference between a Storz and a camlock coupling?",
         "A Storz coupling has two identical halves that twist together. A camlock has a male adapter and a female coupler held by cam arms."
+      ],
+      [
+        "Will your QRC plug fit my existing coupling?",
+        "Only if they are the same series. Send a photo of your plug or body on WhatsApp and we will check it against our list."
+      ],
+      [
+        "Brass or steel QRC?",
+        "Each part is listed in brass and in a carbon steel and stainless version. Send a photo of the part it has to connect to and we confirm which one fits."
+      ],
+      [
+        "Do I need to weld or thread the pipe for a universal coupling?",
+        "No. Universal couplings and flange adapters fit onto plain pipe ends."
       ],
       [
         "Do you have rubber washers for these couplings?",
@@ -217,38 +232,16 @@
       ]
     ]
   },
-  "qrc-couplings-ludecke": {
-    "title": "QRC Quick-Release Couplings in Dubai: Brass, CS & SS | Fakhri",
-    "desc": "QRC hose ends, hose plugs, male thread parts, female bodies and plugs and male plugs, 1/4\" to 1/2\" and 6 to 12 mm, in brass or CS/SS. Al Quoz. Quote on WhatsApp.",
-    "h1": "QRC quick-release coupling supplier in Dubai",
-    "guideTitle": "How to choose a QRC coupling",
-    "intro": [
-      "We list QRC (quick-release) couplings, mostly used on compressed air lines. Hose ends and hose plugs come in ¼\", 5/16\", ⅜\" and ½\" and in 6, 8, 10 and 12 mm. Male thread couplings, female bodies, female plugs and male plugs come in ¼\", ⅜\" and ½\".",
-      "Each part is listed in brass and in a carbon steel and stainless version.",
-      "The body is the socket half, which usually stays on the supply side; the plug goes on the equipment or hose. Plugs and bodies must be from the same series to connect, so if you are adding to an existing set, send a photo of the plug you already use. Hose clamps are on our hose clamp page.",
-      "For a quote, WhatsApp the part (body or plug; hose, male or female), size, brass or steel, and the quantity."
-    ],
-    "faq": [
-      [
-        "Will your QRC plug fit my existing coupling?",
-        "Only if they are the same series. Send a photo of your plug or body on WhatsApp and we will check it against our list."
-      ],
-      [
-        "Brass or steel QRC?",
-        "Each part is listed in brass and in a carbon steel and stainless version. Send a photo of the part it has to connect to and we confirm which one fits."
-      ]
-    ]
-  },
   "union-flexible-connectors": {
-    "title": "Flexible Connectors & Universal Couplings in Dubai | Fakhri",
-    "desc": "GI flexible connectors, union type 1/2\" to 3\" and flanged CL150/PN16 1\" to 16\", plus universal couplings and PN16 flange adapters 2\" to 24\". Quote on WhatsApp.",
-    "h1": "Flexible connectors and universal couplings in Dubai",
+    "title": "G.I Flexible Connectors in Dubai: Union & Flanged | Fakhri",
+    "desc": "G.I flexible connectors: union type 1/2\" to 3\" and flanged CL150/PN16 1\" to 16\", for pump, chiller and equipment connections. Quote on WhatsApp.",
+    "h1": "Flexible connector supplier in Dubai: union and flanged",
     "guideTitle": "How to choose a flexible connector",
     "intro": [
       "We list G.I flexible connectors in Dubai in two forms. The union type comes from ½\" to 3\" for screwed pipework. The flanged (F/T) type comes in CL150 and PN16 drilling from 1\" to 16\".",
       "A flexible connector takes up vibration, small movement and minor misalignment, which is why it goes on pump suction and discharge, chillers and other equipment connections. Use the union type on small screwed lines and the flanged type on larger lines, and match the drilling (CL150 or PN16) to your flanges. Support the pipe on both sides; the connector is not meant to carry pipe weight or fix a large misalignment.",
-      "We also list universal pipe joining couplings and universal flange adapters in PN16, both from 2\" to 24\". A universal coupling joins two plain pipe ends without welding or threading, a common way to repair a damaged section or connect new pipe to old. A universal flange adapter turns a plain pipe end into a PN16 flanged end. Measure the actual outside diameter of the pipe before you order, because pipes of the same nominal size can differ by material.",
-      "For a quote, WhatsApp the size, union or flanged, CL150 or PN16, and the quantity. For a universal coupling or flange adapter, add the measured outside diameter and the pipe material."
+      "Hammer unions for oilfield lines are on our hammer union page, and universal couplings and flange adapters are on our couplings page.",
+      "For a quote, WhatsApp the size, union or flanged, CL150 or PN16, and the quantity."
     ],
     "faq": [
       [
@@ -261,11 +254,7 @@
       ],
       [
         "What sizes do you have?",
-        "Union type from ½\" to 3\"; flanged type from 1\" to 16\"; universal couplings and flange adapters from 2\" to 24\"."
-      ],
-      [
-        "Do I need to weld or thread the pipe for a universal coupling?",
-        "No. Universal couplings and flange adapters fit onto plain pipe ends."
+        "Union type from ½\" to 3\"; flanged type from 1\" to 16\"."
       ]
     ]
   },
@@ -1065,7 +1054,7 @@
         "hoses",
         "camlock-couplings",
         "chicago-couplings-fittings",
-        "qrc-couplings-ludecke",
+        "quick-couplings",
         "cock-valves"
       ],
       "wa": "Hello Fakhri Tools, I need a hydraulic hose made up. Size: , length: , end fittings: , quantity: ",

@@ -106,7 +106,7 @@
   const famName = id => FAMS.find(f => f.id === id).name;
   // a quote line is "slug:index|size" — the part after | is the size the customer picked
   // category links that were renamed keep working
-  const SLUG_ALIAS = { 'gaskets-caf-canf-sheets': 'gaskets-sheets' };
+  const SLUG_ALIAS = { 'gaskets-caf-canf-sheets': 'gaskets-sheets', 'qrc-couplings-ludecke': 'quick-couplings' };
   const slugAlias = s => SLUG_ALIAS[s] || s;
   function itemOf(key) {
     const k = String(key), bar = k.indexOf('|');
