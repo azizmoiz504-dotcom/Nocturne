@@ -12,6 +12,12 @@ jobs:
   phone-test:
     runs-on: ubuntu-latest
     timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: a33-swangle, api: 33, gpu: swangle_indirect }
+          - { name: a30-swiftshader, api: 30, gpu: swiftshader_indirect }
     steps:
       - uses: actions/checkout@v4
       - name: Install the build tools
@@ -28,18 +34,19 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run on an Android 13 phone
+      - name: Run on an Android phone
         uses: reactivecircus/android-emulator-runner@v2
         timeout-minutes: 30
         env:
+          RESULTS_BRANCH: catalogue-app-test-results-${{ matrix.name }}
           PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
         with:
-          api-level: 33
+          api-level: ${{ matrix.api }}
           target: google_apis
           arch: x86_64
           profile: pixel_6
           ram-size: 4096M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu ${{ matrix.gpu }} -no-snapshot -noaudio -no-boot-anim
           disable-animations: false
           script: bash app/ci/phone-test.sh
       - name: Save the screenshots
@@ -49,4 +56,4 @@ jobs:
           echo "commit $GITHUB_SHA run $GITHUB_RUN_ID" > run.txt
           git init -q && git checkout -q -b r && git add -A
           git -c user.name="catalogue test" -c user.email="test@users.noreply.github.com" commit -qm "Phone test results for $GITHUB_SHA"
-          git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" r:catalogue-app-test-results
+          git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" r:catalogue-app-test-results-${{ matrix.name }}
