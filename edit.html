@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Product Editor</title>
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<style>
+  :root { --ink:#0d1b26; --red:#c41e24; --line:#d3d9df; --bg:#eef1f4; --muted:#56636f; --soft:#f5f7f9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:18px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  select, button, input, textarea { font:inherit; color:inherit; }
+  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:14px 22px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
+  header h1 { font-size:22px; margin:0 10px 0 0; letter-spacing:.01em; }
+  header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 460px; min-width:220px; max-width:100%; font-size:19px; font-weight:600; color:var(--ink); background:#fff; }
+  .btn { border:0; border-radius:999px; padding:11px 20px; cursor:pointer; background:#fff; color:var(--ink); font-weight:700; font-size:17px; }
+  .btn.red { background:var(--red); color:#fff; }
+  .btn.ghost { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.6); }
+  .btn:hover { filter:brightness(1.08); }
+  .spacer { flex:1; }
+  .count { font-size:16px; opacity:.85; }
+  .notice { margin:14px 22px 0; padding:12px 18px; border-radius:14px; background:#fff; font-size:18px; border:2px solid #b9e4c9; }
+  .notice b { color:#11703a; }
+  .notice.warn { border-color:var(--red); background:#fff5f5; }
+  .notice.warn b { color:var(--red); }
+  .notice button { margin:8px 10px 0 0; border:0; border-radius:999px; padding:9px 18px; font-weight:700; cursor:pointer; background:var(--ink); color:#fff; }
+  .notice button.ghost { background:#fff; color:var(--ink); border:1.5px solid var(--line); }
+  details.help { background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; color:var(--muted); font-size:17px; }
+  details.help summary { cursor:pointer; color:var(--ink); font-weight:700; }
+  details.help b { color:var(--ink); }
+  details.help p { margin:8px 0 0; }
+  .catbox { margin:18px 22px 0; background:#fff; border-radius:18px; padding:18px; display:flex; flex-wrap:wrap; gap:20px; align-items:center; border:2px solid transparent; }
+  .catbox.sel { border-color:var(--red); }
+  .catbox .ph { width:130px; height:130px; flex:none; border-radius:50%; background:var(--soft); border:3px solid var(--red); display:grid; place-items:center; overflow:hidden; position:relative; cursor:pointer; }
+  .catbox .ph img { max-width:86%; max-height:86%; object-fit:contain; }
+  .catbox .ph.drop { outline:4px dashed var(--red); outline-offset:4px; }
+  .catbox .ph span { font-size:14px; color:var(--muted); text-align:center; padding:10px; }
+  .catbox .fields { flex:1; min-width:260px; display:flex; flex-direction:column; gap:8px; }
+  .catbox input { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:22px; font-weight:700; }
+  .catbox .row { margin-top:4px; }
+  .catbox .row button { flex:0 1 auto; padding:10px 16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:18px 22px 110px; }
+  .card { background:#fff; border:2px solid transparent; border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:7px; cursor:grab; position:relative; box-shadow:0 2px 6px rgba(13,27,38,.06); }
+  .card.sel { border-color:var(--red); }
+  .card.dragging { opacity:.4; }
+  .card.over { box-shadow:0 0 0 4px var(--red) inset; }
+  .num, .star { z-index:2; }
+  .num { position:absolute; top:20px; left:22px; font-size:15px; color:var(--muted); font-weight:800; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:99px; }
+  .star { position:absolute; top:18px; right:20px; font-size:14px; font-weight:700; background:var(--red); color:#fff; padding:3px 10px; border-radius:99px; }
+  .img { height:190px; background:var(--soft); border-radius:14px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .img img { max-width:90%; max-height:90%; object-fit:contain; pointer-events:none; }
+  .img.drop { outline:4px dashed var(--red); outline-offset:-8px; }
+  .img.empty { background:repeating-linear-gradient(45deg,#f3f5f7 0 10px,#eceff3 10px 20px); }
+  .img.empty img { display:none; }
+  .img.empty .hint { position:static; background:none; font-size:16px; font-weight:600; text-align:center; padding:8px 12px; }
+  .img .hint { position:absolute; bottom:8px; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:8px; font-size:13px; color:var(--muted); }
+  label { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+  .card input, .card select, .card textarea { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:18px; background:#fff; cursor:text; }
+  .card textarea { display:block; min-height:96px; resize:vertical; line-height:1.4; font-family:inherit; color:inherit; }
+  .card select { cursor:pointer; }
+  .card input:focus, .card select:focus, .card textarea:focus, .catbox input:focus { outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,27,38,.12); }
+  .card input[data-f="0"] { font-weight:700; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .row button { flex:1 1 auto; white-space:nowrap; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--soft); cursor:pointer; font-size:16px; font-weight:600; }
+  .row button:hover { background:#e6eaee; }
+  .row .del { color:var(--red); }
+  .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 24px; border-radius:999px; font-size:18px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  .toast.on { opacity:1; }
+  @media (max-width:700px) { body { font-size:17px; } header { padding:12px 14px; } header h1 { width:100%; font-size:20px; } header select { min-width:0; width:100%; flex:1 1 100%; } header { position:static; } .grid { grid-template-columns:1fr; gap:14px; padding:14px 14px 100px; } .catbox { margin:14px 14px 0; } .catbox .ph { width:100px; height:100px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Product Editor</h1>
+  <select id="cat" aria-label="Category"></select>
+  <span class="count" id="count"></span>
+  <span class="spacer"></span>
+  <button class="btn ghost" id="undo">Undo</button>
+  <button class="btn ghost" id="reset">Start over</button>
+  <button class="btn red" id="save">Save changes file</button>
+</header>
+<div class="notice" id="notice"></div>
+<div class="notice warn" id="older" hidden></div>
+<div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Save changes file</b> now and send it to Claude.</div>
+<details class="help" open>
+  <summary>How to use the editor</summary>
+  <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
+  <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
+  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own (for more than one, separate them with commas, e.g. "Brass, Stainless").</p>
+  <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
+  When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done". Your work is kept in this browser if you close the page.</p>
+</details>
+<div class="catbox" id="catbox">
+  <div class="ph" id="coverPh" title="Drop, paste or choose the category's main photo"><img id="coverImg" alt=""><span id="coverHint">No main photo yet: drop, paste or choose one</span></div>
+  <div class="fields">
+    <label for="catName">Category name (shown on the website)</label>
+    <input id="catName" maxlength="80">
+    <div class="row"><button id="coverPick" type="button">Choose main photo</button><span class="count" style="align-self:center;color:var(--muted)">or drop a photo on the circle, or click it and press Ctrl+V</span></div>
+  </div>
+</div>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// always load the newest product list (never a copy the browser kept from an earlier visit)
+(() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => startEditor(); d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
+function startEditor() {
+  const KEY = 'ft-editor-v1';
+  const IMG = window.FT_IMG || '';
+  // a fingerprint of the website's product list, so the editor notices when Claude adds products
+  const VER = (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(window.FT_CATS));
+  const keyOf = (slug, it) => slug + '|' + it[0];
+  const siteKeys = () => window.FT_CATS.flatMap(c => c.items.map(it => keyOf(c.slug, it)));
+  // a product is [name, specs, size, photo] plus an optional material the owner picked
+  const cp = it => { const o = [it[0], it[1].slice(), it[2], it[3]]; if (it[4]) o.push(it[4]); return o; };
+  const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(cp) })), images: {} });
+  // materials match the website's Material filter
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
+  const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
+  const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const OLD = 'ft-editor-older';
+  let state, history = [], sel = -1, clip = null;
+  try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  // Whenever the website's product list has changed (Claude applied a changes file), the editor starts from
+  // the newest website list. Older unsaved work is never mixed in (mixing it brought back old photos and made
+  // double products); it is put aside so it can still be downloaded and sent to Claude.
+  if (!state || !state.cats || state.ver !== VER) {
+    if (state && state.cats && state.dirty) {
+      const aside = { at: new Date().toISOString(), state };
+      let list = [];
+      try { const o = JSON.parse(localStorage.getItem(OLD)); list = Array.isArray(o) ? o : o && o.state ? [o] : []; } catch (e) {}
+      list.push(aside);
+      try { localStorage.removeItem(KEY); localStorage.setItem(OLD, JSON.stringify(list)); } catch (e) { window.ftOlder = list; }
+    }
+    state = fresh();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  let ci = 0;
+  const $ = s => document.querySelector(s);
+  const cat = () => state.cats[ci];
+  const src = p => !p ? '' : p.startsWith('new:') ? state.images[p] : IMG + p;
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
+  let shown = null;   // which notice is on screen, so it only redraws when that changes
+  const usedPhotos = st => new Set(st.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
+  let pT = 0;
+  function writeNow() {
+    clearTimeout(pT); pT = 0;
+    // photos that were replaced are not needed any more (undo keeps its own copy), so they don't fill the browser's storage
+    const used = usedPhotos(state);
+    Object.keys(state.images).forEach(k => { if (!used.has(k)) delete state.images[k]; });
+    let ok = true;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { ok = false; }
+    $('#full').hidden = ok;
+  }
+  // typing is saved after a short pause, not on every key (with many photos one save takes a moment)
+  const persist = () => { clearTimeout(pT); pT = setTimeout(writeNow, 400); if (shown !== null && shown !== noticeKind()) showNotice(); };
+  addEventListener('pagehide', () => { if (pT) writeNow(); });
+  addEventListener('beforeunload', () => { if (pT) writeNow(); });
+  const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
+  const change = fn => { snap(); fn(); state.dirty = true; persist(); render(); };
+
+  const selEl = $('#cat');
+  function fillCats() {
+    if (ci >= state.cats.length) ci = 0;
+    selEl.innerHTML = '';
+    state.cats.forEach((c, i) => selEl.add(new Option(c.name + ' (' + c.items.length + ')', i)));
+    selEl.value = ci;
+  }
+  selEl.onchange = () => { ci = +selEl.value; sel = -1; render(); };
+
+  function render() {
+    const c = cat();
+    $('#count').textContent = c.items.length + ' products';
+    if (selEl.options[ci]) selEl.options[ci].text = c.name + ' (' + c.items.length + ')';
+    $('#coverImg').style.display = c.cover ? '' : 'none'; $('#coverHint').style.display = c.cover ? 'none' : ''; if (c.cover) $('#coverImg').src = src(c.cover);
+    if (document.activeElement !== $('#catName')) $('#catName').value = c.name;
+    $('#catbox').classList.toggle('sel', sel === 'cover');
+    const g = $('#grid'); g.innerHTML = '';
+    c.items.forEach((it, i) => {
+      const d = document.createElement('div');
+      const own = !!it[4] && (it[4] === 'Other' || !MAT_LIST.includes(it[4]));
+      d.className = 'card' + (i === sel ? ' sel' : ''); d.draggable = true; d.dataset.i = i;
+      d.innerHTML =
+        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] && it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
+        '<div class="img"><img alt=""><span class="hint">drop or paste a photo</span></div>' +
+        '<label>Name</label><input data-f="0">' +
+        '<label>Specs (comma between each)</label><textarea data-f="1" rows="3"></textarea>' +
+        '<label>Size range</label><input data-f="2">' +
+        '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => m === 'Other' ? '<option value="Other"' + (own ? ' selected' : '') + '>Other: type your own…</option>' : '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
+        '<input data-matown placeholder="e.g. PVC, or Brass, Stainless" maxlength="40"' + (own ? '' : ' hidden') + '>' +
+        '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
+        '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
+        '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
+      if (it[3]) d.querySelector('img').src = src(it[3]);
+      else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
+      const box = f => d.querySelector('[data-f="' + f + '"]');
+      box(0).value = it[0]; box(1).value = it[1].join(', '); box(2).value = it[2];
+      if (own && it[4] !== 'Other') d.querySelector('[data-matown]').value = it[4];
+      g.appendChild(d);
+    });
+  }
+
+  const grid = $('#grid');
+  grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input, textarea')) snap(); });
+  // a card can't be dragged while you press inside a box or dropdown (dragging stole the click before)
+  grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, textarea, select, button'); });
+  grid.addEventListener('input', e => {
+    if (e.target.matches('[data-matown]')) { const it = cat().items[+e.target.closest('.card').dataset.i]; it[4] = e.target.value.trim() || 'Other'; state.dirty = true; persist(); return; }
+    const f = e.target.dataset.f; if (f === undefined) return;
+    const it = cat().items[+e.target.closest('.card').dataset.i];
+    // specs: a comma or a new line starts the next one; a comma inside a number (0–15,000 PSI) does not
+    it[+f] = f === '1' ? e.target.value.split(/\n|,(?!\d{3}\b)/).map(s => s.trim()).filter(Boolean) : e.target.value;
+    state.dirty = true; persist();
+  });
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.card'); if (!card) return;
+    const i = +card.dataset.i, items = cat().items, a = e.target.dataset.a;
+    // clicks on boxes and dropdowns must not redraw the cards, or an open dropdown closes straight away
+    if (!a) { select(i, false); return; }
+    if (a === 'up' && i > 0) change(() => { items.splice(i - 1, 0, items.splice(i, 1)[0]); sel = i - 1; });
+    if (a === 'down' && i < items.length - 1) change(() => { items.splice(i + 1, 0, items.splice(i, 1)[0]); sel = i + 1; });
+    if (a === 'copy') { change(() => { items.splice(i + 1, 0, JSON.parse(JSON.stringify(items[i]))); sel = i + 1; }); toast('Copied. Change the new card’s name and photo.'); }
+    if (a === 'cover') { change(() => { cat().cover = items[i][3]; }); toast('Main photo changed'); }
+    if (a === 'pick') pickFile(i);
+    if (a === 'del' && confirm('Delete "' + items[i][0] + '"?')) change(() => { items.splice(i, 1); sel = -1; });
+  });
+  // move a card to another section (it goes to the end of that section's list)
+  grid.addEventListener('change', e => {
+    if (e.target.matches('[data-mat]')) {
+      const card = e.target.closest('.card'), it = cat().items[+card.dataset.i], v = e.target.value, box = card.querySelector('[data-matown]');
+      snap(); if (v) it[4] = v; else it.length = 4; state.dirty = true; persist();
+      box.hidden = v !== 'Other';
+      if (v === 'Other') { box.value = ''; box.focus(); toast('Type the material in the box'); }
+      else toast(v ? 'Material set to ' + v : 'Material back to automatic');
+      return;
+    }
+    if (!e.target.matches('[data-move]') || e.target.value === '') return;
+    const i = +e.target.closest('.card').dataset.i, to = state.cats[+e.target.value], c = cat(), it = c.items[i];
+    change(() => {
+      c.items.splice(i, 1);
+      if (c.cover && c.cover === it[3]) c.cover = (c.items.find(x => x[3]) || [])[3] || '';
+      to.items.push(it); sel = -1;
+    });
+    fillCats();
+    toast('Moved "' + it[0] + '" to ' + to.name);
+  });
+  function select(i, rerender) { sel = i; if (rerender) render(); else { document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); $('#catbox').classList.toggle('sel', i === 'cover'); } }
+
+  // Category name and main photo
+  const nameIn = $('#catName');
+  nameIn.addEventListener('focus', snap);
+  nameIn.addEventListener('input', () => { const v = nameIn.value.trim(); if (!v) return; cat().name = v; state.dirty = true; persist(); if (selEl.options[ci]) selEl.options[ci].text = v + ' (' + cat().items.length + ')'; });
+  // no redraw here: it removed the box you had just clicked, so that first click and typing were lost (this section's name isn't shown on its own cards)
+  nameIn.addEventListener('blur', () => { if (!nameIn.value.trim()) nameIn.value = cat().name; });
+  const ph = $('#coverPh');
+  ph.addEventListener('click', () => { select('cover', false); toast('Main photo picked: press Ctrl+V to paste a photo'); });
+  $('#coverPick').onclick = () => { select('cover', false); pickFile('cover'); };
+  ph.addEventListener('dragover', e => { e.preventDefault(); ph.classList.add('drop'); });
+  ph.addEventListener('dragleave', () => ph.classList.remove('drop'));
+  ph.addEventListener('drop', e => {
+    e.preventDefault(); ph.classList.remove('drop');
+    const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+    if (f) setPhoto('cover', f); else if (from >= 0) { const it = cat().items[from]; if (it[3]) { change(() => { cat().cover = it[3]; }); toast('Main photo changed'); } } else toast('That was not a photo');
+  });
+
+  // Drag to reorder
+  let from = -1;
+  grid.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c || e.target.matches('input, textarea')) return; from = +c.dataset.i; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'card'); });
+  grid.addEventListener('dragend', () => { from = -1; document.querySelectorAll('.dragging,.over,.drop').forEach(x => x.classList.remove('dragging', 'over', 'drop')); });
+  grid.addEventListener('dragover', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    document.querySelectorAll('.over,.drop').forEach(x => x.classList.remove('over', 'drop'));
+    if (from < 0) c.querySelector('.img').classList.add('drop'); else c.classList.add('over');
+  });
+  grid.addEventListener('drop', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    const to = +c.dataset.i;
+    if (from < 0) { const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) setPhoto(to, f); else toast('That was not a photo'); return; }
+    if (from !== to) { const fr = from; change(() => { const items = cat().items; items.splice(to, 0, items.splice(fr, 1)[0]); sel = to; }); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => e.preventDefault());
+
+  // Photos: drop, paste or choose; shrunk to 800px so the changes file stays small
+  function pickFile(i) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = () => inp.files[0] && setPhoto(i, inp.files[0]); inp.click(); }
+  function setPhoto(i, file) {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const s = Math.min(1, 800 / Math.max(im.width, im.height));
+        const cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+        const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+        const id = 'new:' + cat().slug + '-' + Date.now().toString(36);
+        if (i === 'cover') { change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); cat().cover = id; sel = 'cover'; }); toast('Main photo changed'); return; }
+        change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
+        toast('Photo changed');
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  }
+  document.addEventListener('paste', e => {
+    const f = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/'));
+    if (f) { e.preventDefault(); if (sel === -1) return toast('Click a card or the main photo first, then paste'); setPhoto(sel, f.getAsFile()); return; }
+    if (!e.target.matches('input, textarea') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
+  });
+  document.addEventListener('copy', e => { if (e.target.matches('input, textarea') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+
+  $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
+  $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
+  $('#save').onclick = () => {
+    const used = usedPhotos(state);
+    const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), ver: state.ver, cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+    a.download = 'fakhri-product-changes.json'; a.click();
+    state.dirty = false; state.saved = true; persist(); writeNow();
+    toast('Saved to Downloads as fakhri-product-changes.json');
+  };
+  // what the person is looking at: the newest website list, or their unsaved work on top of it
+  const older = () => { if (window.ftOlder) return window.ftOlder; try { const o = JSON.parse(localStorage.getItem(OLD)); return Array.isArray(o) ? o.filter(x => x && x.state) : o && o.state ? [o] : []; } catch (e) { return []; } };
+  const when = iso => { try { return new Date(iso).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+  function noticeKind() { return state.dirty ? 'dirty' : state.saved ? 'saved' : 'site'; }
+  function showNotice() {
+    const n = window.FT_CATS.reduce((a, c) => a + c.items.length, 0);
+    shown = noticeKind();
+    $('#notice').innerHTML = shown === 'dirty'
+      ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Save changes file</b> when you finish.'
+      : shown === 'saved'
+        ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Send it to Claude. After Claude says it is live, refresh this page to see the new website list.'
+        : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
+    const o = older(), box = $('#older');
+    box.hidden = !o.length;
+    if (o.length) box.innerHTML = '<b>Older unsaved changes were put aside.</b> This browser had changes from ' + o.map(x => when(x.at)).join(' and ') + ' that were never saved, and the website has been updated since. They are NOT in the list below. Download them only if Claude asks for them.' +
+      '<br>' + o.map((x, k) => '<button type="button" class="olderGet" data-k="' + k + '">Download older changes' + (o.length > 1 ? ' (' + escH(when(x.at)) + ')' : '') + '</button>').join('') + '<button type="button" class="ghost" id="olderDel">Delete ' + (o.length > 1 ? 'them all' : 'them') + '</button>';
+  }
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('olderGet')) {
+      const all = older(), k = +e.target.dataset.k, o = all[k]; if (!o) return;
+      const used = usedPhotos(o.state);
+      const out = { kind: 'fakhri-product-edits', saved: o.at, older: true, ver: o.state.ver, cats: o.state.cats, images: Object.fromEntries(Object.entries(o.state.images || {}).filter(([k]) => used.has(k))) };
+      const name = 'fakhri-product-changes-OLDER' + (all.length > 1 ? '-' + (k + 1) : '') + '.json';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+      a.download = name; a.click();
+      toast('Saved to Downloads as ' + name);
+    }
+    if (e.target.id === 'olderDel' && confirm('Delete the older unsaved changes from this browser?')) { window.ftOlder = null; try { localStorage.removeItem(OLD); } catch (err) {} showNotice(); }
+  });
+  fillCats();
+  render();
+  showNotice();
+}
+</script>
+</body>
+</html>
