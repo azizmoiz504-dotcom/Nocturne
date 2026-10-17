@@ -38,6 +38,8 @@ input{font:inherit;color:inherit}
 .btn--wa:hover{background:#17b660}
 .btn--ghost{border:2px solid rgba(255,255,255,.35);color:#fff}
 .btn--ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.btn--line{border:2px solid var(--line);color:var(--text);background:#fff}
+.btn--line:hover{border-color:var(--navy)}
 .btn--big{min-height:58px;font-size:19px;width:100%}
 
 /* ---------- top bar ---------- */

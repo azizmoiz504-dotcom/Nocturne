@@ -6,10 +6,12 @@
   'use strict';
   const LIVE = 'https://azizmoiz504-dotcom.github.io/Nocturne/';
   const WA = '971522767034';
+  const EMAIL = 'dxbsales@ftools.com';
   const OPEN = { days: [1, 2, 3, 4, 5, 6], from: 7.5, to: 18 };   // Monday to Saturday, 7:30am to 6:00pm, Dubai time
   const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const waUrl = t => 'https://wa.me/' + WA + (t ? '?text=' + encodeURIComponent(t) : '');
+  const mailUrl = (subject, body) => 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + (body ? '&body=' + encodeURIComponent(body) : '');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let toastT;
@@ -173,18 +175,20 @@
       const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : o.matPick && m.opts.includes(o.matPick) ? o.matPick + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
       return { size, spec, mat };
     }
-    function itemBlock(o, q, n) {
-      const d = describe(o);
-      return ['*' + (n ? n + '. ' : '') + o.name + '*', 'Group: ' + o.c.name, d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + (q || '')].filter(Boolean).join('\n');
+    // plain = for email (no WhatsApp *bold* marks)
+    function itemBlock(o, q, n, plain) {
+      const d = describe(o), b = plain ? '' : '*';
+      return [b + (n ? n + '. ' : '') + o.name + b, 'Group: ' + o.c.name, d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + (q || '')].filter(Boolean).join('\n');
     }
     const HELLO = 'Hello Fakhri Tools, I would like a quote.';
-    const priceMessage = (o, q) => 'Hello Fakhri Tools, please send me a price for:\n\n' + itemBlock(o, q) + '\n\nThank you.';
-    function quoteMessage() {
+    const priceMessage = (o, q, plain) => 'Hello Fakhri Tools, please send me a price for:\n\n' + itemBlock(o, q, 0, plain) + '\n\nThank you.';
+    function quoteMessage(plain) {
       if (!quote.size) return HELLO;
       return 'Hello Fakhri Tools, please send me a quote for ' + (quote.size === 1 ? 'this item' : 'these ' + quote.size + ' items') + ':\n\n' +
-        [...quote].map(([k, q], i) => itemBlock(itemOf(k), q, quote.size > 1 ? i + 1 : 0)).join('\n\n') + '\n\nThank you.';
+        [...quote].map(([k, q], i) => itemBlock(itemOf(k), q, quote.size > 1 ? i + 1 : 0, plain)).join('\n\n') + '\n\nThank you.';
     }
     $$('[data-wa]').forEach(a => { a.href = waUrl(HELLO); a.target = '_blank'; a.rel = 'noopener'; });
+    $$('[data-mail]').forEach(a => { a.href = mailUrl('Quote request — Fakhri Tools', HELLO); });
 
     /* ---------- quote list (saved on this phone) ---------- */
     const quote = new Map(), STORE = 'ft-products-quote';
@@ -285,6 +289,7 @@
       if (lines.length) $('#pwState').textContent = 'In your quote: ' + lines.reduce((n, [, x]) => n + x, 0) + ' pcs';
       const now = Object.assign({}, o, { pick: p.ok ? p.v : null, specPick: readSpecs(pk), matPick: readMat(pk, o) });
       const a = $('#pwWa'); a.href = waUrl(priceMessage(now, parseQty($('#pwQty').value))); a.target = '_blank'; a.rel = 'noopener';
+      $('#pwMail').href = mailUrl('Price request — ' + o.name, priceMessage(now, parseQty($('#pwQty').value), true));
     }
     function openPW(key) {
       const o = itemOf(key); if (!o) return;
@@ -360,6 +365,8 @@
         $('#qlClear').hidden = false;
       }
       const a = $('#qlSend'); a.href = waUrl(quoteMessage()); a.target = '_blank'; a.rel = 'noopener';
+      $('#qlMail').href = mailUrl('Quote request — Fakhri Tools', quoteMessage(true));
+      $('#qlMail').lastChild.textContent = quote.size ? 'Send quote by email' : 'Email us';
     }
     $('#qlList').addEventListener('click', e => {
       const line = e.target.closest('.line'); if (!line) return;
