@@ -769,7 +769,7 @@
       if (!miss) return true;
       const g = $('[data-g="' + miss + '"]', el);
       if (g) { g.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (!reduce) g.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); g.classList.remove('is-miss'); void g.offsetWidth; g.classList.add('is-miss'); }
-      if (N && N.vibrate) N.vibrate(40);
+      buzz();
       toast({ size: 'Choose a size, or tap Not sure', specs: 'Choose the specs & ratings, or tap Not sure', mat: 'Choose a material, or tap Not sure' }[miss]);
       return false;
     }
