@@ -152,15 +152,18 @@
     const SPECS = new Map();
     const specOpts = o => { if (!SPECS.has(o.id)) SPECS.set(o.id, CH.specOpts(o.chips)); return SPECS.get(o.id); };
     const matOpts = o => CH.matOpts(ownMat(o) || matText(o));
+    // specs and material with more than one option get a "Not sure" button ("?"), like the size
     function choicesHTML(o, cur) {
       const specs = specOpts(o), m = matOpts(o), pickedS = cur ? cur.specPick : specs.length === 1 ? specs : [], pickedM = cur ? cur.matPick : '';
       return sizeChoiceHTML(o, cur ? cur.pick : '') +
-        (specs.length ? group('specs', 'Specs &amp; ratings', specs.length > 1 ? 'Tap the ones you need' : '', specs.map(v => btn('data-spec', v, pickedS.includes(v))).join('')) : '') +
-        (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') : fixed(m.full), m.note) : '');
+        (specs.length ? group('specs', 'Specs &amp; ratings', specs.length > 1 ? 'Tap the ones you need' : '', specs.map(v => btn('data-spec', v, pickedS.includes(v))).join('') + (specs.length > 1 ? btn('data-spec', '?', pickedS.includes('?'), 'Not sure') : '')) : '') +
+        (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') + btn('data-mat', '?', pickedM === '?', 'Not sure') : fixed(m.full), m.note) : '');
     }
     const readSpecs = root => $$('[data-spec].is-on', root).map(b => b.dataset.spec);
     const readMat = (root, o) => { const m = matOpts(o), b = $('[data-mat].is-on', root); return m.opts.length > 1 && b ? b.dataset.mat : ''; };
     const keyOf = (o, v, specs, mat) => { specs = specs || []; return o.id + '|' + v + (specs.length || mat ? '|' + specs.join('¦') + '|' + (mat || '') : ''); };
+    // like the size, specs and material with more than one option need a pick or "Not sure" before the line goes in
+    const missingChoice = (root, o) => specOpts(o).length > 1 && !readSpecs(root).length ? 'specs' : matOpts(o).opts.length > 1 && !readMat(root, o) ? 'mat' : '';
 
     /* ---------- how a product reads in the quote list and on WhatsApp (same as the main site) ---------- */
     function describe(o) {
@@ -171,7 +174,8 @@
         size = !base || base === '?' ? 'to confirm' + (o.size && sp.t !== 'one' ? ' (we offer ' + o.size.split(' · ')[0] + ')' : '') : base.replace(/\?/g, 'to confirm');
         if (len) size += ', length ' + len;
       }
-      const spec = o.specPick.length ? o.specPick.join(', ') : specs.length === 1 && o.pick === null ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
+      const picked = o.specPick.filter(x => x !== '?');   // "?" = Not sure: reads "to confirm (options)", like the size
+      const spec = picked.length ? picked.join(', ') : specs.length === 1 && o.pick === null ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
       const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : o.matPick && m.opts.includes(o.matPick) ? o.matPick + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
       return { size, spec, mat };
     }
@@ -308,8 +312,11 @@
     pk.addEventListener('click', e => {
       const b = e.target.closest('button.cho'); if (!b || b.disabled) return;
       const o = itemOf(pwId);
-      if (b.hasAttribute('data-spec')) setOn(b, !b.classList.contains('is-on'));
-      else {
+      if (b.hasAttribute('data-spec')) {
+        const was = b.classList.contains('is-on');
+        setOn(b, !was);
+        if (!was) $$('[data-spec]', pk).forEach(x => { if (x !== b && (b.dataset.spec === '?' || x.dataset.spec === '?')) setOn(x, false); });   // "Not sure" or specs, not both
+      } else {
         const attr = b.hasAttribute('data-pk-a') ? 'data-pk-a' : b.hasAttribute('data-pk-b') ? 'data-pk-b' : 'data-mat';
         const was = b.classList.contains('is-on');
         $$('[' + attr + ']', pk).forEach(x => setOn(x, false));
@@ -318,7 +325,7 @@
         setOn(b, attr === 'data-mat' ? !was : true);
         tidyPair(pk, o);
       }
-      $('.chg--size', pk) && $('.chg--size', pk).classList.remove('pk-err');
+      const g = b.closest('.chg'); if (g) g.classList.remove('pk-err');
       syncPW();
     });
     pk.addEventListener('input', syncPW);
@@ -327,10 +334,11 @@
     $('#pwQty').addEventListener('blur', e => { e.target.value = parseQty(e.target.value); });
     $('#pwAdd').addEventListener('click', () => {
       const o = itemOf(pwId), p = readPick(pk, o);
-      if (!p.ok) {
-        const g = $('.chg--size', pk); g.classList.remove('pk-err'); void g.offsetWidth; g.classList.add('pk-err');
+      const miss = !p.ok ? 'size' : missingChoice(pk, o);
+      if (miss) {
+        const g = $('.chg--' + miss, pk); g.classList.remove('pk-err'); void g.offsetWidth; g.classList.add('pk-err');
         g.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        toast('Choose a size first (or tap “Not sure”)');
+        toast({ size: 'Choose a size first (or tap “Not sure”)', specs: 'Choose the specs & ratings (or tap “Not sure”)', mat: 'Choose a material (or tap “Not sure”)' }[miss]);
         return;
       }
       const key = keyOf(o, p.v, readSpecs(pk), readMat(pk, o)), qty = parseQty($('#pwQty').value);
