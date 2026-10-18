@@ -1311,9 +1311,9 @@ body.has-quote .fabs{bottom:10.5px}
 .chg__opts input:focus{outline:0;border-color:var(--paper-ink);box-shadow:0 0 0 2.25px rgba(7,24,35,.12)}
 .chg__note{font-size:12.375px;color:var(--paper-mute)}
 .chg__none{font-size:13.5px;color:var(--paper-mute)}
-.chg--size.pk-err .chg__lab .mono{color:var(--red)}
-.chg--size.pk-err .cho:not(.is-on):not(:disabled){border-color:var(--red)}
-.chg--size.pk-err .chg__opts{animation:pkShake .4s}
+.chg.pk-err .chg__lab .mono{color:var(--red)}
+.chg.pk-err .cho:not(.is-on):not(:disabled){border-color:var(--red)}
+.chg.pk-err .chg__opts{animation:pkShake .4s}
 @keyframes pkShake{20%,60%{transform:translateX(-3.75px)}40%,80%{transform:translateX(3.75px)}}
 @media (max-width:450px){
   .qv__choices{gap:12px;margin-top:15px}
