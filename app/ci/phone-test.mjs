@@ -89,6 +89,8 @@ const top = () => pg.evaluate(() => { const v = [...document.querySelectorAll('.
 const scroll = y => pg.evaluate(y => { const v = [...document.querySelectorAll('.view')].filter(x => x.style.visibility !== 'hidden').pop(); v.scrollTo(0, y); }, y);
 const tap = async (sel, ms = 900) => { await pg.locator(sel).first().click(); await wait(ms); };
 const L = '.view:last-child ';
+// picks the first option in every size / specs / material group still open (the app asks for a pick or Not sure)
+const pickRest = scope => pg.evaluate(async scope => { for (let i = 0; i < 6; i++) { const r = [...document.querySelectorAll(scope + ' .pkg[data-g] .sizes')].find(r => !r.querySelector('.sz.is-on')); if (!r) return; r.querySelector('.sz:not(.is-off)').click(); await new Promise(r => setTimeout(r, 250)); } }, scope);
 
 check(await pg.evaluate(() => window.FT_CATS.length > 20 && document.querySelectorAll('.ccard').length > 5), 'home shows the ranges');
 const imgsOk = await pg.evaluate(() => [...document.querySelectorAll('.ph img')].filter(i => i.complete && i.naturalWidth > 0).length);
@@ -113,7 +115,9 @@ await tap(L + '[data-go="c/ball-valves"]', 1300); await shot('08-range');
 await scroll(420); await wait(800); await shot('09-range-products');
 await tap(L + '.pcard', 1400); await shot('10-product');
 await scroll(420); await wait(700);
-await tap(L + '.sz[data-row="s"] >> nth=3', 300); await tap(L + '.sz[data-row="sp"] >> nth=0', 300);
+await tap(L + '#addBtn', 900);
+check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-list') || '[]').length === 0 && document.querySelector('.view:last-child .pkg.is-miss') !== null), 'Add asks for the size first');
+await tap(L + '.sz[data-row="s"] >> nth=3', 300); await tap(L + '.sz[data-row="sp"] >> nth=0', 300); await pickRest('.view:last-child');
 await shot('11-sizes');
 await tap(L + '#addBtn', 1200); await shot('12-added');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-list') || '[]').length === 1), 'product went into the cart');
@@ -137,7 +141,7 @@ await key(4);
 
 // quick add with the + on a card
 await tap(L + '.pcard >> nth=2 >> [data-add]', 1000); await shot('17-quick-add');
-await tap('#sheet .sz >> nth=0', 300); await tap('#sheet #sadd', 1500);
+await tap('#sheet [data-g="specs"] .sz--ask', 300).catch(() => {}); await pickRest('#sheet'); await tap('#sheet #sadd', 1500);
 
 // cart -> order form -> send
 await tap('#tabs [data-tab="cart"]', 1200); await shot('18-cart');

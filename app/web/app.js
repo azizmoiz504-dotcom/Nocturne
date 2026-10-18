@@ -205,13 +205,13 @@
       size = !base || base === '?' ? 'to confirm' + (o && o.size && sp.t !== 'one' ? ' (we offer ' + o.size.split(' · ')[0] + ')' : '') : base.replace(/\?/g, 'to confirm');
       if (len) size += ', length ' + len;
     }
-    const sps = l.sp || [];
+    const sps = (l.sp || []).filter(x => x !== '?');   // "?" = Not sure: reads "to confirm (options)", like the size
     const spec = sps.length ? sps.join(', ') : specs.length === 1 ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
     const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : l.mt && m.opts.includes(l.mt) ? l.mt + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
     return { size, spec, mat };
   }
   // only what was chosen, for short lists: (2" · PN16 · SS316)
-  const shortOf = l => { const o = lineProduct(l), d = describe(l, o), x = [d.size && !/^to confirm/.test(d.size) ? d.size : '', (l.sp || []).join(', '), l.mt].filter(Boolean).join(' · '); return x ? ' <em>(' + esc(x) + ')</em>' : ''; };
+  const shortOf = l => { const o = lineProduct(l), d = describe(l, o), x = [d.size && !/^to confirm/.test(d.size) ? d.size : '', (l.sp || []).filter(x => x !== '?').join(', '), l.mt !== '?' && l.mt].filter(Boolean).join(' · '); return x ? ' <em>(' + esc(x) + ')</em>' : ''; };
   const groupOfLine = (l, o) => o ? o.c.name : ((catBy(l.k) || {}).name || '');
   function itemBlock(l, n, plain) {
     const o = lineProduct(l), d = describe(l, o), b = plain ? '' : '*';
@@ -685,6 +685,7 @@
     const pk = picker(o); $('#pk', el).appendChild(pk.el);
     const q = qtyBox(1); $('#qty', el).replaceWith(q.el);
     $('#addBtn', el).addEventListener('click', () => {
+      if (!pk.check()) return;
       addLines(o, pk.read(), q.get());
       flyToList($('.phero .ph img', el) || $('.phero .ph', el));
       toast('Added to the cart', 'Open cart', () => switchTab('cart'));
@@ -715,17 +716,17 @@
     function draw() {
       let x = '';
       if (sp.t === 'one') x = '<div class="pkg">' + hdr('Size') + '<div class="sizes">' + chip('one', sp.v, true) + '</div></div>';
-      else if (sp.t === 'sel') x = '<div class="pkg">' + hdr('Size', 'choose one') + '<div class="sizes">' + sp.opts.map(v => chip('s', v, s === v)).join('') + chip('s', '?', s === '?', ' sz--ask') + '</div></div>';
+      else if (sp.t === 'sel') x = '<div class="pkg" data-g="size">' + hdr('Size', 'choose one') + '<div class="sizes">' + sp.opts.map(v => chip('s', v, s === v)).join('') + chip('s', '?', s === '?', ' sz--ask') + '</div></div>';
       else if (sp.t === 'pair') {
         const lim = sp.lt && a && a !== '?' ? rung(a) : 99;
-        x = '<div class="pkg">' + hdr('Size', sp.lt ? 'big end, then small end' : 'both ends') +
+        x = '<div class="pkg" data-g="size">' + hdr('Size', sp.lt ? 'big end, then small end' : 'both ends') +
           '<p class="pk__sub">' + (sp.lt ? 'Big end' : 'First end') + '</p><div class="sizes">' + sp.L.map(v => chip('a', v, a === v)).join('') + chip('a', '?', a === '?', ' sz--ask') + '</div>' +
           '<p class="pk__sub">' + (sp.lt ? 'Small end' : 'Second end') + '</p><div class="sizes">' + sp.S.map(v => chip('b', v, b === v, sp.lt && rung(v) >= lim ? ' is-off' : '')).join('') + chip('b', '?', b === '?', ' sz--ask') + '</div></div>';
       } else if (o.size || sp.len) x = '<div class="pkg">' + hdr('Size', sp.hint ? 'we offer ' + sp.hint : '') + '<input class="field" data-t maxlength="40" placeholder="' + esc(sp.hint ? 'Type the size (' + sp.hint + ')' : 'Size, if the customer knows it') + '"></div>';
       if (sp.len) x += '<p class="pk__sub">Length</p><input class="field" data-len maxlength="30" placeholder="Length (' + esc(sp.len) + ')">';
       if (sp.note) x += '<p class="note">' + esc(sp.note) + '</p>';
-      if (specs.length) x += '<div class="pkg">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(v => chip('sp', v, sps.has(v))).join('') + '</div></div>';
-      if (m.opts.length) x += '<div class="pkg">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + (m.opts.length > 1 ? '<div class="sizes">' + m.opts.map(v => chip('mt', v, mt === v)).join('') + '</div>' : '<p class="pk__fixed">' + esc(m.full) + '</p>') + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
+      if (specs.length) x += '<div class="pkg" data-g="specs">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(v => chip('sp', v, sps.has(v))).join('') + (specs.length > 1 ? chip('sp', '?', sps.has('?'), ' sz--ask') : '') + '</div></div>';
+      if (m.opts.length) x += '<div class="pkg" data-g="mat">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + (m.opts.length > 1 ? '<div class="sizes">' + m.opts.map(v => chip('mt', v, mt === v)).join('') + chip('mt', '?', mt === '?', ' sz--ask') + '</div>' : '<p class="pk__fixed">' + esc(m.full) + '</p>') + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
       const keep = { t: $('[data-t]', el) && $('[data-t]', el).value, len: $('[data-len]', el) && $('[data-len]', el).value };
       el.innerHTML = x;
       if (keep.t && $('[data-t]', el)) $('[data-t]', el).value = keep.t;
@@ -738,7 +739,7 @@
       if (row === 's') s = s === val ? '' : val;
       else if (row === 'a') { a = a === val ? '' : val; if (sp.lt && a && a !== '?' && b && b !== '?' && rung(b) >= rung(a)) b = ''; }
       else if (row === 'b') b = b === val ? '' : val;
-      else if (row === 'sp') sps.has(val) ? sps.delete(val) : sps.add(val);
+      else if (row === 'sp') { if (sps.has(val)) sps.delete(val); else { if (val === '?') sps.clear(); else sps.delete('?'); sps.add(val); } }   // "Not sure" or specs, not both
       else if (row === 'mt') mt = mt === val ? '' : val;
       buzz(); draw();
     });
@@ -746,8 +747,8 @@
       const [base, len] = String(cur.s || '').split(' · ');
       if (sp.t === 'sel' && (sp.opts.includes(base) || base === '?')) s = base;
       if (sp.t === 'pair' && base) { const [x, y] = base === '?' ? ['?', '?'] : base.split(' × '); a = x || ''; b = y || ''; }
-      sps = new Set((cur.sp || []).filter(v => specs.includes(v)));
-      mt = m.opts.includes(cur.mt) ? cur.mt : '';
+      sps = new Set((cur.sp || []).filter(v => v === '?' ? specs.length > 1 : specs.includes(v)));
+      mt = m.opts.includes(cur.mt) || (cur.mt === '?' && m.opts.length > 1) ? cur.mt : '';
       draw();
       const t = $('[data-t]', el); if (t && base && base !== '?') t.value = base;
       const l = $('[data-len]', el); if (l && len) l.value = len;
@@ -760,10 +761,20 @@
       else { const t = $('[data-t]', el); size = (t ? t.value.replace(/[|·¦]/g, ' ').trim() : '') || (o.size ? '?' : ''); }
       const l = $('[data-len]', el), len = l ? l.value.replace(/[|·¦]/g, ' ').trim() : '';
       if (len) size = (size || '?') + ' · ' + len;
-      return { s: size, sp: specs.filter(v => sps.has(v)), mt: m.opts.length > 1 ? mt : '' };
+      return { s: size, sp: specs.filter(v => sps.has(v)).concat(sps.has('?') ? ['?'] : []), mt: m.opts.length > 1 ? mt : '' };
+    }
+    // like the website: a size, the specs and the material (when there are several) need a pick or "Not sure" first
+    function check() {
+      const miss = (sp.t === 'sel' && !s) || (sp.t === 'pair' && (a === '?' ? false : !(sp.L.length === 1 || a) || !b)) ? 'size' : specs.length > 1 && !sps.size ? 'specs' : m.opts.length > 1 && !mt ? 'mat' : '';
+      if (!miss) return true;
+      const g = $('[data-g="' + miss + '"]', el);
+      if (g) { g.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (!reduce) g.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); g.classList.remove('is-miss'); void g.offsetWidth; g.classList.add('is-miss'); }
+      if (N && N.vibrate) N.vibrate(40);
+      toast({ size: 'Choose a size, or tap Not sure', specs: 'Choose the specs & ratings, or tap Not sure', mat: 'Choose a material, or tap Not sure' }[miss]);
+      return false;
     }
     function reset() { s = sp.t === 'one' ? sp.v : ''; a = ''; b = ''; mt = ''; sps = new Set(specs.length === 1 ? specs : []); const t = $('[data-t]', el); if (t) t.value = ''; const l = $('[data-len]', el); if (l) l.value = ''; draw(); }
-    return { el, read, reset };
+    return { el, read, reset, check };
   }
   function qtyBox(start, onChange) {
     let n = start;
@@ -806,6 +817,7 @@
       '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id.replace(':', '/') + '">See full details</button></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
     $('#sadd', body).addEventListener('click', () => {
+      if (!pk.check()) return;
       addLines(o, pk.read(), q.get());
       const src = card && $('.ph img', card);
       closeSheet();
@@ -951,6 +963,7 @@
         const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><button class="btn btn--red btn--full" style="margin-top:18px" id="ssave">' + I.check + 'Save changes</button></div>');
         $('#spk', body).appendChild(pk.el);
         $('#ssave', body).onclick = () => {
+          if (!pk.check()) return;
           const pick = pk.read(), nl = Object.assign({}, l, { s: pick.s, sp: pick.sp, mt: pick.mt });
           const dup = lines.findIndex((x, j) => j !== i && lineKey(x) === lineKey(nl));
           if (dup > -1) { lines[dup].q = Math.min(99999, lines[dup].q + l.q); lines.splice(i, 1); } else lines[i] = nl;
@@ -1211,7 +1224,7 @@
     const pk = picker(o), q = qtyBox(1);
     const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
-    $('#sadd', body).onclick = () => { addLines(o, pk.read(), q.get()); updateBadge(true); buzz(); closeSheet(); toast('Added: ' + o.name); };
+    $('#sadd', body).onclick = () => { if (!pk.check()) return; addLines(o, pk.read(), q.get()); updateBadge(true); buzz(); closeSheet(); toast('Added: ' + o.name); };
     openSheet(body);
   }
   function closePresent() {
