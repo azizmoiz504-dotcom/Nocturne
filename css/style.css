@@ -1310,9 +1310,9 @@ body.has-quote .fabs{bottom:14px}
 .chg__opts input:focus{outline:0;border-color:var(--paper-ink);box-shadow:0 0 0 3px rgba(7,24,35,.12)}
 .chg__note{font-size:16.5px;color:var(--paper-mute)}
 .chg__none{font-size:18px;color:var(--paper-mute)}
-.chg--size.pk-err .chg__lab .mono{color:var(--red)}
-.chg--size.pk-err .cho:not(.is-on):not(:disabled){border-color:var(--red)}
-.chg--size.pk-err .chg__opts{animation:pkShake .4s}
+.chg.pk-err .chg__lab .mono{color:var(--red)}
+.chg.pk-err .cho:not(.is-on):not(:disabled){border-color:var(--red)}
+.chg.pk-err .chg__opts{animation:pkShake .4s}
 @keyframes pkShake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 @media (max-width:600px){
   .qv__choices{gap:16px;margin-top:20px}

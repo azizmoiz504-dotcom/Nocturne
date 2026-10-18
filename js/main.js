@@ -238,13 +238,16 @@
     if (len) v = (v || '?') + ' · ' + len;
     return { ok: true, v };
   }
-  function flagPick(root) {
-    const g = $('.chg--size', root) || root;
+  // what = the choice still missing: size (default), specs or mat
+  const FLAG = { size: 'Choose a size first', specs: 'Choose the specs & ratings, or tap Not sure', mat: 'Choose a material, or tap Not sure' };
+  function flagPick(root, what) {
+    what = what || 'size';
+    const g = $('.chg--' + what, root) || root;
     g.classList.remove('pk-err'); void g.offsetWidth; g.classList.add('pk-err');
-    const el = $('[data-pk-a]:not(.is-on), [data-pk-b]:not(:disabled)', g);
+    const el = $(what === 'size' ? '[data-pk-a]:not(.is-on), [data-pk-b]:not(:disabled)' : '.cho:not(:disabled)', g);
     if (el) el.focus({ preventScroll: true });
     g.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    toast('Choose a size first');
+    toast(FLAG[what]);
   }
 
   /* ================= Specs & ratings and material choices (js/choices.js) ================= */
@@ -255,17 +258,20 @@
   // a product with nothing to choose goes straight into the quote; any other opens the product window first
   const hasChoices = o => sizeChoice(o) || specOpts(o).length > 0 || matOpts(o).opts.length > 1;
   // cur = a line from the quote list being changed (null for a fresh pick)
+  // specs and material with more than one option get a "Not sure" button ("?"), like the size
   function choicesHTML(o, cur) {
     const specs = specOpts(o), m = matOpts(o), pickedS = cur ? cur.specPick : specs.length === 1 ? specs : [], pickedM = cur ? cur.matPick : '';
     return sizeChoiceHTML(o, cur ? cur.pick : '') +
-      (specs.length ? group('specs', 'Specs & ratings', specs.length > 1 ? 'Tap the ones you need' : '', specs.map(v => btn('data-spec', v, pickedS.includes(v))).join('')) : '') +
-      (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') : fixed(m.full), m.note) : '');
+      (specs.length ? group('specs', 'Specs & ratings', specs.length > 1 ? 'Tap the ones you need' : '', specs.map(v => btn('data-spec', v, pickedS.includes(v))).join('') + (specs.length > 1 ? btn('data-spec', '?', pickedS.includes('?'), 'Not sure') : '')) : '') +
+      (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') + btn('data-mat', '?', pickedM === '?', 'Not sure') : fixed(m.full), m.note) : '');
   }
   const readSpecs = root => $$('[data-spec].is-on', root).map(b => b.dataset.spec);
   const readMat = (root, o) => { const m = matOpts(o), b = $('[data-mat].is-on', root); return m.opts.length > 1 && b ? b.dataset.mat : ''; };
   // a line's key: the size alone for older lines and products with nothing else picked
   const keyOf = (o, v, specs, mat) => { specs = specs || []; return o.id + '|' + v + (specs.length || mat ? '|' + specs.join('¦') + '|' + (mat || '') : ''); };
   const keyFrom = (root, o, v) => keyOf(o, v, readSpecs(root), readMat(root, o));
+  // like the size, specs and material with more than one option need a pick or "Not sure" before the line goes in
+  const missingChoice = (root, o) => specOpts(o).length > 1 && !readSpecs(root).length ? 'specs' : matOpts(o).opts.length > 1 && !readMat(root, o) ? 'mat' : '';
 
   /* ================= How a line reads in the quote list and in messages ================= */
   function describe(o) {
@@ -276,14 +282,15 @@
       size = !base || base === '?' ? 'to confirm' + (o.size && sp.t !== 'one' ? ' (we offer ' + o.size.split(' · ')[0] + ')' : '') : base.replace(/\?/g, 'to confirm');
       if (len) size += ', length ' + len;
     }
-    const spec = o.specPick.length ? o.specPick.join(', ') : specs.length === 1 && o.pick === null ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
+    const picked = o.specPick.filter(x => x !== '?');   // "?" = Not sure: reads "to confirm (options)", like the size
+    const spec = picked.length ? picked.join(', ') : specs.length === 1 && o.pick === null ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
     const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : o.matPick && m.opts.includes(o.matPick) ? o.matPick + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
     return { size, spec, mat };
   }
   // short form for the quote list, toasts and the enquiry form list: only what was actually chosen
   function summary(o) {
     const d = describe(o);
-    return [d.size && !/^to confirm/.test(d.size) ? d.size : '', o.specPick.join(', '), o.matPick].filter(Boolean).join(' · ');
+    return [d.size && !/^to confirm/.test(d.size) ? d.size : '', o.specPick.filter(x => x !== '?').join(', '), o.matPick !== '?' && o.matPick].filter(Boolean).join(' · ');
   }
   const withSummary = o => { const s = summary(o); return o.name + (s ? ' (' + s + ')' : ''); };
   // one product written out for WhatsApp or email: the name, its group, then one line per choice
@@ -325,8 +332,8 @@
     (JSON.parse(localStorage.getItem('ft-rfq') || '[]')).forEach(([k, q, name, mat]) => {
       const o = findSaved(String(k), name, mat);
       if (!o) { lostLines++; return; }
-      const m = matOpts(o).opts;
-      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick), o.specPick.filter(x => specOpts(o).includes(x)), m.length > 1 && m.includes(o.matPick) ? o.matPick : '');
+      const m = matOpts(o).opts, specs = specOpts(o);
+      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick), o.specPick.filter(x => x === '?' ? specs.length > 1 : specs.includes(x)), m.length > 1 && (m.includes(o.matPick) || o.matPick === '?') ? o.matPick : '');
       rfq.set(key, Math.min(99999, (rfq.get(key) || 0) + Math.max(1, Math.round(+q) || 1)));
     });
   } catch (e) {}
@@ -448,7 +455,10 @@
     const root = b.closest('[data-pick-root]'), o = root && itemOf(root.dataset.pickRoot); if (!o) return;
     e.preventDefault();
     const on = b.classList.contains('is-on'), sp = sizeSpec(o);
-    if (b.hasAttribute('data-spec')) setOn(b, !on);
+    if (b.hasAttribute('data-spec')) {
+      setOn(b, !on);
+      if (!on) $$('[data-spec]', root).forEach(x => { if (x !== b && (b.dataset.spec === '?' || x.dataset.spec === '?')) setOn(x, false); });   // "Not sure" or specs, not both
+    }
     else if (b.hasAttribute('data-mat')) $$('[data-mat]', root).forEach(x => setOn(x, x === b && !on));   // tap the picked one again to leave it open
     else if (b.hasAttribute('data-pk-a')) {
       $$('[data-pk-a]', root).forEach(x => setOn(x, x === b));
@@ -458,7 +468,7 @@
       $$('[data-pk-b]', root).forEach(x => setOn(x, x === b));
       $$('[data-pk-a]', root).forEach(x => { if (x.dataset.pkA === '?') setOn(x, false); else if (sp.L && sp.L.length === 1) setOn(x, true); });
     }
-    root.classList.remove('pk-err'); const g = $('.chg--size', root); if (g) g.classList.remove('pk-err');
+    root.classList.remove('pk-err'); const g = b.closest('.chg'); if (g) g.classList.remove('pk-err');
     if (root.id === 'qvPick') syncQV();
   });
   // a typed size or length
@@ -621,6 +631,7 @@
   $('#qvAdd').addEventListener('click', () => {
     const o = itemOf(qvId), root = $('#qvPick'), p = readPick(root, o);
     if (!p.ok) return flagPick(root);
+    const miss = missingChoice(root, o); if (miss) return flagPick(root, miss);
     const key = keyFrom(root, o, p.v), q = Math.max(1, Math.min(99999, parseQty($('#qvQty').value) || 1));
     if (qvLine && rfq.has(qvLine)) {
       // changing a line from the quote list: it keeps its place; if it now matches another line, the two become one
