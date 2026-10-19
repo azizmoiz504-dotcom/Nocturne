@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (27 categories, 282 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (27 categories, 283 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -208,14 +208,14 @@ window.FT_CATS = [
       ['S.S LONG NIPPLE', [], '¼" – 8" · 3" – 12"', 'ss-forged-low-pressure-bw-fittings/edit-mveyz55a.jpg', 'SS304, SS316']
     ] },
   { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
-    desc: 'CNAF, neoprene, spiral wound and RTJ gaskets — plus gland packing and coupling washers.',
-    cover: 'gaskets-sheets/edit-mv5a6uwk.jpg',
+    desc: 'CNAF, rubber, spiral wound and RTJ gaskets, CNAF and rubber sheet — plus gland packing and coupling washers.',
+    cover: 'gaskets-sheets/edit-mvf6oekj.jpg',
     items: [
-      ['CNAF & Rubber Gasket, Ring & Full Face', ['1.5 MM', '3 MM', 'CL150–CL600', 'PN16–PN40'], '½" – any size', 'gaskets-sheets/edit-mv5a6uwk.jpg'],
-      ['CNAF & Metallic Gasket Sheet', ['1 – 6 MM'], '1.5 m × 1.5 m', 'gaskets-sheets/edit-mv5aquph.jpg'],
-      ['Neoprene Rubber Sheet', ['1 – 16 MM'], '1.2 m × 10 m', 'gaskets-sheets/edit-mv5aj6uu.jpg'],
-      ['Spiral Wound Gasket', ['GRAPHITE', 'PTFE', 'CL150–CL1500'], '½" – 24"', 'gaskets-sheets/edit-mvap5wfk.jpg'],
-      ['Graphited & PTFE Gland Packing', [], '6 mm – 25 mm', 'gaskets-sheets/edit-mv5ald9j.jpg'],
+      ['RING GASKETS', ['CNAF', 'NON METALLIC', 'EPDM', 'NBR', 'NEOPRENE', 'SILICON', '1MM', '2MM', '3MM', '4MM', '5MM', '6MM', 'RF', 'FF', 'PN16', 'CL150', 'CL300'], '½" – any size', 'gaskets-sheets/edit-mv5a6uwk.jpg'],
+      ['GASKET SHEETS', ['CNAF', 'NON METALLIC', 'RF', 'FF', 'PN16', 'CL150', 'CL300', '1.5MTR X 1.5MTR'], '1 mm – 6 mm', 'gaskets-sheets/edit-mv5aquph.jpg'],
+      ['GASKET SHEET', ['EPDM', 'NBR', 'NEOPRENE', 'SILICON', '1.2MTR X 10MTR', '20KG', 'RF', 'FF', 'PN16', 'CL150', 'CL300'], '1 mm – 12 mm', 'gaskets-sheets/edit-mvf876kf.jpg'],
+      ['SPIRAL WOUND GASKETS', ['PN16', 'CL150', 'CL300', 'CL600', '2RING', '3RING', 'SS304', 'SS316'], '½" – any size', 'gaskets-sheets/edit-mvap5wfk.jpg'],
+      ['GLAND PACKING', [], '6 mm – 25 mm', 'gaskets-sheets/edit-mvf8cp0g.jpg'],
       ['Camlock Rubber Washer', [], '', 'gaskets-sheets/edit-mv85hp5p.jpg'],
       ['Chicago Rubber Washer', [], '', 'gaskets-sheets/edit-mv85lt07.jpg'],
       ['RING GASKET (RTJ GASKET)', [], '', 'hammer-union/edit-mvap30fr.jpg', 'Carbon steel & Stainless']
@@ -240,7 +240,7 @@ window.FT_CATS = [
     cover: 'chicago-couplings-fittings/edit-mv463ewq.jpg',
     items: [
       ['G.I Chicago Hose End Coupling', ['2 LUG'], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88fl7t.jpg'],
-      ['G.I Chicago Female Coupling', ['2 LUG', 'BSPT'], '¼" – 1"', 'chicago-couplings-fittings/3.jpg'],
+      ['G.I Chicago Female Coupling', ['2 LUG', 'BSPT'], '¼" – 1"', 'chicago-couplings-fittings/edit-mvf0csuo.jpg'],
       ['G.I Chicago Male Coupling', ['2 LUG', 'BSPT'], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88gs7g.jpg'],
       ['G.I Chicago 3-Way Connector', [], '1"', 'chicago-couplings-fittings/4.jpg'],
       ['G.I Chicago Hose End', ['4 LUG'], '1¼" – 2"', 'chicago-couplings-fittings/edit-mv463ewq.jpg'],
@@ -260,21 +260,25 @@ window.FT_CATS = [
       ['Pressure Gauge, Full S.S Body, Liquid Filled', ['4" DIAL', '2½" DIAL', '0–15,000 PSI'], '½" / ¼" bottom connection', 'instrumentation-fittings-pressure-gas/3.jpg']
     ] },
   { slug: 'butt-weld-fittings', name: 'S.S BUTT WELD FITTING', fam: 'fittings',
-    desc: 'S.S ASTM A403 butt-weld fittings to ASME B16.9 in SCH10, SCH40 and SCH80: elbows, tees, reducers, caps, crosses, swage and long nipples, plus S.S ERW and seamless pipe.',
+    desc: 'S.S 304/304L and 316/316L butt-weld fittings in SCH10, SCH40 and SCH80: elbows, tees, reducers, caps, crosses, swage and long nipples, plus S.S ERW and seamless pipe.',
     cover: 'butt-weld-fittings/edit-mvb57zk0.jpg',
     items: [
-      ['SS Pipe ERW & Seamless', ['SCH10', 'SCH20', 'SCH40', 'SCH80', 'SCH160', 'B16.9'], '½" – 12"', 'butt-weld-fittings/edit-mv50wch0.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Elbow 45° L/R & S/R', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv4zvnfq.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Elbow 90° L/R & S/R', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv4zy43k.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Elbow, 180° L/R & S/R', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv4zz597.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Tee, Equal', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv504evj.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Tee, Reducing', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '¾" × ½" – 24" × 20"', 'butt-weld-fittings/edit-mv89nd4b.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Reducer, Concentric', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '¾" × ½" – 24" × 20"', 'butt-weld-fittings/edit-mv507iwd.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Reducer, Eccentric', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '¾" × ½" – 24" × 20"', 'butt-weld-fittings/edit-mv509zp5.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS End Cap', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv50bc95.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Swage Nipple', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 24"', 'butt-weld-fittings/edit-mv50q1qx.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Cross', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 12"', 'butt-weld-fittings/edit-mv89u21n.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
-      ['SS Long Nipple', ['ASME B16.9', 'SCH10', 'SCH40', 'SCH80'], '½" – 8" × 12"', 'butt-weld-fittings/edit-mv520ula.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L']
+      ['SS PIPES ERW', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¼" – 12"', 'butt-weld-fittings/edit-mvf5ny5j.jpg', 'STAINLESS STEEL'],
+      ['SS PIPE SEAMLESS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¼" – 12"', 'butt-weld-fittings/edit-mv50wch0.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW 45° LONG RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zvnfq.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW 45° SHORT RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zvnfq.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW 90° LONG RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zy43k.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW 90° SHORT RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zy43k.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW, 180°', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zz597.jpg', 'STAINLESS STEEL'],
+      ['SS EQUAL TEE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv504evj.jpg', 'STAINLESS STEEL'],
+      ['SS REDUCING TEE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv89nd4b.jpg', 'STAINLESS STEEL'],
+      ['SS CONCENTRIC REDUCER', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv507iwd.jpg', 'STAINLESS STEEL'],
+      ['SS ECCENTRIC REDUCER', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv509zp5.jpg', 'STAINLESS STEEL'],
+      ['SS END CAP', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv50bc95.jpg', 'STAINLESS STEEL'],
+      ['SS CONCENTRIC SWAGE NIPPLE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv50q1qx.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
+      ['SS ECCENTRIC SWAGE NIPPLE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mvf5gimz.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
+      ['SS CROSS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv89u21n.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L'],
+      ['SS LONG NIPPLE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¼" – 8" · 3" – 12"', 'butt-weld-fittings/edit-mv520ula.jpg', 'ASTM A403/ASME SA-403 304/304L, 316/316L']
     ] },
   { slug: 'socket-weld-fittings', name: 'FORGED C.S SW FITTING (2000PSI, 3000PSI, 6000PSI)', fam: 'fittings',
     desc: 'Forged C.S ASTM A105 socket-weld fittings, 2000, 3000 and 6000 psi, ½" to 4".',
@@ -331,7 +335,7 @@ window.FT_CATS = [
       ['G.I PLUG', [], '¼" – 6"', 'gi-pipe-fittings/edit-mvex5zgd.jpg', 'GALVANIZED IRON'],
       ['G.I CROSS', [], '¼" – 6"', 'gi-pipe-fittings/edit-mvexa3rq.jpg', 'GALVANIZED IRON'],
       ['G.I STREET ELBOW', [], '¼" – 6"', 'gi-pipe-fittings/edit-mv5f8zqo.jpg', 'GALVANIZED IRON'],
-      ['G.I LONG NIPPLE', [], '¼" – 6" · 3" – 12"', 'gi-pipe-fittings/edit-mvey1ai0.jpg', 'GALVANIZED IRON'],
+      ['G.I LONG NIPPLE', [], '¼" – 4" · 3" – 12"', 'gi-pipe-fittings/edit-mvey1ai0.jpg', 'GALVANIZED IRON'],
       ['G.I KING NIPPLE', [], '¼" – 6"', 'gi-pipe-fittings/edit-mv5ffemf.jpg', 'GALVANIZED IRON'],
       ['G.I HOSE MENDER', [], '½" – 6"', 'chicago-couplings-fittings/edit-mv5cuyz8.jpg', 'GALVANIZED IRON']
     ] },
@@ -347,18 +351,15 @@ window.FT_CATS = [
       ['Camlock Type F', ['BSPT', 'NPT'], '½" – 6"', 'camlock-couplings/edit-mv6kyhys.jpg', 'Aluminium, Stainless, Brass, PVC'],
       ['Camlock Type DC', [], '½" – 6"', 'camlock-couplings/edit-mv6l10yd.jpg', 'Aluminium, Stainless, Brass, PVC'],
       ['Camlock Type DP', [], '½" – 6"', 'camlock-couplings/edit-mv6l2j2w.jpg', 'Aluminium, Stainless, Brass, PVC'],
-      ['Camlock Type CR', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv6l5yvp.jpg', 'Aluminium'],
-      ['Camlock Type ER', [], '1" – 4" × 3"', 'camlock-couplings/edit-mv6laegd.jpg', 'Other'],
-      ['Camlock Type AA', [], '1½" × 1½" – 4" × 4"', 'camlock-couplings/edit-mv6lbxcf.jpg'],
-      ['Camlock Type DD', [], '1½" × 1½" – 4" × 4"', 'camlock-couplings/edit-mv6le5rk.jpg'],
+      ['CAMLOCK TYPE CR', [], '2" × 1" – 4" × 3"', 'camlock-couplings/edit-mv6l5yvp.jpg', 'Aluminium'],
+      ['CAMLOCK TYPE ER', [], '2" × 1" – 4" × 3"', 'camlock-couplings/edit-mv6laegd.jpg', 'Other'],
+      ['Camlock Type AA', [], '1½" – 4" · Also reducing, 2" × 1½" to 4" × 3"', 'camlock-couplings/edit-mv6lbxcf.jpg'],
+      ['Camlock Type DD', [], '1½" – 4" · Also reducing, 2" × 1½" to 4" × 3"', 'camlock-couplings/edit-mv6le5rk.jpg'],
       ['Camlock Type DA', [], '2" × 1½" – 4" × 3"', 'camlock-couplings/edit-mv6l8dh1.jpg'],
-      ['Camlock Type AR', [], '3" × 2" – 3" × 4"', 'camlock-couplings/aluminium-camlock-type-ar-reducing-adapter.jpg'],
+      ['Camlock Type DA', [], '2" × 3" – 3" × 4"', 'camlock-couplings/edit-mv6l8dh1.jpg'],
+      ['Camlock Type AR', [], '2" × 2½" – 3" × 4"', 'camlock-couplings/aluminium-camlock-type-ar-reducing-adapter.jpg'],
       ['Camlock Type DR', [], '2" × 1½" – 3" × 2"', 'camlock-couplings/aluminium-camlock-type-dr-reducing-coupler.jpg'],
-      ['API Tank Truck Adaptor', [], '6" × 4"', 'camlock-couplings/edit-mv6liqvo.jpg'],
-      ['Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'camlock-couplings/edit-mv6mau6e.jpg', 'Brass'],
-      ['Camlock Couplings', ['NPT', 'BSPT'], '½" – 6"', 'quick-couplings/edit-mv2ekofo.jpg', 'Aluminium'],
-      ['Camlock Coupling', ['NPT', 'BSPT'], '1" – 3"', 'quick-couplings/edit-mv44y1xi.jpg', 'PVC'],
-      ['Reducing Camlock Coupling', [], '2" – 4"', 'camlock-couplings/edit-mv6m9idc.jpg', 'Stainless']
+      ['API Tank Truck Adaptor', [], '6" × 2½" – 6" × 4"', 'camlock-couplings/edit-mvf1jelq.jpg']
     ] },
   { slug: 'hoses', name: 'Industrial Hoses', fam: 'couplings',
     desc: 'Composite hose assemblies with camlock or flanged ends, oil and water suction hose, and PVC suction, braided, clear, steel wire and lay flat hose.',
