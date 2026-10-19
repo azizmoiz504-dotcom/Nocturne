@@ -114,7 +114,7 @@
       y += 22;
     }
     const FOOT = 64;
-    function newPage() { doc.addPage(); y = header(false); thead(); }
+    function newPage(table) { doc.addPage(); y = header(false); if (table) thead(); }
     thead();
     x.rows.forEach((r, i) => {
       font('bold', 9.8); const nl = wrap(r.n, itW);
@@ -122,7 +122,7 @@
       font('bold', 9.5); const sl = wrap(r.size || '-', szW);
       const textH = 11 + nl.length * 11.5 + det.reduce((s, d) => s + d.ls.length * 10.5, 0) + 4;
       const rh = Math.max(56, textH + 10, sl.length * 11.5 + 18);
-      if (y + rh > H - 50) newPage();
+      if (y + rh > H - 50) newPage(true);
       if (i % 2) { fill(C.zebra); doc.rect(M, y, W - 2 * M, rh, 'F'); }
       font('bold', 9, C.mute); text(String(i + 1), col.n, y + 18);
       if (thumbs[i]) { stroke(C.line, 0.6); doc.roundedRect(col.ph - 1, y + 7, 42, 42, 4, 4, 'S'); doc.addImage(thumbs[i], 'JPEG', col.ph, y + 8, 40, 40); }
