@@ -48,7 +48,8 @@
   const BRANDS = window.FT_BRANDS || [];
   if (!CATS.length) { if (N && N.resetData) N.resetData(); return; }   // a broken download never strands the app
 
-  const IMG = 'p/';
+  const WEB = window.FT_WEB || null;                 // the iPhone web app (Home Screen): live list and photos from the website
+  const IMG = WEB && WEB.img ? WEB.img : 'p/';
   const WA = CFG.whatsappDigits || '971522767034';
   const WA_SHOW = CFG.whatsappDisplay || '+971 52 276 7034';
   const PHONE = CFG.phoneDisplay || '+971 4 285 0135';
@@ -233,6 +234,17 @@
     };
   }
   let pdfBusy = false;
+  // browser / iPhone: hand the file to the share menu; Safari needs a fresh tap if making the PDF took too long
+  function webPdf(b64, name, cap) {
+    const bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    let file = null; try { file = new File([u8], name, { type: 'application/pdf' }); } catch (e) {}
+    const viaShare = () => navigator.share({ files: [file], title: cap }).catch(e => { if (e && e.name === 'NotAllowedError') toast('Order form ready', 'Share PDF', viaShare, 12000); });
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return viaShare();
+    const url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
   // to = 'shop' (Mr Hussain's WhatsApp), a customer's phone, or '' for the phone's share menu
   async function sharePdf(x, to) {
     if (pdfBusy) return; pdfBusy = true;
@@ -241,7 +253,7 @@
       const b64 = await window.FT_ORDER_PDF(orderPdfData(x));
       const name = 'Order-form-' + x.no + '.pdf', cap = 'Order form ' + x.no + (x.cust.name ? ' · ' + x.cust.name : '');
       if (N && N.shareFile) N.shareFile(b64, name, 'application/pdf', cap, to === 'shop' ? WA : (to ? phoneDigits(to) : ''));
-      else { const a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + b64; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+      else webPdf(b64, name, cap);
       window.__lastPdf = b64;
       toast('Order form ready');
     } catch (e) { toast('Could not make the order form. Try again.'); }
@@ -283,7 +295,7 @@
     else if (/^5\d{8}$/.test(d)) d = '971' + d;
     return d.length >= 9 ? d : '';
   }
-  function open(url) { if (N && N.open) N.open(url); else window.open(url, '_blank'); }
+  function open(url) { if (N && N.open) N.open(url); else if (/^(tel|mailto|sms):/.test(url)) location.href = url; else window.open(url, '_blank'); }
   function share(title, text, img) {
     if (N && img && N.sharePhoto) return N.sharePhoto(img, title, text);
     if (N && N.share) return N.share(title, text);
@@ -1077,6 +1089,8 @@
 
   /* catalogue status and updates, shown at the end of Home */
   function catalogueBox() {
+    if (!N) return '<div class="kv"><div><span>Products</span><b>' + nfmt(P.length) + ' in ' + CATS.length + ' ranges</b></div><div><span>List</span><b>Always the newest from the website</b></div><div><span>Works offline</span><b>Yes, the products and photos you have opened</b></div></div>' +
+      '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + 'Check for new products</button>';
     const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
     return '<div class="kv"><div><span>Products</span><b>' + nfmt(P.length) + ' in ' + CATS.length + ' ranges</b></div><div><span>List</span><b>' + (ch ? 'Updated from the website ' + when(ch) : 'As packed in the app') + '</b></div><div><span>Last check</span><b>' + (ck ? when(ck) : 'Not yet') + '</b></div><div><span>Works offline</span><b>Yes, all products and photos</b></div></div>' +
       '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + 'Check for new products</button>';
@@ -1203,7 +1217,7 @@
   };
   document.addEventListener('click', e => {
     const b = e.target.closest('#syncBtn'); if (!b) return;
-    if (!N || !N.syncNow) { toast('Updates work in the phone app'); return; }
+    if (!N || !N.syncNow) { b.innerHTML = '<span class="spin"></span>Checking…'; reloadKeepingPlace(); return; }
     asked = true; b.innerHTML = '<span class="spin"></span>Checking…'; refreshNet(true); N.syncNow();
   });
   // "Browse products" from the cart or the order form goes to Home > All ranges

@@ -539,3 +539,11 @@ input[type=date].field{color-scheme:light}
 @media (min-width:600px){.cats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (min-width:900px){.cats{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @supports not (aspect-ratio:1/1){.ctile .ph{height:0;padding-bottom:100%}.ctile .ph img{position:absolute;top:0;left:0}}
+
+/* iPhone web app (added to the Home Screen): keep the tabs and sheets clear of the home bar */
+html.is-web{--sab:env(safe-area-inset-bottom,0px)}
+html.is-web #stage{bottom:calc(var(--tabs) + var(--sab))}
+html.is-web #tabs{height:calc(var(--tabs) + var(--sab));padding-bottom:var(--sab)}
+html.is-web #toast{bottom:calc(var(--tabs) + var(--sab) + 14px)}
+html.is-web .sheet__panel{padding-bottom:calc(22px + var(--sab))}
+html.is-web #zoom .zoom__hint{bottom:calc(20px + var(--sab))}
