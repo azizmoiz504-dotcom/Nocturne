@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
 import android.view.View;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
@@ -74,13 +75,17 @@ public class MainActivity extends Activity {
         root = new File(getFilesDir(), "www");
         prefs = getSharedPreferences("ft", MODE_PRIVATE);
         Window w = getWindow();
-        w.setStatusBarColor(Color.parseColor("#040C13"));
-        w.setNavigationBarColor(Color.parseColor("#040C13"));
+        // light app: white bars with dark icons (dark nav bar on phones older than Android 8, which can't draw dark nav icons)
+        w.setStatusBarColor(Color.WHITE);
+        int bars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= 26) { w.setNavigationBarColor(Color.WHITE); bars |= 0x00000010; /* SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR */ }
+        else w.setNavigationBarColor(Color.parseColor("#0B1620"));
+        w.getDecorView().setSystemUiVisibility(bars);
 
         // test builds only: lets the automated phone test drive the pages
         if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#040C13"));
+        web.setBackgroundColor(Color.parseColor("#F3F4F6"));
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -381,6 +386,50 @@ public class MainActivity extends Activity {
             new File(root, "data.js").delete();
             prefs.edit().remove("lastChange").apply();
             js("location.reload()");
+        }
+
+        /** Share a file the page made (the order form PDF). With a WhatsApp number it opens that chat in WhatsApp when it can. */
+        @JavascriptInterface
+        public void shareFile(final String b64, final String name, final String mime, final String caption, final String waDigits) {
+            final File dir = new File(getCacheDir(), "share");
+            final String safe = String.valueOf(name).replaceAll("[^A-Za-z0-9._-]", "_");
+            try {
+                dir.mkdirs();
+                File[] old = dir.listFiles();
+                if (old != null) for (File x : old) if (System.currentTimeMillis() - x.lastModified() > 86400000L) x.delete();
+                FileOutputStream o = new FileOutputStream(new File(dir, safe));
+                o.write(Base64.decode(b64, Base64.DEFAULT));
+                o.close();
+            } catch (Exception e) {
+                ui.post(new Runnable() { public void run() { Toast.makeText(MainActivity.this, "Could not make the file", Toast.LENGTH_LONG).show(); } });
+                return;
+            }
+            ui.post(new Runnable() {
+                public void run() {
+                    Uri u = PhotoProvider.uriFor("share/" + safe);
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.setType(mime);
+                    i.putExtra(Intent.EXTRA_STREAM, u);
+                    i.setClipData(ClipData.newRawUri(safe, u));
+                    if (caption != null && caption.length() > 0) i.putExtra(Intent.EXTRA_TEXT, caption);
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    if (waDigits != null && waDigits.length() > 6) {
+                        for (String pkg : new String[] { "com.whatsapp", "com.whatsapp.w4b" }) {
+                            try {
+                                getPackageManager().getPackageInfo(pkg, 0);
+                                Intent w = new Intent(i);
+                                w.setPackage(pkg);
+                                w.putExtra("jid", waDigits + "@s.whatsapp.net");
+                                startActivity(w);
+                                return;
+                            } catch (Exception e) { /* not installed: try the next one */ }
+                        }
+                    }
+                    Intent c = Intent.createChooser(i, safe);
+                    c.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(c);
+                }
+            });
         }
 
         @JavascriptInterface

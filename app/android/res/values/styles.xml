@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ink">#040C13</color>
+    <color name="ink">#F3F4F6</color>
+    <color name="bar">#FFFFFF</color>
     <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:windowBackground">@drawable/splash</item>
-        <item name="android:statusBarColor">@color/ink</item>
-        <item name="android:navigationBarColor">@color/ink</item>
+        <item name="android:statusBarColor">@color/bar</item>
+        <item name="android:navigationBarColor">#0B1620</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:colorAccent">#B91A20</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
     </style>

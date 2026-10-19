@@ -14,7 +14,7 @@ rm -rf "$OUT/apk" "$OUT/classes" "$OUT/gen" "$OUT/res.zip"; mkdir -p "$OUT/apk/a
 W=$OUT/apk/assets/www
 
 # 1. the app's pages, the product list and the shop details
-cp web/index.html web/app.css web/app.js "$W/"
+cp web/index.html web/app.css web/app.js web/orderform.js web/jspdf.umd.min.js "$W/"
 cp "$SITE/js/data.js" "$W/data.js"
 cp "$SITE/js/config.js" "$W/config.js"
 cp "$SITE/js/choices.js" "$W/choices.js"

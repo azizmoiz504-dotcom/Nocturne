@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/** Hands a product photo to WhatsApp (or any app) when the salesman shares a product. Read-only. */
+/** Hands a product photo, or an order form PDF the app made, to WhatsApp (or any app). Read-only. */
 public class PhotoProvider extends ContentProvider {
     static final String AUTH = "com.fakhritools.catalogue.photos";
 
@@ -23,13 +23,18 @@ public class PhotoProvider extends ContentProvider {
 
     String rel(Uri u) throws FileNotFoundException {
         String p = u.getPath();
-        if (p == null || p.contains("..") || !p.startsWith("/p/")) throw new FileNotFoundException(String.valueOf(p));
+        if (p == null || p.contains("..") || !(p.startsWith("/p/") || p.startsWith("/share/"))) throw new FileNotFoundException(String.valueOf(p));
         return p.substring(1);
     }
 
     @Override
     public AssetFileDescriptor openAssetFile(Uri u, String mode) throws FileNotFoundException {
         String rel = rel(u);
+        if (rel.startsWith("share/")) {
+            File s = new File(getContext().getCacheDir(), rel);
+            if (!s.isFile()) throw new FileNotFoundException(rel);
+            return new AssetFileDescriptor(ParcelFileDescriptor.open(s, ParcelFileDescriptor.MODE_READ_ONLY), 0, s.length());
+        }
         File f = new File(new File(getContext().getFilesDir(), "www"), rel);
         if (f.isFile()) return new AssetFileDescriptor(ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY), 0, AssetFileDescriptor.UNKNOWN_LENGTH);
         try {
@@ -42,7 +47,7 @@ public class PhotoProvider extends ContentProvider {
     @Override
     public String getType(Uri u) {
         String p = String.valueOf(u.getPath()).toLowerCase();
-        return p.endsWith(".png") ? "image/png" : p.endsWith(".webp") ? "image/webp" : "image/jpeg";
+        return p.endsWith(".pdf") ? "application/pdf" : p.endsWith(".png") ? "image/png" : p.endsWith(".webp") ? "image/webp" : "image/jpeg";
     }
 
     @Override

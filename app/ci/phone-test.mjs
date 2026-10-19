@@ -92,7 +92,7 @@ const L = '.view:last-child ';
 // picks the first option in every size / specs / material group still open (the app asks for a pick or Not sure)
 const pickRest = scope => pg.evaluate(async scope => { for (let i = 0; i < 6; i++) { const r = [...document.querySelectorAll(scope + ' .pkg[data-g] .sizes')].find(r => !r.querySelector('.sz.is-on')); if (!r) return; r.querySelector('.sz:not(.is-off)').click(); await new Promise(r => setTimeout(r, 250)); } }, scope);
 
-check(await pg.evaluate(() => window.FT_CATS.length > 20 && document.querySelectorAll('.ccard').length > 5), 'home shows the ranges');
+check(await pg.evaluate(() => window.FT_CATS.length > 20 && document.querySelectorAll('.ctile').length > 20), 'home shows every category as a photo tile');
 const imgsOk = await pg.evaluate(() => [...document.querySelectorAll('.ph img')].filter(i => i.complete && i.naturalWidth > 0).length);
 check(imgsOk > 4, 'photos load from inside the app (' + imgsOk + ')');
 await scroll(800); await wait(900); await shot('03-home-ranges');
@@ -110,7 +110,6 @@ await key(4);   // back leaves search
 check(await pg.evaluate(() => !document.querySelector('.view:last-child input[type=search]')), 'phone Back button leaves search');
 
 // ranges -> range -> product
-await tap('.view:last-child [data-go="cats"]', 1200); await shot('07-ranges');
 await tap(L + '[data-go="c/ball-valves"]', 1300); await shot('08-range');
 await scroll(420); await wait(800); await shot('09-range-products');
 await tap(L + '.pcard', 1400); await shot('10-product');
@@ -135,7 +134,7 @@ pg = await attach();
 
 // show the customer
 await key(4); await wait(600);
-await tap(L + '.chead [data-present]', 1200); await shot('15-show-customer');
+await tap(L + '.chead2 [data-present]', 1200); await shot('15-show-customer');
 await pg.evaluate(() => { const t = document.querySelector('.pr__track'); t.scrollTo({ left: t.clientWidth * 2 }); }); await wait(1000); await shot('16-show-customer-3');
 await key(4);
 
@@ -157,7 +156,16 @@ pg = await attach();
 await wait(800); await shot('22-order-sent');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-orders') || '[]').length === 1), 'order saved in Orders');
 check(await pg.evaluate(() => JSON.parse(localStorage.getItem('ft-list') || '[]').length === 0), 'cart empty after the order');
-await tap('#sheet [data-k="orders"]', 1300); await shot('23-orders');
+// the order form PDF: made inside the app, then handed to the phone's share menu
+const pdfLen = await pg.evaluate(() => { const o = JSON.parse(localStorage.getItem('ft-orders') || '[]')[0]; return window.FT_ORDER_PDF(FT.pdfData(o.id)).then(b => b.slice(0, 4) === 'JVBE' ? b.length : -1, () => -2); });
+check(pdfLen > 20000, 'order form PDF is made (' + pdfLen + ' chars)');
+await tap('#sheet [data-k="pdf"]', 5000); await shot('22b-pdf-share');
+check(await pg.evaluate(() => (window.__lastPdf || '').length > 20000), 'Share PDF button hands the PDF to the phone');
+await key(4); await wait(1500);
+pg = await attach();
+if (await pg.evaluate(() => !!document.querySelector('#sheet [data-k="orders"]'))) await tap('#sheet [data-k="orders"]', 1300);
+else await tap('#tabs [data-tab="orders"]', 1300);
+await shot('23-orders');
 await tap(L + '[data-order]', 1000); await shot('24-order-details');
 await key(4);
 
@@ -180,7 +188,6 @@ check(!String(fg).includes(PKG), 'Back on Home leaves the app');
 await d.shell('svc wifi disable'); await d.shell('svc data disable'); await wait(2000);
 pg = await launch();
 await wait(4000); await shot('25-offline-home');
-await tap('.view:last-child [data-go="cats"]', 2500);
 await tap(L + '[data-go="c/camlock-couplings"]', 2500);
 let offImgs = 0;
 for (let i = 0; i < 10 && offImgs <= 3; i++) { await wait(1000); offImgs = await pg.evaluate(() => [...document.querySelectorAll('.view:last-child .ph img')].filter(i => i.complete && i.naturalWidth > 0).length); }

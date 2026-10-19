@@ -71,6 +71,7 @@
 
   /* ================= icons ================= */
   const I = {
+    pdf: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>',
     back: '<svg viewBox="0 0 24 24" class="ico"><path d="M15 5l-7 7 7 7"/></svg>',
     chev: '<svg viewBox="0 0 24 24" class="ico"><path d="M9 5l7 7-7 7"/></svg>',
     down: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 9l6 6 6-6"/></svg>',
@@ -223,6 +224,29 @@
     const d = describe(l, o), part = (k, v) => v ? '<span class="lp"><i>' + k + '</i> ' + (/^to confirm/.test(v) ? '<u>' + esc(v) + '</u>' : esc(v)) + '</span>' : '';
     return part('Size', d.size) + part('Specs', d.spec) + part('Material', d.mat);
   }
+  /* ================= the order form PDF (orderform.js) ================= */
+  function orderPdfData(x) {
+    return {
+      no: x.no, at: x.at, cust: x.cust,
+      rows: x.lines.map(l => { const o = lineProduct(l), d = describe(l, o); return { n: l.n, group: groupOfLine(l, o), img: o ? o.img : '', size: d.size, spec: d.spec, mat: d.mat, q: l.q }; }),
+      shop: { name: SHOP_NAME, address: ADDRESS, city: 'Al Quoz, Dubai', phone: PHONE, wa: WA_SHOW, email: CFG.email || 'dxbsales@ftools.com', logo: 'img/logo-lockup.png' }
+    };
+  }
+  let pdfBusy = false;
+  // to = 'shop' (Mr Hussain's WhatsApp), a customer's phone, or '' for the phone's share menu
+  async function sharePdf(x, to) {
+    if (pdfBusy) return; pdfBusy = true;
+    toast('Making the order form…');
+    try {
+      const b64 = await window.FT_ORDER_PDF(orderPdfData(x));
+      const name = 'Order-form-' + x.no + '.pdf', cap = 'Order form ' + x.no + (x.cust.name ? ' · ' + x.cust.name : '');
+      if (N && N.shareFile) N.shareFile(b64, name, 'application/pdf', cap, to === 'shop' ? WA : (to ? phoneDigits(to) : ''));
+      else { const a = document.createElement('a'); a.href = 'data:application/pdf;base64,' + b64; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+      window.__lastPdf = b64;
+      toast('Order form ready');
+    } catch (e) { toast('Could not make the order form. Try again.'); }
+    pdfBusy = false;
+  }
   const today = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const PAY = ['Cash', 'Card', 'Bank transfer', 'Cheque', 'Credit account'];
   function orderMsg(x) {
@@ -301,6 +325,8 @@
   }
   const catCard = (c, d) => '<button class="ccard tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.slug + '">' + photo(c.coverImg, c.name) +
     '<div class="ccard__t"><b>' + esc(c.name) + '</b><span>' + countWord(c.items.length, 'product') + '</span></div></button>';
+  // a category on Home: its photo and its name, like a shop's category tiles
+  const catTile = (c, d) => '<button class="ctile tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.slug + '">' + photo(c.coverImg, c.name) + '<b>' + esc(c.name) + '</b><span>' + countWord(c.items.length, 'item') + '</span></button>';
   const sizeShort = o => { const s = (o.size || '').split(' · ')[0]; return s.length > 26 ? s.slice(0, 24) + '…' : s; };
   const prodCard = (o, d) => '<div class="pcard tile" style="animation-delay:' + d + 'ms" data-go="p/' + o.id.replace(':', '/') + '" role="button" tabindex="0">' +
     (inList(o) ? '<span class="listtag">In cart</span>' : '') +
@@ -494,93 +520,27 @@
       '<h3>Fakhri Tools<br>Al Quoz</h3><p>' + esc(ADDRESS) + '. Next to Ajyad Traditional Kitchen.</p><p class="hrs">' + hoursText() + '</p>' +
       '<div class="shopbtns"><button data-open="' + esc(waLink(WA, 'Hello Fakhri Tools, ')) + '">' + I.wa + 'WhatsApp</button><button data-open="' + esc(PHONE_LINK) + '">' + I.phone + 'Call</button><button data-open="' + esc(MAPS) + '">' + I.pin + 'Directions</button></div></div>';
   }
+  // Home, Noon style: the logo, search, then every category as a photo tile
   function viewHome() {
-    const hr = new Date(Date.now() + 4 * 3600e3).getUTCHours();
-    const hello = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-    const fams = FAMS.map(f => ({ f, n: CATS.filter(c => c.fam === f.id).reduce((s, c) => s + c.items.length, 0) })).filter(x => x.n);
-    const recents = recent.map(id => byId.get(id)).filter(Boolean);
-    const el = h('<section>' +
-      '<div class="home-top"><img src="img/icon-512.png" alt=""><div class="t"><b>FAKHRI TOOLS</b><span>' + hello + ' · Al Quoz</span></div><span class="net" id="net"><i></i><em>Offline</em></span></div>' +
-      '<div class="hero"><div class="hero__grid"></div><div class="hero__glow"></div><div class="hero__glow hero__glow--b"></div>' +
-        '<p class="mono eyebrow">Product catalogue</p>' +
-        '<h1 style="margin-top:12px"><span class="ln"><span>Pipes,</span></span><span class="ln"><span>fittings</span></span><span class="ln"><span>&amp; <em>valves.</em></span></span></h1>' +
-        '<p>Every product we stock in Al Quoz, with sizes and materials. Works with no signal.</p>' +
-        '<div class="hero__show" data-go="">' +
-          '<div class="hero__dots">' + SHOWCASE.map((_, i) => '<i' + (i ? '' : ' class="is-on"') + '></i>').join('') + '</div></div>' +
-        '<div class="stats"><div class="stat"><b data-count="' + P.length + '">0</b><span>Products</span></div><div class="stat"><b data-count="' + CATS.length + '">0</b><span>Ranges</span></div><div class="stat"><b data-count="' + SIZES_TOTAL + '">0</b><span>Sizes</span></div></div>' +
-      '</div>' +
-      '<button class="searchbox" data-go="search">' + I.search + 'Search ' + P.length + ' products, sizes, materials</button>' +
+    const el = h('<section class="home">' +
+      '<div class="top"><img class="top__logo" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC"></div>' +
+      '<div class="sbar2"><button class="searchbox" data-go="search">' + I.search + '<span>Search ' + nfmt(P.length) + ' products</span></button></div>' +
       '<div class="view__pad">' +
         '<div id="homeCont"></div>' +
-        '<div class="h-sec"><h2>Browse by range</h2><button data-go="cats">All ' + CATS.length + ' ' + I.chev + '</button></div>' +
-        '<div class="fams">' + fams.map((x, i) => '<button class="fam tile" style="animation-delay:' + (i * 70) + 'ms" data-go="cats/' + x.f.id + '">' + (FAM_ART[x.f.id] || '') + '<b>' + esc(x.f.name) + '</b><span>' + x.n + ' products</span></button>').join('') + '</div>' +
-        '<div class="h-sec"><h2>Popular ranges</h2><button data-go="cats">See all ' + I.chev + '</button></div>' +
-        '<div class="rail">' + CATS.slice(0, 10).map((c, i) => catCard(c, i * 50)).join('') + '</div>' +
-        (recents.length ? '<div class="h-sec"><h2>Recently viewed</h2></div><div class="rail" id="recentRail">' + recents.map(o => '<button class="mini" data-go="p/' + o.id.replace(':', '/') + '">' + photo(o.img, o.name) + '<b>' + esc(o.name) + '</b></button>').join('') + '</div>' : '<div id="recentRail"></div>') +
-        '<div class="h-sec"><h2>At the counter</h2></div>' +
-        '<div class="svc">' +
-          '<div class="svc__i"><i>' + I.thread + '</i><div><b>Pipe threading</b><span>Cut and threaded while the customer waits</span></div></div>' +
-          '<div class="svc__i"><i>' + I.cut + '</i><div><b>Hose cut to length</b><span>Any length from the roll</span></div></div>' +
-          '<div class="svc__i"><i>' + I.crimp + '</i><div><b>Hydraulic hose crimping</b><span>Fittings crimped on the hose</span></div></div>' +
-          '<div class="svc__i"><i>' + I.truck + '</i><div><b>Delivery across the UAE</b><span>For orders from AED 5,000</span></div></div>' +
-        '</div>' +
-        '<div class="h-sec"><h2>The shop</h2></div>' + shopCard() +
-        (BRANDS.length ? '<div class="h-sec"><h2>Brands we offer</h2></div><div class="brands"><div class="brands__row">' + [0, 1].map(() => BRANDS.map(b => '<div class="brand">' + (b.logo && !/^https?:/.test(b.logo) ? '<img src="brands/' + esc(b.logo.split('/').pop()) + '" alt="' + esc(b.name) + '">' : '<b>' + esc(b.name) + '</b>') + '</div>').join('')).join('') + '</div></div>' : '') +
-        '<div class="h-sec"><h2>Catalogue</h2></div><div id="catBox"></div>' +
+        '<div class="sec"><h2>Product <em>categories</em></h2><span>' + CATS.length + ' ranges · ' + nfmt(P.length) + ' products</span></div>' +
+        '<div class="cats">' + CATS.map((c, i) => catTile(c, Math.min(i, 12) * 30)).join('') + '</div>' +
+        '<div class="sec"><h2>The <em>shop</em></h2></div>' + shopCard() +
+        '<div class="sec"><h2>Catalogue</h2></div><div id="catBox"></div>' +
         '<div class="foot" id="homeFoot"></div>' +
       '</div></section>');
     const v = { el };
-    // the showcase: products glide through the hero card
-    const showEl = $('.hero__show', el);
-    let k = 0, timer = null, cardEl = null;
-    function card(o) {
-      const c = h('<div class="hero__card">' + photo(o.img, o.name) + '<div class="hero__cap"><b>' + esc(o.name) + '</b><span>' + esc(o.c.name.length > 18 ? famName(o.c.fam) : o.c.name) + '</span></div></div>');
-      wirePhotos(c); return c;
-    }
-    function step(first) {
-      const o = SHOWCASE[k % SHOWCASE.length];
-      const c = card(o);
-      showEl.dataset.go = 'p/' + o.id.replace(':', '/');
-      showEl.appendChild(c);
-      if (!first && !reduce) {
-        c.animate([{ transform: 'translateX(70%) rotate(4deg) scale(.9)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 900, easing: 'cubic-bezier(.16,1,.3,1)' });
-        $('img', c).animate([{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 2800, easing: 'ease-out' });
-        $('.hero__cap', c).animate([{ transform: 'translateY(100%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 700, delay: 250, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
-        if (cardEl) { const old = cardEl; old.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(-40%) rotate(-3deg) scale(.86)', opacity: 0 }], { duration: 800, easing: 'cubic-bezier(.7,0,.3,1)' }).onfinish = () => old.remove(); }
-      } else if (cardEl) cardEl.remove();
-      cardEl = c;
-      $$('.hero__dots i', el).forEach((d, i) => d.classList.toggle('is-on', i === k % SHOWCASE.length));
-      k++;
-    }
-    if (SHOWCASE.length) step(true);
-    v.onShow = () => { clearInterval(timer); if (SHOWCASE.length > 1) timer = setInterval(() => step(false), 3200); stamp(); refreshNet(); };
-    v.onHide = () => clearInterval(timer);
-    v.refresh = () => {
-      const c = $('#homeCont', el); if (c) c.replaceWith(contCard());
-      const rr = $('#recentRail', el), rc = recent.map(id => byId.get(id)).filter(Boolean);
-      if (rr && rc.length) {
-        const nr = h('<div class="rail" id="recentRail">' + rc.map(o => '<button class="mini" data-go="p/' + o.id.replace(':', '/') + '">' + photo(o.img, o.name) + '<b>' + esc(o.name) + '</b></button>').join('') + '</div>');
-        if (!rr.classList.contains('rail')) rr.insertAdjacentHTML('beforebegin', '<div class="h-sec"><h2>Recently viewed</h2></div>');
-        rr.replaceWith(nr); wirePhotos(nr);
-      }
-      v.dirty = false;
-    };
-    v.introPlayed = false;
-    v.intro = () => {
-      if (v.introPlayed) return; v.introPlayed = true;
-      const ease = 'cubic-bezier(.16,1,.3,1)';
-      $$('.hero h1 .ln > span', el).forEach((s, i) => s.animate([{ transform: 'translateY(105%)' }, { transform: 'none' }], { duration: 1000, delay: 80 + i * 110, easing: ease, fill: 'backwards' }));
-      [$('.hero .eyebrow', el), $('.hero > p:not(.eyebrow)', el), showEl, $('.stats', el), $('.searchbox', el)].forEach((x, i) => x && x.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 200 + i * 90, easing: ease, fill: 'backwards' }));
-      countUp(el);
-    };
-    // the family drawings sketch themselves the first time they scroll into view
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-drawn'); io.unobserve(e.target); } }), { root: el, threshold: .4 });
-    $$('.fam', el).forEach(f => io.observe(f));
+    v.onShow = () => { stamp(); refreshNet(); };
+    v.refresh = () => { const c = $('#homeCont', el); if (c) c.replaceWith(contCard()); v.dirty = false; };
+    v.intro = () => {};
     setTimeout(() => { v.refresh(); stamp(); }, 0);
     function stamp() {
       const cb = $('#catBox', el); if (cb && !$('.spin', cb)) cb.innerHTML = catalogueBox();
       const f = $('#homeFoot', el); if (!f) return;
-      const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
       f.innerHTML = 'Prices are never shown. The shop sends prices on WhatsApp.<br>' + esc(SHOP_NAME) + (N && N.version ? '<br>App version ' + esc(N.version()) : '');
     }
     return v;
@@ -601,28 +561,10 @@
   }
 
   /* ================= ALL RANGES ================= */
-  function viewCats(fam) {
-    const isRoot = !fam;
-    let cur = fam || 'all';
-    const el = h('<section>' + (isRoot ? '<header class="bar bar--fixed" style="padding-left:var(--pad)"><div class="bar__t">All ranges</div></header>' : bar(famName(fam))) +
-      '<div class="ptitle"><p class="mono eyebrow">' + CATS.length + ' ranges · ' + P.length + ' products</p><h1 style="margin-top:10px">' + (fam ? esc(famName(fam)) : 'Every range<br>we stock') + '</h1></div>' +
-      '<div class="segs">' + [['all', 'All', P.length]].concat(FAMS.map(f => [f.id, ({ valves: 'Valves', couplings: 'Couplings', fittings: 'Fittings', sealing: 'Sealing' })[f.id] || f.name.split(' ')[0].replace(/,$/, ''), CATS.filter(c => c.fam === f.id).reduce((s, c) => s + c.items.length, 0)])).map(([id, n, k]) => '<button class="chip' + (id === cur ? ' is-on' : '') + '" data-f="' + id + '">' + esc(n) + ' <b>' + k + '</b></button>').join('') + '</div>' +
-      '<div class="view__pad"><div class="grid2" id="cgrid"></div></div></section>');
-    const v = { el };
-    function fill() {
-      const list = CATS.filter(c => cur === 'all' || c.fam === cur);
-      const g = $('#cgrid', el);
-      g.innerHTML = list.map((c, i) => catCard(c, Math.min(i, 10) * 45)).join('');
-      wirePhotos(g);
-    }
-    $('.segs', el).addEventListener('click', e => {
-      const b = e.target.closest('[data-f]'); if (!b || b.dataset.f === cur) return;
-      cur = b.dataset.f; $$('.segs .chip', el).forEach(x => x.classList.toggle('is-on', x === b));
-      b.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
-      fill();
-    });
-    fill();
-    return v;
+  function viewCats() {
+    const el = h('<section>' + bar('All categories') + '<div class="view__pad"><div class="sec" style="margin-top:6px"><h2>Product <em>categories</em></h2><span>' + CATS.length + ' ranges · ' + nfmt(P.length) + ' products</span></div>' +
+      '<div class="cats">' + CATS.map((c, i) => catTile(c, Math.min(i, 12) * 30)).join('') + '</div></div></section>');
+    return { el };
   }
 
   /* ================= ONE RANGE ================= */
@@ -633,29 +575,18 @@
     const groups = [...new Set(items.map(o => o.group).filter(Boolean))];
     let cur = '';
     const el = h('<section>' + bar(c.name, '<button class="ib" data-present aria-label="Show the customer">' + I.play + '</button>') +
-      '<div class="chero"><div data-hero class="ph-wrap">' + photo(c.coverImg, c.name) + '</div></div>' +
-      '<div class="chead"><p class="mono eyebrow">' + esc(famName(c.fam)) + '</p><h1 style="margin-top:8px">' + esc(c.name) + '</h1>' + (c.desc ? '<p>' + esc(c.desc) + '</p>' : '') +
-        '<div class="chead__row"><span class="mono">' + countWord(items.length, 'product') + '</span><button class="present-btn" data-present>' + I.play + 'Show customer</button></div></div>' +
-      '<div class="view__pad">' + (groups.length > 1 ? '<div class="mats">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g || 'All') + ' <b>' + (g ? items.filter(o => o.group === g).length : items.length) + '</b></button>').join('') + '</div>' : '') +
+      '<div class="view__pad"><div class="chead2"><p>' + countWord(items.length, 'product') + '</p><button class="present-btn" data-present>' + I.play + 'Show customer</button></div>' +
+      (groups.length > 1 ? '<div class="mats">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g || 'All') + ' <b>' + (g ? items.filter(o => o.group === g).length : items.length) + '</b></button>').join('') + '</div>' : '') +
       '<div class="pgrid" id="pgrid"></div></div></section>');
-    // the hero wrapper takes the photo frame's shape for the zoom-in animation
-    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;top:0;right:0;bottom:0;left:0;border-radius:0 0 32px 32px;overflow:hidden';
     const v = { el };
     const shown = () => items.filter(o => !cur || o.group === cur);
-    function fill() { const g = $('#pgrid', el); g.innerHTML = shown().map((o, i) => prodCard(o, Math.min(i, 8) * 45)).join(''); wirePhotos(g); }
+    function fill() { const g = $('#pgrid', el); g.innerHTML = shown().map((o, i) => prodCard(o, Math.min(i, 8) * 40)).join(''); wirePhotos(g); }
     fill();
     $('.mats', el) && $('.mats', el).addEventListener('click', e => {
       const b = e.target.closest('[data-g]'); if (!b) return;
       cur = b.dataset.g; $$('.mats .chip', el).forEach(x => x.classList.toggle('is-on', x === b)); fill();
     });
     $$('[data-present]', el).forEach(b => b.addEventListener('click', () => present(shown(), 0, c.name)));
-    const ph = $('.chero', el);
-    el.addEventListener('scroll', () => {
-      const y = el.scrollTop;
-      if (y < 340) ph.style.transform = 'translateY(' + (y * .45) + 'px) scale(' + (1 + y / 1600) + ')';
-      ph.style.opacity = Math.max(0, 1 - y / 360);
-    }, { passive: true });
-    solidBar(v, 220);
     v.refresh = () => { refreshMarks(); v.dirty = false; };
     return v;
   }
@@ -1025,7 +956,7 @@
           '<p class="flabel">3 · Payment</p><div class="segs2 segs2--wrap">' + PAY.map(p => opt('pay', p, p)).join('') + '</div>' +
           '<p class="flabel">4 · Note</p><textarea class="field" data-c="note" placeholder="Anything the shop should know (threading, cut lengths, timing)">' + esc(cust.note || '') + '</textarea>' +
           '<p class="flabel">5 · Items</p>' +
-          '<div class="kv osum">' + lines.map(l => '<div><span style="color:#fff">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '<div><span>Total</span><b>' + countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs</b></div></div>' +
+          '<div class="kv osum">' + lines.map(l => '<div><span style="color:var(--hd)">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '<div><span>Total</span><b>' + countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs</b></div></div>' +
           '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-tab="cart">Change items in the cart</button>' +
         '</div>' +
         '<div class="sendbar"><button class="btn btn--wa btn--full" data-place>' + I.wa + 'Send order to the shop</button><p class="fine">Opens WhatsApp to Mr Hussain (' + esc(WA_SHOW) + ') with the order typed in. Press send there.</p></div></div>');
@@ -1059,10 +990,15 @@
   }
   function success(x) {
     const body = h('<div class="done"><div class="done__tick"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div><h3>Order ' + esc(x.no) + ' sent</h3><p class="sub">It is saved in Orders. If WhatsApp did not open, use "Send again" there.</p>' +
-      '<button class="btn btn--ghost btn--full" data-k="cust">' + I.share + 'Send a copy to the customer</button><button class="btn btn--red btn--full" style="margin-top:10px" data-k="orders">See all orders</button></div>');
+      '<button class="btn btn--wa btn--full" data-k="pdfshop">' + I.pdf + 'Send the order form (PDF) to the shop</button>' +
+      '<div class="prow2"><button class="btn btn--ghost" data-k="pdfcust">' + I.pdf + 'PDF to customer</button><button class="btn btn--ghost" data-k="pdf">' + I.share + 'Share or save</button></div>' +
+      '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-k="cust">' + I.share + 'Send the customer a text copy</button><button class="btn btn--red btn--full" style="margin-top:10px" data-k="orders">See all orders</button></div>');
     body.addEventListener('click', e => {
       const k = e.target.closest('[data-k]'); if (!k) return;
-      if (k.dataset.k === 'cust') { closeSheet(); setTimeout(() => sendTo('Send a copy to the customer', orderMsgCustomer(x), x.cust.phone), 380); }
+      if (k.dataset.k === 'pdfshop') sharePdf(x, 'shop');
+      else if (k.dataset.k === 'pdfcust') sharePdf(x, x.cust.phone);
+      else if (k.dataset.k === 'pdf') sharePdf(x, '');
+      else if (k.dataset.k === 'cust') { closeSheet(); setTimeout(() => sendTo('Send a copy to the customer', orderMsgCustomer(x), x.cust.phone), 380); }
       else { closeSheet(); switchTab('orders'); }
     });
     openSheet(body);
@@ -1117,13 +1053,18 @@
     const c = x.cust;
     const body = h('<div><p class="mono" style="color:var(--red-2)">' + esc(x.no) + '</p><h3 style="margin-top:6px">' + esc(c.name || 'Order') + '</h3><p class="sub">' + new Date(x.at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</p>' +
       '<div class="kv">' + [['Contact', c.person], ['Phone', c.phone], ['Location', c.site], ['Delivery', c.delivery === 'deliver' ? 'Deliver' : 'Collect from shop'], ['Needed by', c.by], ['Payment', c.pay], ['Note', c.note]].filter(r => r[1]).map(r => '<div><span>' + r[0] + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
-      '<div class="kv osum">' + x.lines.map(l => '<div><span style="color:#fff">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '</div>' +
-      '<div class="prow2" style="margin-top:16px"><button class="btn btn--wa" data-k="wa">' + I.wa + 'Send again</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'To customer</button></div>' +
+      '<div class="kv osum">' + x.lines.map(l => '<div><span style="color:var(--hd)">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '</div>' +
+      '<button class="btn btn--red btn--full" style="margin-top:16px" data-k="pdf">' + I.pdf + 'Order form (PDF)</button>' +
+      '<div class="prow2"><button class="btn btn--ghost" data-k="pdfshop">' + I.pdf + 'PDF to shop</button><button class="btn btn--ghost" data-k="pdfcust">' + I.pdf + 'PDF to customer</button></div>' +
+      '<div class="prow2"><button class="btn btn--wa" data-k="wa">' + I.wa + 'Send again</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'Text to customer</button></div>' +
       '<div class="prow2"><button class="btn btn--ghost" data-k="repeat">' + I.sync + 'Repeat order</button><button class="btn btn--ghost" data-k="del">' + I.trash + 'Delete</button></div></div>');
     body.addEventListener('click', e => {
       const b = e.target.closest('[data-k]'); if (!b) return;
       const k = b.dataset.k;
       if (k === 'wa') open(waLink(WA, orderMsg(x)));
+      else if (k === 'pdf') sharePdf(x, '');
+      else if (k === 'pdfshop') sharePdf(x, 'shop');
+      else if (k === 'pdfcust') sharePdf(x, c.phone);
       else if (k === 'cust') { closeSheet(); setTimeout(() => sendTo('Send a copy to the customer', orderMsgCustomer(x), c.phone), 380); }
       else if (k === 'repeat') {
         const load = () => { lines = x.lines.map(l => Object.assign({}, l)); cust = Object.assign({}, c, { by: '', note: '' }); store.set('ft-cust', cust); saveLines(); refreshMarks(); closeSheet(); switchTab('cart'); const cv = stacks.cart[0]; cv && cv.refresh(); toast('Order copied into the cart. Change anything, then place it.'); };
@@ -1249,6 +1190,7 @@
   let asked = false;
   const FT = window.FT = {
     back,
+    pdfData: id => { const x = store.get('ft-orders', []).find(z => z.id === id); return x ? orderPdfData(x) : null; },   // used by the automated test
     onSync(r) {
       refreshNet(false);
       const cb = $('#catBox'); if (cb) cb.innerHTML = catalogueBox();
