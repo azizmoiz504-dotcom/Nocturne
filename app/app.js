@@ -209,7 +209,7 @@
     }
     const sps = (l.sp || []).filter(x => x !== '?');   // "?" = Not sure: reads "to confirm (options)", like the size
     const spec = sps.length ? sps.join(', ') : specs.length === 1 ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
-    const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : l.mt && m.opts.includes(l.mt) ? l.mt + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
+    const mat = !m.opts.length ? '' : m.opts.length === 1 ? (l.mt === '?' ? 'to confirm (' + m.full + ')' : m.full) : l.mt && m.opts.includes(l.mt) ? l.mt + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
     return { size, spec, mat };
   }
   // only what was chosen, for short lists: (2" · PN16 · SS316)
@@ -669,7 +669,7 @@
       if (sp.len) x += '<p class="pk__sub">Length</p><input class="field" data-len maxlength="30" placeholder="Length (' + esc(sp.len) + ')">';
       if (sp.note) x += '<p class="note">' + esc(sp.note) + '</p>';
       if (specs.length) x += '<div class="pkg" data-g="specs">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(v => chip('sp', v, sps.has(v))).join('') + (specs.length > 1 ? chip('sp', '?', sps.has('?'), ' sz--ask') : '') + '</div></div>';
-      if (m.opts.length) x += '<div class="pkg" data-g="mat">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + (m.opts.length > 1 ? '<div class="sizes">' + m.opts.map(v => chip('mt', v, mt === v)).join('') + chip('mt', '?', mt === '?', ' sz--ask') + '</div>' : '<p class="pk__fixed">' + esc(m.full) + '</p>') + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
+      if (m.opts.length) x += '<div class="pkg" data-g="mat">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + '<div class="sizes">' + (m.opts.length > 1 ? m.opts.map(v => chip('mt', v, mt === v)).join('') : '<button class="sz' + (mt !== '?' ? ' is-on' : '') + '" data-row="mt" data-v="' + esc(m.opts[0]) + '">' + esc(m.full) + '</button>') + chip('mt', '?', mt === '?', ' sz--ask') + '</div>' + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
       const keep = { t: $('[data-t]', el) && $('[data-t]', el).value, len: $('[data-len]', el) && $('[data-len]', el).value };
       el.innerHTML = x;
       if (keep.t && $('[data-t]', el)) $('[data-t]', el).value = keep.t;
@@ -683,7 +683,7 @@
       else if (row === 'a') { a = a === val ? '' : val; if (sp.lt && a && a !== '?' && b && b !== '?' && rung(b) >= rung(a)) b = ''; }
       else if (row === 'b') b = b === val ? '' : val;
       else if (row === 'sp') { if (sps.has(val)) sps.delete(val); else { if (val === '?') sps.clear(); else sps.delete('?'); sps.add(val); } }   // "Not sure" or specs, not both
-      else if (row === 'mt') mt = mt === val ? '' : val;
+      else if (row === 'mt') mt = m.opts.length > 1 ? (mt === val ? '' : val) : val === '?' && mt !== '?' ? '?' : '';   // one material: it, or Not sure
       buzz(); draw();
     });
     if (cur) {
@@ -691,7 +691,7 @@
       if (sp.t === 'sel' && (sp.opts.includes(base) || base === '?')) s = base;
       if (sp.t === 'pair' && base) { const [x, y] = base === '?' ? ['?', '?'] : base.split(' × '); a = x || ''; b = y || ''; }
       sps = new Set((cur.sp || []).filter(v => v === '?' ? specs.length > 1 : specs.includes(v)));
-      mt = m.opts.includes(cur.mt) || (cur.mt === '?' && m.opts.length > 1) ? cur.mt : '';
+      mt = (m.opts.length > 1 && m.opts.includes(cur.mt)) || (cur.mt === '?' && m.opts.length) ? cur.mt : '';
       draw();
       const t = $('[data-t]', el); if (t && base && base !== '?') t.value = base;
       const l = $('[data-len]', el); if (l && len) l.value = len;
@@ -704,7 +704,7 @@
       else { const t = $('[data-t]', el); size = (t ? t.value.replace(/[|·¦]/g, ' ').trim() : '') || (o.size ? '?' : ''); }
       const l = $('[data-len]', el), len = l ? l.value.replace(/[|·¦]/g, ' ').trim() : '';
       if (len) size = (size || '?') + ' · ' + len;
-      return { s: size, sp: specs.filter(v => sps.has(v)).concat(sps.has('?') ? ['?'] : []), mt: m.opts.length > 1 ? mt : '' };
+      return { s: size, sp: specs.filter(v => sps.has(v)).concat(sps.has('?') ? ['?'] : []), mt: m.opts.length > 1 || mt === '?' ? mt : '' };
     }
     // like the website: a size, the specs and the material (when there are several) need a pick or "Not sure" first
     function check() {
