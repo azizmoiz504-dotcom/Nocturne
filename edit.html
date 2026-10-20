@@ -67,6 +67,32 @@
   .row .del { color:var(--red); }
   .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 24px; border-radius:999px; font-size:18px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
   .toast.on { opacity:1; }
+  .modal { position:fixed; inset:0; z-index:20; background:rgba(13,27,38,.55); display:grid; place-items:center; padding:18px; }
+  .modal[hidden] { display:none; }
+  .modal__box { background:#fff; border-radius:20px; padding:24px 26px; width:100%; max-width:680px; max-height:88vh; overflow:auto; box-shadow:0 20px 60px -20px rgba(0,0,0,.5); }
+  .modal h2 { margin:0 0 10px; font-size:26px; }
+  .modal h3 { margin:16px 0 4px; font-size:19px; }
+  .modal p { margin:8px 0; }
+  .modal ul, .modal ol { margin:6px 0; padding-left:24px; }
+  .modal li { margin:4px 0; }
+  .modal code { background:var(--soft); padding:1px 6px; border-radius:6px; }
+  .modal a { color:var(--red); font-weight:700; }
+  .modal details { margin-top:12px; background:var(--soft); border-radius:12px; padding:10px 14px; }
+  .modal summary { cursor:pointer; font-weight:700; }
+  .modal .ukey { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; margin-top:6px; }
+  .modal .umsg { color:var(--red); font-weight:700; min-height:1.4em; }
+  .modal .umuted { color:var(--muted); font-size:16px; }
+  .modal__btns { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; margin-top:18px; }
+  .modal__btns .btn { border:1.5px solid var(--line); }
+  .modal__btns .btn.red { border-color:var(--red); }
+  .steps { list-style:none; padding:0 !important; margin:14px 0 !important; }
+  .steps li { display:flex; gap:12px; align-items:center; font-size:19px; padding:6px 0; color:var(--muted); }
+  .steps li.on { color:var(--ink); font-weight:700; }
+  .steps li.ok { color:#11703a; }
+  .steps i { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:16px; background:var(--soft); border:2px solid var(--line); }
+  .steps li.ok i { background:#11703a; border-color:#11703a; color:#fff; }
+  .steps li.on i { border-color:var(--red); border-top-color:transparent; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   @media (max-width:700px) { body { font-size:17px; } header { padding:12px 14px; } header h1 { width:100%; font-size:20px; } header select { min-width:0; width:100%; flex:1 1 100%; } header { position:static; } .grid { grid-template-columns:1fr; gap:14px; padding:14px 14px 100px; } .catbox { margin:14px 14px 0; } .catbox .ph { width:100px; height:100px; } }
 </style>
 </head>
@@ -78,18 +104,20 @@
   <span class="spacer"></span>
   <button class="btn ghost" id="undo">Undo</button>
   <button class="btn ghost" id="reset">Start over</button>
-  <button class="btn red" id="save">Save changes file</button>
+  <button class="btn ghost" id="save">Save changes file</button>
+  <button class="btn red" id="upload">Upload to website</button>
 </header>
 <div class="notice" id="notice"></div>
 <div class="notice warn" id="older" hidden></div>
-<div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Save changes file</b> now and send it to Claude.</div>
+<div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Upload to website</b> now (or <b>Save changes file</b> and send it to Claude).</div>
 <details class="help" open>
   <summary>How to use the editor</summary>
   <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
   <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
   Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own (for more than one, separate them with commas, e.g. "Brass, Stainless").</p>
   <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
-  When finished, press <b>Save changes file</b>, keep it in Downloads and tell Claude "done". Your work is kept in this browser if you close the page.</p>
+  When finished, press <b>Upload to website</b>. It tidies and checks your changes, shows you anything to look at, puts them on the website and tells you when they are live (usually a few minutes). Your work is kept in this browser if you close the page.
+  <b>Save changes file</b> is a backup: it saves your changes in Downloads so you can send them to Claude instead.</p>
 </details>
 <div class="catbox" id="catbox">
   <div class="ph" id="coverPh" title="Drop, paste or choose the category's main photo"><img id="coverImg" alt=""><span id="coverHint">No main photo yet: drop, paste or choose one</span></div>
@@ -101,7 +129,9 @@
 </div>
 <div class="grid" id="grid"></div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="up" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="upTitle"><h2 id="upTitle"></h2><div id="upBody"></div><div class="modal__btns" id="upBtns"></div></div></div>
 
+<script src="js/edit-check.js?v=1"></script>
 <script>
 // always load the newest product list (never a copy the browser kept from an earlier visit)
 (() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => startEditor(); d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
@@ -109,7 +139,8 @@ function startEditor() {
   const KEY = 'ft-editor-v1';
   const IMG = window.FT_IMG || '';
   // a fingerprint of the website's product list, so the editor notices when Claude adds products
-  const VER = (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(window.FT_CATS));
+  const fpr = cats => (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(cats));
+  const VER = fpr(window.FT_CATS);
   const keyOf = (slug, it) => slug + '|' + it[0];
   const siteKeys = () => window.FT_CATS.flatMap(c => c.items.map(it => keyOf(c.slug, it)));
   // a product is [name, specs, size, photo] plus an optional material the owner picked
@@ -120,7 +151,9 @@ function startEditor() {
   const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
   const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
   const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  const OLD = 'ft-editor-older';
+  const OLD = 'ft-editor-older', UPEND = 'ft-upload-pending';
+  // an upload still on its way to the website when this page was closed (see "Upload to website" below)
+  const pend0 = (() => { try { return JSON.parse(localStorage.getItem(UPEND)); } catch (e) { return null; } })();
   let state, history = [], sel = -1, clip = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   // Whenever the website's product list has changed (Claude applied a changes file), the editor starts from
@@ -128,7 +161,8 @@ function startEditor() {
   // double products); it is put aside so it can still be downloaded and sent to Claude.
   if (!state || !state.cats || state.ver !== VER) {
     if (state && state.cats && state.dirty) {
-      const aside = { at: new Date().toISOString(), state };
+      // work that was uploaded is marked, so it is dropped again once that upload turns out to be live
+      const aside = { at: new Date().toISOString(), state, upload: pend0 && pend0.id || undefined };
       let list = [];
       try { const o = JSON.parse(localStorage.getItem(OLD)); list = Array.isArray(o) ? o : o && o.state ? [o] : []; } catch (e) {}
       list.push(aside);
@@ -313,9 +347,10 @@ function startEditor() {
 
   $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
   $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
+  // the changes file: "Save changes file" downloads it, "Upload to website" sends it
+  const changesFile = () => { const used = usedPhotos(state); return { kind: 'fakhri-product-edits', saved: new Date().toISOString(), ver: state.ver, cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) }; };
   $('#save').onclick = () => {
-    const used = usedPhotos(state);
-    const out = { kind: 'fakhri-product-edits', saved: new Date().toISOString(), ver: state.ver, cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) };
+    const out = changesFile();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
     a.download = 'fakhri-product-changes.json'; a.click();
@@ -330,7 +365,7 @@ function startEditor() {
     const n = window.FT_CATS.reduce((a, c) => a + c.items.length, 0);
     shown = noticeKind();
     $('#notice').innerHTML = shown === 'dirty'
-      ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Save changes file</b> when you finish.'
+      ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Upload to website</b> when you finish.'
       : shown === 'saved'
         ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Send it to Claude. After Claude says it is live, refresh this page to see the new website list.'
         : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
@@ -352,6 +387,127 @@ function startEditor() {
     }
     if (e.target.id === 'olderDel' && confirm('Delete the older unsaved changes from this browser?')) { window.ftOlder = null; try { localStorage.removeItem(OLD); } catch (err) {} showNotice(); }
   });
+
+  /* ===== Upload to website =====
+     The changes file goes to GitHub (edits/inbox/ on the website's source branch). GitHub then tidies and checks it,
+     builds the product pages and publishes the website by itself (.github/workflows/editor-upload.yml runs
+     tools/publish-upload.js) and writes the result to edits/status/, which this page shows. The website key is a
+     GitHub key that can change the website files; it is kept in this browser only. */
+  const GH = 'https://api.github.com/repos/azizmoiz504-dotcom/Nocturne', BR = 'claude/website-changes-9vx8yk';
+  const UKEY = 'ft-upload-key';
+  const keep = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} } };
+  const gh = (url, opt = {}, key = keep.get(UKEY)) => fetch(GH + url, Object.assign({ cache: 'no-store' }, opt, { headers: Object.assign({ Authorization: 'Bearer ' + key, Accept: 'application/vnd.github+json' }, opt.headers || {}) }));
+  const wait = ms => new Promise(ok => setTimeout(ok, ms));
+  const ul = items => '<ul>' + items.map(x => '<li>' + escH(x) + '</li>').join('') + '</ul>';
+  const box = $('#up');
+  function modal(title, html, btns) {
+    $('#upTitle').textContent = title; $('#upBody').innerHTML = html;
+    const b = $('#upBtns'); b.innerHTML = '';
+    (btns || []).forEach(([label, fn, red]) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn' + (red ? ' red' : ''); x.textContent = label; x.onclick = fn; b.appendChild(x); });
+    box.hidden = false;
+  }
+  const closeModal = () => { box.hidden = true; };
+  // the website's list right now, as a fingerprint (to know when an upload is live, or that someone else uploaded first)
+  async function liveVer() { const t = await (await fetch('js/data.js?t=' + Date.now(), { cache: 'no-store' })).text(); const w = {}; new Function('window', t)(w); return fpr(w.FT_CATS); }
+  const toB64 = s => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = no; r.readAsDataURL(new Blob([s], { type: 'application/json' })); });
+  const HOWTO = '<details><summary>How to get the website key</summary><ol>' +
+    '<li>On a computer signed in to GitHub (account <b>azizmoiz504-dotcom</b>), open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>' +
+    '<li>Name: <b>Fakhri editor</b>. Expiration: the longest you can pick.</li>' +
+    '<li>Repository access: <b>Only select repositories</b>, then pick <b>Nocturne</b>.</li>' +
+    '<li>Permissions: add <b>Contents</b> and set it to <b>Read and write</b>. Nothing else is needed.</li>' +
+    '<li>Press <b>Generate token</b>, copy the key (it starts with <code>github_pat_</code>) and paste it here.</li></ol>' +
+    '<p class="umuted">Keep the key private: anyone who has it can change the website. Do not send it in a chat. To use another computer, paste the same key there once.</p></details>';
+
+  function askKey(why) {
+    modal('Website key', (why ? '<p class="umsg">' + escH(why) + '</p>' : '') +
+      '<p>To upload from this computer, paste the <b>website key</b> once. It stays in this browser only.</p>' +
+      '<input id="upKey" class="ukey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="Website key"><p class="umsg" id="upMsg"></p>' + HOWTO,
+      [['Cancel', closeModal], ['Save key', saveKey, true]]);
+    $('#upKey').focus();
+    $('#upKey').onkeydown = e => { if (e.key === 'Enter') saveKey(); };
+  }
+  async function saveKey() {
+    const k = $('#upKey').value.trim(), msg = $('#upMsg');
+    if (!/^(github_pat_|ghp_)\w{20,}$/.test(k)) { msg.textContent = 'That is not a website key. It starts with github_pat_'; return; }
+    msg.textContent = 'Checking the key…';
+    try {
+      const r = await gh('', {}, k);
+      if (r.status === 401) { msg.textContent = 'This key does not work (wrong or expired). Make a new one.'; return; }
+      if (!r.ok) { msg.textContent = 'This key cannot reach the website files. When making it, pick "Only select repositories" and Nocturne.'; return; }
+    } catch (e) { msg.textContent = 'Could not reach GitHub. Check the internet and try again.'; return; }
+    keep.set(UKEY, k);
+    startUpload();
+  }
+
+  $('#upload').onclick = () => { if (pT) writeNow(); if (!keep.get(UKEY)) askKey(); else startUpload(); };
+  function startUpload() {
+    const file = changesFile();
+    if (JSON.stringify(file.cats) === JSON.stringify(fresh().cats)) return modal('Nothing to upload', '<p>This is exactly the website list. Make your changes first, then press <b>Upload to website</b>.</p>', [['OK', closeModal, true]]);
+    const r = window.FT_EDIT_CHECK.run(file, window.FT_CATS);
+    if (r.errors.length) return modal('Please fix this first', ul(r.errors), [['OK, go back', closeModal, true]]);
+    let html = '<p>Your changes go on the website for everyone: the catalogue, the shop page and the app.</p>';
+    if (r.fixes.length) html += '<h3>Tidied for you</h3>' + ul(r.fixes);
+    if (r.warnings.length) html += '<h3>Please check these</h3><p class="umuted">They go up as they are, unless you press Go back and change them.</p>' + ul(r.warnings);
+    modal(r.warnings.length ? 'Check before uploading' : 'Upload your changes?', html, [['Change website key', () => askKey()], ['Go back', closeModal], ['Upload now', () => send(r), true]]);
+  }
+
+  const STEPS = ['Sending your changes', 'Checking them and building the website pages', 'Putting them live'];
+  const progress = n => modal('Uploading to the website', '<ol class="steps">' + STEPS.map((s, i) => '<li class="' + (i < n ? 'ok' : i === n ? 'on' : '') + '"><i>' + (i < n ? '✓' : '') + '</i>' + s + '</li>').join('') + '</ol><p class="umuted">This usually takes a few minutes. Keep this page open; if you close it, it carries on and this page picks it up again next time.</p>');
+  function failed(msg, id) {
+    keep.set(UPEND, null);
+    const aside = id && older().some(x => x.upload === id);
+    modal('Not uploaded', '<p>' + escH(msg) + '</p><p class="umuted">' + (aside ? 'Your changes were put aside when this page reopened: press <b>Download older changes</b> (red box at the top) and send the file to Claude.' : 'Your changes are still here in the editor.') + '</p>',
+      aside ? [['Close', closeModal, true]] : [['Save changes file', () => { closeModal(); $('#save').click(); }], ['Close', closeModal, true]]);
+  }
+
+  async function send(r) {
+    // what goes up is the tidied list, and the editor shows the tidied list from now on (Undo brings back the old one)
+    snap(); state.cats = JSON.parse(JSON.stringify(r.file.cats)); state.dirty = true; writeNow(); fillCats(); render();
+    progress(0);
+    const id = new Date().toISOString().replace(/[-:]|\.\d+Z$/g, '').replace('T', '-') + '-' + Math.random().toString(36).slice(2, 6);
+    try {
+      if (await liveVer() !== state.ver) return failed('The website list was changed after you opened the editor (someone else uploaded first), so your changes were NOT uploaded: they would undo the other changes. Press "Save changes file" and send the file to Claude.');
+      const content = await toB64(JSON.stringify(changesFile()));
+      const res = await gh('/contents/edits/inbox/' + id + '.json', { method: 'PUT', body: JSON.stringify({ message: 'Product editor upload ' + id, content, branch: BR }) });
+      if (res.status === 401) { keep.set(UKEY, null); return askKey('The website key does not work any more (wrong or expired). Paste a new key, then upload again.'); }
+      if (res.status === 403 || res.status === 404) { keep.set(UKEY, null); return askKey('This key is not allowed to change the website files. Make a new key with Contents set to "Read and write", paste it, then upload again.'); }
+      if (!res.ok) return failed('GitHub did not take the upload (code ' + res.status + '), so nothing changed. Try again in a few minutes.');
+    } catch (e) { return failed('Could not reach GitHub or the website, so nothing was uploaded. Check the internet and try again.'); }
+    keep.set(UPEND, JSON.stringify({ id, at: Date.now() }));
+    watch(id, Date.now());
+  }
+
+  async function watch(id, t0) {
+    progress(1);
+    let st = null;
+    while (!st) {
+      if (Date.now() - t0 > 20 * 60e3) return modal('Still working', '<p>GitHub has not finished checking your upload yet. It finishes by itself: leave this page open, or come back later and this page picks it up again.</p>', [['Close', closeModal], ['Keep waiting', () => watch(id, Date.now()), true]]);
+      await wait(6000);
+      try {
+        const r = await gh('/contents/edits/status/' + id + '.json?ref=' + encodeURIComponent(BR), { headers: { Accept: 'application/vnd.github.raw+json' } });
+        if (r.ok) st = JSON.parse(await r.text());
+      } catch (e) { /* no internet for a moment: keep trying */ }
+    }
+    if (!st.ok) return failed(st.error || 'Your changes could not be put on the website.', id);
+    // the changes are on the website's list now, so they no longer count as unsaved work
+    state.dirty = false; state.saved = false; writeNow();
+    const rest = older().filter(x => x.upload !== id);
+    window.ftOlder = window.ftOlder ? rest : null;
+    try { if (rest.length) localStorage.setItem(OLD, JSON.stringify(rest)); else localStorage.removeItem(OLD); } catch (e) {}
+    showNotice();
+    progress(2);
+    while (true) {
+      if (Date.now() - t0 > 45 * 60e3) { keep.set(UPEND, null); return modal('Published', '<p>Your changes are published (' + st.products + ' products). GitHub is slow to show them today; they appear on the website by themselves.</p>', [['Close', () => location.reload(), true]]); }
+      try { if (await liveVer() === st.ver) break; } catch (e) { /* keep trying */ }
+      await wait(8000);
+    }
+    keep.set(UPEND, null);
+    modal('Live on the website ✓', '<p>Your changes are live: <b>' + st.products + ' products in ' + st.categories + ' sections</b>' + (st.photos ? ', ' + st.photos + ' new photo' + (st.photos > 1 ? 's' : '') : '') + '. The catalogue, the shop page and the app show them now (refresh a page that was already open).</p>' +
+      (st.fixes && st.fixes.length ? '<h3>Tidied for you</h3>' + ul(st.fixes) : ''), [['Continue editing', () => location.reload(), true]]);
+  }
+  // an upload that was still running when this page was closed or refreshed
+  try { const p = JSON.parse(keep.get(UPEND)); if (p && p.id && Date.now() - p.at < 3 * 3600e3) watch(p.id, p.at); else keep.set(UPEND, null); } catch (e) { keep.set(UPEND, null); }
+
   fillCats();
   render();
   showNotice();
