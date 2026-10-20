@@ -258,15 +258,15 @@
   // a product with nothing to choose goes straight into the quote; any other opens the product window first
   const hasChoices = o => sizeChoice(o) || specOpts(o).length > 0 || matOpts(o).opts.length > 1;
   // cur = a line from the quote list being changed (null for a fresh pick)
-  // specs and material with more than one option get a "Not sure" button ("?"), like the size
+  // specs with more than one option, and any material, get a "Not sure" button ("?"), like the size
   function choicesHTML(o, cur) {
     const specs = specOpts(o), m = matOpts(o), pickedS = cur ? cur.specPick : specs.length === 1 ? specs : [], pickedM = cur ? cur.matPick : '';
     return sizeChoiceHTML(o, cur ? cur.pick : '') +
       (specs.length ? group('specs', 'Specs & ratings', specs.length > 1 ? 'Tap the ones you need' : '', specs.map(v => btn('data-spec', v, pickedS.includes(v))).join('') + (specs.length > 1 ? btn('data-spec', '?', pickedS.includes('?'), 'Not sure') : '')) : '') +
-      (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') + btn('data-mat', '?', pickedM === '?', 'Not sure') : fixed(m.full), m.note) : '');
+      (m.opts.length ? group('mat', 'Material', m.opts.length > 1 ? 'Choose one' : '', m.opts.length > 1 ? m.opts.map(v => btn('data-mat', v, v === pickedM)).join('') + btn('data-mat', '?', pickedM === '?', 'Not sure') : btn('data-mat', m.opts[0], pickedM !== '?', m.full) + btn('data-mat', '?', pickedM === '?', 'Not sure'), m.note) : '');
   }
   const readSpecs = root => $$('[data-spec].is-on', root).map(b => b.dataset.spec);
-  const readMat = (root, o) => { const m = matOpts(o), b = $('[data-mat].is-on', root); return m.opts.length > 1 && b ? b.dataset.mat : ''; };
+  const readMat = (root, o) => { const m = matOpts(o), b = $('[data-mat].is-on', root); return !b ? '' : m.opts.length > 1 || b.dataset.mat === '?' ? b.dataset.mat : ''; };   // one material: '' = that material, '?' = Not sure
   // a line's key: the size alone for older lines and products with nothing else picked
   const keyOf = (o, v, specs, mat) => { specs = specs || []; return o.id + '|' + v + (specs.length || mat ? '|' + specs.join('¦') + '|' + (mat || '') : ''); };
   const keyFrom = (root, o, v) => keyOf(o, v, readSpecs(root), readMat(root, o));
@@ -284,7 +284,7 @@
     }
     const picked = o.specPick.filter(x => x !== '?');   // "?" = Not sure: reads "to confirm (options)", like the size
     const spec = picked.length ? picked.join(', ') : specs.length === 1 && o.pick === null ? specs[0] : specs.length ? 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '') : '';
-    const mat = !m.opts.length ? '' : m.opts.length === 1 ? m.full : o.matPick && m.opts.includes(o.matPick) ? o.matPick + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
+    const mat = !m.opts.length ? '' : m.opts.length === 1 ? (o.matPick === '?' ? 'to confirm (' + m.full + ')' : m.full) : o.matPick && m.opts.includes(o.matPick) ? o.matPick + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
     return { size, spec, mat };
   }
   // short form for the quote list, toasts and the enquiry form list: only what was actually chosen
@@ -333,7 +333,7 @@
       const o = findSaved(String(k), name, mat);
       if (!o) { lostLines++; return; }
       const m = matOpts(o).opts, specs = specOpts(o);
-      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick), o.specPick.filter(x => x === '?' ? specs.length > 1 : specs.includes(x)), m.length > 1 && (m.includes(o.matPick) || o.matPick === '?') ? o.matPick : '');
+      const key = keyOf(o, o.pick === null ? defaultPick(o) : cleanPick(o, o.pick), o.specPick.filter(x => x === '?' ? specs.length > 1 : specs.includes(x)), (m.length > 1 && m.includes(o.matPick)) || (m.length && o.matPick === '?') ? o.matPick : '');
       rfq.set(key, Math.min(99999, (rfq.get(key) || 0) + Math.max(1, Math.round(+q) || 1)));
     });
   } catch (e) {}
