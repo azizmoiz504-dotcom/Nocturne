@@ -82,6 +82,8 @@
   .modal .ukey { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; margin-top:6px; }
   .modal .umsg { color:var(--red); font-weight:700; min-height:1.4em; }
   .modal .umuted { color:var(--muted); font-size:16px; }
+  .modal .kbtn { display:inline-block; text-decoration:none; margin:2px 0; }
+  .modal .ksteps li { margin:10px 0; }
   .modal__btns { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; margin-top:18px; }
   .modal__btns .btn { border:1.5px solid var(--line); }
   .modal__btns .btn.red { border-color:var(--red); }
@@ -422,8 +424,10 @@ function startEditor() {
   // the website's list right now, as a fingerprint (to know when an upload is live, or that someone else uploaded first)
   async function liveVer() { const t = await (await fetch('js/data.js?t=' + Date.now(), { cache: 'no-store' })).text(); const w = {}; new Function('window', t)(w); return fpr(w.FT_CATS); }
   const toB64 = s => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = no; r.readAsDataURL(new Blob([s], { type: 'application/json' })); });
-  const HOWTO = '<details><summary>How to get the website key</summary><ol>' +
-    '<li>On a computer signed in to GitHub (account <b>azizmoiz504-dotcom</b>), open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>' +
+  // GitHub's new-key page with the name, owner, a year's expiry and Contents: Read and write already filled in
+  const KEYURL = 'https://github.com/settings/personal-access-tokens/new?name=Fakhri+editor&description=Product+editor+Upload+to+website+button&target_name=azizmoiz504-dotcom&expires_in=366&contents=write';
+  const HOWTO = '<details><summary>If the GitHub page is not filled in</summary><ol>' +
+    '<li>On a computer signed in to GitHub (account <b>azizmoiz504-dotcom</b>), open <a href="' + KEYURL + '" target="_blank" rel="noopener">GitHub\'s new key page</a>.</li>' +
     '<li>Name: <b>Fakhri editor</b>. Expiration: the longest you can pick.</li>' +
     '<li>Repository access: <b>Only select repositories</b>, then pick <b>Nocturne</b>.</li>' +
     '<li>Permissions: add <b>Contents</b> and set it to <b>Read and write</b>. Nothing else is needed.</li>' +
@@ -432,13 +436,20 @@ function startEditor() {
 
   function askKey(why) {
     modal('Website key', (why ? '<p class="umsg">' + escH(why) + '</p>' : '') +
-      '<p>To upload from this computer, paste the <b>website key</b> once. It stays in this browser only.</p>' +
+      '<p>To upload from this computer, the editor needs a <b>website key</b> from GitHub, once. It stays in this browser only.</p>' +
+      '<ol class="ksteps"><li><a class="btn red kbtn" href="' + KEYURL + '" target="_blank" rel="noopener">Make the key on GitHub</a><br><span class="umuted">It opens GitHub with the boxes filled in for you.</span></li>' +
+      '<li>On GitHub, under <b>Repository access</b>, pick <b>Only select repositories</b>, then pick <b>Nocturne</b>.</li>' +
+      '<li>Press <b>Generate token</b> at the bottom, then press the copy button next to the key.</li>' +
+      '<li>Come back here and paste it:</li></ol>' +
       '<input id="upKey" class="ukey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="Website key"><p class="umsg" id="upMsg"></p>' + HOWTO,
       [['Cancel', closeModal], ['Save key', saveKey, true]]);
     $('#upKey').focus();
     $('#upKey').onkeydown = e => { if (e.key === 'Enter') saveKey(); };
+    $('#upKey').onpaste = () => setTimeout(saveKey, 0);   // pasting the key is enough, no extra press
   }
-  async function saveKey() {
+  let checking = false;   // pasting and pressing Save key together check the key once
+  async function saveKey() { if (checking) return; checking = true; try { await checkKey(); } finally { checking = false; } }
+  async function checkKey() {
     const k = $('#upKey').value.trim(), msg = $('#upMsg');
     if (!/^(github_pat_|ghp_)\w{20,}$/.test(k)) { msg.textContent = 'That is not a website key. It starts with github_pat_'; return; }
     msg.textContent = 'Checking the key…';
