@@ -102,13 +102,13 @@
   <select id="cat" aria-label="Category"></select>
   <span class="count" id="count"></span>
   <span class="spacer"></span>
+  <button class="btn ghost" id="newSec">New group</button>
   <button class="btn ghost" id="undo">Undo</button>
   <button class="btn ghost" id="reset">Start over</button>
   <button class="btn ghost" id="save">Save changes file</button>
   <button class="btn red" id="upload">Upload to website</button>
 </header>
 <div class="notice" id="notice"></div>
-<div class="notice warn" id="older" hidden></div>
 <div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Upload to website</b> now (or <b>Save changes file</b> and send it to Claude).</div>
 <details class="help" open>
   <summary>How to use the editor</summary>
@@ -125,13 +125,14 @@
     <label for="catName">Category name (shown on the website)</label>
     <input id="catName" maxlength="80">
     <div class="row"><button id="coverPick" type="button">Choose main photo</button><span class="count" style="align-self:center;color:var(--muted)">or drop a photo on the circle, or click it and press Ctrl+V</span></div>
+    <div class="row"><button id="addProd" type="button">+ Add product</button><button id="delSec" type="button" class="del" hidden>Remove this new group</button></div>
   </div>
 </div>
 <div class="grid" id="grid"></div>
 <div class="toast" id="toast"></div>
 <div class="modal" id="up" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="upTitle"><h2 id="upTitle"></h2><div id="upBody"></div><div class="modal__btns" id="upBtns"></div></div></div>
 
-<script src="js/edit-check.js?v=1"></script>
+<script src="js/edit-check.js?v=2"></script>
 <script>
 // always load the newest product list (never a copy the browser kept from an earlier visit)
 (() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => startEditor(); d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
@@ -151,23 +152,14 @@ function startEditor() {
   const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
   const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
   const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  const OLD = 'ft-editor-older', UPEND = 'ft-upload-pending';
-  // an upload still on its way to the website when this page was closed (see "Upload to website" below)
-  const pend0 = (() => { try { return JSON.parse(localStorage.getItem(UPEND)); } catch (e) { return null; } })();
+  const UPEND = 'ft-upload-pending';
+  // older versions of the editor put unsaved work aside here (with a red box); that box is gone
+  try { localStorage.removeItem('ft-editor-older'); } catch (e) {}
   let state, history = [], sel = -1, clip = null;
   try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-  // Whenever the website's product list has changed (Claude applied a changes file), the editor starts from
-  // the newest website list. Older unsaved work is never mixed in (mixing it brought back old photos and made
-  // double products); it is put aside so it can still be downloaded and sent to Claude.
+  // Whenever the website's product list has changed (an upload went live), the editor starts from the newest
+  // website list. Older work that was never uploaded is not mixed in (mixing brought back old photos and made double products).
   if (!state || !state.cats || state.ver !== VER) {
-    if (state && state.cats && state.dirty) {
-      // work that was uploaded is marked, so it is dropped again once that upload turns out to be live
-      const aside = { at: new Date().toISOString(), state, upload: pend0 && pend0.id || undefined };
-      let list = [];
-      try { const o = JSON.parse(localStorage.getItem(OLD)); list = Array.isArray(o) ? o : o && o.state ? [o] : []; } catch (e) {}
-      list.push(aside);
-      try { localStorage.removeItem(KEY); localStorage.setItem(OLD, JSON.stringify(list)); } catch (e) { window.ftOlder = list; }
-    }
     state = fresh();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
@@ -208,6 +200,7 @@ function startEditor() {
     const c = cat();
     $('#count').textContent = c.items.length + ' products';
     if (selEl.options[ci]) selEl.options[ci].text = c.name + ' (' + c.items.length + ')';
+    $('#delSec').hidden = !isNewCat(c);
     $('#coverImg').style.display = c.cover ? '' : 'none'; $('#coverHint').style.display = c.cover ? 'none' : ''; if (c.cover) $('#coverImg').src = src(c.cover);
     if (document.activeElement !== $('#catName')) $('#catName').value = c.name;
     $('#catbox').classList.toggle('sel', sel === 'cover');
@@ -276,6 +269,7 @@ function startEditor() {
       c.items.splice(i, 1);
       if (c.cover && c.cover === it[3]) c.cover = (c.items.find(x => x[3]) || [])[3] || '';
       to.items.push(it); sel = -1;
+      if (!to.cover && it[3]) to.cover = it[3];   // a new group's first photo is its main photo
     });
     fillCats();
     toast('Moved "' + it[0] + '" to ' + to.name);
@@ -331,7 +325,7 @@ function startEditor() {
         const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
         const id = 'new:' + cat().slug + '-' + Date.now().toString(36);
         if (i === 'cover') { change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); cat().cover = id; sel = 'cover'; }); toast('Main photo changed'); return; }
-        change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
+        change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (!cat().cover || cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
         toast('Photo changed');
       };
       im.src = r.result;
@@ -344,6 +338,43 @@ function startEditor() {
     if (!e.target.matches('input, textarea') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
   });
   document.addEventListener('copy', e => { if (e.target.matches('input, textarea') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+
+  // New group (a new section of the website): it goes on the website with the first upload that has products in it
+  const isNewCat = c => !window.FT_CATS.some(x => x.slug === c.slug);
+  $('#newSec').onclick = () => {
+    modal('New group', '<p>Type the group name as it should show on the website, and pick where it shows.</p>' +
+      '<p><b>Group name</b><br><input id="secName" class="ukey" maxlength="80" placeholder="e.g. PVC PIPES & FITTINGS"></p>' +
+      '<p><b>Shows under</b><br><select id="secFam" class="ukey">' + window.FT_FAMILIES.map(f => '<option value="' + escH(f.id) + '">' + escH(f.name) + '</option>').join('') + '</select></p><p class="umsg" id="secMsg"></p>',
+      [['Cancel', closeModal], ['Make group', makeSection, true]]);
+    $('#secName').focus();
+    $('#secName').onkeydown = e => { if (e.key === 'Enter') makeSection(); };
+  };
+  function makeSection() {
+    const name = $('#secName').value.replace(/\s+/g, ' ').trim(), fam = $('#secFam').value;
+    if (!name) { $('#secMsg').textContent = 'Type the group name first.'; return; }
+    if (state.cats.some(c => c.name.toLowerCase() === name.toLowerCase())) { $('#secMsg').textContent = 'There is already a group called that. Pick it from the list at the top instead.'; return; }
+    const slug = window.FT_EDIT_CHECK.newSlug(name, window.FT_CATS.map(c => c.slug).concat(state.cats.map(c => c.slug)));
+    change(() => { state.cats.push({ slug, name, fam, desc: '', cover: '', items: [] }); ci = state.cats.length - 1; sel = -1; });
+    fillCats(); closeModal();
+    toast('Group made. Press + Add product, or move cards here with "Move to another section".');
+  }
+  $('#addProd').onclick = () => {
+    change(() => { cat().items.push(['', [], '', '']); sel = cat().items.length - 1; });
+    const card = document.querySelector('.card[data-i="' + (cat().items.length - 1) + '"]');
+    if (card) {   // the top of the new card just under the bar at the top, so its photo box shows too
+      const bar = getComputedStyle($('header')).position === 'sticky' ? $('header').offsetHeight : 0;
+      window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - bar - 12, behavior: 'smooth' });
+      card.querySelector('[data-f="0"]').focus({ preventScroll: true });
+    }
+    toast('New product added at the end: type its name, then add a photo');
+  };
+  $('#delSec').onclick = () => {
+    const c = cat(); if (!isNewCat(c)) return;
+    if (!confirm('Remove the new group "' + c.name + '"' + (c.items.length ? ' and its ' + c.items.length + ' product' + (c.items.length > 1 ? 's' : '') : '') + '?')) return;
+    change(() => { state.cats.splice(ci, 1); ci = 0; sel = -1; });
+    fillCats(); render();
+    toast('Group removed');
+  };
 
   $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
   $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
@@ -358,8 +389,6 @@ function startEditor() {
     toast('Saved to Downloads as fakhri-product-changes.json');
   };
   // what the person is looking at: the newest website list, or their unsaved work on top of it
-  const older = () => { if (window.ftOlder) return window.ftOlder; try { const o = JSON.parse(localStorage.getItem(OLD)); return Array.isArray(o) ? o.filter(x => x && x.state) : o && o.state ? [o] : []; } catch (e) { return []; } };
-  const when = iso => { try { return new Date(iso).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
   function noticeKind() { return state.dirty ? 'dirty' : state.saved ? 'saved' : 'site'; }
   function showNotice() {
     const n = window.FT_CATS.reduce((a, c) => a + c.items.length, 0);
@@ -367,26 +396,9 @@ function startEditor() {
     $('#notice').innerHTML = shown === 'dirty'
       ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Upload to website</b> when you finish.'
       : shown === 'saved'
-        ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Send it to Claude. After Claude says it is live, refresh this page to see the new website list.'
+        ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Press <b>Upload to website</b> to put them on the website, or send the file to Claude.'
         : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
-    const o = older(), box = $('#older');
-    box.hidden = !o.length;
-    if (o.length) box.innerHTML = '<b>Older unsaved changes were put aside.</b> This browser had changes from ' + o.map(x => when(x.at)).join(' and ') + ' that were never saved, and the website has been updated since. They are NOT in the list below. Download them only if Claude asks for them.' +
-      '<br>' + o.map((x, k) => '<button type="button" class="olderGet" data-k="' + k + '">Download older changes' + (o.length > 1 ? ' (' + escH(when(x.at)) + ')' : '') + '</button>').join('') + '<button type="button" class="ghost" id="olderDel">Delete ' + (o.length > 1 ? 'them all' : 'them') + '</button>';
   }
-  document.addEventListener('click', e => {
-    if (e.target.classList.contains('olderGet')) {
-      const all = older(), k = +e.target.dataset.k, o = all[k]; if (!o) return;
-      const used = usedPhotos(o.state);
-      const out = { kind: 'fakhri-product-edits', saved: o.at, older: true, ver: o.state.ver, cats: o.state.cats, images: Object.fromEntries(Object.entries(o.state.images || {}).filter(([k]) => used.has(k))) };
-      const name = 'fakhri-product-changes-OLDER' + (all.length > 1 ? '-' + (k + 1) : '') + '.json';
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
-      a.download = name; a.click();
-      toast('Saved to Downloads as ' + name);
-    }
-    if (e.target.id === 'olderDel' && confirm('Delete the older unsaved changes from this browser?')) { window.ftOlder = null; try { localStorage.removeItem(OLD); } catch (err) {} showNotice(); }
-  });
 
   /* ===== Upload to website =====
      The changes file goes to GitHub (edits/inbox/ on the website's source branch). GitHub then tidies and checks it,
@@ -453,11 +465,9 @@ function startEditor() {
 
   const STEPS = ['Sending your changes', 'Checking them and building the website pages', 'Putting them live'];
   const progress = n => modal('Uploading to the website', '<ol class="steps">' + STEPS.map((s, i) => '<li class="' + (i < n ? 'ok' : i === n ? 'on' : '') + '"><i>' + (i < n ? '✓' : '') + '</i>' + s + '</li>').join('') + '</ol><p class="umuted">This usually takes a few minutes. Keep this page open; if you close it, it carries on and this page picks it up again next time.</p>');
-  function failed(msg, id) {
+  function failed(msg) {
     keep.set(UPEND, null);
-    const aside = id && older().some(x => x.upload === id);
-    modal('Not uploaded', '<p>' + escH(msg) + '</p><p class="umuted">' + (aside ? 'Your changes were put aside when this page reopened: press <b>Download older changes</b> (red box at the top) and send the file to Claude.' : 'Your changes are still here in the editor.') + '</p>',
-      aside ? [['Close', closeModal, true]] : [['Save changes file', () => { closeModal(); $('#save').click(); }], ['Close', closeModal, true]]);
+    modal('Not uploaded', '<p>' + escH(msg) + '</p><p class="umuted">Your changes are still here in the editor.</p>', [['Save changes file', () => { closeModal(); $('#save').click(); }], ['Close', closeModal, true]]);
   }
 
   async function send(r) {
@@ -488,13 +498,9 @@ function startEditor() {
         if (r.ok) st = JSON.parse(await r.text());
       } catch (e) { /* no internet for a moment: keep trying */ }
     }
-    if (!st.ok) return failed(st.error || 'Your changes could not be put on the website.', id);
+    if (!st.ok) return failed(st.error || 'Your changes could not be put on the website.');
     // the changes are on the website's list now, so they no longer count as unsaved work
-    state.dirty = false; state.saved = false; writeNow();
-    const rest = older().filter(x => x.upload !== id);
-    window.ftOlder = window.ftOlder ? rest : null;
-    try { if (rest.length) localStorage.setItem(OLD, JSON.stringify(rest)); else localStorage.removeItem(OLD); } catch (e) {}
-    showNotice();
+    state.dirty = false; state.saved = false; writeNow(); showNotice();
     progress(2);
     while (true) {
       if (Date.now() - t0 > 45 * 60e3) { keep.set(UPEND, null); return modal('Published', '<p>Your changes are published (' + st.products + ' products). GitHub is slow to show them today; they appear on the website by themselves.</p>', [['Close', () => location.reload(), true]]); }
