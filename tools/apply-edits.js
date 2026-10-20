@@ -18,11 +18,17 @@ if (!edits.ver) console.warn('Note: this file has no list fingerprint (made by a
 const brandsAt = src.indexOf('/* Oilfield brands');
 if (brandsAt < 0) throw new Error('Could not find the "/* Oilfield brands" comment in js/data.js, so the brand list would be lost');
 
+// sections the editor made ("New group"): they need a name, a family and an address name the website never used
+const NEW = new Set(edits.cats.filter(e => !W.FT_CATS.some(c => c.slug === e.slug)).map(e => {
+  if (!/^[a-z0-9-]+$/.test(e.slug || '') || !e.name || !W.FT_FAMILIES.some(f => f.id === e.fam)) throw new Error('Unknown category ' + e.slug);
+  if (fs.existsSync(path.join('products', e.slug + '.html'))) throw new Error('The new group "' + e.name + '" would use the web address products/' + e.slug + '.html, which the website already uses. Give the group another name.');
+  return e.slug;
+}));
 // Save new photos next to the category's other photos
 const saved = {};
 for (const [id, url] of Object.entries(edits.images || {})) {
   const m = /^new:([a-z0-9-]+)-([a-z0-9]+)$/.exec(id), d = /^data:image\/jpeg;base64,(.+)$/.exec(url);
-  if (!m || !d || !W.FT_CATS.some(c => c.slug === m[1])) throw new Error('Bad photo ' + id);
+  if (!m || !d || !(W.FT_CATS.some(c => c.slug === m[1]) || NEW.has(m[1]))) throw new Error('Bad photo ' + id);
   const rel = m[1] + '/edit-' + m[2] + '.jpg';
   fs.mkdirSync(path.join('assets/products', m[1]), { recursive: true });
   fs.writeFileSync(path.join('assets/products', rel), Buffer.from(d[1], 'base64'));

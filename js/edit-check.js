@@ -84,6 +84,7 @@
         if (!it[3]) warnings.push(label(c, it) + ': no photo yet (the website shows "Photo on WhatsApp")');
       }
       c.items = keep;
+      if (!was && !keep.length) warnings.push((c.name || c.slug) + ': this new group has no products yet, so it does not show on the website');
       const seen = new Map();
       c.items.forEach(it => { const k = it[0].toLowerCase(); seen.set(k, (seen.get(k) || 0) + 1); });
       for (const [k, n] of seen) if (n > 1 && c.items.some(it => it[0].toLowerCase() === k && !known.has(it[0] + '|' + it[2]))) warnings.push((c.name || c.slug) + ': "' + c.items.find(it => it[0].toLowerCase() === k)[0] + '" is in this section ' + n + ' times');
@@ -91,6 +92,19 @@
     return { file: out, fixes, warnings, errors };
   }
 
-  const api = { run, tidySize, sizeKind };
+  // the web address name for a new section: from its name, never one the website uses now or used before
+  // (old addresses forward to other pages: see PAGE_URL, MOVED in tools/build-pages.js and SLUG_ALIAS in js/main.js)
+  const RESERVED = ['index', 'valves', 'valves-hub', 'oilfield-supplies', 'carbon-steel-pipes-fittings', 'stainless-steel-pipes-fittings', 'gi-pipes-fittings', 'flanges',
+    'instrumentation-fittings', 'pressure-gauges', 'instrumentation-pressure-gauges', 'universal-couplings-flange-adapter', 'qrc-couplings', 'qrc-couplings-ludecke',
+    'gaskets-caf-canf-sheets', 'socket-weld-fittings', 'threaded-forged-fittings', 'union-flexible-connectors', 'cock-valves', 'brass-fittings-valves'];
+  function newSlug(name, taken) {
+    const base = String(name).toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '') || 'section';
+    const used = new Set(RESERVED.concat(taken || []));
+    let s = base, n = 2;
+    while (used.has(s)) s = base + '-' + n++;
+    return s;
+  }
+
+  const api = { run, tidySize, sizeKind, newSlug, RESERVED };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.FT_EDIT_CHECK = api;
 })(typeof window !== 'undefined' ? window : this);

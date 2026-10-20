@@ -93,7 +93,8 @@ const MOVED = { 'products/valves-hub.html': 'products/valves.html',
 const fit = (...opts) => opts.find(o => o.length <= 60) || opts[opts.length - 1];
 const cut = (s, n) => s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n - 1)).replace(/[,;:.—-]$/, '') + '…';
 require('./zoom-css.js');   // computer copies of the stylesheets (75% size)
-const ver = fs.statSync('css/pages.css').mtimeMs.toString(36).slice(-6);
+// from the stylesheets' content (not the file time, which changes on every fresh copy of the site, e.g. on GitHub)
+const ver = require('crypto').createHash('md5').update(fs.readFileSync('css/pages.css')).update(fs.readFileSync('css/pages-75.css')).digest('hex').slice(0, 6);
 const WA_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>';
 
 // Google Analytics 4: off until js/config.js has a ga4 ID (starts with G-). Then it counts page views and
