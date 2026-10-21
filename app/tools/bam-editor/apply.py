@@ -8,7 +8,7 @@
 Writes app/bam/data.js, Arabic names into app/bam/ar.js, and new photos into app/bam/p/<category>/ and
 app/bam/covers/. Then: copy app/bam to the shared private copy, rebuild the app and the editor.
 """
-import argparse, base64, io, json, os, sys, time
+import argparse, base64, io, json, os, re, sys, time
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +29,15 @@ def photo(data_url, path, max_side):
 
 
 def money(v): return 'on request' if v is None else 'AED %g' % v
+
+
+def new_id(name, taken):
+    """an address-safe id for a new category: "Power Tools" -> power-tools (photos go in p/<id>/)"""
+    base = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')[:40].strip('-') or 'range'
+    cid, k = base, 2
+    while cid in taken: cid = '%s-%d' % (base, k); k += 1
+    taken.add(cid)
+    return cid
 
 
 def main():
@@ -74,6 +83,7 @@ def main():
         return rel
 
     cats, seen, ar_new = [], set(), {}
+    taken = set(orig_cats)
     def ar_set(en, value):
         value = (value or '').strip()
         if not en or not value or d.get(en) == value: return
@@ -82,7 +92,12 @@ def main():
 
     for c in ch['cats']:
         oc = orig_cats.get(c.get('id'))
-        if not oc: problems.append('unknown category %r left out' % c.get('id')); continue
+        if not oc and c.get('isNew'):
+            name = (c.get('name') or '').strip()
+            if not name: problems.append('a new category with no name left out'); continue
+            oc = {'id': new_id(name, taken), 'name': name, 'title': name, 'lede': '', 'secs': [], 'cover': ''}
+            report.append('NEW category "%s"' % name)
+        elif not oc: problems.append('unknown category %r left out' % c.get('id')); continue
         cid = oc['id']
         name = (c.get('name') or '').strip() or oc['name']
         if name != oc['name']: report.append('%s: category renamed to "%s"' % (oc['name'], name))
@@ -148,10 +163,14 @@ def main():
                 was = [k for k in (item_key(cid, osi, i) for i in range(len(oc['secs'][osi]['items']))) if k in keys]
                 if keys and [k for k in keys if k in was] != was: report.append('%s > %s: products put in a new order' % (name, sn))
             if items: secs.append({'n': sn, 'items': items})
+        if not secs:
+            if not c.get('isNew'): report.append('%s: no products left, category taken out' % name)
+            continue
         cats.append({'id': cid, 'name': name, 'title': oc.get('title', ''), 'lede': oc.get('lede', ''), 'secs': secs, 'cover': cover})
     for k, (ocid, osi, osn, oi) in orig.items():
         if k not in seen: report.append('%s > %s > %s: DELETED' % (orig_cats[ocid]['name'], osn, oi['n']))
-    missing = [c['id'] for c in data['cats'] if c['id'] not in {x['id'] for x in cats}]
+    in_file = {c.get('id') for c in ch['cats']}
+    missing = [c['id'] for c in data['cats'] if c['id'] not in in_file]
     if missing: problems.append('categories missing from the file, kept as they were: ' + ', '.join(missing))
     for cid in missing:
         cats.insert([c['id'] for c in data['cats']].index(cid), orig_cats[cid])
