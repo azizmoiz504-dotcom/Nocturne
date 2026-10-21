@@ -16,6 +16,7 @@ cp web/app.css web/app.js web/orderform.js web/jspdf.umd.min.js "$W/"
 for f in barlow-400-latin barlow-500-latin barlow-600-latin barlow-700-latin barlow-condensed-600-latin barlow-condensed-700-latin barlow-condensed-800-latin barlow-semi-condensed-500-latin barlow-semi-condensed-600-latin; do cp "$SITE/fonts/$f.woff2" "$W/fonts/"; done
 cp "$SITE"/assets/brands/*.png "$W/brands/"
 cp "$SITE/assets/logo-lockup.png" "$SITE/assets/logo-stacked.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-192.png" "$SITE/assets/icon-512.png" "$SITE/assets/apple-touch-icon.png" "$W/img/"
+cp web/img/*.png "$W/img/"
 
 # index.html: Home Screen tags, live list from the website, offline helper
 HEAD='<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="apple-mobile-web-app-title" content="Fakhri Tools">\n<meta name="robots" content="noindex">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="img/apple-touch-icon.png">\n<link rel="icon" href="img/icon-192.png">\n<script>document.documentElement.className += " is-web"; window.FT_WEB = { img: "../assets/products/", brand: "fakhri" };</script>'

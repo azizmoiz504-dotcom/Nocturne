@@ -105,7 +105,7 @@ const pickRest = scope => pg.evaluate(async scope => { for (let i = 0; i < 6; i+
 check(await pg.evaluate(() => document.querySelectorAll('#first .bcard').length === 2), 'first start asks which branch');
 await tap('#first .bcard--bam', 3500);
 pg = await attach(); await wait(1500);
-check(await pg.evaluate(() => FTNative.brand() === 'bam' && document.documentElement.dataset.brand === 'bam'), 'Bait Al Maqdis picked: the app turns black and orange');
+check(await pg.evaluate(() => FTNative.brand() === 'bam' && document.documentElement.dataset.brand === 'bam' && document.documentElement.dataset.theme === 'light'), 'Bait Al Maqdis picked: the app turns orange, light look');
 await shot('02-bam-home');
 check(await pg.evaluate(() => { const t = [...document.querySelectorAll('.ctile--fk')], first = t[0] && t[0].getAttribute('data-go'); return t.length >= 40 && /^c\/b-/.test(first) && !document.querySelector('.ctile--img, .sech--more'); }), 'home shows one list of categories, Bait Al Maqdis first, then Fakhri Tools');
 await scroll(99999); await wait(900); await shot('03-bam-home-end');
@@ -202,6 +202,9 @@ pg = await attach(); await wait(1000);
 
 /* ---------- switch to Fakhri Tools in Settings ---------- */
 await tap(L + '[data-go="settings"]', 1200); await shot('24-settings');
+await tap(L + '[data-settheme="dark"]', 1200); await shot('24b-dark-look');
+check(await pg.evaluate(() => document.documentElement.dataset.theme === 'dark' && JSON.parse(localStorage.getItem('app-theme')) === 'dark'), 'Settings turns on the dark look');
+await tap(L + '[data-settheme="light"]', 900);
 await tap(L + '.bcard--fakhri', 900); await shot('25-switch-confirm');
 await tap('#sheet [data-ok]', 3500);
 pg = await attach(); await wait(1500);

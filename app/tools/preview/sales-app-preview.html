@@ -1,5 +1,5 @@
 <title>Sales App Preview</title>
-<meta name="theme-color" content="#0a0a0b">
+<meta name="theme-color" content="#f3f4f6">
 <link rel="stylesheet" href="app.css">
 <style>
 :root{--pv-backdrop:#e9e7e2;--pv-caption:#55524c;--pv-note-bg:#111214;--pv-note-text:#fff}
@@ -25,7 +25,7 @@
 <script>if(document.body)document.body.classList.add('is-booting')</script>
 <script src="packs.js"></script>
 <script src="preview.js"></script>
-<script>/* the branch's colours before anything is drawn */try{var b=(window.FT_WEB&&FT_WEB.brand)||JSON.parse(localStorage.getItem('app-brand')||'""');document.documentElement.setAttribute('data-brand',b==='bam'?'bam':b==='fakhri'?'fakhri':'none');if(JSON.parse(localStorage.getItem('app-lang')||'""')==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar'}}catch(e){}</script>
+<script>/* the branch's colours before anything is drawn */try{var b=(window.FT_WEB&&FT_WEB.brand)||JSON.parse(localStorage.getItem('app-brand')||'""');document.documentElement.setAttribute('data-brand',b==='bam'?'bam':b==='fakhri'?'fakhri':'none');document.documentElement.setAttribute('data-theme',JSON.parse(localStorage.getItem('app-theme')||'""')==='dark'?'dark':'light');if(JSON.parse(localStorage.getItem('app-lang')||'""')==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar'}}catch(e){}</script>
 
 <!-- opening: the branch's logo on its own colour -->
 <div id="splash" aria-hidden="true"><img class="sp__logo" alt=""><div class="sp__bar"><i></i></div></div>

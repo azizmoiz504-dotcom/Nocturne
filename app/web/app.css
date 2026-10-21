@@ -1,6 +1,6 @@
 /* =========================================================
-   Sales catalogue app · one layout (Bait Al Maqdis style), two looks:
-   Bait Al Maqdis: near-black, orange, Poppins.  Fakhri Tools: light, crimson & navy, Barlow.
+   Sales catalogue app · one layout, two branches, each light (the default) or dark (Settings):
+   Bait Al Maqdis: orange, Poppins.  Fakhri Tools: crimson & navy, Barlow.
    ========================================================= */
 @font-face{font-family:'Poppins';font-weight:400;font-display:swap;src:url(bam/fonts/poppins-400.woff2) format('woff2')}
 @font-face{font-family:'Poppins';font-weight:500;font-display:swap;src:url(bam/fonts/poppins-500.woff2) format('woff2')}
@@ -14,24 +14,32 @@
 @font-face{font-family:'Barlow Condensed';font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-700-latin.woff2) format('woff2')}
 @font-face{font-family:'Barlow Condensed';font-weight:800;font-display:swap;src:url(fonts/barlow-condensed-800-latin.woff2) format('woff2')}
 
-:root,html[data-brand=bam],html[data-brand=none]{
-  --bg:#0a0a0b; --card:#151517; --card-2:#1b1b1e; --field:#111113; --nav:#141416;
-  --line:#2a2a30; --line-2:#3a3a42; --text:#fff; --text-2:#d9d9de; --muted:#8b8b93;
-  --accent:#f5821f; --accent-2:#ffa24d; --accent-ink:#1a0d00; --accent-soft:rgba(245,130,31,.55); --accent-bg:rgba(245,130,31,.13);
-  --wa:#1fa855; --danger:#ff7a59; --amber:#ffb547;
-  --shadow:0 18px 40px -22px rgba(0,0,0,.9);
-  --f:'Poppins',system-ui,sans-serif; --fh:'Poppins',system-ui,sans-serif; --fh-w:700; --fh-t:none;
-  color-scheme:dark;
-}
-html[data-brand=fakhri]{
+:root{
   --bg:#f3f4f6; --card:#fff; --card-2:#f6f7f9; --field:#fff; --nav:#fff;
   --line:rgba(10,25,40,.10); --line-2:rgba(10,25,40,.18); --text:#0b1620; --text-2:#3e4756; --muted:#6a7383;
-  --accent:#b91a20; --accent-2:#e0303a; --accent-ink:#fff; --accent-soft:rgba(185,26,32,.3); --accent-bg:rgba(185,26,32,.09);
-  --wa:#1fa855; --danger:#c62828; --amber:#b26a00;
-  --shadow:0 14px 34px -20px rgba(10,25,40,.45);
-  --f:'Barlow',system-ui,sans-serif; --fh:'Barlow Condensed','Arial Narrow',system-ui,sans-serif; --fh-w:800; --fh-t:uppercase;
+  --wa:#1fa855; --danger:#c62828; --amber:#b26a00; --toast:#0b1620;
+  --shadow:0 14px 34px -20px rgba(10,25,40,.45); --nav-shadow:0 14px 36px -16px rgba(10,25,40,.3);
   color-scheme:light;
 }
+html[data-theme=dark]{
+  --bg:#0a0a0b; --card:#151517; --card-2:#1b1b1e; --field:#111113; --nav:#141416;
+  --line:#2a2a30; --line-2:#3a3a42; --text:#fff; --text-2:#d9d9de; --muted:#8b8b93;
+  --danger:#ff7a59; --amber:#ffb547; --toast:#26262b;
+  --shadow:0 18px 40px -22px rgba(0,0,0,.9); --nav-shadow:0 14px 40px -12px rgba(0,0,0,.55);
+  color-scheme:dark;
+}
+html[data-brand=fakhri][data-theme=dark]{--bg:#0b1118; --card:#131b24; --card-2:#18222d; --field:#0f161e; --nav:#121a23; --line:#232f3d; --line-2:#334253; --text-2:#d6dce4; --muted:#8792a2; --toast:#1d2835}
+/* the branch: its colour and its letters */
+:root,html[data-brand=bam]{
+  --accent:#ee7a14; --accent-2:#ff9a3d; --accent-ink:#1a0d00; --accent-soft:rgba(238,122,20,.45); --accent-bg:rgba(238,122,20,.11);
+  --f:'Poppins',system-ui,sans-serif; --fh:'Poppins',system-ui,sans-serif; --fh-w:700; --fh-t:none;
+}
+html[data-brand=bam][data-theme=dark]{--accent:#f5821f; --accent-2:#ffa24d; --accent-soft:rgba(245,130,31,.55); --accent-bg:rgba(245,130,31,.13)}
+html[data-brand=fakhri]{
+  --accent:#b91a20; --accent-2:#e0303a; --accent-ink:#fff; --accent-soft:rgba(185,26,32,.3); --accent-bg:rgba(185,26,32,.09);
+  --f:'Barlow',system-ui,sans-serif; --fh:'Barlow Condensed','Arial Narrow',system-ui,sans-serif; --fh-w:800; --fh-t:uppercase;
+}
+html[data-brand=fakhri][data-theme=dark]{--accent:#e0303a; --accent-2:#f05a62; --accent-soft:rgba(224,48,58,.5); --accent-bg:rgba(224,48,58,.15)}
 :root{--pad:16px;--ease:cubic-bezier(.16,1,.3,1);--spring:cubic-bezier(.34,1.56,.64,1);--sab:env(safe-area-inset-bottom,0px);--nav-h:64px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);overflow:hidden}
@@ -78,7 +86,7 @@ html[data-brand=fakhri] .phead h1{font-size:34px;letter-spacing:0}
 
 /* ---------- the floating tab bar ---------- */
 #tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + var(--sab));z-index:50;transition:transform .45s var(--ease)}
-.tabs__in{position:relative;display:grid;height:var(--nav-h);border-radius:22px;background:var(--nav);border:1px solid var(--line);box-shadow:0 14px 40px -12px rgba(0,0,0,.55);overflow:hidden}
+.tabs__in{position:relative;display:grid;height:var(--nav-h);border-radius:22px;background:var(--nav);border:1px solid var(--line);box-shadow:var(--nav-shadow);overflow:hidden}
 #tabs button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:12.5px;font-weight:500;transition:color .25s;text-align:center}
 #tabs svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s var(--spring)}
 #tabs button.is-on{color:var(--accent);font-weight:600}
@@ -99,31 +107,28 @@ html[dir=rtl] #badge{left:auto;right:calc(50% + 6px)}
 body.is-booting #tabs{transform:translateY(160%)}
 
 /* ---------- first start: pick the branch ---------- */
-#first{position:fixed;top:0;right:0;bottom:0;left:0;z-index:300;background:#0a0a0b;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px var(--pad)}
+#first{position:fixed;top:0;right:0;bottom:0;left:0;z-index:300;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:24px var(--pad)}
 .first__in{width:100%;max-width:440px}
 #first h1{font:700 27px/1.15 'Poppins',var(--f);letter-spacing:-.01em}
-#first p{margin-top:8px;color:#9a9aa3;font-size:15px}
+#first p{margin-top:8px;color:var(--muted);font-size:15px}
 .first__list{display:grid;gap:12px;margin-top:26px}
 .blist{display:grid;gap:10px}
-.bcard{display:flex;align-items:center;gap:14px;width:100%;padding:12px;border-radius:20px;background:#151517;border:1.5px solid #2a2a30;color:#fff;transition:transform .2s,border-color .3s}
+.bcard{display:flex;align-items:center;gap:14px;width:100%;padding:12px;border-radius:20px;background:var(--card);border:1.5px solid var(--line-2);color:var(--text);box-shadow:var(--shadow);transition:transform .2s,border-color .3s}
 .bcard:active{transform:scale(.98)}
 .bcard.is-on{border-color:var(--accent)}
 .bcard__logo{width:92px;height:62px;border-radius:14px;display:grid;place-items:center;flex:none;padding:8px}
 .bcard--bam .bcard__logo{background:#0a0a0b;border:1px solid #2a2a30}
-.bcard--fakhri .bcard__logo{background:#fff}
+.bcard--fakhri .bcard__logo{background:#fff;border:1px solid var(--line)}
 .bcard__logo img{max-width:100%;max-height:100%;object-fit:contain}
 .bcard__t{flex:1;min-width:0}
 .bcard__t b{display:block;font-size:17px;font-weight:700}
-.bcard__t span{display:block;margin-top:2px;font-size:13px;color:#9a9aa3}
+.bcard__t span{display:block;margin-top:2px;font-size:13px;color:var(--muted)}
 .bcard__on,.bcard__go{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none}
 .bcard__on{background:var(--accent);color:var(--accent-ink)}
-.bcard__go{color:#9a9aa3}
+.bcard__go{color:var(--muted)}
 .bcard .ico{width:18px;height:18px}
-html[data-brand=fakhri] .blist .bcard{background:var(--card);color:var(--text);border-color:var(--line-2)}
-html[data-brand=fakhri] .blist .bcard.is-on{border-color:var(--accent)}
-html[data-brand=fakhri] .blist .bcard--fakhri .bcard__logo{border:1px solid var(--line)}
 .langpill{height:42px;padding:0 18px;border-radius:21px;background:var(--card);border:1px solid var(--line-2);font:600 15px/1 'Segoe UI',Tahoma,var(--f);color:var(--text)}
-.langpill--first{display:block;margin:26px auto 0;background:#151517;border-color:#34343c;color:#fff}
+.langpill--first{display:block;margin:26px auto 0}
 
 /* ---------- photos ---------- */
 .ph{position:relative;background:#fff;overflow:hidden;isolation:isolate}
@@ -145,6 +150,8 @@ html[data-brand=fakhri] .blist .bcard--fakhri .bcard__logo{border:1px solid var(
 .hero{display:flex;flex-direction:column;align-items:center;padding:6px 0 18px}
 .hero__logo{width:min(250px,64vw);height:auto}
 .hero__logo--fk{width:min(270px,72vw);margin-top:4px}
+/* the Bait Al Maqdis logo is white: black on the light look */
+html:not([data-theme=dark]) .hero__logo--bam,html:not([data-theme=dark])[data-brand=bam] .sp__logo{filter:brightness(0)}
 .hero__tag{display:flex;align-items:center;gap:12px;margin-top:10px;color:var(--accent);font-weight:700;font-size:15px;letter-spacing:.32em}
 .hero__tag i{display:block;width:40px;height:2px;background:var(--accent)}
 .searchbox{display:flex;align-items:center;gap:10px;width:100%;height:52px;padding:0 16px;border-radius:16px;background:var(--card);border:1px solid var(--line-2);color:var(--muted);font-size:15px}
@@ -157,7 +164,7 @@ html[data-brand=fakhri] .sech{font-weight:800;font-size:30px;text-transform:uppe
 .ctile{position:relative;display:block;border-radius:14px;overflow:hidden;transition:transform .2s var(--ease)}
 .ctile:active{transform:scale(.96)}
 .ctile--fk{display:flex;flex-direction:column;align-items:center;padding:8px 6px 10px;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 3px rgba(10,25,40,.06);text-align:center}
-html[data-brand=bam] .ctile--fk{background:#fff;border-color:#fff;color:#111114}
+html[data-theme=dark] .ctile--fk{background:#fff;border-color:#fff;color:#111114}   /* the photos are on white */
 .ctile .ph{width:100%;height:0;padding-bottom:100%;border-radius:10px}
 .ctile .ph img{position:absolute;top:0;left:0;padding:4px}
 .ctile b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:7px;font:800 14px/1.08 var(--fh);text-transform:uppercase;min-height:2.16em}
@@ -340,6 +347,9 @@ textarea.field{height:96px;padding:12px 15px;resize:vertical;line-height:1.4}
 .segs--wrap{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 .seg{height:48px;padding:0 10px;border-radius:13px;border:1px solid var(--line-2);background:var(--card);font-weight:600;font-size:14.5px;color:var(--text-2);text-align:center;transition:all .25s var(--ease)}
 .seg.is-on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg--th{display:flex;align-items:center;justify-content:center}
+.seg--th .ico{width:18px;height:18px;margin-right:8px}
+html[dir=rtl] .seg--th .ico{margin-right:0;margin-left:8px}
 .slab{margin:24px 0 10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .kv{border-radius:18px;background:var(--card);border:1px solid var(--line);padding:4px 16px}
 .kv > div{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -463,8 +473,7 @@ html[data-brand=fakhri] .shead b{font:700 20px/1.08 var(--fh);text-transform:upp
 .zoom__hint{position:absolute;left:0;right:0;bottom:calc(24px + var(--sab));text-align:center;color:#5b6577;font-size:14px;transition:opacity .6s}
 
 /* ---------- toast ---------- */
-#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--nav-h) + 22px + var(--sab));z-index:120;display:flex;align-items:center;gap:12px;min-height:54px;padding:10px 10px 10px 18px;border-radius:16px;background:#1f1f23;color:#fff;font-weight:500;font-size:14.5px;box-shadow:0 20px 50px -15px rgba(0,0,0,.7);transform:translateY(30px) scale(.96);opacity:0;pointer-events:none;transition:transform .45s var(--ease),opacity .3s}
-html[data-brand=fakhri] #toast{background:#0b1620}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(var(--nav-h) + 22px + var(--sab));z-index:120;display:flex;align-items:center;gap:12px;min-height:54px;padding:10px 10px 10px 18px;border-radius:16px;background:var(--toast);color:#fff;font-weight:500;font-size:14.5px;box-shadow:0 20px 50px -15px rgba(0,0,0,.7);transform:translateY(30px) scale(.96);opacity:0;pointer-events:none;transition:transform .45s var(--ease),opacity .3s}
 html[dir=rtl] #toast{padding:10px 18px 10px 10px}
 #toast.is-on{transform:none;opacity:1;pointer-events:auto}
 #toast span{flex:1}

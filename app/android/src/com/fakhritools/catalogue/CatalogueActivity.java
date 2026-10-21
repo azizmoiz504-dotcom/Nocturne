@@ -82,13 +82,14 @@ public class CatalogueActivity extends Activity {
         root = new File(getFilesDir(), "www");
         prefs = getSharedPreferences("ft", MODE_PRIVATE);
         brand = prefs.getString("brand", "");
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6")));
+        theme = prefs.getString("theme", "light");
+        getWindow().setBackgroundDrawable(new ColorDrawable(bg()));
         paintBars();
 
         // test builds only: lets the automated phone test drive the pages
         if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6"));
+        web.setBackgroundColor(bg());
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -157,13 +158,19 @@ public class CatalogueActivity extends Activity {
     volatile String brand = "";
     boolean isBam() { return "bam".equals(brand); }
 
-    /** Bait Al Maqdis is dark with light icons; Fakhri Tools is white with dark icons. */
+    /** light (the default) or dark, picked in the app's Settings */
+    volatile String theme = "light";
+    boolean isDark() { return "dark".equals(theme); }
+    /** the page's background colour, as in app.css */
+    int bg() { return Color.parseColor(!isDark() ? "#F3F4F6" : isBam() ? "#0A0A0B" : "#0B1118"); }
+
+    /** The light look has white bars with dark icons; the dark look has bars in the page's colour with light icons. */
     void paintBars() {
         Window w = getWindow();
         int bars = 0;
-        if (isBam()) {
-            w.setStatusBarColor(Color.parseColor("#0A0A0B"));
-            w.setNavigationBarColor(Color.parseColor("#0A0A0B"));
+        if (isDark()) {
+            w.setStatusBarColor(bg());
+            w.setNavigationBarColor(bg());
         } else {
             w.setStatusBarColor(Color.WHITE);
             bars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -174,7 +181,7 @@ public class CatalogueActivity extends Activity {
         w.getDecorView().setSystemUiVisibility(bars);
         try {
             Bitmap icon = BitmapFactory.decodeResource(getResources(), isBam() ? R.mipmap.ic_bam : R.mipmap.ic_launcher);
-            setTaskDescription(new ActivityManager.TaskDescription(getString(isBam() ? R.string.name_bam : R.string.name_fakhri), icon, isBam() ? Color.parseColor("#0A0A0B") : Color.WHITE));
+            setTaskDescription(new ActivityManager.TaskDescription(getString(isBam() ? R.string.name_bam : R.string.name_fakhri), icon, isDark() ? bg() : Color.WHITE));
         } catch (Exception e) { /* the recent-apps card keeps the default look */ }
     }
 
@@ -537,6 +544,20 @@ public class CatalogueActivity extends Activity {
 
         @JavascriptInterface
         public String brand() { return brand; }
+
+        /** "light" or "dark": the phone's top and bottom bars follow the page */
+        @JavascriptInterface
+        public void setTheme(final String t) {
+            ui.post(new Runnable() { public void run() {
+                String th = "dark".equals(t) ? "dark" : "light";
+                if (th.equals(theme)) return;
+                theme = th;
+                prefs.edit().putString("theme", theme).apply();
+                getWindow().setBackgroundDrawable(new ColorDrawable(bg()));
+                web.setBackgroundColor(bg());
+                paintBars();
+            } });
+        }
 
         @JavascriptInterface
         public void vibrate() {
