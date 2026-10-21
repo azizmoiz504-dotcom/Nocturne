@@ -224,7 +224,7 @@
       ],
       [
         "Do you have rubber washers for these couplings?",
-        "Yes. Rubber washers for Chicago, camlock, Storz, Bauer and Miller couplings are listed on our gaskets page."
+        "Washers for camlock and Chicago couplings are listed on our gaskets page. For these couplings, ask on WhatsApp with the coupling type and size."
       ],
       [
         "Which camlock type do I need?",
@@ -291,7 +291,7 @@
     "intro": [
       "M.S pipe, ERW (ASTM A53) and seamless (ASTM A106 GR.B), is stocked at our Al Quoz counter in SCH STD, SCH40, SCH80 and SCH160 from ½\" to 12\". Send the size, schedule and quantity on WhatsApp.",
       "C.S butt-weld fittings (ASTM A234 WPB) come in the same schedules from ½\" to 24\": 45° and 90° elbows in short and long radius, 180° elbows, equal tees and end caps, plus reducing tees and concentric and eccentric reducers from ¾\" × ½\" to 24\" × 22\". We also list C.S swage nipples, concentric and eccentric, to MSS SP-95 in BSP or NPT from ¾\" × ½\" to 8\" × 6\", and M.S long nipples from ¼\" to 8\": ERW (ASTM A53) in SCH40 and SCH80, and seamless (ASTM A106 GR.B) in SCH40 to SCH160.",
-      "For small-bore lines, forged C.S socket weld fittings run from ½\" to 4\" in 2000, 3000 and 6000 psi and forged C.S threaded fittings in CL1000 to CL6000, and MS A105 flanges come in SORF, WNRF, SWRF, blind and threaded up to 24\". Match the fitting schedule to the pipe wall so the bores line up for welding. We also offer pipe threading at the counter.",
+      "For small-bore lines, forged C.S socket weld fittings run from ½\" to 4\" in 2000, 3000 and 6000 psi and forged C.S threaded fittings in CL1000 to CL6000, and C.S A105 flanges come slip-on, weld neck, socket weld, blind and threaded up to 24\". Match the fitting schedule to the pipe wall so the bores line up for welding. We also offer pipe threading at the counter.",
       "Send the size, schedule, end type and quantity on WhatsApp and we will quote."
     ],
     "faq": [
@@ -364,14 +364,14 @@
     "catsTitle": "More stainless steel fittings"
   },
   "gaskets-sheets": {
-    "title": "Gaskets & CNAF Sheets in Dubai: Spiral Wound, RTJ | Fakhri",
-    "desc": "CNAF and rubber gaskets, spiral wound CL150-600, RTJ rings, CNAF and rubber sheet, gland packing. Al Quoz. Quote on WhatsApp.",
-    "h1": "Gasket supplier in Dubai: CNAF, spiral wound and RTJ",
+    "title": "Gaskets & CNAF Sheets in Dubai: Spiral Wound, Rubber | Fakhri",
+    "desc": "CNAF and rubber ring gaskets, SS spiral wound CL150-600, CNAF and rubber sheet, PTFE and graphite gland packing. Al Quoz. Quote on WhatsApp.",
+    "h1": "Gasket supplier in Dubai: CNAF, rubber and spiral wound",
     "guideTitle": "How to choose a gasket",
     "intro": [
-      "Ring gaskets come in CNAF, non-metallic and rubber (EPDM, NBR, neoprene and silicone), 1 to 6 mm thick, raised face (RF) or full face (FF), for PN16, CL150 and CL300 flanges, from ½\" up to any size. Spiral wound gaskets in SS304 or SS316, 2-ring or 3-ring, are listed for PN16 and CL150 to CL600, also from ½\" up to any size. RTJ ring gaskets come in carbon steel or stainless.",
-      "Sheet: CNAF and non-metallic gasket sheet from 1 to 6 mm in 1.5 m × 1.5 m, and rubber sheet in EPDM, NBR, neoprene or silicone from 1 to 12 mm in 1.2 m × 10 m. We also list gland packing from 6 mm to 25 mm and rubber washers for camlock and Chicago couplings.",
-      "A ring gasket sits inside the bolts on a raised-face flange; a full face gasket covers the whole face and suits flat-face flanges. Spiral wound gaskets are for higher pressure and temperature. RTJ rings fit ring-type joint flanges in oil and gas lines.",
+      "Ring gaskets come in CNAF, non-metallic, EPDM and NBR, raised face (RF) or full face (FF), for PN16, CL150, CL300 and CL600 flanges, from ½\" up to any size. Spiral wound gaskets in SS304 or SS316, 2-ring or 3-ring, are listed for PN16 and CL150 to CL600, also from ½\" up to any size.",
+      "Sheet: CNAF and non-metallic gasket sheet from 1 to 6 mm in 1.5 m × 1.5 m, and rubber, neoprene, silicone, Teflon or nylon sheet from 1 to 12 mm in 1.2 m × 10 m (20 kg). We also list PTFE, graphite and fiberglass gland packing from 6 mm to 50 mm (¼\" to 2\"), EPDM camlock washers and NBR Chicago coupling washers from ½\" to 2\".",
+      "A ring gasket sits inside the bolts on a raised-face flange; a full face gasket covers the whole face and suits flat-face flanges. Spiral wound gaskets are for higher pressure and temperature.",
       "For a quote, WhatsApp the flange size, class or PN, face type, gasket type, thickness and quantity."
     ],
     "faq": [
@@ -384,8 +384,8 @@
         "They are listed for PN16, CL150, CL300 and CL600, in SS304 or SS316, from ½\" up to any size. Send the flange size and class with your list."
       ],
       [
-        "Carbon steel or stainless RTJ ring?",
-        "The ring should be softer than the flange groove. Carbon steel rings are usual on carbon steel flanges and stainless rings on stainless flanges. Send the ring number with your list."
+        "Which gland packing do you have?",
+        "PTFE, graphite and fiberglass gland packing from 6 mm to 50 mm (¼\" to 2\"). Send the packing size with your list."
       ],
       [
         "Do you deliver outside Dubai?",
@@ -414,17 +414,17 @@
       ],
       [
         "Do you have gaskets for these flanges?",
-        "Yes. CNAF, rubber, spiral wound and RTJ gaskets are listed on our gaskets page."
+        "Yes. CNAF, rubber and spiral wound gaskets are listed on our gaskets page."
       ]
     ]
   },
   "chicago-couplings-fittings": {
     "title": "Chicago Claw Couplings & Air Hose Fittings, Dubai | Fakhri",
-    "desc": "GI Chicago claw couplings for air and water hose: 2-lug hose ends, male and female couplings and a 3-way, plus 4-lug hose, male and female ends. Quote on WhatsApp.",
+    "desc": "Chicago claw couplings for air and water hose: GI 2-lug hose, female and male couplings, a 3-way and a clamp, plus SS 4-lug couplings. Quote on WhatsApp.",
     "h1": "Chicago coupling supplier in Dubai for air and water hose",
     "guideTitle": "How to choose Chicago couplings",
     "intro": [
-      "We list G.I Chicago couplings in Dubai for air and water hose in two size groups. The 2-lug range, ¼\" to 1\", has hose end couplings and female and male couplings with BSPT thread, plus a 1\" 3-way connector. The 4-lug range, 1¼\" to 2\", has hose ends and female and male ends with BSP thread. G.I king nipples and hose menders are on our G.I fittings page, and four bolt clamps on our hose clamp page.",
+      "We list Chicago couplings in Dubai for air and water hose in two size groups. The 2-lug range, ¼\" to 1\", is galvanised iron: hose couplings, female and male couplings, a 1\" 3-way connector and a 1\" coupling clamp. The 4-lug range, 1¼\" to 2\", is stainless steel: hose couplings and female and male couplings. G.I king nipples and hose menders are on our G.I fittings page, and four bolt clamps on our hose clamp page.",
       "Chicago couplings, also called claw couplings, join with a quarter turn, and two claw heads connect with no male or female half. Match the hose end to the inside diameter of the hose. Rubber washers for Chicago couplings are on our gaskets page.",
       "For a quote, WhatsApp the part, size, 2-lug or 4-lug, thread where it applies, and the quantity."
     ],
@@ -726,11 +726,11 @@
   },
   "cock-valves": {
     "title": "Hose Clamps in Dubai: Single, Double & Four Bolt | Fakhri",
-    "desc": "Single bolt hose clamps in zinc plated CS or SS, 17-19 mm to 292-304 mm, double bolt clamps SL 29 to SL 675, and GI four bolt clamps 1/2\" to 3\". Quote on WhatsApp.",
+    "desc": "Single bolt hose clamps in zinc plated CS or SS, 17-19 mm to 292-304 mm, GI double bolt clamps 20-22 mm to 300-330 mm, hose clips 1/2\" to 12\". Quote on WhatsApp.",
     "h1": "Hose clamp supplier in Dubai: single, double and four bolt clamps",
     "guideTitle": "How to choose a hose clamp",
     "intro": [
-      "We list single bolt hose clamps in zinc plated carbon steel or SS from 17-19 mm to 292-304 mm, double bolt clamps from SL 29 to SL 675, and galvanised four bolt clamps from ½\" to 3\". An S.S cock valve, threaded, ½\" × 12 mm, is on the same page.",
+      "We list single bolt hose clamps in zinc plated carbon steel or SS304/SS316 from 17-19 mm to 292-304 mm, galvanised double bolt clamps from 20-22 mm to 300-330 mm, hose clips in galvanised iron or SS304/SS316 from ½\" to 12\", and galvanised four bolt clamps from ½\" to 3\".",
       "Measure the outside of the hose over the fitting and pick the clamp range that covers it. Zinc plated and galvanised clamps suit dry, indoor work; SS clamps suit wet, outdoor or corrosive conditions.",
       "For a quote, WhatsApp the clamp type, size range, zinc plated, galvanised or SS, and the quantity."
     ],
@@ -747,11 +747,11 @@
   },
   "acrylic-tubes": {
     "title": "Acrylic Tubes & Tank Level Cocks in Dubai | Fakhri Tools",
-    "desc": "Clear acrylic tube, 2 mm wall, 8 mm to 75 mm, and brass tank level cocks 12 mm × 1/2\" to 25 mm × 1\" for tank level gauges. Al Quoz, Dubai. Quote on WhatsApp.",
+    "desc": "Acrylic tube 12 mm to 50 mm, brass tank level cocks 12 mm × 1/2\" to 50 mm × 2\" and brass tube connectors for tank level gauges. Al Quoz, Dubai. Quote on WhatsApp.",
     "h1": "Clear acrylic tube and tank level cocks in Dubai",
     "guideTitle": "How to choose an acrylic tube",
     "intro": [
-      "We list clear acrylic tube with a 2 mm wall, from 8 mm to 75 mm, and brass tank level cocks, threaded, from 12 mm × ½\" to 25 mm × 1\", at our counter in Al Quoz Industrial Area 3.",
+      "We list acrylic tube from 12 mm to 50 mm, brass tank level cocks from 12 mm × ½\" to 50 mm × 2\", and brass acrylic tube connectors from 12 mm to 50 mm, at our counter in Al Quoz Industrial Area 3.",
       "Acrylic tube is clear, light and easy to cut, which is why it is used for tank level gauges and sight glasses. It suits low pressure service at normal temperatures. Check the fluid and the temperature first, because acrylic is not meant for hot liquids or high pressure. Tank level cocks hold the tube on the tank so you can read the level.",
       "For a quote, WhatsApp the tube size, the length you need, the cock size and the quantity. If you are replacing an old tube, send its size or a photo with a tape measure."
     ],
@@ -766,7 +766,7 @@
       ],
       [
         "What sizes do you have?",
-        "Clear acrylic tube with a 2 mm wall from 8 mm to 75 mm, and tank level cocks from 12 mm × ½\" to 25 mm × 1\"."
+        "Acrylic tube from 12 mm to 50 mm, tank level cocks from 12 mm × ½\" to 50 mm × 2\", and brass tube connectors from 12 mm to 50 mm."
       ]
     ]
   },
@@ -1066,7 +1066,7 @@
       "desc": "CS, SS, brass and CI gate, ball, globe, check and butterfly valves plus Y-strainers: CL150/300, PN10 to PN25, 200# to 3000 WOG. Al Quoz. Quote on WhatsApp.",
       "h1": "Valve supplier in Dubai: CS, SS, brass and cast iron",
       "eyebrow": "Valves",
-      "lead": "Gate, globe, check, ball and butterfly valves, Y-strainers, safety, foot, float and cock valves, in CS, SS, forged steel, brass, bronze and cast iron, from our trade counter in Al Quoz Industrial Area 3, Dubai.",
+      "lead": "Gate, globe, check, ball and butterfly valves, Y-strainers, safety, foot and float valves, and tank level cocks, in CS, SS, forged steel, brass, bronze and cast iron, from our trade counter in Al Quoz Industrial Area 3, Dubai.",
       "sections": [
         {
           "h2": "Valve types we list",
@@ -1128,10 +1128,10 @@
                 "½\" to 8\""
               ],
               [
-                "Cock valves",
-                "Isolate small connections; hold a level gauge tube",
-                "SS cock valve, brass tank level cock",
-                "½\" × 12 mm; 12 mm × ½\" to 25 mm × 1\""
+                "Tank level cocks",
+                "Hold a level gauge tube on a tank",
+                "Brass tank level cock",
+                "12 mm × ½\" to 50 mm × 2\""
               ]
             ]
           }
@@ -1193,7 +1193,7 @@
     {
       "path": "products/oilfield-supplies.html",
       "title": "Oilfield Supplies in Dubai: Hammer Unions & Valves | Fakhri",
-      "desc": "Hammer unions, high pressure valves, forged 3000#/6000# fittings, instrumentation fittings and RTJ gaskets. UAE delivery from AED 5,000. Quote on WhatsApp.",
+      "desc": "Hammer unions, high pressure valves, forged 3000#/6000# fittings, instrumentation fittings and spiral wound gaskets. UAE delivery from AED 5,000. Quote on WhatsApp.",
       "h1": "Oilfield supplies in Dubai: unions, valves, fittings and gaskets",
       "eyebrow": "Oil and gas",
       "lead": "We list oilfield supplies in Dubai at our counter in Al Quoz Industrial Area 3, with delivery anywhere in the UAE for orders from AED 5,000, including Musaffah and Jebel Ali.",
@@ -1229,7 +1229,7 @@
         {
           "h2": "Flanges and gaskets",
           "p": [
-            "MS A105 and SS A182 F304/304L and F316/316L weld neck (WNRF), slip-on, socket weld, blind and threaded flanges, CL150 to CL600, ½\" to 24\". RTJ ring gaskets in carbon steel or stainless, and spiral wound gaskets for PN16 and CL150 to CL600."
+            "C.S A105 and SS A182 F304/304L and F316/316L weld neck (WNRF), slip-on, socket weld, blind and threaded flanges, PN16, CL150 to CL600 and 5K to 16K, ½\" to 24\". Spiral wound gaskets in SS304 or SS316 for PN16 and CL150 to CL600."
           ]
         },
         {
@@ -1253,8 +1253,8 @@
           "We list figures 50, 100, 110, 200, 206, 211, 400, 602, 1002, 1003 and 1502, plus the FIG 207 blanking union. Send the figure number and size on WhatsApp and we confirm."
         ],
         [
-          "Do you have RTJ gaskets?",
-          "Yes. RTJ ring gaskets are listed in carbon steel and stainless."
+          "Do you have spiral wound gaskets?",
+          "Yes. Spiral wound gaskets in SS304 or SS316, 2-ring or 3-ring, are listed for PN16 and CL150 to CL600."
         ]
       ],
       "cats": [
@@ -2262,7 +2262,7 @@
         {
           "h2": "Flanges and gaskets we list",
           "p": [
-            "SS A182 F304/304L and F316/316L and MS A105 flanges in SORF, SWRF, WNRF, blind and threaded, from ½\" to 24\", in CL150 to CL600, PN ratings (SS PN16, MS PN10 to PN25) and 5K, 10K and 16K. For the joint, we list CNAF and rubber gaskets for PN16, CL150 and CL300, and spiral wound gaskets for PN16 and CL150 to CL600."
+            "SS A182 F304/304L and F316/316L and C.S A105 flanges in slip-on (SORF), socket weld (SWRF), weld neck (WNRF), blind and threaded, from ½\" to 24\", in PN16, CL150 to CL600, and 5K, 10K and 16K. For the joint, we list CNAF, non-metallic and rubber ring gaskets for PN16 and CL150 to CL600, and spiral wound gaskets for PN16 and CL150 to CL600."
           ]
         },
         {
