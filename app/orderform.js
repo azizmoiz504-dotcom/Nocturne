@@ -14,6 +14,34 @@
   // the PDF's built-in font prints Western European letters; everything else is written out plainly
   const MAP = { '–': '-', '—': '-', '≤': '<=', '≥': '>=', '⅛': '1/8', '⅜': '3/8', '⅝': '5/8', '⅞': '7/8', '⅓': '1/3', '‘': "'", '’': "'", '“': '"', '”': '"', '…': '...', ' ': ' ' };
   const clean = s => String(s == null ? '' : s).replace(/[^\x20-\x7e\xa0-\xff]/g, ch => MAP[ch] !== undefined ? MAP[ch] : '?');
+  // text that font can't print (Arabic names and notes) is drawn by the phone, as a picture of the words
+  const foreign = s => /[^\x20-\x7e\xa0-\xff]/.test(String(s == null ? '' : s).replace(/[^\x20-\x7e\xa0-\xff]/g, ch => MAP[ch] !== undefined ? MAP[ch] : ch));
+  const PX = 4, cv = document.createElement('canvas'), cx = cv.getContext('2d');   // 4 px per pt: sharp when printed
+  const cfont = (sz, bold) => (bold ? 'bold ' : '') + (sz * PX) + 'px sans-serif';
+  const AR = '\u0600-\u065F\u066A-\u06EF\u06FA-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF';   // Arabic letters, not digits
+  const rtlRx = new RegExp('^[^A-Za-z' + AR + ']*[' + AR + ']'), rtlText = s => rtlRx.test(s);
+  function measure(s, sz, bold) { cx.font = cfont(sz, bold); return cx.measureText(s).width / PX; }
+  function wrapForeign(s, sz, bold, w) {
+    const out = [];
+    String(s).split(/\r?\n/).forEach(par => {
+      let line = '';
+      par.split(/\s+/).filter(Boolean).forEach(word => {
+        const t = line ? line + ' ' + word : word;
+        if (!line || measure(t, sz, bold) <= w) line = t; else { out.push(line); line = word; }
+      });
+      out.push(line);
+    });
+    return out;
+  }
+  function picture(s, sz, bold, col) {
+    const w = Math.ceil(measure(s, sz, bold) * PX) + 8, h = Math.ceil(sz * 1.45 * PX);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d'), r = rtlText(s);
+    g.font = cfont(sz, bold); g.fillStyle = 'rgb(' + col.join(',') + ')'; g.textBaseline = 'alphabetic';
+    g.direction = r ? 'rtl' : 'ltr'; g.textAlign = r ? 'right' : 'left';
+    g.fillText(s, r ? w - 4 : 4, Math.round(sz * 1.1 * PX));
+    return { url: c.toDataURL('image/png'), w: w / PX, h: h / PX };
+  }
 
   function loadImg(src) {
     return new Promise(res => {
@@ -56,11 +84,18 @@
     // a light brand colour (orange) is darkened a little for small text on white
     const accT = (acc[0] * .3 + acc[1] * .59 + acc[2] * .11) > 140 ? acc.map(v => Math.round(v * .78)) : acc;
     const [lg, thumbs] = await Promise.all([logo(shop.logo), Promise.all(x.rows.map(r => thumb(r.img, 140)))]);
-    const font = (st, sz, col) => { doc.setFont('helvetica', st); doc.setFontSize(sz); doc.setTextColor.apply(doc, col || C.ink); };
+    const cur = { st: 'normal', sz: 10, col: C.ink };
+    const font = (st, sz, col) => { cur.st = st; cur.sz = sz; cur.col = col || C.ink; doc.setFont('helvetica', st); doc.setFontSize(sz); doc.setTextColor.apply(doc, cur.col); };
     const fill = col => doc.setFillColor.apply(doc, col);
     const stroke = (col, w) => { doc.setDrawColor.apply(doc, col); doc.setLineWidth(w || 0.6); };
-    const text = (s, xx, yy, o) => doc.text(clean(s), xx, yy, o);
-    const wrap = (s, w) => doc.splitTextToSize(clean(s), w);
+    function text(s, xx, yy, o) {
+      if (!foreign(s)) return doc.text(clean(s), xx, yy, o);
+      const p = picture(String(s), cur.sz, cur.st === 'bold', cur.col), al = o && o.align;
+      doc.addImage(p.url, 'PNG', al === 'right' ? xx - p.w + 1 : al === 'center' ? xx - p.w / 2 : xx - 1, yy - cur.sz * 1.1, p.w, p.h);
+    }
+    const wrap = (s, w) => foreign(s) ? wrapForeign(s, cur.sz, cur.st === 'bold', w) : doc.splitTextToSize(clean(s), w);
+    // several lines, spaced like jsPDF spaces them
+    const lines = (ls, xx, yy) => ls.some(foreign) ? ls.forEach((l, i) => text(l, xx, yy + i * cur.sz * doc.getLineHeightFactor())) : doc.text(ls, xx, yy);
     const date = new Date(x.at);
     const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
@@ -87,7 +122,8 @@
 
     /* ---------- customer and order details ---------- */
     const bw = (W - 2 * M - 12) / 2, pad = 12;
-    const custRows = [['Contact', cu.person], ['Phone', cu.phone], ['Location', cu.site]].filter(r => r[1]);
+    const phone = String(cu.phone || '').replace(/[\u0660-\u0669\u06F0-\u06F9]/g, c => c.charCodeAt(0) & 15);   // Arabic digits as 0-9
+    const custRows = [['Contact', cu.person], ['Phone', phone], ['Location', cu.site]].filter(r => r[1]);
     const ordRows = [['Order no.', x.no], ['Date', dateStr], ['Delivery', !cu.delivery ? '' : cu.delivery === 'deliver' ? 'Deliver to the customer' : 'Collect from the ' + (shop.pickup || 'shop')], ['Needed by', cu.by ? new Date(cu.by + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : ''], ['Payment', cu.pay]].filter(r => r[1]);
     font('bold', 12.5); const nameLines = wrap(cu.name || '-', bw - 2 * pad);
     const lineH = 13.5;
@@ -101,12 +137,12 @@
     function kv(bx, yy, rows) {
       rows.forEach(r => {
         font('normal', 7.8, C.mute); text(r[0].toUpperCase(), bx + pad, yy);
-        font('bold', 9, C.ink); const ls = wrap(r[1], bw - 2 * pad - 62); doc.text(ls, bx + pad + 62, yy);
+        font('bold', 9, C.ink); const ls = wrap(r[1], bw - 2 * pad - 62); lines(ls, bx + pad + 62, yy);
         yy += ls.length * 11.5 + 2.5;
       });
     }
     box(M, 'CUSTOMER');
-    font('bold', 12.5, C.ink); doc.text(nameLines, M + pad, y + 37);
+    font('bold', 12.5, C.ink); lines(nameLines, M + pad, y + 37);
     kv(M, y + 37 + nameLines.length * 15 + 4, custRows);
     box(M + bw + 12, 'ORDER DETAILS');
     kv(M + bw + 12, y + 37, ordRows);
@@ -143,19 +179,19 @@
       let ty = y + 15;
       font('normal', 6.8, C.mute); doc.setCharSpace(0.8); text(String(r.group || '').toUpperCase(), col.it, ty); doc.setCharSpace(0);
       ty += 11;
-      font('bold', 9.8, C.ink); doc.text(nl, col.it, ty); ty += nl.length * 11.5;
+      font('bold', 9.8, C.ink); lines(nl, col.it, ty); ty += nl.length * 11.5;
       det.forEach(d => {
         d.ls.forEach((l, j) => {
           const tc = /to confirm/.test(d.v);
           if (j === 0) {
-            font('normal', 8.3, C.mute); doc.text(d.k + ':', col.it, ty);
+            font('normal', 8.3, C.mute); text(d.k + ':', col.it, ty);
             const kw = doc.getTextWidth(d.k + ': ');
-            font(tc ? 'bold' : 'normal', 8.3, tc ? C.amber : C.ink); doc.text(l.slice(d.k.length + 2), col.it + kw, ty);
-          } else { font(tc ? 'bold' : 'normal', 8.3, tc ? C.amber : C.ink); doc.text(l, col.it, ty); }
+            font(tc ? 'bold' : 'normal', 8.3, tc ? C.amber : C.ink); text(l.slice(d.k.length + 2), col.it + kw, ty);
+          } else { font(tc ? 'bold' : 'normal', 8.3, tc ? C.amber : C.ink); text(l, col.it, ty); }
           ty += 10.5;
         });
       });
-      font('bold', 9.5, /to confirm/.test(r.size) ? C.amber : C.ink); doc.text(sl, col.sz, y + 26);
+      font('bold', 9.5, /to confirm/.test(r.size) ? C.amber : C.ink); lines(sl, col.sz, y + 26);
       font('bold', 12, C.ink); text(String(r.q), col.q, y + 26, { align: 'right' });
       font('normal', 7, C.mute); text('pcs', col.q, y + 36, { align: 'right' });
       if (priced) {
@@ -195,7 +231,7 @@
       if (y + nh > H - FOOT) newPage();
       fill([255, 248, 235]); doc.roundedRect(M, y, W - 2 * M, nh, 6, 6, 'F');
       font('bold', 7.5, C.amber); doc.setCharSpace(1.2); text('NOTE', M + 12, y + 15); doc.setCharSpace(0);
-      font('normal', 9, C.ink); doc.text(nl, M + 12, y + 28);
+      font('normal', 9, C.ink); lines(nl, M + 12, y + 28);
       y += nh + 14;
     }
     const hasFk = x.rows.some(r => /to confirm/.test([r.size, r.spec, r.mat].join(' ')));
@@ -205,7 +241,7 @@
     if (hasFk) say.push('Anything marked "to confirm" is checked with the customer first.');
     font('normal', 8.3); const info = wrap(say.join(' '), W - 2 * M);
     if (y + info.length * 11 + 92 > H - FOOT) newPage();
-    font('normal', 8.3, C.mute); if (say.length) doc.text(info, M, y); y += (say.length ? info.length * 11 : 0) + 48;
+    font('normal', 8.3, C.mute); if (say.length) lines(info, M, y); y += (say.length ? info.length * 11 : 0) + 48;
     stroke(C.ink, 0.7);
     doc.line(M, y, M + bw, y); doc.line(M + bw + 12, y, W - M, y);
     font('bold', 8, C.ink); text('Customer name, signature & stamp', M, y + 13); text('For ' + shop.name, M + bw + 12, y + 13);
