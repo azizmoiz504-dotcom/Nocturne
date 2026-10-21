@@ -59,3 +59,45 @@ jobs:
           git init -q && git checkout -q -b r && git add -A
           git -c user.name="catalogue test" -c user.email="test@users.noreply.github.com" commit -qm "Phone test results for $GITHUB_SHA"
           git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" r:catalogue-app-test-results-${{ matrix.name }}
+
+  # Installs the app the way a salesman does, on newer Android: over the old Fakhri Tools app (v1.5)
+  # and on a phone that never had it, then opens it. Built as a normal release (not a test build).
+  install-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [34, 35]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install the build tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq android-sdk-build-tools android-sdk-platform-23 dalvik-exchange apksigner zipalign imagemagick
+      - name: Build the old app (v1.5) and the new one with the same key
+        run: |
+          keytool -genkeypair -keystore /tmp/t.jks -storepass testpass -keypass testpass -alias fakhri -keyalg RSA -keysize 2048 -validity 100 -dname CN=test
+          git worktree add -q /tmp/v15 e1d4014
+          (cd /tmp/v15 && app/build.sh /tmp/t.jks testpass) && cp /tmp/v15/app/build/fakhri-catalogue.apk /tmp/old.apk
+          python3 app/ci/fake-bam.py
+          app/build.sh /tmp/t.jks testpass && cp app/build/fakhri-catalogue.apk /tmp/new.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and open on an Android phone
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 25
+        env:
+          RESULTS_BRANCH: catalogue-app-test-results-install-${{ matrix.api }}
+          PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash app/ci/install-test.sh /tmp/old.apk /tmp/new.apk

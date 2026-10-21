@@ -212,7 +212,7 @@ public class CatalogueActivity extends Activity {
         String mime = mime(rel);
         Map<String, String> h = new HashMap<>();
         h.put("Access-Control-Allow-Origin", "*");
-        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") || rel.startsWith("bam/p/") || rel.startsWith("bam/tiles/") || rel.startsWith("bam/fonts/") ? "max-age=31536000" : "no-cache");
+        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") || rel.startsWith("bam/p/") || rel.startsWith("bam/covers/") || rel.startsWith("bam/fonts/") ? "max-age=31536000" : "no-cache");
         try {
             File f = new File(root, rel);
             if (f.isFile()) return resp(mime, h, new FileInputStream(f));

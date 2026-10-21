@@ -14,5 +14,6 @@ PUB=$TMP/apk/assets/public
 python3 -I "$TOOLS/bam_extract.py" "$PUB" "$TMP/ex" > "$TMP/extract.log"
 tail -1 "$TMP/extract.log"
 python3 -I "$TOOLS/bam_build.py" "$TMP/ex" "$PUB" "$OUT"
+python3 -I "$TOOLS/bam_covers.py" "$OUT"
 node "$TOOLS/bam_ar.js" "$PUB/i18n.js" "$OUT/ar.js"
 du -sh "$OUT"

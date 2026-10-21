@@ -85,6 +85,11 @@
   if (!window.BAM_DATA) delete BRANDS.bam;           // a build without Bait Al Maqdis
   let brandId = LOCK || (N && N.brand ? N.brand() : '') || store.get('app-brand', '');
   if (!BRANDS[brandId]) brandId = Object.keys(BRANDS).length === 1 ? Object.keys(BRANDS)[0] : '';
+  // an update from the Fakhri Tools-only app (v1.5 and earlier) with its cart or orders on the phone: that salesman is Fakhri Tools
+  if (!brandId && BRANDS.fakhri && ['list', 'orders', 'cust'].some(k => store.get(BRANDS.fakhri.keys[k], null) != null)) {
+    brandId = 'fakhri'; store.set('app-brand', brandId);
+    try { if (N && N.setBrand) N.setBrand(brandId); } catch (e) {}
+  }
   const BR = BRANDS[brandId] || BRANDS.fakhri;
   const BAM = brandId === 'bam';
   root.setAttribute('data-brand', !brandId ? 'none' : BAM ? 'bam' : 'fakhri');
@@ -147,7 +152,6 @@
     'just now': 'الآن', 'English': 'English', 'Search': 'بحث', 'Back': 'رجوع', 'Close': 'إغلاق', 'No longer in the catalogue': 'لم يعد في الكتالوج',
     'Pinch or double-tap to zoom': 'كبّر بإصبعين أو اضغط مرتين', 'Order copied': 'تم نسخ الطلب', 'quoted separately': 'تُسعّر بشكل منفصل',
     '{n} on request, quoted separately': '{n} عند الطلب، تُسعّر بشكل منفصل', 'Continue': 'متابعة', 'Full name': 'الاسم الكامل',
-    'More from': 'المزيد من', '{n} more products. They go on the same order form.': '{n} منتج إضافي، تُضاف إلى نفس نموذج الطلب.',
     'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.'
   };
   const BAR_ = (window.BAM_AR && window.BAM_AR.dict) || {}, SPECW = (window.BAM_AR && window.BAM_AR.spec) || {};
@@ -231,7 +235,7 @@
   /* ---- Bait Al Maqdis: every product has rows [part no., size, price or null] ---- */
   if (window.BAM_DATA) {
     window.BAM_DATA.cats.forEach(c0 => {
-      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: 'bam/tiles/' + c0.id + '.jpg', secs: [], items: [] };
+      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: c0.cover ? 'bam/' + c0.cover : '', secs: [], items: [] };
       c0.secs.forEach(s => {
         c.secs.push(s.n);
         s.items.forEach(it => {
@@ -239,6 +243,7 @@
           c.items.push(o); byId.set(o.id, o);
         });
       });
+      if (!c.tile) c.tile = (c.items.find(o => o.img) || {}).img || '';
       BCATS.push(c);
     });
   }
@@ -603,8 +608,9 @@
   const openAttr = o => isB(o) ? 'data-sheet="' + o.id + '"' : 'data-go="p/' + o.id + '"';
   const pName = o => isB(o) ? tn(o.n) : o.n;
   const cName = c => c.src === 'bam' ? tn(c.name) : c.name;
+  const catLabel = c => c.src === 'bam' ? tn(c.name) : shortCat(c.name);   // short name, for tiles and lists
   const prodRow = (o, mark) => '<button class="prow" ' + openAttr(o) + '>' + photo(o.img, o.n) +
-    '<div class="prow__t"><small>' + esc(isB(o) ? tn(o.c.name) : shortCat(o.c.name)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
+    '<div class="prow__t"><small>' + esc(catLabel(o.c)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
     (isB(o) ? '<span>' + esc(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
 
   /* ================= views and tabs ================= */
@@ -769,11 +775,10 @@
   const langPill = () => BCATS.length || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
 
   /* ================= HOME ================= */
-  // a category tile: Bait Al Maqdis tiles carry their name in the picture, Fakhri Tools tiles are a photo with the name under it
+  // a category tile: a product photo on white with the name under it, for both companies
   function catTile(c, i) {
     const d = Math.min(i, 14) * 28;
-    if (c.src === 'bam') return '<button class="ctile ctile--img tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '"><img src="' + esc(c.tile) + '" alt="' + esc(c.name) + '" loading="lazy"><span class="vh">' + esc(tn(c.name)) + '</span></button>';
-    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(shortCat(c.name)) + '</b></button>';
+    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(catLabel(c)) + '</b></button>';
   }
   function viewHome() {
     const el = h('<section class="home">' +
@@ -782,10 +787,7 @@
         : '<img class="hero__logo hero__logo--fk" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
       '<button class="searchbox" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
       '<h2 class="sech">' + I.dots + '<span>' + esc(t('Product')) + ' <em>' + esc(t('Categories')) + '</em></span></h2>' +
-      '<div class="cats">' + OWN.map(catTile).join('') + '</div>' +
-      (OTHER.length ? '<h2 class="sech sech--more">' + I.dots + '<span>' + esc(t('More from')) + ' <em>' + esc(OTHER_BR.name) + '</em></span></h2>' +
-        '<p class="sech__n">' + esc(t('{n} more products. They go on the same order form.', { n: nfmt(OTHER.reduce((a, c) => a + c.items.length, 0)) })) + '</p>' +
-        '<div class="cats">' + OTHER.map((c, i) => catTile(c, i + OWN.length)).join('') + '</div>' : '') +
+      '<div class="cats">' + CATS.map(catTile).join('') + '</div>' +
       '<p class="foot">' + esc(BR.full) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
       '</section>');
     return { el };
@@ -837,7 +839,7 @@
     const el = h('<section class="pview">' + bar(o.n) +
       '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.n) + '</div>' + (o.img ? WM + '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
       '<div class="pbody" data-item="' + o.id + '">' +
-        '<button class="crumb" data-go="c/' + o.c.id + '">' + esc(shortCat(o.c.name)) + ' ' + I.chev + '</button>' +
+        '<button class="crumb" data-go="c/' + o.c.id + '">' + esc(catLabel(o.c)) + ' ' + I.chev + '</button>' +
         '<h1>' + esc(o.n) + '</h1>' +
         '<div id="pk"></div>' +
         '<div class="addrow"><div id="qty"></div><button class="btn btn--main" id="addBtn">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
@@ -940,7 +942,7 @@
       return;
     }
     const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div>' +
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(catLabel(o.c)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div>' +
       '<div class="addrow"><div id="sq"></div><button class="btn btn--main" id="sadd">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
       '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id + '">' + esc(t('See full details')) + '</button></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
@@ -1026,7 +1028,7 @@
     let tm = null;
     function idle() {
       res.innerHTML = (recentQ.length ? '<div class="h-sec"><h2>' + esc(t('Recent')) + '</h2><button data-clr>' + esc(t('Clear')) + '</button></div><div class="sugg">' + recentQ.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' : '') +
-        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + (c.src === 'bam' ? '<div class="ph ph--tile"><img src="' + esc(c.tile) + '" alt="" class="is-in"></div>' : photo(c.tile, c.name)) + '<div class="prow__t"><b>' + esc(c.src === 'bam' ? tn(c.name) : shortCat(c.name)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
+        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<div class="prow__t"><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
       wirePhotos(res);
     }
     function remember(q) { recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set(K.searches, recentQ); }
@@ -1159,7 +1161,7 @@
   function changeLine(i, redraw) {
     const l = lines[i], o = lineProduct(l); if (!o) return;
     const pk = picker(o, l);
-    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div><button class="btn btn--main btn--full" style="margin-top:18px" id="ssave">' + I.check + esc(t('Save changes')) + '</button></div>');
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(catLabel(o.c)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div><button class="btn btn--main btn--full" style="margin-top:18px" id="ssave">' + I.check + esc(t('Save changes')) + '</button></div>');
     $('#spk', body).appendChild(pk.el);
     $('#ssave', body).onclick = () => {
       if (!pk.check()) return;

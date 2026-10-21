@@ -26,7 +26,7 @@ mkdir -p "$W/fonts" "$W/brands" "$W/img"
 for f in barlow-400-latin barlow-500-latin barlow-600-latin barlow-700-latin barlow-condensed-600-latin barlow-condensed-700-latin barlow-condensed-800-latin barlow-semi-condensed-500-latin barlow-semi-condensed-600-latin; do cp "$SITE/fonts/$f.woff2" "$W/fonts/"; done
 cp "$SITE"/assets/brands/*.png "$W/brands/"
 cp "$SITE/assets/logo-lockup.png" "$SITE/assets/logo-stacked.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-512.png" "$W/img/"
-cp -r bam "$W/bam"
+cp -r bam "$W/bam"; rm -rf "$W/bam/tiles"   # the old black banner tiles: the app shows a product photo per category (bam/covers, tools/bam_covers.py)
 
 # 2. every photo the list uses, made lighter for phones (cached between builds)
 node -e '
