@@ -53,10 +53,13 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  // Arabic keyboards type ٠-٩ (or ۰-۹): read them as 0-9
+  const digits = s => String(s == null ? '' : s).replace(/[\u0660-\u0669]/g, c => c.charCodeAt(0) - 0x660).replace(/[\u06F0-\u06F9]/g, c => c.charCodeAt(0) - 0x6F0);
+  const qtyIn = v => { const d = digits(v).replace(/[\s,'\u066C]/g, '').match(/\d+/); return d ? +d[0] : null; };
   const h = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
   };
   const buzz = () => { try { N && N.vibrate && N.vibrate(); } catch (e) {} };
   const nfmt = n => Number(n).toLocaleString('en-US');
@@ -71,7 +74,7 @@
       logo: 'bam/logo.png', pdfLogo: 'bam/logo-pdf.jpg', icon: 'bam/logo.png', pdfAccent: [245, 130, 31], pdfDark: [20, 20, 22],
       address: 'Exhibition Showroom No.06, Jurf Industrial Zone 1, Emirate-Ajman', city: 'Jurf, Ajman',
       phone: '+971 6 529 4533', email: 'baitalmaqdisuae@gmail.com', wa: '', waShow: '',
-      prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches' }
+      prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches', seq: 'bam-seq' }
     },
     fakhri: {
       id: 'fakhri', name: 'Fakhri Tools', full: 'Fakhri Tools & Workshop Materials Trading LLC', where: 'Al Quoz, Dubai',
@@ -79,12 +82,17 @@
       address: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai', city: 'Al Quoz, Dubai',
       phone: CFG.phoneDisplay || '+971 4 285 0135', email: CFG.email || 'dxbsales@ftools.com',
       wa: CFG.whatsappDigits || '971522767034', waShow: CFG.whatsappDisplay || '+971 52 276 7034',
-      prices: false, keys: { list: 'ft-list', orders: 'ft-orders', cust: 'ft-cust', saved: 'ft-saved', searches: 'ft-searches' }
+      prices: false, keys: { list: 'ft-list', orders: 'ft-orders', cust: 'ft-cust', saved: 'ft-saved', searches: 'ft-searches', seq: 'ft-seq' }
     }
   };
   if (!window.BAM_DATA) delete BRANDS.bam;           // a build without Bait Al Maqdis
   let brandId = LOCK || (N && N.brand ? N.brand() : '') || store.get('app-brand', '');
   if (!BRANDS[brandId]) brandId = Object.keys(BRANDS).length === 1 ? Object.keys(BRANDS)[0] : '';
+  // an update from the Fakhri Tools-only app (v1.5 and earlier) with its cart or orders on the phone: that salesman is Fakhri Tools
+  if (!brandId && BRANDS.fakhri && ['list', 'orders', 'cust'].some(k => store.get(BRANDS.fakhri.keys[k], null) != null)) {
+    brandId = 'fakhri'; store.set('app-brand', brandId);
+    try { if (N && N.setBrand) N.setBrand(brandId); } catch (e) {}
+  }
   const BR = BRANDS[brandId] || BRANDS.fakhri;
   const BAM = brandId === 'bam';
   root.setAttribute('data-brand', !brandId ? 'none' : BAM ? 'bam' : 'fakhri');
@@ -108,7 +116,7 @@
     'All': 'الكل', 'Tap a card to see the prices': 'اضغط على البطاقة لرؤية الأسعار', 'Prices': 'الأسعار', 'in cart': 'في السلة',
     'Added to the cart': 'تمت الإضافة إلى السلة', 'Open cart': 'فتح السلة', 'Removed': 'تمت الإزالة', 'Undo': 'تراجع',
     'Your cart is empty': 'سلة التسوق فارغة', 'Browse products': 'تصفح المنتجات', 'Add products, then place the order from here.': 'أضف المنتجات ثم أكمل الطلب من هنا.',
-    'Items': 'عدد القطع', 'Pieces': 'القطع', 'Priced subtotal': 'المجموع الفرعي', 'Awaiting price': 'بانتظار السعر', 'Total': 'الإجمالي',
+    'Items': 'عدد الأصناف', 'Pieces': 'القطع', 'Priced subtotal': 'المجموع الفرعي', 'Awaiting price': 'بانتظار السعر', 'Total': 'الإجمالي',
     'Proceed to checkout': 'إتمام الطلب', 'Empty cart': 'إفراغ السلة', 'Empty the cart?': 'إفراغ السلة؟', 'Remove': 'إزالة', 'Change': 'تعديل',
     'All {n} will be removed.': 'ستتم إزالة كل {n}.',
     'Checkout': 'إتمام الطلب', 'Back to cart': 'العودة إلى السلة', 'Saved customers': 'العملاء المحفوظون', 'Saved on this phone': 'محفوظ على هذا الهاتف',
@@ -147,7 +155,7 @@
     'just now': 'الآن', 'English': 'English', 'Search': 'بحث', 'Back': 'رجوع', 'Close': 'إغلاق', 'No longer in the catalogue': 'لم يعد في الكتالوج',
     'Pinch or double-tap to zoom': 'كبّر بإصبعين أو اضغط مرتين', 'Order copied': 'تم نسخ الطلب', 'quoted separately': 'تُسعّر بشكل منفصل',
     '{n} on request, quoted separately': '{n} عند الطلب، تُسعّر بشكل منفصل', 'Continue': 'متابعة', 'Full name': 'الاسم الكامل',
-    'More from': 'المزيد من', '{n} more products. They go on the same order form.': '{n} منتج إضافي، تُضاف إلى نفس نموذج الطلب.',
+    'The order could not be saved: the phone is full. Delete some old orders, then try again.': 'تعذّر حفظ الطلب: ذاكرة الهاتف ممتلئة. احذف بعض الطلبات القديمة ثم حاول مرة أخرى.',
     'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.'
   };
   const BAR_ = (window.BAM_AR && window.BAM_AR.dict) || {}, SPECW = (window.BAM_AR && window.BAM_AR.spec) || {};
@@ -231,7 +239,7 @@
   /* ---- Bait Al Maqdis: every product has rows [part no., size, price or null] ---- */
   if (window.BAM_DATA) {
     window.BAM_DATA.cats.forEach(c0 => {
-      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: 'bam/tiles/' + c0.id + '.jpg', secs: [], items: [] };
+      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: c0.cover ? 'bam/' + c0.cover : '', secs: [], items: [] };
       c0.secs.forEach(s => {
         c.secs.push(s.n);
         s.items.forEach(it => {
@@ -239,6 +247,7 @@
           c.items.push(o); byId.set(o.id, o);
         });
       });
+      if (!c.tile) c.tile = (c.items.find(o => o.img) || {}).img || '';
       BCATS.push(c);
     });
   }
@@ -320,17 +329,18 @@
 
   /* ================= the cart (one per branch; may hold products of both) =================
      Bait Al Maqdis product: { src: 'bam', k: category, n: product, c: part no., s: size, p: price when added, q }
-     Fakhri Tools product:   { src: 'fk', k: category, n: product, m: material set, s: size, sp: [specs], mt: material, q } */
+     Fakhri Tools product:   { src: 'fk', k: category, n: product, m: material set, z: the product's size range, s: size, sp: [specs], mt: material, q } */
   let lines = store.get(K.list, []).filter(l => l && l.n && l.q > 0);
   let cust = store.get(K.cust, {});
   const saveLines = () => { store.set(K.list, lines); updateBadge(); };
-  const lineKey = l => lb(l) ? ['b', l.k, l.n, l.c || '', l.s || ''].join('|') : ['f', l.k, l.n, l.m, l.s, (l.sp || []).join('¦'), l.mt || ''].join('|');
+  const lineKey = l => lb(l) ? ['b', l.k, l.n, l.c || '', l.s || ''].join('|') : ['f', l.k, l.n, l.m, l.z || '', l.s, (l.sp || []).join('¦'), l.mt || ''].join('|');
   // the product a line points at, or null when it left the catalogue
   function lineProduct(l) {
     const c = catBy(l.k);
     if (lb(l)) return c ? c.items.find(o => o.n === l.n && o.r.some(r => r[0] === (l.c || null) && r[1] === (l.s || null))) || null : null;
     const pool = c && c.src === 'fk' ? c.items : FCATS.reduce((a, x) => a.concat(x.items), []);
-    return pool.find(o => o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n) || null;
+    const same = o => o.n === l.n && o.matSet === l.m && (l.z == null || o.size === l.z);   // older lines have no z
+    return pool.find(same) || pool.find(o => o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n) || null;
   }
   const lineRow = (l, o) => o ? o.r.find(r => r[0] === (l.c || null) && r[1] === (l.s || null)) : null;
   // Bait Al Maqdis: today's price from the catalogue (orders keep the price they were placed with); Fakhri Tools: no price
@@ -344,7 +354,7 @@
   // Bait Al Maqdis: how many of one size are in the cart
   const rowLine = (o, j) => { const r = o.r[j]; return lines.find(l => lb(l) && l.k === o.c.id && l.n === o.n && (l.c || null) === r[0] && (l.s || null) === r[1]); };
   const qtyOf = (o, j) => { const l = rowLine(o, j); return l ? l.q : 0; };
-  const qtyAll = o => isB(o) ? o.r.reduce((s, r, j) => s + qtyOf(o, j), 0) : lines.filter(l => !lb(l) && l.k === o.c.id && l.n === o.n && l.m === o.matSet).reduce((s, l) => s + l.q, 0);
+  const qtyAll = o => isB(o) ? o.r.reduce((s, r, j) => s + qtyOf(o, j), 0) : lines.filter(l => !lb(l) && l.k === o.c.id && l.n === o.n && l.m === o.matSet && (l.z == null || l.z === o.size)).reduce((s, l) => s + l.q, 0);
   function setRowQty(o, j, q) {
     const r = o.r[j], l = rowLine(o, j);
     q = Math.max(0, Math.min(99999, q | 0));
@@ -354,12 +364,17 @@
     saveLines(); paintItem(o); markDirty();
   }
   function addFk(o, pick, q) {
-    const l = { src: 'fk', k: o.c.id, n: o.n, m: o.matSet, s: pick.s, sp: pick.sp, mt: pick.mt, q };
+    const l = { src: 'fk', k: o.c.id, n: o.n, m: o.matSet, z: o.size, s: pick.s, sp: pick.sp, mt: pick.mt, q };
     const ex = lines.find(x => lineKey(x) === lineKey(l));
     if (ex) ex.q = Math.min(99999, ex.q + q); else lines.push(l);
     saveLines(); paintItem(o); markDirty();
   }
-  function markDirty() { ['cart', 'orders'].forEach(tb => { const v = stacks[tb] && stacks[tb][0]; if (v && tab !== tb) v.dirty = true; }); }
+  // the cart, checkout and order screens are drawn again when next shown; the one on screen now (under a sheet) straight away
+  function markDirty() {
+    ['cart', 'orders'].forEach(tb => (stacks[tb] || []).forEach(v => { v.dirty = true; }));
+    const v = (tab === 'cart' || tab === 'orders') && top();
+    if (v && v.refresh) { const y = v.el.scrollTop; v.refresh(); v.el.scrollTop = y; }
+  }
 
   /* ---- Fakhri Tools: a line written out the website's way; anything not chosen reads "to confirm" ---- */
   function describe(l, o) {
@@ -394,8 +409,10 @@
     const d = new Date(Date.now() + 4 * 3600e3), p2 = n => String(n).padStart(2, '0');
     const stamp = BAM ? d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) : p2(d.getUTCDate()) + p2(d.getUTCMonth() + 1) + String(d.getUTCFullYear()).slice(2);
     const pre = (BAM ? 'BAM-' : 'AQ-') + stamp + '-';
-    const used = getOrders().filter(o => o.no.indexOf(pre) === 0).map(o => +o.no.slice(pre.length) || 0);
-    return pre + String((used.length ? Math.max.apply(null, used) : 0) + 1).padStart(BAM ? 3 : 2, '0');
+    const used = getOrders().filter(o => o.no.indexOf(pre) === 0).map(o => +o.no.slice(pre.length) || 0), last = store.get(K.seq, {});
+    const n = Math.max(used.length ? Math.max.apply(null, used) : 0, last.pre === pre ? +last.n || 0 : 0) + 1;   // a deleted order's number is not used again
+    store.set(K.seq, { pre, n });
+    return pre + String(n).padStart(BAM ? 3 : 2, '0');
   }
   const when2 = ms => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   // the order as text: for WhatsApp and "Copy order as text" (always English, the shop reads it)
@@ -464,7 +481,7 @@
   }
   const waLink = (digits, text) => 'https://wa.me/' + (digits || '') + '?text=' + encodeURIComponent(text);
   function phoneDigits(p) {
-    let d = String(p || '').replace(/\D/g, '');
+    let d = digits(p).replace(/\D/g, '');
     if (d.startsWith('00')) d = d.slice(2);
     if (d.startsWith('0')) d = '971' + d.slice(1);
     else if (/^5\d{8}$/.test(d)) d = '971' + d;
@@ -502,7 +519,7 @@
     const inp = $('input', el);
     const set = v => { n = Math.max(1, Math.min(99999, v)); inp.value = n; onChange && onChange(n); };
     el.addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (b) { set(n + +b.dataset.st); buzz(); } });
-    inp.addEventListener('change', () => { const d = String(inp.value).replace(/[\s,']/g, '').match(/\d+/); set(d ? +d[0] : n); });
+    inp.addEventListener('change', () => { const d = qtyIn(inp.value); set(d != null ? d : n); });
     inp.addEventListener('focus', () => inp.select());
     return { el, get: () => n, set };
   }
@@ -589,9 +606,9 @@
   });
   document.addEventListener('change', e => {
     const row = e.target.closest('[data-row]'); if (!row || e.target.tagName !== 'INPUT') return;
-    const [id, j] = row.dataset.row.split('|'), o = byId.get(id), d = String(e.target.value).replace(/[\s,']/g, '').match(/\d+/);
+    const [id, j] = row.dataset.row.split('|'), o = byId.get(id), d = qtyIn(e.target.value);
     e.target.blur();
-    if (o) setRowQty(o, +j, d ? +d[0] : qtyOf(o, +j));
+    if (o) setRowQty(o, +j, d != null ? d : qtyOf(o, +j));
   });
   document.addEventListener('focusin', e => { if (e.target.closest('.st') && e.target.tagName === 'INPUT') e.target.select(); });
 
@@ -603,8 +620,9 @@
   const openAttr = o => isB(o) ? 'data-sheet="' + o.id + '"' : 'data-go="p/' + o.id + '"';
   const pName = o => isB(o) ? tn(o.n) : o.n;
   const cName = c => c.src === 'bam' ? tn(c.name) : c.name;
+  const catLabel = c => c.src === 'bam' ? tn(c.name) : shortCat(c.name);   // short name, for tiles and lists
   const prodRow = (o, mark) => '<button class="prow" ' + openAttr(o) + '>' + photo(o.img, o.n) +
-    '<div class="prow__t"><small>' + esc(isB(o) ? tn(o.c.name) : shortCat(o.c.name)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
+    '<div class="prow__t"><small>' + esc(catLabel(o.c)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
     (isB(o) ? '<span>' + esc(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
 
   /* ================= views and tabs ================= */
@@ -769,11 +787,10 @@
   const langPill = () => BCATS.length || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
 
   /* ================= HOME ================= */
-  // a category tile: Bait Al Maqdis tiles carry their name in the picture, Fakhri Tools tiles are a photo with the name under it
+  // a category tile: a product photo on white with the name under it, for both companies
   function catTile(c, i) {
     const d = Math.min(i, 14) * 28;
-    if (c.src === 'bam') return '<button class="ctile ctile--img tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '"><img src="' + esc(c.tile) + '" alt="' + esc(c.name) + '" loading="lazy"><span class="vh">' + esc(tn(c.name)) + '</span></button>';
-    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(shortCat(c.name)) + '</b></button>';
+    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(catLabel(c)) + '</b></button>';
   }
   function viewHome() {
     const el = h('<section class="home">' +
@@ -782,10 +799,7 @@
         : '<img class="hero__logo hero__logo--fk" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
       '<button class="searchbox" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
       '<h2 class="sech">' + I.dots + '<span>' + esc(t('Product')) + ' <em>' + esc(t('Categories')) + '</em></span></h2>' +
-      '<div class="cats">' + OWN.map(catTile).join('') + '</div>' +
-      (OTHER.length ? '<h2 class="sech sech--more">' + I.dots + '<span>' + esc(t('More from')) + ' <em>' + esc(OTHER_BR.name) + '</em></span></h2>' +
-        '<p class="sech__n">' + esc(t('{n} more products. They go on the same order form.', { n: nfmt(OTHER.reduce((a, c) => a + c.items.length, 0)) })) + '</p>' +
-        '<div class="cats">' + OTHER.map((c, i) => catTile(c, i + OWN.length)).join('') + '</div>' : '') +
+      '<div class="cats">' + CATS.map(catTile).join('') + '</div>' +
       '<p class="foot">' + esc(BR.full) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
       '</section>');
     return { el };
@@ -837,7 +851,7 @@
     const el = h('<section class="pview">' + bar(o.n) +
       '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.n) + '</div>' + (o.img ? WM + '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
       '<div class="pbody" data-item="' + o.id + '">' +
-        '<button class="crumb" data-go="c/' + o.c.id + '">' + esc(shortCat(o.c.name)) + ' ' + I.chev + '</button>' +
+        '<button class="crumb" data-go="c/' + o.c.id + '">' + esc(catLabel(o.c)) + ' ' + I.chev + '</button>' +
         '<h1>' + esc(o.n) + '</h1>' +
         '<div id="pk"></div>' +
         '<div class="addrow"><div id="qty"></div><button class="btn btn--main" id="addBtn">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
@@ -940,7 +954,7 @@
       return;
     }
     const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div>' +
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(catLabel(o.c)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div>' +
       '<div class="addrow"><div id="sq"></div><button class="btn btn--main" id="sadd">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
       '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id + '">' + esc(t('See full details')) + '</button></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
@@ -958,15 +972,15 @@
   /* ================= SEARCH ================= */
   const FRAC = [['1-1/2', '1½'], ['1 1/2', '1½'], ['1-1/4', '1¼'], ['1 1/4', '1¼'], ['2-1/2', '2½'], ['2 1/2', '2½'], ['3-1/2', '3½'], ['1/2', '½'], ['3/4', '¾'], ['1/4', '¼'], ['3/8', '⅜'], ['1/8', '⅛']];
   function norm(s) {
-    s = ' ' + String(s).toLowerCase() + ' ';
+    s = ' ' + digits(s).toLowerCase() + ' ';
     FRAC.forEach(([a, b]) => { s = s.split(a).join(b); });
-    return s.replace(/(\d[½¼¾⅜⅛]?)\s*(?:inch|in|'')(?=\W)/g, '$1"')
+    return s.replace(/(\d[½¼¾⅜⅛]?|[½¼¾⅜⅛])\s*(?:inch|in|'')(?=\W)/g, '$1"')
       .replace(/\bs\.s\.?/g, 'ss').replace(/\bc\.s\.?/g, 'cs').replace(/\bg\.i\.?/g, 'gi').replace(/\bm\.s\.?/g, 'ms').replace(/\bc\.i\.?/g, 'ci').replace(/\bd\.i\.?/g, 'di')
       .replace(/\bss\s?(304|316)l?\b/g, 'ss $1').replace(/(\d)\s*#/g, '$1 lb').replace(/\bnrv\b/g, 'non return check')
       .replace(/stainless( steel)?/g, 'stainless ss').replace(/carbon steel/g, 'carbon cs').replace(/galvani[sz]ed/g, 'galvanised gi').replace(/mild steel/g, 'mild ms').replace(/cast iron/g, 'cast ci').replace(/ductile( iron)?/g, 'ductile di')
       .replace(/(\d)\s*mm\b/g, '$1mm').replace(/[^\w"½¼¾⅜⅛؀-ۿ ]+/g, ' ').replace(/\s+/g, ' ').trim();
   }
-  const codeN = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const codeN = s => digits(s).toLowerCase().replace(/[^a-z0-9]/g, '');
   const HAY = new Map();
   function hay(o) {
     if (HAY.has(o.id)) return HAY.get(o.id);
@@ -1026,7 +1040,7 @@
     let tm = null;
     function idle() {
       res.innerHTML = (recentQ.length ? '<div class="h-sec"><h2>' + esc(t('Recent')) + '</h2><button data-clr>' + esc(t('Clear')) + '</button></div><div class="sugg">' + recentQ.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' : '') +
-        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + (c.src === 'bam' ? '<div class="ph ph--tile"><img src="' + esc(c.tile) + '" alt="" class="is-in"></div>' : photo(c.tile, c.name)) + '<div class="prow__t"><b>' + esc(c.src === 'bam' ? tn(c.name) : shortCat(c.name)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
+        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<div class="prow__t"><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
       wirePhotos(res);
     }
     function remember(q) { recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set(K.searches, recentQ); }
@@ -1038,7 +1052,12 @@
       if (!r.length) { r = fuzzy(q); fz = r.length > 0; }
       const toks = q.toLowerCase().split(/\s+/).filter(x => x.length > 0).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       const rx = toks.length ? new RegExp('(' + toks.join('|') + ')', 'gi') : null;
-      const mark = s => rx && !fz ? esc(s).replace(rx, '<mark>$1</mark>') : esc(s);
+      const mark = s => {
+        s = String(s); if (!rx || fz) return esc(s);
+        let out = '', at = 0;
+        s.replace(rx, (m, g, i) => { out += esc(s.slice(at, i)) + '<mark>' + esc(m) + '</mark>'; at = i + m.length; return m; });
+        return out + esc(s.slice(at));
+      };
       res.innerHTML = '<p class="scount">' + (r.length ? esc(fz ? t('{n} with a similar spelling', { n: cnt(r.length, 'product') }) : t('{n} found', { n: cnt(r.length, 'product') })) : '') + '</p>' + (r.length ? '<div class="plist">' + r.slice(0, 150).map(o => prodRow(o, mark)).join('') + '</div>' :
         '<div class="empty">' + I.search.replace('<svg', '<svg width="56" height="56"') + '<b>' + esc(t('Nothing found for "{q}"', { q })) + '</b>' + esc(t('Try a shorter word or a part number.')) + '</div>');
       wirePhotos(res);
@@ -1126,12 +1145,18 @@
     el.addEventListener('click', e => {
       const tg = e.target;
       const st = tg.closest('[data-lq] [data-st]');
-      if (st) { const i = +st.closest('[data-lq]').dataset.lq, l = lines[i]; l.q = Math.max(1, Math.min(99999, l.q + +st.dataset.st)); buzz(); saveLines(); afterChange(l); draw(); return; }
+      if (st) { const l = lines[+st.closest('[data-lq]').dataset.lq]; if (!l) return draw(); l.q = Math.max(1, Math.min(99999, l.q + +st.dataset.st)); buzz(); saveLines(); afterChange(l); draw(); return; }
       const d = tg.closest('[data-del]');
       if (d) {
-        const i = +d.dataset.del, row = d.closest('.line'), gone = lines[i];
+        const row = d.closest('.line'), gone = lines[+d.dataset.del];
+        if (row.classList.contains('is-gone')) return;
+        if (!gone) return draw();
         row.classList.add('is-gone');
-        setTimeout(() => { lines.splice(i, 1); saveLines(); afterChange(gone); draw(); toast(t('Removed'), t('Undo'), () => { lines.splice(i, 0, gone); saveLines(); afterChange(gone); draw(); }); }, 260);
+        setTimeout(() => {
+          const i = lines.indexOf(gone); if (i < 0) return;
+          lines.splice(i, 1); saveLines(); afterChange(gone); draw();
+          toast(t('Removed'), t('Undo'), () => { if (lines.indexOf(gone) > -1) return; lines.splice(Math.min(i, lines.length), 0, gone); saveLines(); afterChange(gone); draw(); });
+        }, 260);
         return;
       }
       if (tg.closest('[data-clearall]')) { confirmSheet(t('Empty the cart?'), t('All {n} will be removed.', { n: cnt(lines.length, 'item') }), t('Empty cart'), () => { const was = lines; lines = []; saveLines(); was.forEach(afterChange); draw(); }); return; }
@@ -1141,8 +1166,8 @@
     });
     el.addEventListener('change', e => {
       const box = e.target.closest('[data-lq]'); if (!box) return;
-      const i = +box.dataset.lq, d = String(e.target.value).replace(/[\s,']/g, '').match(/\d+/);
-      lines[i].q = Math.max(1, Math.min(99999, d ? +d[0] : lines[i].q)); saveLines(); afterChange(lines[i]); draw();
+      const l = lines[+box.dataset.lq], d = qtyIn(e.target.value); if (!l) return draw();
+      l.q = Math.max(1, Math.min(99999, d != null ? d : l.q)); saveLines(); afterChange(l); draw();
     });
     draw();
     v.refresh = draw;
@@ -1159,7 +1184,7 @@
   function changeLine(i, redraw) {
     const l = lines[i], o = lineProduct(l); if (!o) return;
     const pk = picker(o, l);
-    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div><button class="btn btn--main btn--full" style="margin-top:18px" id="ssave">' + I.check + esc(t('Save changes')) + '</button></div>');
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(catLabel(o.c)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div><button class="btn btn--main btn--full" style="margin-top:18px" id="ssave">' + I.check + esc(t('Save changes')) + '</button></div>');
     $('#spk', body).appendChild(pk.el);
     $('#ssave', body).onclick = () => {
       if (!pk.check()) return;
@@ -1237,12 +1262,14 @@
       buzz(); toast(keys[0] === 'name' ? t('Type the customer name') : t('Type a phone number the shop can call'));
     }
     function place() {
+      if (!lines.length) { draw(); return; }
       const miss = [['name', !String(cust.name || '').trim()], ['phone', !BAM && !phoneDigits(cust.phone)]].filter(x => x[1]).map(x => x[0]);
       if (miss.length) return bad(miss);
       const c = {}; Object.keys(cust).forEach(k => { const val = String(cust[k] == null ? '' : cust[k]).trim(); if (val) c[k] = val; });
       const x = { id: Date.now().toString(36), no: nextOrderNo(), at: Date.now(), cust: c, lines: lines.map(l => { const z = Object.assign({}, l); if (lb(l)) z.p = linePrice(l); return z; }) };
       if (totals(x.lines, true).priced) x.total = totals(x.lines, true).sum;
-      const all = getOrders(); all.unshift(x); putOrders(all);
+      const all = getOrders(); all.unshift(x);
+      if (!putOrders(all)) { toast(t('The order could not be saved: the phone is full. Delete some old orders, then try again.'), '', null, 9000); return; }
       const was = lines; lines = []; saveLines(); was.forEach(afterChange);
       cust = BAM ? {} : { delivery: 'pickup' }; saveCust();
       const ov = stacks.orders[0]; if (ov) ov.dirty = true;
@@ -1417,7 +1444,8 @@
   const zimg = $('#zoom .zoom__img img');
   $('.zoom__hint').textContent = t('Pinch or double-tap to zoom');
   function zoom(src) {
-    const z = $('#zoom'); zimg.src = src; zs = 1; $('.wm', z).hidden = /^bam\//.test(src);   // the Fakhri Tools mark only on Fakhri Tools photos zx = 0; zy = 0; apply();
+    const z = $('#zoom'); zimg.src = src; zs = 1; zx = 0; zy = 0; apply();
+    $('.wm', z).hidden = /^bam\//.test(src);   // the Fakhri Tools mark only on Fakhri Tools photos
     z.hidden = false; $('.zoom__hint', z).style.opacity = 1;
     setTimeout(() => { $('.zoom__hint', z).style.opacity = 0; }, 2200);
     if (!reduce) z.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.16,1,.3,1)' });
