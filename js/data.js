@@ -1,4 +1,4 @@
-/* Fakhri Tools — product catalogue (27 categories, 289 products). Product photos are stored locally in assets/products/.
+/* Fakhri Tools — product catalogue (27 categories, 291 products). Product photos are stored locally in assets/products/.
    Each product is [name, [specs], size range, photo]. "cover" is the photo shown for the whole category. */
 window.FT_IMG = 'assets/products/';
 
@@ -12,7 +12,7 @@ window.FT_FAMILIES = [
 window.FT_CATS = [
   { slug: 'gate-valves', name: 'GATE VALVE', fam: 'valves',
     desc: 'Full-bore isolation for on/off service — stainless SS304 and SS316, carbon steel, cast iron, ductile iron, forged steel, brass and bronze, screwed, socket-weld or flanged, plus knife edge gate valves.',
-    cover: 'gate-valves/edit-mvgoea6i.jpg',
+    cover: 'gate-valves/edit-mvi813w5.jpg',
     items: [
       ['C.S GATE VALVE F/T', ['CL150', 'CL300'], '½" – 16"', 'gate-valves/edit-mv988gmw.jpg', 'CARBON STEEL ASTM A216 (WCB)'],
       ['FORGED C.S GATE VALVE F/T', ['CL150', 'CL300'], '½" – 2"', 'gate-valves/edit-mvgoeugw.jpg', 'FORGED STEEL ASTM A105'],
@@ -30,7 +30,7 @@ window.FT_CATS = [
     ] },
   { slug: 'globe-valves', name: 'GLOBE VALVE', fam: 'valves',
     desc: 'Throttling and flow regulation — S.S, C.S, forged steel, C.I and D.I bodies from ½" to 12".',
-    cover: 'globe-valves/edit-mv816abf.jpg',
+    cover: 'globe-valves/edit-mvi847pt.jpg',
     items: [
       ['C.S GLOBE VALVE F/T', ['CL150', 'CL300'], '½" – 12"', 'globe-valves/edit-mv8135rk.jpg', 'CARBON STEEL ASTM A216 WCB'],
       ['S.S GLOBE VALVE F/T', ['CL150', 'CL300', 'SS304', 'SS316'], '½" – 6"', 'globe-valves/edit-mv816abf.jpg', 'STAINLESS STEEL ASTM A351'],
@@ -42,7 +42,7 @@ window.FT_CATS = [
     ] },
   { slug: 'check-valves', name: 'CHECK VALVE', fam: 'valves',
     desc: 'Non-return protection — swing, spring, piston, wafer disk and dual-disk designs.',
-    cover: 'check-valves/edit-mvcf54a8.jpg',
+    cover: 'check-valves/edit-mvi8jbcw.jpg',
     items: [
       ['C.S CHECK VALVE F/T', ['CL150', 'CL300'], '½" – 12"', 'check-valves/edit-mv2d3shk.jpg', 'CARBON STEEL ASTM A216 WCB'],
       ['C.I CHECK VALVE F/T', ['PN16', 'ASTM A126', 'EN-GJL-250'], '1½" – 8"', 'check-valves/edit-mv2d1bik.jpg', 'CAST IRON'],
@@ -64,7 +64,7 @@ window.FT_CATS = [
     ] },
   { slug: 'ball-valves', name: 'BALL VALVE', fam: 'valves',
     desc: 'Quarter-turn shut-off — 1PC, 2PC, 3PC and 3-way designs in SS304/SS316, carbon steel, cast iron, mild steel, brass, bronze and chrome plated, plus high-pressure hydraulic ball valves and S.S needle valves.',
-    cover: 'ball-valves/edit-mv2dxfry.jpg',
+    cover: 'ball-valves/edit-mvi8r1n2.jpg',
     items: [
       ['C.S BALL VALVE 3PCS BODY F/T', ['CL150', 'CL300'], '½" – 6"', 'ball-valves/edit-mv58nyck.jpg', 'CARBON STEEL ASTM A216 WCB'],
       ['S.S BALL VALVE 2PCS F/T', ['PN16', 'CL150', 'CL300', 'SS304', 'SS316'], '½" – 12"', 'ball-valves/edit-mv820aqz.jpg', 'STAINLESS STEEL ASTM A351'],
@@ -86,7 +86,7 @@ window.FT_CATS = [
     ] },
   { slug: 'y-strainers', name: 'Y STRAINER', fam: 'valves',
     desc: 'Line protection for pumps, meters and valves — screwed and flanged, ½" to 12".',
-    cover: 'y-strainers/edit-mv839yqj.jpg',
+    cover: 'y-strainers/edit-mvi8y4no.jpg',
     items: [
       ['C.I Y STRAINER F/T', ['PN10', 'PN16', 'ASTM A126', 'EN-GJL-250'], '1½" – 8"', 'y-strainers/edit-mv83d9tl.jpg', 'CAST IRON'],
       ['C.S Y STRAINER F/T', ['CL150', 'CL300'], '½" – 12"', 'y-strainers/edit-mv839yqj.jpg', 'CARBON STEEL ASTM A216 WCB'],
@@ -99,7 +99,7 @@ window.FT_CATS = [
     ] },
   { slug: 'safety-valves', name: 'SAFETY VALVE', fam: 'valves',
     desc: 'Bronze pressure-relief valves, 10 and 20 bar, with or without lever, plus brass and S.S air vents.',
-    cover: 'safety-valves/edit-mv6mrp28.jpg',
+    cover: 'safety-valves/edit-mvi94uey.jpg',
     items: [
       ['SAFETY VALVE WITHOUT LEVER', ['10BAR', '20BAR'], '½" – 2"', 'safety-valves/edit-mv6mrp28.jpg', 'BRONZE (ASTM B62)'],
       ['SAFETY VALVE WITH LEVER', ['10BAR', '20BAR'], '½" – 2"', 'safety-valves/edit-mv83jdfw.jpg', 'BRONZE (ASTM B62)'],
@@ -147,7 +147,7 @@ window.FT_CATS = [
       ['G.I FLEXIBLE CONNECTOR UNION TYPE', [], '½" – 3"', 'union-flexible-connectors/1.jpg', 'GALVANIZED IRON'],
       ['G.I FLEXIBLE CONNECTOR F/T', ['CL150', 'PN16'], '1" – 16"', 'union-flexible-connectors/edit-mv59gr5y.jpg', 'GALVANIZED IRON']
     ] },
-  { slug: 'hammer-union', name: 'Hammer Union', fam: 'couplings',
+  { slug: 'hammer-union', name: 'HAMMER UNION', fam: 'couplings',
     desc: 'Wing-nut hammer unions, blanking unions and hose connectors for high-pressure oilfield lines.',
     cover: 'hammer-union/edit-mvaoux17.jpg',
     items: [
@@ -205,20 +205,19 @@ window.FT_CATS = [
       ['S.S FORGED END PLUG THREAD TYPE', ['2000PSI', '3000PSI', '6000PSI', 'BSP', 'NPT'], '¼" – 2"', 'ss-forged-low-pressure-bw-fittings/edit-mv51hetr.jpg', 'SS304, SS316 (ASTM A182)'],
       ['S.S FORGED THREADOLET', ['2000PSI', '3000PSI', '6000PSI', 'BSP', 'NPT'], '¼" – 2"', 'ss-forged-low-pressure-bw-fittings/edit-mvez1vvn.jpg', 'SS304, SS316 (ASTM A182)'],
       ['S.S KING NIPPLE', [], '¼" – 4"', 'ss-forged-low-pressure-bw-fittings/edit-mv51s908.jpg', 'SS304, SS316'],
-      ['S.S LONG NIPPLE', [], '¼" – 8" · 3" – 12"', 'ss-forged-low-pressure-bw-fittings/edit-mveyz55a.jpg', 'SS304, SS316']
+      ['S.S LONG NIPPLE', ['SCH10', 'SCH40', 'SCH80'], '¼" – 8" · 3" – 12"', 'ss-forged-low-pressure-bw-fittings/edit-mveyz55a.jpg', 'SS304, SS316']
     ] },
   { slug: 'gaskets-sheets', name: 'Gaskets & CNAF Sheets', fam: 'sealing',
-    desc: 'CNAF, rubber, spiral wound and RTJ gaskets, CNAF and rubber sheet — plus gland packing and coupling washers.',
+    desc: 'CNAF, non-metallic and rubber ring gaskets, SS spiral wound gaskets, CNAF and rubber sheet, plus gland packing and coupling washers.',
     cover: 'gaskets-sheets/edit-mvf6oekj.jpg',
     items: [
-      ['RING GASKETS', ['CNAF', 'NON METALLIC', 'EPDM', 'NBR', 'NEOPRENE', 'SILICON', '1MM', '2MM', '3MM', '4MM', '5MM', '6MM', 'RF', 'FF', 'PN16', 'CL150', 'CL300'], '½" – any size', 'gaskets-sheets/edit-mv5a6uwk.jpg'],
-      ['GASKET SHEETS', ['CNAF', 'NON METALLIC', 'RF', 'FF', 'PN16', 'CL150', 'CL300', '1.5MTR X 1.5MTR'], '1 mm – 6 mm', 'gaskets-sheets/edit-mv5aquph.jpg'],
-      ['GASKET SHEET', ['EPDM', 'NBR', 'NEOPRENE', 'SILICON', '1.2MTR X 10MTR', '20KG', 'RF', 'FF', 'PN16', 'CL150', 'CL300'], '1 mm – 12 mm', 'gaskets-sheets/edit-mvf876kf.jpg'],
-      ['SPIRAL WOUND GASKETS', ['PN16', 'CL150', 'CL300', 'CL600', '2RING', '3RING', 'SS304', 'SS316'], '½" – any size', 'gaskets-sheets/edit-mvap5wfk.jpg'],
-      ['GLAND PACKING', [], '6 mm – 25 mm', 'gaskets-sheets/edit-mvf8cp0g.jpg'],
-      ['Camlock Rubber Washer', [], '', 'gaskets-sheets/edit-mv85hp5p.jpg'],
-      ['Chicago Rubber Washer', [], '', 'gaskets-sheets/edit-mv85lt07.jpg'],
-      ['RING GASKET (RTJ GASKET)', [], '', 'hammer-union/edit-mvap30fr.jpg', 'Carbon steel & Stainless']
+      ['RING GASKETS', ['PN16', 'CL150', 'CL300', 'CL600', 'RF', 'FF'], '½" – any size', 'gaskets-sheets/edit-mv5a6uwk.jpg', 'CNAF, NON METALLIC, EPDM, NBR'],
+      ['SPIRAL WOUND GASKETS', ['PN16', 'CL150', 'CL300', 'CL600', '2RING', '3RING', 'SS304', 'SS316'], '½" – any size', 'gaskets-sheets/edit-mvap5wfk.jpg', 'STAINLESS STEEL'],
+      ['GASKET SHEETS', [], '1 mm – 6 mm · 1.5 m × 1.5 m', 'gaskets-sheets/edit-mv5aquph.jpg', 'CNAF, NON METALLIC'],
+      ['GASKET SHEET', [], '1 mm – 12 mm · 1.2 m × 10 m, 20 kg', 'gaskets-sheets/edit-mvf876kf.jpg', 'RUBBER, NEOPRENE, SILICON, TEFLON, NYLON'],
+      ['GLAND PACKING', [], '6 mm – 50 mm (¼" – 2")', 'gaskets-sheets/edit-mvf8cp0g.jpg', 'PTFE, GRAPHITE, FIBERGLASS'],
+      ['CAMLOCK WASHER', [], '', 'gaskets-sheets/edit-mv85hp5p.jpg', 'EPDM'],
+      ['CHICAGO COUPLING WASHER', [], '½" – 2"', 'gaskets-sheets/edit-mv85lt07.jpg', 'NBR']
     ] },
   { slug: 'ss-ms-flanges-forging-casting', name: 'S.S & M.S Flanges', fam: 'fittings',
     desc: 'S.S ASTM A182 F304/304L and F316/316L flanges and C.S ASTM A105 flanges: slip-on, weld neck, socket weld, blind and threaded, ½" to 24".',
@@ -236,16 +235,17 @@ window.FT_CATS = [
       ['C.S SOCKET WELD FLANGE', ['PN16', 'CL150', 'CL300', 'CL600', '5K', '10K', '16K'], '½" – 24"', 'ss-ms-flanges-forging-casting/edit-mv88dg9b.jpg', 'CARBON STEEL A105']
     ] },
   { slug: 'chicago-couplings-fittings', name: 'Chicago Couplings & Fittings', fam: 'couplings',
-    desc: 'Galvanised 2-lug and 4-lug claw couplings for air and water hose: hose ends, male and female ends and 3-way connectors.',
+    desc: 'Claw couplings for air and water hose: galvanised 2-lug hose, female and male couplings, a 3-way connector and a clamp, plus stainless 4-lug couplings.',
     cover: 'chicago-couplings-fittings/edit-mv463ewq.jpg',
     items: [
-      ['G.I Chicago Hose End Coupling', ['2 LUG'], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88fl7t.jpg'],
-      ['G.I Chicago Female Coupling', ['2 LUG', 'BSPT'], '¼" – 1"', 'chicago-couplings-fittings/edit-mvf0csuo.jpg'],
-      ['G.I Chicago Male Coupling', ['2 LUG', 'BSPT'], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88gs7g.jpg'],
-      ['G.I Chicago 3-Way Connector', [], '1"', 'chicago-couplings-fittings/4.jpg'],
-      ['G.I Chicago Hose End', ['4 LUG'], '1¼" – 2"', 'chicago-couplings-fittings/edit-mv463ewq.jpg'],
-      ['G.I Chicago Female End', ['4 LUG', 'BSP'], '1¼" – 2"', 'chicago-couplings-fittings/edit-mv88jlzv.jpg'],
-      ['G.I Chicago Male End', ['4 LUG', 'BSP'], '1¼" – 2"', 'chicago-couplings-fittings/edit-mveygf5l.jpg']
+      ['CHICAGO HOSE COUPLING 2LUG', [], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88fl7t.jpg', 'GALVANIZED IRON'],
+      ['CHICAGO FEMALE COUPLING 2LUG', [], '¼" – 1"', 'chicago-couplings-fittings/edit-mvf0csuo.jpg', 'GALVANIZED IRON'],
+      ['CHICAGO MALE COUPLING 2LUG', [], '¼" – 1"', 'chicago-couplings-fittings/edit-mv88gs7g.jpg', 'GALVANIZED IRON'],
+      ['CHICAGO COUPLING 3 WAY CONNECTOR', [], '1"', 'chicago-couplings-fittings/4.jpg', 'GALVANIZED IRON'],
+      ['CHICAGO COUPLING CLAMP', [], '1"', 'chicago-couplings-fittings/edit-mvhvaaxt.jpg', 'GALVANIZED IRON'],
+      ['CHICAGO HOSE COUPLING 4LUG', [], '1¼" – 2"', 'chicago-couplings-fittings/edit-mv463ewq.jpg', 'STAINLESS STEEL'],
+      ['CHICAGO FEMALE COUPLING 4LUG', [], '1¼" – 2"', 'chicago-couplings-fittings/edit-mvhv88mj.jpg', 'STAINLESS STEEL'],
+      ['CHICAGO MALE COUPLING 4LUG', [], '1¼" – 2"', 'chicago-couplings-fittings/edit-mveygf5l.jpg', 'STAINLESS STEEL']
     ] },
   { slug: 'instrumentation-fittings-pressure-gas', name: 'Instrumentation Fittings', fam: 'sealing',
     desc: 'S.S compression fittings with nut and ferrule for 6 to 12 mm tube.',
@@ -269,7 +269,7 @@ window.FT_CATS = [
       ['SS ELBOW 45° SHORT RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zvnfq.jpg', 'STAINLESS STEEL'],
       ['SS ELBOW 90° LONG RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zy43k.jpg', 'STAINLESS STEEL'],
       ['SS ELBOW 90° SHORT RADIUS', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zy43k.jpg', 'STAINLESS STEEL'],
-      ['SS ELBOW, 180°', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zz597.jpg', 'STAINLESS STEEL'],
+      ['SS ELBOW 180°', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv4zz597.jpg', 'STAINLESS STEEL'],
       ['SS EQUAL TEE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '½" – 12"', 'butt-weld-fittings/edit-mv504evj.jpg', 'STAINLESS STEEL'],
       ['SS REDUCING TEE', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv89nd4b.jpg', 'STAINLESS STEEL'],
       ['SS CONCENTRIC REDUCER', ['SCH10', 'SCH40', 'SCH80', 'SS304/304L', 'SS316/316L'], '¾" × ½" – 12" × 10"', 'butt-weld-fittings/edit-mv507iwd.jpg', 'STAINLESS STEEL'],
@@ -374,7 +374,7 @@ window.FT_CATS = [
       ['BRAIDED HOSE', ['300PSI (20BAR)'], '¼" – 1" · 30 mtr', 'hoses/edit-mv6jn3zf.jpg', 'PVC'],
       ['CLEAR LEVEL HOSE', ['300PSI (20BAR)'], '¼" – 1" · 30 mtr', 'hoses/edit-mv6jk137.jpg', 'PVC'],
       ['STEEL WIRE HOSE', [], '½" – 4" · 30 mtr', 'hoses/edit-mv6jszei.jpg', 'PVC'],
-      ['LAY FLAT HOSE', ['2BAR - 4BAR', '50MTR', '100MTR'], '2" – 8"', 'hoses/edit-mv6jvx75.jpg', 'PVC'],
+      ['LAY FLAT HOSE', ['2BAR', '4BAR', '50MTR', '100MTR'], '2" – 8"', 'hoses/edit-mv6jvx75.jpg', 'PVC'],
       ['PU PNEUMATIC HOSE', ['CLEAR', 'ORANGE', 'BLUE', 'BLACK'], '6 mm – 12 mm', 'hoses/edit-mvgqdlia.jpg', 'PVC']
     ] },
   { slug: 'brass-fittings-valves', name: 'BRASS PIPE FITTING', fam: 'fittings',
@@ -418,21 +418,23 @@ window.FT_CATS = [
       ['Float Valve with PVC Ball', ['THREADED'], '½" – 2"', 'foot-valves/edit-mv6fw7mm.jpg', 'Brass']
     ] },
   { slug: 'cock-valves', name: 'HOSE CLAMP', fam: 'couplings',
-    desc: 'Single, double and four bolt hose clamps in zinc plated carbon steel, galvanised steel or stainless, plus an S.S cock valve.',
+    desc: 'Single bolt clamps in zinc plated carbon steel or SS304/SS316, galvanised double bolt clamps, galvanised or stainless hose clips, and four bolt clamps.',
     cover: 'qrc-couplings-ludecke/edit-mv6epth9.jpg',
     items: [
-      ['S.S Cock Valve', ['THREADED'], '½" × 12 mm', 'cock-valves/s-s-cock-valve.jpg', 'Stainless'],
-      ['Double Bolt Clamp', [], 'SL 29 – SL 675', 'qrc-couplings-ludecke/edit-mv6epth9.jpg', 'Carbon steel'],
-      ['Single Bolt Clamp', ['ZINC PLATED'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv6ern5d.jpg', 'Carbon steel'],
-      ['Single Bolt Clamp', ['SS'], '17-19MM TO 292-304MM', 'qrc-couplings-ludecke/edit-mv6eudqq.jpg', 'Stainless'],
+      ['DOUBLE BOLT CLAMP', [], '20-22 mm, 22-29 mm, 28-34 mm, 32-40 mm, 39-49 mm, 48-60 mm, 60-76 mm, 77-94 mm, 88-96 mm, 94-115 mm, 96-103 mm, 103-125 mm, 114-128 mm, 130-144 mm, 151-165 mm, 165-192 mm, 210-225 mm, 227-239 mm, 252-289 mm, 300-330 mm', 'qrc-couplings-ludecke/edit-mv6epth9.jpg', 'GALVANIZED IRON'],
+      ['SINGLE BOLT CLAMP', ['ZINC PLATED'], '17-19 mm, 20-22 mm, 23-25 mm, 26-28 mm, 29-31 mm, 32-35 mm, 36-39 mm, 40-43 mm, 44-47 mm, 48-51 mm, 52-55 mm, 56-59 mm, 60-63 mm, 64-67 mm, 68-73 mm, 74-79 mm, 80-85 mm, 86-91 mm, 92-97 mm, 98-103 mm, 104-112 mm, 113-121 mm, 122-130 mm, 131-139 mm, 140-148 mm, 149-161 mm, 162-174 mm, 175-187 mm, 188-200 mm, 201-213 mm, 214-226 mm, 227-239 mm, 239-252 mm, 253-265 mm, 292-304 mm', 'qrc-couplings-ludecke/edit-mv6ern5d.jpg', 'Carbon steel'],
+      ['SINGLE BOLT CLAMP', ['SS304', 'SS316'], '17-19 mm, 20-22 mm, 23-25 mm, 26-28 mm, 29-31 mm, 32-35 mm, 36-39 mm, 40-43 mm, 44-47 mm, 48-51 mm, 52-55 mm, 56-59 mm, 60-63 mm, 64-67 mm, 68-73 mm, 74-79 mm, 80-85 mm, 86-91 mm, 92-97 mm, 98-103 mm, 104-112 mm, 113-121 mm, 122-130 mm, 131-139 mm, 140-148 mm, 149-161 mm, 162-174 mm, 175-187 mm, 188-200 mm, 201-213 mm, 214-226 mm, 227-239 mm, 239-252 mm, 253-265 mm, 292-304 mm', 'qrc-couplings-ludecke/edit-mv6eudqq.jpg', 'Stainless'],
+      ['HOSE CLIP', [], '½" – 12"', 'cock-valves/edit-mvhuyrda.jpg', 'GALVANIZED IRON'],
+      ['HOSE CLIP', ['SS304', 'SS316'], '½" – 12"', 'cock-valves/edit-mvhuyrda.jpg', 'STAINLESS STEEL'],
       ['Four Bolt Clamp', [], '½" – 3"', 'chicago-couplings-fittings/10.jpg', 'Galvanised']
     ] },
   { slug: 'acrylic-tubes', name: 'ACRYLIC TUBE AND FITTING', fam: 'sealing',
-    desc: 'Clear acrylic tubes with 2 mm wall for level gauges and sight glasses, plus brass tank level cocks.',
+    desc: 'Acrylic tubes from 12 mm to 50 mm for level gauges and sight glasses, plus brass tank level cocks and tube connectors.',
     cover: 'acrylic-tubes/clear-acrylic-tube.jpg',
     items: [
-      ['Clear Acrylic Tube', ['2 MM WALL'], '8 mm – 75 mm', 'acrylic-tubes/clear-acrylic-tube.jpg', 'Acrylic'],
-      ['Tank Level Cock', ['THREADED'], '12 mm × ½" – 25 mm × 1"', 'cock-valves/edit-mv6f027a.jpg', 'Brass']
+      ['ACRYLIC TUBE', [], '12 mm – 50 mm', 'acrylic-tubes/clear-acrylic-tube.jpg', 'ACRYLIC'],
+      ['TANK LEVEL COCK', [], '12 mm × ½" – 50 mm × 2"', 'acrylic-tubes/edit-mvi7lheq.jpg', 'BRASS'],
+      ['ACRYLIC TUBE CONNECTOR', [], '12 mm – 50 mm', 'acrylic-tubes/edit-mvi7nh8s.jpg', 'BRASS']
     ] }
 ];
 
