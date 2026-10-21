@@ -1,6 +1,8 @@
 package com.fakhritools.catalogue;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
@@ -8,6 +10,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -74,18 +79,13 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         root = new File(getFilesDir(), "www");
         prefs = getSharedPreferences("ft", MODE_PRIVATE);
-        Window w = getWindow();
-        // light app: white bars with dark icons (dark nav bar on phones older than Android 8, which can't draw dark nav icons)
-        w.setStatusBarColor(Color.WHITE);
-        int bars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        if (Build.VERSION.SDK_INT >= 26) { w.setNavigationBarColor(Color.WHITE); bars |= 0x00000010; /* SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR */ }
-        else w.setNavigationBarColor(Color.parseColor("#0B1620"));
-        w.getDecorView().setSystemUiVisibility(bars);
+        brand = prefs.getString("brand", "");
+        paintBars();
 
         // test builds only: lets the automated phone test drive the pages
         if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#F3F4F6"));
+        web.setBackgroundColor(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6"));
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -141,6 +141,50 @@ public class MainActivity extends Activity {
                 if (!"true".equals(v)) MainActivity.super.onBackPressed();
             }
         });
+    }
+
+    /* ---------------- branch: Fakhri Tools or Bait Al Maqdis ---------------- */
+
+    volatile String brand = "";
+    boolean isBam() { return "bam".equals(brand); }
+
+    /** Bait Al Maqdis is dark with light icons; Fakhri Tools is white with dark icons. */
+    void paintBars() {
+        Window w = getWindow();
+        int bars = 0;
+        if (isBam()) {
+            w.setStatusBarColor(Color.parseColor("#0A0A0B"));
+            w.setNavigationBarColor(Color.parseColor("#0A0A0B"));
+        } else {
+            w.setStatusBarColor(Color.WHITE);
+            bars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            // phones older than Android 8 can't draw dark nav icons, so they keep a dark nav bar
+            if (Build.VERSION.SDK_INT >= 26) { w.setNavigationBarColor(Color.WHITE); bars |= 0x00000010; /* SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR */ }
+            else w.setNavigationBarColor(Color.parseColor("#0B1620"));
+        }
+        w.getDecorView().setSystemUiVisibility(bars);
+        try {
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), isBam() ? R.mipmap.ic_bam : R.mipmap.ic_launcher);
+            setTaskDescription(new ActivityManager.TaskDescription(getString(isBam() ? R.string.name_bam : R.string.name_fakhri), icon, isBam() ? Color.parseColor("#0A0A0B") : Color.WHITE));
+        } catch (Exception e) { /* the recent-apps card keeps the default look */ }
+    }
+
+    /** Switch the home-screen icon and name to the branch: one launcher alias on, the other off. */
+    void applyBrand(String b) {
+        brand = "bam".equals(b) ? "bam" : "fakhri";
+        prefs.edit().putString("brand", brand).apply();
+        paintBars();
+        PackageManager pm = getPackageManager();
+        ComponentName fk = new ComponentName(this, getPackageName() + ".BrandFakhri");
+        ComponentName bm = new ComponentName(this, getPackageName() + ".BrandBam");
+        try {
+            // turn the new one on before the old one off, so there is never a moment with no icon
+            ComponentName on = isBam() ? bm : fk, off = isBam() ? fk : bm;
+            if (pm.getComponentEnabledSetting(on) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+                pm.setComponentEnabledSetting(on, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+            if (pm.getComponentEnabledSetting(off) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+                pm.setComponentEnabledSetting(off, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        } catch (Exception e) { /* the icon stays as it was; the app itself still switches */ }
     }
 
     /* ---------------- local server ---------------- */
@@ -416,7 +460,6 @@ public class MainActivity extends Activity {
                     if (waDigits != null && waDigits.length() > 6) {
                         for (String pkg : new String[] { "com.whatsapp", "com.whatsapp.w4b" }) {
                             try {
-                                getPackageManager().getPackageInfo(pkg, 0);
                                 Intent w = new Intent(i);
                                 w.setPackage(pkg);
                                 w.putExtra("jid", waDigits + "@s.whatsapp.net");
@@ -431,6 +474,15 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        /** The branch the salesman picked ("bam" or "fakhri"): icon, name and colours follow it. */
+        @JavascriptInterface
+        public void setBrand(final String b) {
+            ui.post(new Runnable() { public void run() { applyBrand(b); } });
+        }
+
+        @JavascriptInterface
+        public String brand() { return brand; }
 
         @JavascriptInterface
         public void vibrate() {

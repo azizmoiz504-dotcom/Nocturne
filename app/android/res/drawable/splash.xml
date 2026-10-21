@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- the same plain start screen for both branches: the page paints the chosen branch a moment later -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><color android:color="#F3F4F6" /></item>
-    <item><bitmap android:gravity="center" android:src="@drawable/splash_logo" /></item>
+    <item><color android:color="#FFFFFF" /></item>
 </layer-list>
