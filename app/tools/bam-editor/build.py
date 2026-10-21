@@ -80,7 +80,11 @@ def main():
         from cryptography.hazmat.primitives import hashes
         pw = open(a.password_file, encoding='utf-8').read().strip()
         if len(pw) < 10: sys.exit('the password is too short')
-        salt = os.urandom(16)
+        # the same salt every build (kept next to the password), so "Remember" on a device lasts across updates
+        sf = a.password_file + '.salt'
+        if not os.path.isfile(sf):
+            with open(sf, 'w') as fh: fh.write(os.urandom(16).hex() + '\n')
+        salt = bytes.fromhex(open(sf).read().strip())
         key = AESGCM(PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITER).derive(pw.encode()))
 
     def seal(raw):
