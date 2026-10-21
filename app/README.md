@@ -26,6 +26,6 @@ The Fakhri Tools launcher entry keeps the name `.MainActivity` (the launcher of 
 
 - `web/` the app's screens (HTML, CSS, JS)
 - `android/` the Android shell (a full-screen WebView that serves the packed files and fetches updates)
-- `tools/` the Bait Al Maqdis import
+- `tools/` the Bait Al Maqdis import, and `tools/preview/` the private browser preview (photos packed into a few files, PDFs shown on the page)
 - `ci/` the automated phone test run by `.github/workflows/catalogue-app.yml`
 - `build-web.sh` the iPhone web app (Fakhri Tools only, since it is public)

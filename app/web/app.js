@@ -453,6 +453,7 @@
   function webPdf(b64, name, cap, view) {
     const bin = atob(b64), u8 = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    if (window.FT_PDF_VIEW) return window.FT_PDF_VIEW(u8, name);   // a page that shows PDFs itself (the browser preview)
     const blob = new Blob([u8], { type: 'application/pdf' }), url = URL.createObjectURL(blob);
     let file = null; try { file = new File([u8], name, { type: 'application/pdf' }); } catch (e) {}
     const viaShare = () => navigator.share({ files: [file], title: cap }).catch(e => { if (e && e.name === 'NotAllowedError') toast(t('Order form ready'), t('Share'), viaShare, 12000); });
@@ -1368,6 +1369,7 @@
       const p = list[+b.dataset.pdf], path = 'bam/' + p.file;
       if (N && N.viewAsset && b.dataset.how === 'open') N.viewAsset(path);
       else if (N && N.shareAsset) N.shareAsset(path, p.title);
+      else if (window.FT_PDF_VIEW) fetch(path).then(r => r.arrayBuffer()).then(buf => window.FT_PDF_VIEW(new Uint8Array(buf), p.title));
       else if (b.dataset.how === 'open') window.open(path, '_blank');
       else shareWebFile(path, p.title);
     });
