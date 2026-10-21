@@ -13,7 +13,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/** Hands a product photo, or an order form PDF the app made, to WhatsApp (or any app). Read-only. */
+/** Hands a product photo, an order form PDF the app made, or a packed Bait Al Maqdis catalogue PDF
+ *  to WhatsApp, a PDF viewer or any app. Read-only. */
 public class PhotoProvider extends ContentProvider {
     static final String AUTH = "com.fakhritools.catalogue.photos";
 
@@ -23,7 +24,7 @@ public class PhotoProvider extends ContentProvider {
 
     String rel(Uri u) throws FileNotFoundException {
         String p = u.getPath();
-        if (p == null || p.contains("..") || !(p.startsWith("/p/") || p.startsWith("/share/"))) throw new FileNotFoundException(String.valueOf(p));
+        if (p == null || p.contains("..") || !(p.startsWith("/p/") || p.startsWith("/share/") || p.startsWith("/bam/"))) throw new FileNotFoundException(String.valueOf(p));
         return p.substring(1);
     }
 

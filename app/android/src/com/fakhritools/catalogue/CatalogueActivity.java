@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -52,16 +53,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Fakhri Tools catalogue: a full-screen WebView that shows the catalogue bundled inside the app
- * (works with no signal) and quietly pulls the newest product list and photos from the live
- * website whenever the phone is online.
+ * Sales catalogue (Fakhri Tools + Bait Al Maqdis): a full-screen WebView that shows the catalogue
+ * bundled inside the app (works with no signal) and quietly pulls the newest Fakhri Tools product
+ * list and photos from the live website whenever the phone is online. The Bait Al Maqdis catalogue,
+ * prices and PDFs are packed in the app (assets/www/bam/).
  *
  * Every page and photo is served from https://app.fakhri.local/..., looked up in this order:
  *   1. files/www/   (newer list and photos downloaded from the website)
  *   2. assets/www/  (what was packed into the app)
  *   3. the live website (a photo the app has never seen; saved for next time)
  */
-public class MainActivity extends Activity {
+public class CatalogueActivity extends Activity {
     static final String HOST = "app.fakhri.local";
     static final String BASE = "https://" + HOST + "/";
     static final String LIVE = "https://azizmoiz504-dotcom.github.io/Nocturne/";
@@ -80,6 +82,7 @@ public class MainActivity extends Activity {
         root = new File(getFilesDir(), "www");
         prefs = getSharedPreferences("ft", MODE_PRIVATE);
         brand = prefs.getString("brand", "");
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6")));
         paintBars();
 
         // test builds only: lets the automated phone test drive the pages
@@ -135,10 +138,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        switchIcon();
+    }
+
+    @Override
     public void onBackPressed() {
         web.evaluateJavascript("window.FT && FT.back ? FT.back() : false", new ValueCallback<String>() {
             public void onReceiveValue(String v) {
-                if (!"true".equals(v)) MainActivity.super.onBackPressed();
+                if (!"true".equals(v)) CatalogueActivity.super.onBackPressed();
             }
         });
     }
@@ -169,13 +178,20 @@ public class MainActivity extends Activity {
         } catch (Exception e) { /* the recent-apps card keeps the default look */ }
     }
 
-    /** Switch the home-screen icon and name to the branch: one launcher alias on, the other off. */
+    /** The salesman picked a branch: colours now, the home-screen icon and name once the app leaves the screen. */
     void applyBrand(String b) {
         brand = "bam".equals(b) ? "bam" : "fakhri";
         prefs.edit().putString("brand", brand).apply();
         paintBars();
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6")));
+    }
+
+    /** Switch the home-screen icon and name to the branch: one launcher alias on, the other off.
+     *  Done when the app is not on screen (onStop), because some phones close an app whose launcher entry changes. */
+    void switchIcon() {
+        if (brand.isEmpty()) return;
         PackageManager pm = getPackageManager();
-        ComponentName fk = new ComponentName(this, getPackageName() + ".BrandFakhri");
+        ComponentName fk = new ComponentName(this, getPackageName() + ".MainActivity");   // the Fakhri Tools icon keeps v1.5's name, so its home-screen icon survives the update
         ComponentName bm = new ComponentName(this, getPackageName() + ".BrandBam");
         try {
             // turn the new one on before the old one off, so there is never a moment with no icon
@@ -196,7 +212,7 @@ public class MainActivity extends Activity {
         String mime = mime(rel);
         Map<String, String> h = new HashMap<>();
         h.put("Access-Control-Allow-Origin", "*");
-        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") ? "max-age=31536000" : "no-cache");
+        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") || rel.startsWith("bam/p/") || rel.startsWith("bam/tiles/") || rel.startsWith("bam/fonts/") ? "max-age=31536000" : "no-cache");
         try {
             File f = new File(root, rel);
             if (f.isFile()) return resp(mime, h, new FileInputStream(f));
@@ -238,6 +254,7 @@ public class MainActivity extends Activity {
         if (l.endsWith(".svg")) return "image/svg+xml";
         if (l.endsWith(".woff2")) return "font/woff2";
         if (l.endsWith(".jpg") || l.endsWith(".jpeg")) return "image/jpeg";
+        if (l.endsWith(".pdf")) return "application/pdf";
         return "application/octet-stream";
     }
 
@@ -348,6 +365,40 @@ public class MainActivity extends Activity {
         ui.post(new Runnable() { public void run() { web.evaluateJavascript(code, null); } });
     }
 
+    static boolean okAsset(String p) { return p != null && p.startsWith("bam/") && !p.contains(".."); }
+
+    void sendUri(Uri u, String label, String mime, String caption, String waDigits) {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType(mime);
+        i.putExtra(Intent.EXTRA_STREAM, u);
+        i.setClipData(ClipData.newRawUri(label, u));
+        if (caption != null && caption.length() > 0) i.putExtra(Intent.EXTRA_TEXT, caption);
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        if (waDigits != null && (waDigits.equals("wa") || waDigits.length() > 6)) {
+            for (String pkg : new String[] { "com.whatsapp", "com.whatsapp.w4b" }) {
+                try {
+                    Intent w = new Intent(i);
+                    w.setPackage(pkg);
+                    if (!waDigits.equals("wa")) w.putExtra("jid", waDigits + "@s.whatsapp.net");
+                    startActivity(w);
+                    return;
+                } catch (Exception e) { /* not installed: try the next one */ }
+            }
+        }
+        Intent c = Intent.createChooser(i, label);
+        c.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try { startActivity(c); } catch (Exception e) { Toast.makeText(this, "No app on this phone can take that file", Toast.LENGTH_LONG).show(); }
+    }
+
+    void viewUri(Uri u, String label, String mime) {
+        Intent v = new Intent(Intent.ACTION_VIEW);
+        v.setDataAndType(u, mime);
+        v.setClipData(ClipData.newRawUri(label, u));
+        v.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try { startActivity(v); }
+        catch (ActivityNotFoundException e) { sendUri(u, label, mime, "", ""); }   // no PDF viewer: the share menu still works (Drive, WhatsApp...)
+    }
+
     void openOutside(String url) {
         try {
             Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -414,7 +465,7 @@ public class MainActivity extends Activity {
         public long lastChange() { return prefs.getLong("lastChange", 0); }
 
         @JavascriptInterface
-        public boolean online() { return MainActivity.this.online(); }
+        public boolean online() { return CatalogueActivity.this.online(); }
 
         @JavascriptInterface
         public String version() {
@@ -432,11 +483,10 @@ public class MainActivity extends Activity {
             js("location.reload()");
         }
 
-        /** Share a file the page made (the order form PDF). With a WhatsApp number it opens that chat in WhatsApp when it can. */
-        @JavascriptInterface
-        public void shareFile(final String b64, final String name, final String mime, final String caption, final String waDigits) {
-            final File dir = new File(getCacheDir(), "share");
-            final String safe = String.valueOf(name).replaceAll("[^A-Za-z0-9._-]", "_");
+        /** Keep a file the page made (the order form PDF) where other apps can read it; null if it could not be written. */
+        String keep(String b64, String name) {
+            File dir = new File(getCacheDir(), "share");
+            String safe = String.valueOf(name).replaceAll("[^A-Za-z0-9._-]", "_");
             try {
                 dir.mkdirs();
                 File[] old = dir.listFiles();
@@ -444,35 +494,39 @@ public class MainActivity extends Activity {
                 FileOutputStream o = new FileOutputStream(new File(dir, safe));
                 o.write(Base64.decode(b64, Base64.DEFAULT));
                 o.close();
+                return safe;
             } catch (Exception e) {
-                ui.post(new Runnable() { public void run() { Toast.makeText(MainActivity.this, "Could not make the file", Toast.LENGTH_LONG).show(); } });
-                return;
+                ui.post(new Runnable() { public void run() { Toast.makeText(CatalogueActivity.this, "Could not make the file", Toast.LENGTH_LONG).show(); } });
+                return null;
             }
-            ui.post(new Runnable() {
-                public void run() {
-                    Uri u = PhotoProvider.uriFor("share/" + safe);
-                    Intent i = new Intent(Intent.ACTION_SEND);
-                    i.setType(mime);
-                    i.putExtra(Intent.EXTRA_STREAM, u);
-                    i.setClipData(ClipData.newRawUri(safe, u));
-                    if (caption != null && caption.length() > 0) i.putExtra(Intent.EXTRA_TEXT, caption);
-                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    if (waDigits != null && waDigits.length() > 6) {
-                        for (String pkg : new String[] { "com.whatsapp", "com.whatsapp.w4b" }) {
-                            try {
-                                Intent w = new Intent(i);
-                                w.setPackage(pkg);
-                                w.putExtra("jid", waDigits + "@s.whatsapp.net");
-                                startActivity(w);
-                                return;
-                            } catch (Exception e) { /* not installed: try the next one */ }
-                        }
-                    }
-                    Intent c = Intent.createChooser(i, safe);
-                    c.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(c);
-                }
-            });
+        }
+
+        /** Share a file the page made (the order form PDF). waDigits: a number opens that WhatsApp chat,
+         *  "wa" opens WhatsApp to pick a chat, empty shows every app that can take it. */
+        @JavascriptInterface
+        public void shareFile(final String b64, final String name, final String mime, final String caption, final String waDigits) {
+            final String safe = keep(b64, name);
+            if (safe != null) ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor("share/" + safe), safe, mime, caption, waDigits); } });
+        }
+
+        /** Open a file the page made (the order form PDF) in the phone's PDF viewer; with no viewer, the share menu. */
+        @JavascriptInterface
+        public void viewFile(final String b64, final String name, final String mime) {
+            final String safe = keep(b64, name);
+            if (safe != null) ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor("share/" + safe), safe, mime); } });
+        }
+
+        /** Open one of the PDFs packed in the app (Bait Al Maqdis catalogues), e.g. "bam/pdf/kapusi-catalogue.pdf". */
+        @JavascriptInterface
+        public void viewAsset(final String path) {
+            if (!okAsset(path)) return;
+            ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor(path), path.substring(path.lastIndexOf('/') + 1), mime(path)); } });
+        }
+
+        @JavascriptInterface
+        public void shareAsset(final String path, final String title) {
+            if (!okAsset(path)) return;
+            ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(path), title, mime(path), title, ""); } });
         }
 
         /** The branch the salesman picked ("bam" or "fakhri"): icon, name and colours follow it. */

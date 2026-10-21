@@ -13,7 +13,7 @@
         android:usesCleartextTraffic="false"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".CatalogueActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:screenOrientation="unspecified"
@@ -21,10 +21,12 @@
             android:windowSoftInputMode="adjustResize" />
 
         <!-- The home-screen icon and name follow the branch the salesman picks in Settings:
-             one of these two is switched on at a time (MainActivity.applyBrand). -->
+             one of these two is switched on at a time (CatalogueActivity.switchIcon).
+             The Fakhri Tools one is called .MainActivity, the launcher name of v1.5 and earlier,
+             so a Fakhri Tools icon already on a home screen keeps working after the update. -->
         <activity-alias
-            android:name=".BrandFakhri"
-            android:targetActivity=".MainActivity"
+            android:name=".MainActivity"
+            android:targetActivity=".CatalogueActivity"
             android:label="@string/name_fakhri"
             android:icon="@mipmap/ic_launcher"
             android:enabled="true"
@@ -36,7 +38,7 @@
         </activity-alias>
         <activity-alias
             android:name=".BrandBam"
-            android:targetActivity=".MainActivity"
+            android:targetActivity=".CatalogueActivity"
             android:label="@string/name_bam"
             android:icon="@mipmap/ic_bam"
             android:enabled="false"

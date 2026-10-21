@@ -1,3 +1,5 @@
 build/
 ci/node_modules/
 ci/out/
+# the Bait Al Maqdis catalogue (prices, customer list, PDFs) stays out of this public repository: see README
+bam/

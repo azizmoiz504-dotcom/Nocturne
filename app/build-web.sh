@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Builds the iPhone web app (Add to Home Screen) from the same screens as the Android app.
+# It is Fakhri Tools only: the web app is public, and the Bait Al Maqdis prices stay inside the Android app.
 #   usage: app/build-web.sh   -> app/build/webapp/   (publish it as  <site>/app/  next to the main website)
 # The list (js/data.js, js/choices.js, js/config.js) and the photos (assets/products/) are read live
 # from the website one folder up, so editor saves show without a new build. Opened screens, products
@@ -17,15 +18,17 @@ cp "$SITE"/assets/brands/*.png "$W/brands/"
 cp "$SITE/assets/logo-lockup.png" "$SITE/assets/logo-stacked.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-192.png" "$SITE/assets/icon-512.png" "$SITE/assets/apple-touch-icon.png" "$W/img/"
 
 # index.html: Home Screen tags, live list from the website, offline helper
-HEAD='<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="apple-mobile-web-app-title" content="Fakhri Tools">\n<meta name="robots" content="noindex">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="img/apple-touch-icon.png">\n<link rel="icon" href="img/icon-192.png">\n<script>document.documentElement.className += " is-web"; window.FT_WEB = { img: "../assets/products/" };</script>'
+HEAD='<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="apple-mobile-web-app-title" content="Fakhri Tools">\n<meta name="robots" content="noindex">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="img/apple-touch-icon.png">\n<link rel="icon" href="img/icon-192.png">\n<script>document.documentElement.className += " is-web"; window.FT_WEB = { img: "../assets/products/", brand: "fakhri" };</script>'
 sed -e 's#<meta name="theme-color" content="[^"]*">#<meta name="theme-color" content="\#ffffff">#' \
     -e "s#<link rel=\"stylesheet\" href=\"app.css\">#&\n$HEAD#" \
     -e 's#<script src="config.js"></script>#<script src="../js/config.js"></script>#' \
     -e 's#<script src="data.js"></script>#<script src="../js/data.js"></script>#' \
     -e 's#<script src="choices.js"></script>#<script src="../js/choices.js"></script>#' \
     -e "s#<script src=\"app.js\"></script>#&\n<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>#" \
+    -e '/<script src="bam\//d' \
     web/index.html > "$W/index.html"
-for k in manifest.webmanifest 'is-web' '../js/data.js' '../js/choices.js' '../js/config.js' 'sw.js'; do grep -q -- "$k" "$W/index.html" || { echo "index.html is missing $k" >&2; exit 1; }; done
+for k in manifest.webmanifest 'is-web' '../js/data.js' '../js/choices.js' '../js/config.js' 'sw.js' 'brand: "fakhri"'; do grep -q -- "$k" "$W/index.html" || { echo "index.html is missing $k" >&2; exit 1; }; done
+if grep -q 'bam/' "$W/index.html"; then echo "index.html still loads Bait Al Maqdis files" >&2; exit 1; fi
 
 cat > "$W/manifest.webmanifest" <<'EOF'
 {

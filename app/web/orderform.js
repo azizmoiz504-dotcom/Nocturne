@@ -1,13 +1,16 @@
 /* =========================================================
-   Fakhri Tools catalogue app · the order form as a PDF (A4)
+   Sales catalogue app · the order form as a PDF (A4), under the salesman's branch
    FT_ORDER_PDF(order) -> Promise<base64 PDF>
-   order = { no, at, cust:{...}, rows:[{ n, group, img, size, spec, mat, q }], shop:{...} }
-   No prices: the shop confirms prices and stock on WhatsApp.
+   order = { no, at, brand, accent:[r,g,b], dark:[r,g,b], priced, cust:{...}, shop:{...},
+             rows:[{ src, n, group, img, q, p,  code, size ('bam': Bait Al Maqdis)  |  size, spec, mat ('fk': Fakhri Tools) }] }
+   priced: the form shows Rate and Amount; a row without a price reads "On request".
+   Fakhri Tools products have no prices: the shop confirms them.
    ========================================================= */
 (() => {
   'use strict';
   const W = 595.28, H = 841.89, M = 34;
   const C = { ink: [7, 24, 35], mute: [91, 101, 119], light: [244, 246, 248], zebra: [248, 249, 251], line: [222, 226, 232], red: [185, 26, 32], navy: [8, 71, 103], amber: [176, 104, 0], white: [255, 255, 255] };
+  const num = v => (Math.round(v * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // the PDF's built-in font prints Western European letters; everything else is written out plainly
   const MAP = { '–': '-', '—': '-', '≤': '<=', '≥': '>=', '⅛': '1/8', '⅜': '3/8', '⅝': '5/8', '⅞': '7/8', '⅓': '1/3', '‘': "'", '’': "'", '“': '"', '”': '"', '…': '...', ' ': ' ' };
   const clean = s => String(s == null ? '' : s).replace(/[^\x20-\x7e\xa0-\xff]/g, ch => MAP[ch] !== undefined ? MAP[ch] : '?');
@@ -48,7 +51,10 @@
     await loadLib();
     const J = window.jspdf && window.jspdf.jsPDF; if (!J) throw new Error('PDF maker missing');
     const doc = new J({ unit: 'pt', format: 'a4', compress: true });
-    const shop = x.shop, cu = x.cust || {};
+    const shop = x.shop, cu = x.cust || {}, priced = !!x.priced;
+    const acc = x.accent || C.red, dark = x.dark || C.navy;
+    // a light brand colour (orange) is darkened a little for small text on white
+    const accT = (acc[0] * .3 + acc[1] * .59 + acc[2] * .11) > 140 ? acc.map(v => Math.round(v * .78)) : acc;
     const [lg, thumbs] = await Promise.all([logo(shop.logo), Promise.all(x.rows.map(r => thumb(r.img, 140)))]);
     const font = (st, sz, col) => { doc.setFont('helvetica', st); doc.setFontSize(sz); doc.setTextColor.apply(doc, col || C.ink); };
     const fill = col => doc.setFillColor.apply(doc, col);
@@ -60,33 +66,36 @@
 
     /* ---------- page top ---------- */
     function header(first) {
-      fill(C.red); doc.rect(0, 0, W, 5, 'F');
-      fill(C.navy); doc.rect(0, 5, W, 1.6, 'F');
-      const lw = first ? 205 : 150;
-      if (lg) doc.addImage(lg.url, 'JPEG', M, first ? 26 : 22, lw, lw * lg.r);
+      fill(acc); doc.rect(0, 0, W, 5, 'F');
+      fill(dark); doc.rect(0, 5, W, 1.6, 'F');
+      // the logo: wide ones (Fakhri Tools) by width, tall ones (Bait Al Maqdis) by height
+      const top = first ? 24 : 20, maxW = first ? 205 : 150, maxH = first ? 72 : 46;
+      let lb = top + 34;
+      if (lg) { const lw = Math.min(maxW, maxH / lg.r), lh = lw * lg.r; doc.addImage(lg.url, 'JPEG', M, top, lw, lh); lb = top + lh; }
       font('bold', first ? 22 : 15, C.ink); text('ORDER FORM', W - M, first ? 46 : 38, { align: 'right' });
-      font('bold', first ? 11.5 : 9.5, C.red); text(x.no, W - M, first ? 62 : 51, { align: 'right' });
+      font('bold', first ? 11.5 : 9.5, accT); text(x.no, W - M, first ? 62 : 51, { align: 'right' });
       font('normal', 8.5, C.mute); text(first ? dateStr : 'continued', W - M, first ? 75 : 62, { align: 'right' });
-      if (!first) { stroke(C.line, 0.8); doc.line(M, 74, W - M, 74); return 86; }
+      if (!first) { const ly = Math.max(74, lb + 8); stroke(C.line, 0.8); doc.line(M, ly, W - M, ly); return ly + 12; }
+      const ay = Math.max(86, lb + 12);
       font('normal', 8.2, C.mute);
-      text(shop.address, M, 86);
-      text('Tel ' + shop.phone + '   ·   WhatsApp ' + shop.wa + '   ·   ' + shop.email, M, 97);
-      stroke(C.line, 0.8); doc.line(M, 108, W - M, 108);
-      return 122;
+      text(shop.address, M, ay);
+      text([shop.phone && 'Tel ' + shop.phone, shop.wa && 'WhatsApp ' + shop.wa, shop.email].filter(Boolean).join('   ·   '), M, ay + 11);
+      stroke(C.line, 0.8); doc.line(M, ay + 22, W - M, ay + 22);
+      return ay + 36;
     }
     let y = header(true);
 
     /* ---------- customer and order details ---------- */
     const bw = (W - 2 * M - 12) / 2, pad = 12;
     const custRows = [['Contact', cu.person], ['Phone', cu.phone], ['Location', cu.site]].filter(r => r[1]);
-    const ordRows = [['Order no.', x.no], ['Date', dateStr], ['Delivery', cu.delivery === 'deliver' ? 'Deliver to the customer' : 'Collect from the Al Quoz shop'], ['Needed by', cu.by ? new Date(cu.by + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : ''], ['Payment', cu.pay]].filter(r => r[1]);
+    const ordRows = [['Order no.', x.no], ['Date', dateStr], ['Delivery', !cu.delivery ? '' : cu.delivery === 'deliver' ? 'Deliver to the customer' : 'Collect from the ' + (shop.pickup || 'shop')], ['Needed by', cu.by ? new Date(cu.by + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : ''], ['Payment', cu.pay]].filter(r => r[1]);
     font('bold', 12.5); const nameLines = wrap(cu.name || '-', bw - 2 * pad);
     const lineH = 13.5;
     const kvH = rows => rows.reduce((s, r) => { font('normal', 9); return s + wrap(r[1], bw - 2 * pad - 62).length * 11.5 + 2.5; }, 0);
     const bh = Math.max(20 + nameLines.length * 15 + 6 + kvH(custRows), 20 + kvH(ordRows)) + pad;
     function box(bx, title) {
       fill(C.light); doc.roundedRect(bx, y, bw, bh, 7, 7, 'F');
-      fill(title === 'CUSTOMER' ? C.red : C.navy); doc.rect(bx, y + 10, 3, 12, 'F');
+      fill(title === 'CUSTOMER' ? acc : dark); doc.rect(bx, y + 10, 3, 12, 'F');
       font('bold', 7.5, C.mute); doc.setCharSpace(1.2); text(title, bx + pad, y + 19); doc.setCharSpace(0);
     }
     function kv(bx, yy, rows) {
@@ -104,21 +113,25 @@
     y += bh + 18;
 
     /* ---------- items ---------- */
-    const col = { n: M + 8, ph: M + 26, it: M + 76, sz: W - M - 132, q: W - M - 10 };
-    const itW = col.sz - col.it - 12, szW = col.q - 44 - col.sz;
+    // columns: # · photo · item · size · qty (· rate · amount when priced)
+    const col = priced ? { n: M + 8, ph: M + 26, it: M + 76, sz: W - M - 236, q: W - M - 138, r: W - M - 72, a: W - M - 10 }
+                       : { n: M + 8, ph: M + 26, it: M + 76, sz: W - M - 132, q: W - M - 10 };
+    const itW = col.sz - col.it - 12, szW = col.q - 40 - col.sz;
     function thead() {
       fill(C.ink); doc.roundedRect(M, y, W - 2 * M, 22, 4, 4, 'F');
       font('bold', 7.6, C.white); doc.setCharSpace(1);
       text('#', col.n, y + 14.5); text('ITEM', col.it, y + 14.5); text('SIZE', col.sz, y + 14.5); text('QTY', col.q, y + 14.5, { align: 'right' });
+      if (priced) { text('RATE', col.r, y + 14.5, { align: 'right' }); text('AMOUNT', col.a, y + 14.5, { align: 'right' }); }
       doc.setCharSpace(0);
       y += 22;
     }
     const FOOT = 64;
     function newPage(table) { doc.addPage(); y = header(false); if (table) thead(); }
     thead();
+    let sum = 0, ask = 0;
     x.rows.forEach((r, i) => {
       font('bold', 9.8); const nl = wrap(r.n, itW);
-      const det = [['Specs & ratings', r.spec], ['Material', r.mat]].filter(d => d[1]).map(d => { font('normal', 8.3); return { k: d[0], v: d[1], ls: wrap(d[0] + ': ' + d[1], itW) }; });
+      const det = [['Part no.', r.code], ['Specs & ratings', r.spec], ['Material', r.mat]].filter(d => d[1]).map(d => { font('normal', 8.3); return { k: d[0], v: d[1], ls: wrap(d[0] + ': ' + d[1], itW) }; });
       font('bold', 9.5); const sl = wrap(r.size || '-', szW);
       const textH = 11 + nl.length * 11.5 + det.reduce((s, d) => s + d.ls.length * 10.5, 0) + 4;
       const rh = Math.max(56, textH + 10, sl.length * 11.5 + 18);
@@ -145,18 +158,37 @@
       font('bold', 9.5, /to confirm/.test(r.size) ? C.amber : C.ink); doc.text(sl, col.sz, y + 26);
       font('bold', 12, C.ink); text(String(r.q), col.q, y + 26, { align: 'right' });
       font('normal', 7, C.mute); text('pcs', col.q, y + 36, { align: 'right' });
+      if (priced) {
+        if (r.p != null) {
+          const amt = r.p * r.q; sum += amt;
+          font('normal', 9, C.ink); text(num(r.p), col.r, y + 26, { align: 'right' });
+          font('bold', 9.5, C.ink); text(num(amt), col.a, y + 26, { align: 'right' });
+        } else { ask++; font('bold', 7.8, C.amber); text('On request', col.a, y + 26, { align: 'right' }); }
+      }
       y += rh;
       stroke(C.line, 0.5); doc.line(M, y, W - M, y);
     });
 
     /* ---------- totals, note, signatures ---------- */
     const pcs = x.rows.reduce((s, r) => s + (+r.q || 0), 0);
-    if (y + 40 > H - FOOT) newPage();
+    const count = x.rows.length + (x.rows.length === 1 ? ' item' : ' items') + '  ·  ' + pcs + ' pcs';
+    if (y + (priced ? 70 : 40) > H - FOOT) newPage();
     y += 10;
-    fill(C.light); doc.roundedRect(W - M - 210, y, 210, 30, 5, 5, 'F');
-    font('bold', 7.8, C.mute); doc.setCharSpace(1); text('TOTAL', W - M - 198, y + 19); doc.setCharSpace(0);
-    font('bold', 11.5, C.ink); text(x.rows.length + (x.rows.length === 1 ? ' item' : ' items') + '  ·  ' + pcs + ' pcs', W - M - 12, y + 19.5, { align: 'right' });
-    y += 46;
+    if (priced) {
+      const tw = 240, tx = W - M - tw;
+      fill(C.light); doc.roundedRect(tx, y, tw, ask ? 72 : 52, 5, 5, 'F');
+      font('normal', 8.5, C.mute); text(count, tx + 12, y + 17);
+      fill(dark); doc.roundedRect(tx, y + 24, tw, 28, 5, 5, 'F');
+      font('bold', 7.8, C.white); doc.setCharSpace(1); text('TOTAL (AED)', tx + 12, y + 42); doc.setCharSpace(0);
+      font('bold', 13, C.white); text(num(sum), W - M - 12, y + 43, { align: 'right' });
+      if (ask) { font('bold', 7.8, C.amber); text(ask + (ask === 1 ? ' item' : ' items') + ' marked On request, quoted separately', W - M - 12, y + 64, { align: 'right' }); }
+      y += (ask ? 72 : 52) + 16;
+    } else {
+      fill(C.light); doc.roundedRect(W - M - 210, y, 210, 30, 5, 5, 'F');
+      font('bold', 7.8, C.mute); doc.setCharSpace(1); text('TOTAL', W - M - 198, y + 19); doc.setCharSpace(0);
+      font('bold', 11.5, C.ink); text(count, W - M - 12, y + 19.5, { align: 'right' });
+      y += 46;
+    }
     if (cu.note) {
       font('normal', 9); const nl = wrap(cu.note, W - 2 * M - 24);
       const nh = 26 + nl.length * 11.5;
@@ -166,9 +198,14 @@
       font('normal', 9, C.ink); doc.text(nl, M + 12, y + 28);
       y += nh + 14;
     }
-    font('normal', 8.3); const info = wrap('Prices and stock are confirmed by Fakhri Tools on WhatsApp before delivery or collection. Anything marked "to confirm" is checked with the customer first.', W - 2 * M);
+    const hasFk = x.rows.some(r => /to confirm/.test([r.size, r.spec, r.mat].join(' ')));
+    const say = [];
+    if (!priced) say.push('Prices and stock are confirmed by ' + shop.short + ' before delivery or collection.');
+    else if (ask) say.push('Items marked "On request" are priced by ' + shop.short + ' separately.');
+    if (hasFk) say.push('Anything marked "to confirm" is checked with the customer first.');
+    font('normal', 8.3); const info = wrap(say.join(' '), W - 2 * M);
     if (y + info.length * 11 + 92 > H - FOOT) newPage();
-    font('normal', 8.3, C.mute); doc.text(info, M, y); y += info.length * 11 + 48;
+    font('normal', 8.3, C.mute); if (say.length) doc.text(info, M, y); y += (say.length ? info.length * 11 : 0) + 48;
     stroke(C.ink, 0.7);
     doc.line(M, y, M + bw, y); doc.line(M + bw + 12, y, W - M, y);
     font('bold', 8, C.ink); text('Customer name, signature & stamp', M, y + 13); text('For ' + shop.name, M + bw + 12, y + 13);
