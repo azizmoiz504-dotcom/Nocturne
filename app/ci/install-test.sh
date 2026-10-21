@@ -29,7 +29,7 @@ opens 1-old-app; check $? "the old app opens ($(version))"
 
 # 2. the new app installed over it, as when the salesman taps the downloaded file
 installs -r "$NEW"; check $? "the new app installs over the old one"
-v=$(version); [ "$v" = "versionName=$(sed -n 's/^versionName=//p' app/version.txt)" ]; check $? "the phone now has the new version ($v)"
+v=$(version); [ "$v" = "versionName=$(sed -n 's/.*versionName=\([^ ]*\).*/\1/p' app/version.txt)" ]; check $? "the phone now has the new version ($v)"
 opens 2-updated-app; check $? "the updated app opens from its icon"
 
 # 3. a phone that never had the app

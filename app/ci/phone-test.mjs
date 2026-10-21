@@ -177,6 +177,7 @@ pg = await attach();
 /* ---------- PDFs ---------- */
 await tap('#tabs [data-tab="pdfs"]', 1200); await shot('19-pdfs');
 check(await pg.evaluate(() => document.querySelectorAll('#stage > .view:not(.is-under) [data-pdf]').length >= 6), 'PDFs tab lists the catalogues');
+const bamPdf = await pg.evaluate(() => 'bam/' + window.BAM_DATA.pdfs[2].file);
 await tap(L + '[data-pdf="2"][data-how="open"]', 5000); await shot('20-catalogue-open');
 log('after catalogue:', resumed());
 await key(4); await wait(1500);
@@ -256,6 +257,18 @@ offImgs = await photosIn(); await shot('33-offline-bam');
 check(offImgs > 2, 'Bait Al Maqdis photos show with no internet (' + offImgs + ')');
 check(await ls('ft-orders', 1) && await ls('bam-orders', 1), 'orders kept after closing the app');
 await d.shell('svc wifi enable'); await d.shell('svc data enable');
+
+/* ---------- PDF viewers and WhatsApp get whole files (many refuse a piece of one: "Not a whole file") ---------- */
+// asks the app for the file the way such an app does; needs root on the phone, which test phones have
+const fetchFile = rel => { try { return execSync('adb shell content read --uri content://' + PKG + '.photos/' + rel, { timeout: 60000, maxBuffer: 64e6 }); } catch (e) { log('read failed: ' + rel + ' ' + e.message.split('\n')[0]); return Buffer.alloc(0); } };
+if (/restarting|already running/.test(sh('root'))) {
+  sh('wait-for-device', 60000); await wait(4000);
+  const made = sh('shell ls /data/data/' + PKG + '/cache/share').split(/\s+/).find(f => f.endsWith('.pdf'));
+  for (const [rel, what] of [[bamPdf, 'a catalogue PDF'], [made && 'share/' + made, 'an order form PDF']]) {
+    const b = rel ? fetchFile(rel) : Buffer.alloc(0);
+    check(b.slice(0, 4).toString() === '%PDF', 'a PDF viewer can open ' + what + ' (' + (rel || 'not found') + ', ' + b.length + ' bytes)');
+  }
+} else log('SKIP whole-file check: no root on this phone');
 
 log(fails.length ? 'FAILED: ' + fails.join(' | ') : 'ALL CHECKS PASSED');
 process.exit(fails.length ? 1 : 0);

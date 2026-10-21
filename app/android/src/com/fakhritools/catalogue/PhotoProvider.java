@@ -11,7 +11,10 @@ import android.provider.OpenableColumns;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /** Hands a product photo, an order form PDF the app made, or a packed Bait Al Maqdis catalogue PDF
  *  to WhatsApp, a PDF viewer or any app. Read-only. */
@@ -28,20 +31,53 @@ public class PhotoProvider extends ContentProvider {
         return p.substring(1);
     }
 
+    // Always a whole file: many PDF viewers refuse a piece of one ("Not a whole file"), which is what an
+    // exact length or a file packed inside the APK would hand them.
+    static AssetFileDescriptor whole(File f) throws FileNotFoundException {
+        return new AssetFileDescriptor(ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY), 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+    }
+
     @Override
     public AssetFileDescriptor openAssetFile(Uri u, String mode) throws FileNotFoundException {
         String rel = rel(u);
         if (rel.startsWith("share/")) {
             File s = new File(getContext().getCacheDir(), rel);
             if (!s.isFile()) throw new FileNotFoundException(rel);
-            return new AssetFileDescriptor(ParcelFileDescriptor.open(s, ParcelFileDescriptor.MODE_READ_ONLY), 0, s.length());
+            return whole(s);
         }
         File f = new File(new File(getContext().getFilesDir(), "www"), rel);
-        if (f.isFile()) return new AssetFileDescriptor(ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY), 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+        if (f.isFile()) return whole(f);
+        return whole(copyOfAsset(rel));
+    }
+
+    @Override
+    public ParcelFileDescriptor openFile(Uri u, String mode) throws FileNotFoundException {
+        return openAssetFile(u, mode).getParcelFileDescriptor();
+    }
+
+    /** a copy of a file packed in the app, made again after each app update */
+    synchronized File copyOfAsset(String rel) throws FileNotFoundException {
+        File c = new File(new File(getContext().getCacheDir(), "packed"), rel);
+        long updated = 0;
+        try { updated = getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).lastUpdateTime; } catch (Exception e) { /* keep any copy */ }
+        if (c.isFile() && c.lastModified() >= updated) return c;
+        File part = new File(c.getPath() + ".part");
+        InputStream in = null; OutputStream out = null;
         try {
-            return getContext().getAssets().openFd("www/" + rel);
+            c.getParentFile().mkdirs();
+            in = getContext().getAssets().open("www/" + rel);
+            out = new FileOutputStream(part);
+            byte[] buf = new byte[65536];
+            for (int n; (n = in.read(buf)) > 0; ) out.write(buf, 0, n);
+            out.close(); out = null;
+            if (!part.renameTo(c)) throw new IOException("rename");
+            return c;
         } catch (IOException e) {
+            part.delete();
             throw new FileNotFoundException(rel);
+        } finally {
+            try { if (in != null) in.close(); } catch (IOException e) { /* closed */ }
+            try { if (out != null) out.close(); } catch (IOException e) { /* closed */ }
         }
     }
 
