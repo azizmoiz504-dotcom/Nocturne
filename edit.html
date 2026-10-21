@@ -96,9 +96,35 @@
   .steps li.on i { border-color:var(--red); border-top-color:transparent; animation:spin 1s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
   @media (max-width:700px) { body { font-size:17px; } header { padding:12px 14px; } header h1 { width:100%; font-size:20px; } header select { min-width:0; width:100%; flex:1 1 100%; } header { position:static; } .grid { grid-template-columns:1fr; gap:14px; padding:14px 14px 100px; } .catbox { margin:14px 14px 0; } .catbox .ph { width:100px; height:100px; } }
+  /* password box: the editor stays hidden until the password is entered */
+  .lock { display:none; position:fixed; inset:0; z-index:100; background:var(--bg); place-items:center; padding:16px; }
+  html.locked .lock { display:grid; }
+  html.locked body > :not(#lock) { display:none !important; }
+  .lock__box { background:#fff; border-radius:20px; padding:26px; width:100%; max-width:420px; box-shadow:0 20px 60px -20px rgba(0,0,0,.35); }
+  .lock h2 { margin:0 0 6px; font-size:26px; }
+  .lock p { margin:0 0 14px; color:var(--muted); }
+  .lock input { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; }
+  .lock .lock__msg { color:var(--red); font-weight:700; min-height:1.4em; margin:8px 0 10px; }
+  .lock .btn { width:100%; }
 </style>
+<script>
+  // the editor opens with a password; the page keeps only a scrambled check value of it, never the password itself
+  window.FT_LOCK = { salt: 'ac90d2e5f7145ca9170835cf7cea34a8', it: 600000, h: '7aac32814a30e56d3892930380d99540bdaba55307e1d68e60d8e498a81ac306' };
+  // asked once per visit: closing the tab locks the editor again
+  (() => { let open = false; try { open = sessionStorage.getItem('ft-editor-open') === FT_LOCK.h; } catch (e) {} if (!open) document.documentElement.classList.add('locked'); })();
+</script>
 </head>
 <body>
+<div class="lock" id="lock">
+  <form class="lock__box" id="lockForm">
+    <h2>Product Editor</h2>
+    <p>Enter the password to open the editor.</p>
+    <input type="text" name="username" value="Product editor" autocomplete="username" hidden>
+    <input id="lockPw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Password" aria-label="Password">
+    <p class="lock__msg" id="lockMsg" role="alert"></p>
+    <button class="btn red" type="submit">Open the editor</button>
+  </form>
+</div>
 <header>
   <h1>Product Editor</h1>
   <select id="cat" aria-label="Category"></select>
@@ -137,7 +163,33 @@
 <script src="js/edit-check.js?v=2"></script>
 <script>
 // always load the newest product list (never a copy the browser kept from an earlier visit)
-(() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => startEditor(); d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
+// the editor starts once the product list is loaded and the password is entered
+const boot = { data: false, open: !document.documentElement.classList.contains('locked'), on: false };
+const go = () => { if (boot.data && boot.open && !boot.on) { boot.on = true; startEditor(); } };
+(() => {
+  if (boot.open) return;
+  const html = document.documentElement, pw = document.getElementById('lockPw'), msg = document.getElementById('lockMsg');
+  const hex = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
+  let busy = false;
+  pw.focus();
+  document.getElementById('lockForm').onsubmit = async e => {
+    e.preventDefault();
+    if (busy) return;
+    if (!pw.value.trim()) { msg.textContent = 'Type the password.'; return; }
+    if (!window.crypto || !crypto.subtle) { msg.textContent = 'Open the editor from its website link.'; return; }
+    busy = true; msg.textContent = 'Checking…';
+    try {
+      const L = window.FT_LOCK, salt = new Uint8Array(L.salt.match(/../g).map(x => parseInt(x, 16)));
+      const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw.value.trim()), 'PBKDF2', false, ['deriveBits']);
+      const h = hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: L.it }, k, 256));
+      if (h !== L.h) { msg.textContent = 'Wrong password. Try again.'; pw.select(); return; }
+      try { sessionStorage.setItem('ft-editor-open', h); } catch (e) {}
+      msg.textContent = ''; html.classList.remove('locked'); boot.open = true; go();
+    } catch (e) { msg.textContent = 'Could not check the password. Refresh and try again.'; }
+    finally { busy = false; }
+  };
+})();
+(() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => { boot.data = true; go(); }; d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
 function startEditor() {
   const KEY = 'ft-editor-v1';
   const IMG = window.FT_IMG || '';
