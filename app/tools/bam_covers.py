@@ -107,6 +107,8 @@ def on_white(cid):
 
 
 for c in data['cats']:
+    if '-own-' in (c.get('cover') or ''):     # a picture chosen in the product editor stays
+        print('%-16s %s (chosen in the editor)' % (c['id'], c['cover'])); continue
     if os.path.isfile(os.path.join(BAM, 'tiles', c['id'] + '.jpg')):
         c['cover'] = on_white(c['id'])
     else:
