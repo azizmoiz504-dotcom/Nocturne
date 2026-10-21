@@ -3,17 +3,19 @@
 # both over the old Fakhri Tools app (v1.5) and on a phone that never had it, and does it open?
 #   usage: app/ci/install-test.sh <old v1.5 apk> <new apk>      (writes app/ci/out/)
 set -u
+ADB=$(command -v adb); adb() { timeout 90 "$ADB" "$@"; }   # a phone that stops answering must not hang the check
 OLD=$1 NEW=$2 PKG=com.fakhritools.catalogue OUT=app/ci/out
 mkdir -p $OUT; : > $OUT/log.txt
 FAILS=0
 log() { echo "$(date +%T) $*" | tee -a $OUT/log.txt; }
 check() { if [ "$1" = 0 ]; then log "PASS $2"; else log "FAIL $2"; FAILS=$((FAILS + 1)); fi; }
-installs() { local r; r=$(timeout 300 adb install $1 "$2" 2>&1); log "adb install $1: $(echo "$r" | tail -1)"; echo "$r" | grep -q '^Success'; }
+installs() { local r; r=$(timeout 300 "$ADB" install $1 "$2" 2>&1); log "adb install $1: $(echo "$r" | tail -1)"; echo "$r" | grep -q '^Success'; }
 opens() {    # tap the home-screen icon, then the app must be on screen and not crashed
   adb shell input keyevent 3; sleep 2
   adb shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1; sleep 12
   adb exec-out screencap -p > "$OUT/$1.png"
-  adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep -q "$PKG/.CatalogueActivity"
+  local top; top=$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | tr -d '\r' | tr -s ' \n' ' '); log "on screen: $top"
+  echo "$top" | grep -q "$PKG/"   # shows the icon's name (.MainActivity), not the screen's
 }
 version() { adb shell dumpsys package $PKG | grep -m1 -o 'versionName=[^ ]*' | tr -d '\r'; }
 

@@ -68,7 +68,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: [34, 35]
+        include:
+          - { api: 34, gpu: swiftshader_indirect }
+          - { api: 35, gpu: swangle_indirect }   # its emulator stopped answering with swiftshader
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,5 +101,5 @@ jobs:
           arch: x86_64
           profile: pixel_6
           ram-size: 4096M
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu ${{ matrix.gpu }} -no-snapshot -noaudio -no-boot-anim
           script: bash app/ci/install-test.sh /tmp/old.apk /tmp/new.apk
