@@ -27,5 +27,18 @@ The Fakhri Tools launcher entry keeps the name `.MainActivity` (the launcher of 
 - `web/` the app's screens (HTML, CSS, JS)
 - `android/` the Android shell (a full-screen WebView that serves the packed files and fetches updates)
 - `tools/` the Bait Al Maqdis import, and `tools/preview/` the private browser preview (photos packed into a few files, PDFs shown on the page)
+- `tools/bam-editor/` the password-locked Bait Al Maqdis product editor (`build.py` makes it, `apply.py` applies the changes file it saves)
+- `tools/bam-site/` the public Bait Al Maqdis products website, with no prices (see below)
 - `ci/` the automated phone test run by `.github/workflows/catalogue-app.yml`
 - `build-web.sh` the iPhone web app (Fakhri Tools only, since it is public)
+
+## Bait Al Maqdis website
+
+`python3 app/tools/bam-site/build.py` makes the public products website from `app/bam/` into `app/build/bait-al-maqdis/`
+(English, Arabic in `ar/`, a page per range, photos, the three catalogue PDFs and the search list). It needs python3 with jinja2 and Pillow, and poppler-utils.
+Prices never leave the build: product lines are read as part number and size only, and the build stops if anything written looks like a price.
+Every link is relative, so the folder works at any address; it is published at `<website>/bait-al-maqdis/` (`--url` sets the address used for shared-link pictures).
+After applying a changes file from the Bait Al Maqdis editor, build the website again and publish the new folder.
+
+- `build.py` the pages; `i18n.py` every English and Arabic word on them (product names come from `app/bam/ar.js`)
+- `templates/` the home page, range page and frame; `static/` the look (`site.css`), the moving parts (`site.js`: search, product window, the price-request list) and the fonts (SIL Open Font License)

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="rhero">
+  <div class="hero__pattern" aria-hidden="true"></div>
+  <div class="wrap rhero__in">
+    <div class="rhero__copy">
+      <nav class="crumbs rise" style="--d:.02s" aria-label="{{ T('all_ranges') }}"><a href="{{ home }}">{{ T('brand') }}</a><span aria-hidden="true">/</span><a href="{{ home }}#ranges">{{ T('all_ranges') }}</a></nav>
+      <p class="eyebrow rise" style="--d:.08s">{{ '%02d' % r.no }} / {{ '%02d' % stats.ranges }}{% if r.title[lang] %} · {{ r.title[lang] }}{% endif %}</p>
+      <h1 class="rhero__h1">{{ split(r.name[lang]) }}</h1>
+      {% set alt = r.name['en' if lang == 'ar' else 'ar'] %}{% if alt and alt != r.name[lang] %}<p class="rhero__alt rise" style="--d:.3s" lang="{{ 'en' if lang == 'ar' else 'ar' }}"><bdi>{{ alt }}</bdi></p>{% endif %}
+      {% if r.lede[lang] %}<p class="rhero__lede rise" style="--d:.38s">{{ r.lede[lang] }}</p>{% endif %}
+      <p class="rhero__stats rise" style="--d:.46s"><span><b>{{ r.count }}</b> {{ T('st_products') }}</span><span><b>{{ r.groups|length }}</b> {{ T('groups') }}</span><span><b>{{ r.lines }}</b> {{ T('st_lines') }}</span></p>
+      <div class="rhero__acts rise" style="--d:.54s">
+        <a class="btn btn--primary" href="#products">{{ T('groups') }}{{ icon('down') }}</a>
+        {% if r.pdf %}<a class="btn btn--ghost" href="{{ root }}{{ r.pdf.file }}" target="_blank" rel="noopener">{{ icon('book') }}{{ T('printed') }} <small>PDF · {{ r.pdf.mb }} MB</small></a>{% endif %}
+      </div>
+    </div>
+    <div class="rhero__art" aria-hidden="true">
+      <div class="rhero__arch">{% if r.cover %}<img src="{{ root }}{{ r.cover }}" alt="" width="{{ r.cover_w }}" height="{{ r.cover_h }}" decoding="async" style="view-transition-name:r-{{ r.vt }}">{% endif %}</div>
+      <svg class="rhero__lines" viewBox="0 0 400 480" fill="none"><g class="ln">
+        <path pathLength="1" d="M20 470H380"/><path pathLength="1" d="M30 470V200A170 170 0 0 1 370 200V470"/><path pathLength="1" class="ln--thin" d="M200 10V30"/>
+      </g></svg>
+    </div>
+  </div>
+</section>
+
+<div class="rbar" id="rbar">
+  <div class="wrap rbar__in">
+    <label class="rbar__find">{{ icon('search') }}<input id="rfind" type="search" autocomplete="off" enterkeyhint="search" placeholder="{{ T('filter_ph', name=r.name[lang]) }}" aria-label="{{ T('filter_ph', name=r.name[lang]) }}"><output id="rcount" aria-live="polite"></output></label>
+    <nav class="chips" id="chips" aria-label="{{ T('groups') }}">{% for g in r.groups %}<a class="chip" href="#g-{{ g.slug }}" data-g="{{ g.slug }}">{{ g.name[lang] }}<span>{{ g.count }}</span></a>{% endfor %}</nav>
+  </div>
+</div>
+
+<div class="wrap rbody" id="products">
+  {% for g in r.groups %}
+  <section class="grp" id="g-{{ g.slug }}" data-g="{{ g.slug }}">
+    <header class="grp__head">
+      <span class="grp__no">{{ '%02d' % loop.index }}</span>
+      <h2><bdi>{{ g.name[lang] }}</bdi></h2>
+      {% set galt = g.name['en' if lang == 'ar' else 'ar'] %}{% if galt and galt != g.name[lang] %}<span class="grp__alt" lang="{{ 'en' if lang == 'ar' else 'ar' }}"><bdi>{{ galt }}</bdi></span>{% endif %}
+      <span class="grp__count">{{ g.count_txt }}</span>
+    </header>
+    <div class="cards">
+      {% for p in g['items'] %}
+      <article class="card" data-p="{{ p.slug }}">
+        <a class="card__link" href="#p={{ p.slug }}">
+          <span class="card__win">{% if p.img %}<img src="{{ root }}{{ p.img }}" alt="" width="{{ p.w }}" height="{{ p.h }}" loading="lazy" decoding="async">{% else %}<span class="card__nophoto">{{ icon('dome') }}<small>{{ T('no_photo') }}</small></span>{% endif %}</span>
+          <span class="card__body">
+            <span class="card__name"><bdi>{{ p.name[lang] }}</bdi></span>
+            {% set palt = p.name['en' if lang == 'ar' else 'ar'] %}{% if palt and palt != p.name[lang] %}<span class="card__alt" lang="{{ 'en' if lang == 'ar' else 'ar' }}"><bdi>{{ palt }}</bdi></span>{% endif %}
+            <span class="card__meta">{{ p.summary }}</span>
+            {% if p.codes %}<span class="card__code" dir="ltr">{{ p.codes }}</span>{% endif %}
+          </span>
+        </a>
+        <button class="card__add" type="button" data-quick="{{ p.slug }}" aria-label="{{ T('quick_add') }}: {{ p.name[lang] }}">{{ icon('plus') }}{{ icon('check') }}</button>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  <div class="rnone" id="rnone" hidden><p></p><button class="btn btn--ghost" type="button" data-open-search>{{ icon('search') }}{{ T('search_all') }}</button></div>
+</div>
+
+<section class="rnext">
+  <div class="wrap">
+    <a class="rnext__link" href="{{ home }}range/{{ nxt.id }}/">
+      <span class="eyebrow">{{ T('next_range') }}</span>
+      <span class="rnext__name">{{ nxt.name[lang] }}</span>
+      <span class="rnext__meta">{{ nxt.count_txt }} · {{ nxt.groups_txt }}</span>
+      <span class="rnext__win">{% if nxt.cover %}<img src="{{ root }}{{ nxt.cover }}" alt="" width="{{ nxt.cover_w }}" height="{{ nxt.cover_h }}" loading="lazy" decoding="async">{% endif %}</span>
+      <span class="rtile__go" aria-hidden="true">{{ icon('arrow') }}</span>
+    </a>
+    <div class="rmini">{% for x in ranges %}<a class="chip{% if x.id == r.id %} is-on{% endif %}" href="{{ home }}range/{{ x.id }}/">{{ x.name[lang] }}</a>{% endfor %}</div>
+  </div>
+</section>
+{% endblock %}
+{% block data %}<script type="application/json" id="range-data">{{ range_json | safe }}</script>{% endblock %}
