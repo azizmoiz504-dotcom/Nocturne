@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="icon" href="img/icon-192.png">
 <script>document.documentElement.className += " is-web"; window.FT_WEB = { img: "../assets/products/", brand: "fakhri" };</script>
-<script>/* the branch's colours before anything is drawn */try{var b=(window.FT_WEB&&FT_WEB.brand)||(window.FTNative&&FTNative.brand&&FTNative.brand())||JSON.parse(localStorage.getItem('app-brand')||'""');document.documentElement.setAttribute('data-brand',b==='bam'?'bam':b==='fakhri'?'fakhri':'none');if(JSON.parse(localStorage.getItem('app-lang')||'""')==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar'}}catch(e){}</script>
+<script>/* the branch's colours and the light or dark look before anything is drawn */try{var b=(window.FT_WEB&&FT_WEB.brand)||(window.FTNative&&FTNative.brand&&FTNative.brand())||JSON.parse(localStorage.getItem('app-brand')||'""');document.documentElement.setAttribute('data-brand',b==='bam'?'bam':b==='fakhri'?'fakhri':'none');document.documentElement.setAttribute('data-theme',JSON.parse(localStorage.getItem('app-theme')||'""')==='dark'?'dark':'light');if(JSON.parse(localStorage.getItem('app-lang')||'""')==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar'}}catch(e){}</script>
 </head>
 <body class="is-booting">
 

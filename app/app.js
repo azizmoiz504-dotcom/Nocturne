@@ -66,6 +66,22 @@
   const money = v => 'AED ' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const round2 = v => Math.round(v * 100) / 100;
 
+  /* ================= light (the default) or dark, picked in Settings ================= */
+  let theme = store.get('app-theme', 'light') === 'dark' ? 'dark' : 'light';
+  const fkLogo = () => theme === 'dark' ? 'img/logo-lockup-dark.png' : 'img/logo-lockup.png';   // its grey line made light
+  function paintTheme() {
+    root.setAttribute('data-theme', theme);
+    const m = $('meta[name=theme-color]'); if (m) m.setAttribute('content', getComputedStyle(root).getPropertyValue('--bg').trim() || '#ffffff');
+    try { if (N && N.setTheme) N.setTheme(theme); } catch (e) {}   // the phone's top and bottom bars
+  }
+  function setTheme(th) {
+    theme = th === 'dark' ? 'dark' : 'light';
+    store.set('app-theme', theme);
+    paintTheme();
+    $$('img.hero__logo--fk').forEach(i => { i.src = fkLogo(); });
+  }
+  paintTheme();
+
   /* ================= branch ================= */
   const LOCK = WEB && WEB.brand ? WEB.brand : '';    // the iPhone web app is Fakhri Tools only
   const BRANDS = {
@@ -106,7 +122,7 @@
     'Product': 'فئات', 'Categories': 'المنتجات', 'TOOLS & MORE': 'أدوات وأكثر',
     'Search {n} products': 'ابحث في {n} منتج', 'Search products, sizes or part numbers': 'ابحث عن منتج أو مقاس أو رقم قطعة',
     'Search products or sizes': 'ابحث عن منتج أو مقاس',
-    'Branch': 'الفرع', 'Language': 'اللغة', 'Which branch are you from?': 'من أي فرع أنت؟',
+    'Branch': 'الفرع', 'Language': 'اللغة', 'Look': 'المظهر', 'Light': 'فاتح', 'Dark': 'داكن', 'Which branch are you from?': 'من أي فرع أنت؟',
     'You can change it later in Settings.': 'يمكنك تغييره لاحقًا من الإعدادات.',
     'Switch to {b}?': 'التبديل إلى {b}؟', 'Switch': 'تبديل', 'Cancel': 'إلغاء', 'Current branch': 'الفرع الحالي',
     'The app icon, name, colours and order form change to {b}. Each branch keeps its own cart and orders.': 'تتغير أيقونة التطبيق واسمه وألوانه ونموذج الطلب إلى {b}. يحتفظ كل فرع بسلته وطلباته.',
@@ -174,6 +190,8 @@
     back: '<svg viewBox="0 0 24 24" class="ico flipx-rtl"><path d="M15 5l-7 7 7 7"/></svg>',
     chev: '<svg viewBox="0 0 24 24" class="ico flipx-rtl"><path d="M9 5l7 7-7 7"/></svg>',
     down: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 9l6 6 6-6"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" class="ico"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
     plus: '<svg viewBox="0 0 24 24" class="ico"><path d="M12 5v14M5 12h14"/></svg>',
     check: '<svg viewBox="0 0 24 24" class="ico"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
     x: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -795,8 +813,8 @@
   function viewHome() {
     const el = h('<section class="home">' +
       '<div class="home__top"><button class="ib ib--soft" data-go="settings" aria-label="' + esc(t('Settings')) + '">' + I.gear + '</button>' + langPill() + '</div>' +
-      '<div class="hero">' + (BAM ? '<img class="hero__logo" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>'
-        : '<img class="hero__logo hero__logo--fk" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
+      '<div class="hero">' + (BAM ? '<img class="hero__logo hero__logo--bam" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>'
+        : '<img class="hero__logo hero__logo--fk" src="' + fkLogo() + '" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
       '<button class="searchbox" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
       '<h2 class="sech">' + I.dots + '<span>' + esc(t('Product')) + ' <em>' + esc(t('Categories')) + '</em></span></h2>' +
       '<div class="cats">' + CATS.map(catTile).join('') + '</div>' +
@@ -1015,7 +1033,8 @@
       }
       out.push({ o, score, idx });
     });
-    return out.sort((x, y) => y.score - x.score || x.idx - y.idx).map(x => x.o);
+    // the branch's own products first, then the other company's
+    return out.sort((x, y) => (x.o.src !== OWN_SRC) - (y.o.src !== OWN_SRC) || y.score - x.score || x.idx - y.idx).map(x => x.o);
   }
   // typing mistakes ("camlok", "flang", "hamer"): a word one or two letters off still counts
   function near(a, b) {
@@ -1104,6 +1123,7 @@
     const el = h('<section>' + bar(t('Settings')) + '<div class="view__pad">' +
       (LOCK ? '' : '<h3 class="slab">' + esc(t('Branch')) + '</h3><div class="blist">' + Object.keys(BRANDS).map(id => branchCard(id, id === brandId)).join('') + '</div>') +
       '<h3 class="slab">' + esc(t('Language')) + '</h3><div class="segs"><button class="seg' + (lang === 'en' ? ' is-on' : '') + '" data-setlang="en">English</button><button class="seg' + (lang === 'ar' ? ' is-on' : '') + '" data-setlang="ar">العربية</button></div>' +
+      '<h3 class="slab">' + esc(t('Look')) + '</h3><div class="segs">' + ['light', 'dark'].map(th => '<button class="seg seg--th' + (theme === th ? ' is-on' : '') + '" data-settheme="' + th + '">' + (th === 'light' ? I.sun : I.moon) + esc(t(th === 'light' ? 'Light' : 'Dark')) + '</button>').join('') + '</div>' +
       '<h3 class="slab">' + esc(t('Products')) + '</h3><div id="catBox">' + catalogueBox() + '</div>' +
       '<p class="foot">' + esc(BR.full) + '<br>' + esc(BR.address) + '<br>' + esc(BR.phone) + ' · ' + esc(BR.email) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
       '</div></section>');
@@ -1115,6 +1135,8 @@
         return;
       }
       const l = e.target.closest('[data-setlang]'); if (l && l.dataset.setlang !== lang) setLang(l.dataset.setlang);
+      const th = e.target.closest('[data-settheme]');
+      if (th && th.dataset.settheme !== theme) { setTheme(th.dataset.settheme); $$('[data-settheme]', el).forEach(b => b.classList.toggle('is-on', b.dataset.settheme === theme)); buzz(); }
     });
     return { el, onShow() { const cb = $('#catBox', el); if (cb && !$('.spin', cb)) cb.innerHTML = catalogueBox(); } };
   }
@@ -1520,7 +1542,7 @@
   function splash() {
     const s = $('#splash');
     if (!s) return;
-    $('.sp__logo', s).src = BAM ? 'bam/logo.png' : 'img/logo-lockup.png';
+    $('.sp__logo', s).src = BAM ? 'bam/logo.png' : fkLogo();
     if (reduce) { s.remove(); document.body.classList.remove('is-booting'); return; }
     const ease = 'cubic-bezier(.16,1,.3,1)';
     $('.sp__logo', s).animate([{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'none' }], { duration: 700, easing: ease, fill: 'forwards' });
