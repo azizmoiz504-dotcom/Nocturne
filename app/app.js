@@ -1,7 +1,10 @@
 /* =========================================================
-   Fakhri Tools catalogue app
+   Sales catalogue app: Bait Al Maqdis and Fakhri Tools in one.
+   The salesman picks his branch once (Settings can change it). The look, logo, products,
+   cart, orders and order form all follow the branch; each branch keeps its own cart and orders.
+   Bait Al Maqdis: bam/data.js (with prices, packed in the app).
+   Fakhri Tools: the website's own js/data.js (no prices, refreshed from the website).
    One page; every screen is a "view" stacked inside its tab, like a native app.
-   The product list is the website's own js/data.js (window.FT_CATS).
    ========================================================= */
 /* Older phones (built-in browser before 2020) ignore "gap" between items in a row.
    There, the same space is added as margins instead. Newer phones skip this. */
@@ -21,13 +24,13 @@
       const cs = getComputedStyle(el); el.__gapDone = true;
       if (cs.display !== 'flex' && cs.display !== 'inline-flex') continue;
       const cg = px(cs.columnGap), rg = px(cs.rowGap); if (!cg && !rg) continue;
-      const col = cs.flexDirection.indexOf('column') === 0, wrap = cs.flexWrap !== 'nowrap';
+      const col = cs.flexDirection.indexOf('column') === 0, wrap = cs.flexWrap !== 'nowrap', rtl = cs.direction === 'rtl';
       el.__gapFix = () => {
         const kids = [].filter.call(el.children, k => getComputedStyle(k).position !== 'absolute' && getComputedStyle(k).display !== 'none');
         kids.forEach((k, j) => {
           const last = j === kids.length - 1;
           if (col) { if (!last && rg) k.style.marginBottom = rg + 'px'; }
-          else { if ((!last || wrap) && cg) k.style.marginRight = cg + 'px'; if (wrap && rg) k.style.marginBottom = rg + 'px'; }
+          else { if ((!last || wrap) && cg) k.style[rtl ? 'marginLeft' : 'marginRight'] = cg + 'px'; if (wrap && rg) k.style.marginBottom = rg + 'px'; }
         });
         if (!col && wrap && rg) el.style.marginBottom = (px(cs.marginBottom) - rg) + 'px';
       };
@@ -42,22 +45,10 @@
 (() => {
   'use strict';
   const N = window.FTNative || null;                 // the phone (null when opened in a browser)
+  const WEB = window.FT_WEB || null;                 // web builds: where photos live, and a branch fixed by the build
   const CFG = window.FT_CONFIG || {};
-  const CATS = (window.FT_CATS || []).filter(c => c && Array.isArray(c.items));
-  const FAMS = window.FT_FAMILIES || [];
-  const BRANDS = window.FT_BRANDS || [];
-  if (!CATS.length) { if (N && N.resetData) N.resetData(); return; }   // a broken download never strands the app
-
-  const WEB = window.FT_WEB || null;                 // the iPhone web app (Home Screen): live list and photos from the website
-  const IMG = WEB && WEB.img ? WEB.img : 'p/';
-  const WA = CFG.whatsappDigits || '971522767034';
-  const WA_SHOW = CFG.whatsappDisplay || '+971 52 276 7034';
-  const PHONE = CFG.phoneDisplay || '+971 4 285 0135';
-  const PHONE_LINK = CFG.phoneLink || 'tel:+97142850135';
-  const MAPS = CFG.mapsUrl || CFG.mapsSearchUrl || '';
-  const SHOP_NAME = 'Fakhri Tools & Workshop Materials Trading LLC';
-  const ADDRESS = 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -68,75 +59,232 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
   const buzz = () => { try { N && N.vibrate && N.vibrate(); } catch (e) {} };
-  const nfmt = n => n.toLocaleString('en-US');
+  const nfmt = n => Number(n).toLocaleString('en-US');
+  const money = v => 'AED ' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const round2 = v => Math.round(v * 100) / 100;
+
+  /* ================= branch ================= */
+  const LOCK = WEB && WEB.brand ? WEB.brand : '';    // the iPhone web app is Fakhri Tools only
+  const BRANDS = {
+    bam: {
+      id: 'bam', name: 'Bait Al Maqdis', full: 'Bait Al Maqdis Building Materials Trading LLC', where: 'Jurf, Ajman',
+      logo: 'bam/logo.png', pdfLogo: 'bam/logo-pdf.jpg', icon: 'bam/logo.png', pdfAccent: [245, 130, 31], pdfDark: [20, 20, 22],
+      address: 'Exhibition Showroom No.06, Jurf Industrial Zone 1, Emirate-Ajman', city: 'Jurf, Ajman',
+      phone: '+971 6 529 4533', email: 'baitalmaqdisuae@gmail.com', wa: '', waShow: '',
+      prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches' }
+    },
+    fakhri: {
+      id: 'fakhri', name: 'Fakhri Tools', full: 'Fakhri Tools & Workshop Materials Trading LLC', where: 'Al Quoz, Dubai',
+      logo: 'img/logo-lockup.png', pdfLogo: 'img/logo-lockup.png', icon: 'img/icon-512.png', pdfAccent: [185, 26, 32], pdfDark: [17, 24, 39],
+      address: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai', city: 'Al Quoz, Dubai',
+      phone: CFG.phoneDisplay || '+971 4 285 0135', email: CFG.email || 'dxbsales@ftools.com',
+      wa: CFG.whatsappDigits || '971522767034', waShow: CFG.whatsappDisplay || '+971 52 276 7034',
+      prices: false, keys: { list: 'ft-list', orders: 'ft-orders', cust: 'ft-cust', saved: 'ft-saved', searches: 'ft-searches' }
+    }
+  };
+  if (!window.BAM_DATA) delete BRANDS.bam;           // a build without Bait Al Maqdis
+  let brandId = LOCK || (N && N.brand ? N.brand() : '') || store.get('app-brand', '');
+  if (!BRANDS[brandId]) brandId = Object.keys(BRANDS).length === 1 ? Object.keys(BRANDS)[0] : '';
+  const BR = BRANDS[brandId] || BRANDS.fakhri;
+  const BAM = brandId === 'bam';
+  root.setAttribute('data-brand', !brandId ? 'none' : BAM ? 'bam' : 'fakhri');
+  document.title = BR.name + ' Catalogue';
+
+  /* ================= language: English, or Arabic for the screens ================= */
+  let lang = store.get('app-lang', 'en') === 'ar' ? 'ar' : 'en';
+  root.lang = lang; root.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const AR = {
+    'Home': 'الرئيسية', 'Orders': 'الطلبات', 'PDFs': 'ملفات PDF', 'Cart': 'السلة', 'Settings': 'الإعدادات',
+    'Product': 'فئات', 'Categories': 'المنتجات', 'TOOLS & MORE': 'أدوات وأكثر',
+    'Search {n} products': 'ابحث في {n} منتج', 'Search products, sizes or part numbers': 'ابحث عن منتج أو مقاس أو رقم قطعة',
+    'Search products or sizes': 'ابحث عن منتج أو مقاس',
+    'Branch': 'الفرع', 'Language': 'اللغة', 'Which branch are you from?': 'من أي فرع أنت؟',
+    'You can change it later in Settings.': 'يمكنك تغييره لاحقًا من الإعدادات.',
+    'Switch to {b}?': 'التبديل إلى {b}؟', 'Switch': 'تبديل', 'Cancel': 'إلغاء', 'Current branch': 'الفرع الحالي',
+    'The app icon, name, colours and order form change to {b}. Each branch keeps its own cart and orders.': 'تتغير أيقونة التطبيق واسمه وألوانه ونموذج الطلب إلى {b}. يحتفظ كل فرع بسلته وطلباته.',
+    '{n} sizes': '{n} مقاسات', '1 size': 'مقاس واحد', '{n} products': '{n} منتج', '1 product': 'منتج واحد',
+    '{n} items': '{n} أصناف', '1 item': 'صنف واحد', '{n} pcs': '{n} قطعة', '{n} orders': '{n} طلبات', '1 order': 'طلب واحد',
+    'from': 'من', 'Price on request': 'السعر عند الطلب', 'On request': 'عند الطلب', 'Add': 'إضافة', 'Spec sheet': 'جدول المواصفات',
+    'All': 'الكل', 'Tap a card to see the prices': 'اضغط على البطاقة لرؤية الأسعار', 'Prices': 'الأسعار', 'in cart': 'في السلة',
+    'Added to the cart': 'تمت الإضافة إلى السلة', 'Open cart': 'فتح السلة', 'Removed': 'تمت الإزالة', 'Undo': 'تراجع',
+    'Your cart is empty': 'سلة التسوق فارغة', 'Browse products': 'تصفح المنتجات', 'Add products, then place the order from here.': 'أضف المنتجات ثم أكمل الطلب من هنا.',
+    'Items': 'عدد القطع', 'Pieces': 'القطع', 'Priced subtotal': 'المجموع الفرعي', 'Awaiting price': 'بانتظار السعر', 'Total': 'الإجمالي',
+    'Proceed to checkout': 'إتمام الطلب', 'Empty cart': 'إفراغ السلة', 'Empty the cart?': 'إفراغ السلة؟', 'Remove': 'إزالة', 'Change': 'تعديل',
+    'All {n} will be removed.': 'ستتم إزالة كل {n}.',
+    'Checkout': 'إتمام الطلب', 'Back to cart': 'العودة إلى السلة', 'Saved customers': 'العملاء المحفوظون', 'Saved on this phone': 'محفوظ على هذا الهاتف',
+    'Find a customer': 'ابحث عن عميل', 'Customer name': 'اسم العميل', 'Phone number (optional)': 'رقم الهاتف (اختياري)', 'Note (optional)': 'ملاحظة (اختياري)',
+    'Delivery address, site name, anything else': 'عنوان التوصيل أو اسم الموقع أو أي شيء آخر', 'Place order': 'تأكيد الطلب', 'Save these details': 'حفظ هذه البيانات',
+    'Saved': 'تم الحفظ', 'Type the customer name': 'اكتب اسم العميل', 'Type a phone number the shop can call': 'اكتب رقم هاتف يمكن للمحل الاتصال به',
+    'Customer (company or workshop)': 'العميل (شركة أو ورشة)', 'Phone / WhatsApp': 'الهاتف / واتساب', 'Location or site (optional)': 'الموقع (اختياري)',
+    'Delivery': 'التوصيل', 'Collect from shop': 'استلام من المحل', 'Deliver': 'توصيل', 'Payment (optional)': 'الدفع (اختياري)',
+    'Cash': 'نقدًا', 'Card': 'بطاقة', 'Bank transfer': 'تحويل بنكي', 'Cheque': 'شيك', 'Credit account': 'حساب آجل',
+    'Delivery anywhere in the UAE is for orders from AED 5,000. The shop confirms it with the price.': 'التوصيل داخل الإمارات للطلبات من 5,000 درهم. يؤكده المحل مع السعر.',
+    'Anything the shop should know': 'أي شيء يجب أن يعرفه المحل',
+    'Order placed': 'تم استلام الطلب', 'Order number': 'رقم الطلب', 'Order form (PDF)': 'نموذج الطلب (PDF)', 'Send on WhatsApp': 'إرسال عبر واتساب',
+    'Send to the shop on WhatsApp': 'إرسال إلى المحل عبر واتساب', 'View my orders': 'عرض طلباتي', 'Continue shopping': 'متابعة التسوق',
+    'Copy order as text': 'نسخ الطلب كنص', 'Repeat order': 'تكرار الطلب', 'Delete order': 'حذف الطلب', 'Delete order {no}?': 'حذف الطلب {no}؟',
+    'It is only removed from this phone.': 'يُحذف من هذا الهاتف فقط.', 'Delete': 'حذف', 'Order deleted': 'تم حذف الطلب',
+    'All orders': 'كل الطلبات', 'No orders yet': 'لا توجد طلبات بعد', 'Orders you place will be listed here.': 'ستظهر الطلبات التي تقوم بها هنا.',
+    'Find an order': 'ابحث عن طلب', 'Placed on': 'تاريخ الطلب', 'Name': 'الاسم', 'Phone': 'الهاتف', 'Note': 'ملاحظة', 'Location': 'الموقع', 'Payment': 'الدفع',
+    'Open': 'فتح', 'Share': 'مشاركة', 'Making the order form…': 'جارٍ إعداد نموذج الطلب…', 'Order form ready': 'نموذج الطلب جاهز',
+    'Could not make the order form. Try again.': 'تعذر إعداد نموذج الطلب. حاول مرة أخرى.', 'Copied': 'تم النسخ',
+    'Replace the cart?': 'استبدال السلة؟', 'The cart already has {n}. They will be replaced by this order.': 'السلة تحتوي على {n}. سيتم استبدالها بهذا الطلب.',
+    'Replace': 'استبدال', 'Order copied into the cart': 'تم نسخ الطلب إلى السلة',
+    'Nothing found for "{q}"': 'لا توجد نتائج لـ "{q}"', 'Try a shorter word or a part number.': 'جرّب كلمة أقصر أو رقم قطعة.', '{n} found': 'تم العثور على {n}',
+    '{n} with a similar spelling': '{n} بتهجئة مشابهة', 'Recent': 'عمليات البحث الأخيرة', 'Clear': 'مسح', 'Jump to a category': 'انتقل إلى فئة',
+    'App version': 'إصدار التطبيق', 'Products': 'المنتجات', 'Product list': 'قائمة المنتجات', 'Last check': 'آخر تحقق', 'Not yet': 'ليس بعد',
+    'Check for new products': 'البحث عن منتجات جديدة', 'Checking…': 'جارٍ التحقق…', 'As packed in the app': 'كما في التطبيق',
+    'Always the newest from the website': 'دائمًا الأحدث من الموقع', 'Updated from the website {w}': 'تم التحديث من الموقع {w}',
+    'Prices are packed in the app. New prices come with an app update.': 'الأسعار مضمّنة في التطبيق. تصل الأسعار الجديدة مع تحديث التطبيق.',
+    'Prices are not shown. The shop confirms prices on WhatsApp.': 'لا تظهر الأسعار. يؤكد المحل الأسعار عبر واتساب.',
+    'New products from the shop are ready': 'منتجات جديدة من المحل جاهزة', 'Refresh': 'تحديث', 'You already have the newest list': 'لديك أحدث قائمة',
+    'No internet. The saved catalogue still works.': 'لا يوجد إنترنت. الكتالوج المحفوظ يعمل.', 'Could not reach the website. Try again later.': 'تعذر الوصول إلى الموقع. حاول لاحقًا.',
+    'Size': 'المقاس', 'Specs & ratings': 'المواصفات', 'Material': 'المادة', 'choose one': 'اختر واحدًا', 'Not sure': 'غير متأكد',
+    'tap the ones you need': 'اختر ما تحتاجه', 'Add to cart': 'أضف إلى السلة', 'More in this category': 'المزيد من هذه الفئة', 'See full details': 'عرض التفاصيل',
+    'Choose a size, or tap Not sure': 'اختر مقاسًا أو اضغط غير متأكد', 'Choose the specs & ratings, or tap Not sure': 'اختر المواصفات أو اضغط غير متأكد',
+    'Choose a material, or tap Not sure': 'اختر المادة أو اضغط غير متأكد', 'Save changes': 'حفظ التغييرات', 'Changed': 'تم التعديل',
+    'Catalogues to open or send': 'كتالوجات للفتح أو الإرسال', 'Customer': 'العميل', 'Order form': 'نموذج الطلب',
+    'just now': 'الآن', 'English': 'English', 'Search': 'بحث', 'Back': 'رجوع', 'Close': 'إغلاق', 'No longer in the catalogue': 'لم يعد في الكتالوج',
+    'Pinch or double-tap to zoom': 'كبّر بإصبعين أو اضغط مرتين', 'Order copied': 'تم نسخ الطلب', 'quoted separately': 'تُسعّر بشكل منفصل',
+    '{n} on request, quoted separately': '{n} عند الطلب، تُسعّر بشكل منفصل', 'Continue': 'متابعة', 'Full name': 'الاسم الكامل',
+    'More from': 'المزيد من', '{n} more products. They go on the same order form.': '{n} منتج إضافي، تُضاف إلى نفس نموذج الطلب.',
+    'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.'
+  };
+  const BAR_ = (window.BAM_AR && window.BAM_AR.dict) || {}, SPECW = (window.BAM_AR && window.BAM_AR.spec) || {};
+  const BLOW = {}; Object.keys(BAR_).forEach(k => { BLOW[k.toLowerCase()] = BAR_[k]; });
+  // screen words: t('Search {n} products', { n: 597 })
+  const t = (s, v) => { let x = lang === 'ar' ? (AR[s] || BAR_[s] || s) : s; if (v) Object.keys(v).forEach(k => { x = x.split('{' + k + '}').join(v[k]); }); return x; };
+  // Bait Al Maqdis names and sizes in Arabic from their own word list (only used on their products; Fakhri Tools names stay as written)
+  const tn = s => lang === 'ar' && s ? (BAR_[s] || BLOW[String(s).toLowerCase().replace(/\s+/g, ' ').trim()] || s) : s;
+  const ts = s => lang === 'ar' && s ? String(s).replace(/[A-Za-z]+/g, w => SPECW[w.toUpperCase()] || w) : (s || '');
+  const cnt = (n, w) => n === 1 ? t('1 ' + w) : t('{n} ' + w + 's', { n: nfmt(n) });
+  const pcs = n => t('{n} pcs', { n: nfmt(n) });
 
   /* ================= icons ================= */
   const I = {
     pdf: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>',
-    back: '<svg viewBox="0 0 24 24" class="ico"><path d="M15 5l-7 7 7 7"/></svg>',
-    chev: '<svg viewBox="0 0 24 24" class="ico"><path d="M9 5l7 7-7 7"/></svg>',
+    back: '<svg viewBox="0 0 24 24" class="ico flipx-rtl"><path d="M15 5l-7 7 7 7"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" class="ico flipx-rtl"><path d="M9 5l7 7-7 7"/></svg>',
     down: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 9l6 6 6-6"/></svg>',
     plus: '<svg viewBox="0 0 24 24" class="ico"><path d="M12 5v14M5 12h14"/></svg>',
     check: '<svg viewBox="0 0 24 24" class="ico"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
     x: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     search: '<svg viewBox="0 0 24 24" class="ico"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>',
-    share: '<svg viewBox="0 0 24 24" class="ico"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
-    play: '<svg viewBox="0 0 24 24" class="ico"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+    share: '<svg viewBox="0 0 24 24" class="ico"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v8h14v-8"/></svg>',
+    flip: '<svg viewBox="0 0 24 24" class="ico"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4"/></svg>',
     zoom: '<svg viewBox="0 0 24 24" class="ico"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
     wa: '<svg viewBox="0 0 24 24" class="ico-f"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.2-.9.9-.9 2.2s.9 2.6 1.1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.7-.3z"/></svg>',
-    phone: '<svg viewBox="0 0 24 24" class="ico"><path d="M5 3h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 5.1 5.1l1.4-2.3L19 13.5V17a2 2 0 0 1-2 2A15 15 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>',
-    pin: '<svg viewBox="0 0 24 24" class="ico"><path d="M12 21s-7-6.3-7-11.5a7 7 0 0 1 14 0C19 14.7 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
     user: '<svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
     copy: '<svg viewBox="0 0 24 24" class="ico"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
     trash: '<svg viewBox="0 0 24 24" class="ico"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
-    save: '<svg viewBox="0 0 24 24" class="ico"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>',
     sync: '<svg viewBox="0 0 24 24" class="ico"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg>',
-    truck: '<svg viewBox="0 0 24 24" class="ico"><path d="M2 6h12v10H2zM14 9h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
-    thread: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 9h12v6H3zM15 10.5h6M15 13.5h6M6 9v6M9 9v6M12 9v6"/></svg>',
-    cut: '<svg viewBox="0 0 24 24" class="ico"><circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="M8.5 8.5 20 18M8.5 15.5 20 6"/></svg>',
-    crimp: '<svg viewBox="0 0 24 24" class="ico"><path d="M2 12h6M16 12h6M8 8h8v8H8zM10 5v3M14 5v3M10 16v3M14 16v3"/></svg>',
-    box: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>'
-  };
-  const FAM_ART = {
-    valves: '<svg viewBox="0 0 64 64"><circle cx="32" cy="12" r="8"/><path d="M32 20v10M24 12h16M32 4v16"/><path d="M14 34h36v14H14z"/><path d="M6 38h8v6H6zM50 38h8v6h-8z"/><path d="M26 30h12v4H26z"/></svg>',
-    couplings: '<svg viewBox="0 0 64 64"><path d="M4 26h18v14H4zM42 26h18v14H42z"/><path d="M22 23h20v20H22z"/><path d="M30 23l-8-12h-4M34 43l8 12h4"/></svg>',
-    fittings: '<svg viewBox="0 0 64 64"><path d="M6 14h22a18 18 0 0 1 18 18v26"/><path d="M6 28h18a8 8 0 0 1 8 8v22"/><path d="M6 10v22M32 54h18"/></svg>',
-    sealing: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24"/><circle cx="32" cy="32" r="12"/><circle cx="32" cy="13" r="2.5"/><circle cx="32" cy="51" r="2.5"/><circle cx="13" cy="32" r="2.5"/><circle cx="51" cy="32" r="2.5"/></svg>'
+    gear: '<svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    box: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 7.5 12 3l9 7.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>',
+    cartBig: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>',
+    doc: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg>',
+    dots: '<svg viewBox="0 0 24 24" class="dots"><circle cx="4" cy="4" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="4" cy="20" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="20" cy="20" r="2"/></svg>'
   };
 
-  /* ================= products ================= */
+  /* ================= toast ================= */
+  let toastT;
+  function toast(msg, act, fn, ms) {
+    const tt = $('#toast');
+    tt.innerHTML = '<span>' + esc(msg) + '</span>' + (act ? '<button>' + esc(act) + '</button>' : '');
+    if (act) $('button', tt).onclick = () => { tt.classList.remove('is-on'); fn(); };
+    tt.classList.add('is-on');
+    clearTimeout(toastT); toastT = setTimeout(() => tt.classList.remove('is-on'), ms || (act ? 6000 : 2600));
+  }
+
+  /* ================= first start: which branch? ================= */
+  function branchCard(id, on) {
+    const b = BRANDS[id];
+    return '<button class="bcard bcard--' + id + (on ? ' is-on' : '') + '" data-brand="' + id + '"><span class="bcard__logo"><img src="' + esc(b.logo) + '" alt=""></span>' +
+      '<span class="bcard__t"><b>' + esc(b.name) + '</b><span>' + esc(b.where) + '</span></span>' + (on ? '<i class="bcard__on">' + I.check + '</i>' : '<i class="bcard__go">' + I.chev + '</i>') + '</button>';
+  }
+  function setBrand(id) {
+    store.set('app-brand', id);
+    try { if (N && N.setBrand) N.setBrand(id); } catch (e) {}
+    try { sessionStorage.removeItem('ft-routes'); } catch (e) {}
+    $('#stage').style.opacity = 0;
+    setTimeout(() => location.reload(), N ? 250 : 60);
+  }
+  if (!brandId) {
+    const f = h('<div id="first"><div class="first__in"><h1>' + esc(t('Which branch are you from?')) + '</h1><p>' + esc(t('You can change it later in Settings.')) + '</p>' +
+      '<div class="first__list">' + Object.keys(BRANDS).map(id => branchCard(id, false)).join('') + '</div>' +
+      '<button class="langpill langpill--first" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button></div></div>');
+    document.body.appendChild(f);
+    f.addEventListener('click', e => {
+      const b = e.target.closest('[data-brand]'); if (b) { b.classList.add('is-on'); buzz(); setBrand(b.dataset.brand); return; }
+      if (e.target.closest('[data-lang]')) { store.set('app-lang', lang === 'ar' ? 'en' : 'ar'); location.reload(); }
+    });
+    const s = $('#splash'); if (s) s.remove();
+    document.body.classList.remove('is-booting');
+    window.FT = { back: () => false };
+    return;
+  }
+
+  /* ================= products: both catalogues in every branch, the branch's own first ================= */
+  const K = BR.keys;
+  const BCATS = [], FCATS = [];     // { id, src: 'bam' | 'fk', name, tile, items: [product] }
+  const P = [], byId = new Map();   // every product
+
+  /* ---- Bait Al Maqdis: every product has rows [part no., size, price or null] ---- */
+  if (window.BAM_DATA) {
+    window.BAM_DATA.cats.forEach(c0 => {
+      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: 'bam/tiles/' + c0.id + '.jpg', secs: [], items: [] };
+      c0.secs.forEach(s => {
+        c.secs.push(s.n);
+        s.items.forEach(it => {
+          const o = { id: c.id + '/' + c.items.length, src: 'bam', c, sec: s.n, n: it.n, img: it.img ? 'bam/' + it.img : '', r: it.r, spec: (it.spec || []).map(x => 'bam/' + x) };
+          c.items.push(o); byId.set(o.id, o);
+        });
+      });
+      BCATS.push(c);
+    });
+  }
+
+  /* ---- Fakhri Tools: the website's list; sizes, specs and material are chosen on the product ---- */
+  const IMG = WEB && WEB.img ? WEB.img : 'p/';
   const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b|[Cc]ast [Ii]ron/], ['Ductile iron', /\bD\.I\b|\bDI\b|[Dd]uctile/], ['Galvanised', /\bG\.I\b|\bGI\b|[Gg]alvani[sz]ed/], ['Mild steel', /\bM\.S\b|\bMS\b|[Mm]ild [Ss]teel/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene|EPDM|NBR/i], ['PVC', /\bPVC\b/], ['Acrylic', /acrylic/i]];
   function materialOf(name) {
     let best = null, at = 1e9;
     MATS.forEach(([m, r]) => { const k = String(name).search(r); if (k > -1 && k < at) { at = k; best = m; } });
     return best;
   }
-  const P = [], byId = new Map();
-  CATS.forEach(c => {
-    c.items.forEach((it, i) => {
-      const o = { id: c.slug + ':' + i, c, i, name: it[0], specs: it[1] || [], size: it[2] || '', img: it[3] ? IMG + it[3] : '', matSet: it[4] || '' };
-      o.mat = o.matSet && o.matSet !== 'Other' ? o.matSet : (materialOf(o.name) || '');
-      o.group = materialOf(o.mat) || materialOf(o.name) || (o.mat ? o.mat.split(/[(,&]/)[0].trim() : '');
-      P.push(o); byId.set(o.id, o);
+  const raw = (window.FT_CATS || []).filter(c => c && Array.isArray(c.items));
+  // a broken download of the Fakhri Tools list never strands the app: go back to the packed one (once)
+  if (!raw.length && N && N.resetData) { let tried = false; try { tried = !!sessionStorage.getItem('ft-reset'); sessionStorage.setItem('ft-reset', '1'); } catch (e) {} if (!tried) { N.resetData(); return; } }
+  raw.forEach(c0 => {
+    const c = { id: c0.slug, src: 'fk', slug: c0.slug, fam: c0.fam, name: c0.name, items: [] };
+    c0.items.forEach((it, i) => {
+      const o = { id: c0.slug + '/' + i, src: 'fk', c, n: it[0], specs: it[1] || [], size: it[2] || '', img: it[3] ? IMG + it[3] : '', matSet: it[4] || '' };
+      o.mat = o.matSet && o.matSet !== 'Other' ? o.matSet : (materialOf(o.n) || '');
+      o.group = materialOf(o.mat) || materialOf(o.n) || (o.mat ? o.mat.split(/[(,&]/)[0].trim() : '');
+      c.items.push(o); byId.set(o.id, o);
     });
-    c.coverImg = c.cover ? IMG + c.cover : (c.items.find(it => it[3]) ? IMG + c.items.find(it => it[3])[3] : '');
+    c.tile = c0.cover ? IMG + c0.cover : (c.items.find(o => o.img) || {}).img || '';
+    FCATS.push(c);
   });
-  const catBy = s => CATS.find(c => c.slug === s);
-  const famName = id => (FAMS.find(f => f.id === id) || {}).name || '';
-  const nice = s => String(s).replace(/\s+/g, ' ').trim();
-  // messages say the material when the name doesn't
-  const fullName = o => o.mat && !materialOf(o.name) ? o.name + ' – ' + o.mat : o.name;
-  const countWord = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  const OWN = BAM ? BCATS : FCATS, OTHER = BAM ? FCATS : BCATS;
+  const OTHER_BR = (BAM ? BRANDS.fakhri : BRANDS.bam) || { name: '' };
+  const OWN_SRC = BAM ? 'bam' : 'fk';
+  const BRAND_ORDER = [BR, OTHER_BR].filter(b => b && b.id);
+  const CATS = OWN.concat(OTHER);
+  CATS.forEach(c => c.items.forEach(o => P.push(o)));
+  const isB = o => !!o && o.src === 'bam';
+  const lb = l => l.src === 'bam';   // a cart line of a Bait Al Maqdis product (older Fakhri Tools lines have no src)
+  const catBy = id => CATS.find(c => c.id === id);
+  const shortCat = s => String(s).replace(/\s*\(.*\)\s*$/, '').trim();
 
-  /* ================= sizes (same rules as the website's size picker) ================= */
+  /* ---- Fakhri Tools sizes (same rules as the website's size picker) ---- */
   const LADDER = ['⅛"', '¼"', '⅜"', '½"', '¾"', '1"', '1¼"', '1½"', '2"', '2½"', '3"', '3½"', '4"', '5"', '6"', '8"', '10"', '12"', '14"', '16"', '18"', '20"', '22"', '24"', '26"', '28"', '30"', '32"', '34"', '36"', '40"', '42"', '48"'];
-  const rung = t => LADDER.indexOf(t);
+  const rung = x => LADDER.indexOf(x);
   const IN = '(\\d*[⅛¼⅜½¾]?"|\\d+\\/\\d+")';
   const RX_RANGE = new RegExp('^' + IN + ' – ' + IN + '$'), RX_PAIR = new RegExp('^' + IN + ' × ' + IN + ' – ' + IN + ' × ' + IN + '$'), RX_RANGEX = new RegExp('^' + IN + ' – ' + IN + ' × ' + IN + '$');
   function ladder(a, b, fam) {
     const i = rung(a), j = b === 'any' ? LADDER.length - 1 : rung(b);
     if (i < 0 || j < i) return null;
-    return LADDER.slice(i, j + 1).filter(t => t !== '3½"' || fam === 'fittings' || t === a || t === b);
+    return LADDER.slice(i, j + 1).filter(x => x !== '3½"' || fam === 'fittings' || x === a || x === b);
   }
   const SPEC = new Map();
   function sizeSpec(o) {
@@ -164,41 +312,56 @@
     SPEC.set(o.id, sp);
     return sp;
   }
-  const sizeCount = o => { const sp = sizeSpec(o); return sp.t === 'sel' ? sp.opts.length : sp.t === 'pair' ? sp.L.length : sp.t === 'one' ? 1 : 0; };
-  function sizeWords(pick, o) {
-    if (!pick) return '';
-    const [base, len] = String(pick).split(' · ');
-    const b = base === '?' ? 'size to confirm' + (o && o.size ? ', range ' + o.size.split(' · ')[0] : '') : base.replace(/\?/g, 'size to confirm');
-    return [b, len ? 'length ' + len : ''].filter(Boolean).join(', ');
-  }
-
-  /* ================= specs & ratings and material choices (the website's js/choices.js) ================= */
   const CH = window.FT_CHOICES || { specOpts: c => [...new Set(c || [])], matOpts: x => ({ opts: x ? [x] : [], note: '', full: x || '' }) };
   const SPECS = new Map();
   const specOpts = o => { if (!SPECS.has(o.id)) SPECS.set(o.id, CH.specOpts(o.specs)); return SPECS.get(o.id); };
   const matOpts = o => CH.matOpts(o.mat);
   const hasChoices = o => { const sp = sizeSpec(o); return sp.t === 'sel' || sp.t === 'pair' || (sp.t === 'text' && !!o.size) || !!sp.len || specOpts(o).length > 1 || matOpts(o).opts.length > 1; };
 
-  /* ================= the cart ================= */
-  // a line remembers the product by section + name + material, so it survives list updates
-  let lines = store.get('ft-list', []).filter(l => l && l.n);
-  let cust = store.get('ft-cust', {});
-  const lineKey = l => [l.k, l.n, l.m, l.s, (l.sp || []).join('¦'), l.mt || ''].join('|');
+  /* ================= the cart (one per branch; may hold products of both) =================
+     Bait Al Maqdis product: { src: 'bam', k: category, n: product, c: part no., s: size, p: price when added, q }
+     Fakhri Tools product:   { src: 'fk', k: category, n: product, m: material set, s: size, sp: [specs], mt: material, q } */
+  let lines = store.get(K.list, []).filter(l => l && l.n && l.q > 0);
+  let cust = store.get(K.cust, {});
+  const saveLines = () => { store.set(K.list, lines); updateBadge(); };
+  const lineKey = l => lb(l) ? ['b', l.k, l.n, l.c || '', l.s || ''].join('|') : ['f', l.k, l.n, l.m, l.s, (l.sp || []).join('¦'), l.mt || ''].join('|');
+  // the product a line points at, or null when it left the catalogue
   function lineProduct(l) {
     const c = catBy(l.k);
-    const hit = (c ? c.items.map((it, i) => byId.get(c.slug + ':' + i)) : []).find(o => o.name === l.n && o.matSet === l.m) || P.find(o => o.name === l.n && o.matSet === l.m) || P.find(o => o.name === l.n);
-    return hit || null;
+    if (lb(l)) return c ? c.items.find(o => o.n === l.n && o.r.some(r => r[0] === (l.c || null) && r[1] === (l.s || null))) || null : null;
+    const pool = c && c.src === 'fk' ? c.items : FCATS.reduce((a, x) => a.concat(x.items), []);
+    return pool.find(o => o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n && o.matSet === l.m) || P.find(o => o.src === 'fk' && o.n === l.n) || null;
   }
-  const saveLines = () => { store.set('ft-list', lines); updateBadge(); };
-  const inList = o => lines.some(l => l.k === o.c.slug && l.n === o.name && l.m === o.matSet);
-  function addLines(o, pick, q) {
-    const l = { k: o.c.slug, n: o.name, m: o.matSet, s: pick.s, sp: pick.sp, mt: pick.mt, q };
+  const lineRow = (l, o) => o ? o.r.find(r => r[0] === (l.c || null) && r[1] === (l.s || null)) : null;
+  // Bait Al Maqdis: today's price from the catalogue (orders keep the price they were placed with); Fakhri Tools: no price
+  function linePrice(l, o) { if (!lb(l)) return null; const r = lineRow(l, o === undefined ? lineProduct(l) : o); return r ? r[2] : (l.p == null ? null : l.p); }
+  // items, pieces, total of the priced ones, how many wait for a price, how many have a price
+  function totals(ls, snap) {
+    let items = ls.length, q = 0, sum = 0, ask = 0, priced = 0, b = 0;
+    ls.forEach(l => { q += l.q; if (lb(l)) b++; const p = snap ? (lb(l) ? l.p : null) : linePrice(l); if (p == null) ask++; else { priced++; sum += p * l.q; } });
+    return { items, q, sum: round2(sum), ask, priced, b };
+  }
+  // Bait Al Maqdis: how many of one size are in the cart
+  const rowLine = (o, j) => { const r = o.r[j]; return lines.find(l => lb(l) && l.k === o.c.id && l.n === o.n && (l.c || null) === r[0] && (l.s || null) === r[1]); };
+  const qtyOf = (o, j) => { const l = rowLine(o, j); return l ? l.q : 0; };
+  const qtyAll = o => isB(o) ? o.r.reduce((s, r, j) => s + qtyOf(o, j), 0) : lines.filter(l => !lb(l) && l.k === o.c.id && l.n === o.n && l.m === o.matSet).reduce((s, l) => s + l.q, 0);
+  function setRowQty(o, j, q) {
+    const r = o.r[j], l = rowLine(o, j);
+    q = Math.max(0, Math.min(99999, q | 0));
+    if (l && !q) lines.splice(lines.indexOf(l), 1);
+    else if (l) l.q = q;
+    else if (q) lines.push({ src: 'bam', k: o.c.id, n: o.n, c: r[0], s: r[1], p: r[2], q });
+    saveLines(); paintItem(o); markDirty();
+  }
+  function addFk(o, pick, q) {
+    const l = { src: 'fk', k: o.c.id, n: o.n, m: o.matSet, s: pick.s, sp: pick.sp, mt: pick.mt, q };
     const ex = lines.find(x => lineKey(x) === lineKey(l));
     if (ex) ex.q = Math.min(99999, ex.q + q); else lines.push(l);
-    saveLines();
-    refreshMarks();
+    saveLines(); paintItem(o); markDirty();
   }
-  // a line written out the website's way: anything not chosen reads "to confirm" with the options
+  function markDirty() { ['cart', 'orders'].forEach(tb => { const v = stacks[tb] && stacks[tb][0]; if (v && tab !== tb) v.dirty = true; }); }
+
+  /* ---- Fakhri Tools: a line written out the website's way; anything not chosen reads "to confirm" ---- */
   function describe(l, o) {
     const sp = o ? sizeSpec(o) : { t: 'text' }, m = o ? matOpts(o) : { opts: l.m ? [l.m] : [], note: '', full: l.m || '' }, specs = o ? specOpts(o) : [];
     let size = '';
@@ -212,80 +375,92 @@
     const mat = !m.opts.length ? '' : m.opts.length === 1 ? (l.mt === '?' ? 'to confirm (' + m.full + ')' : m.full) : l.mt && m.opts.includes(l.mt) ? l.mt + (m.note ? ' (' + m.note + ')' : '') : 'to confirm (' + m.opts.join(' / ') + ')';
     return { size, spec, mat };
   }
-  // only what was chosen, for short lists: (2" · PN16 · SS316)
-  const shortOf = l => { const o = lineProduct(l), d = describe(l, o), x = [d.size && !/^to confirm/.test(d.size) ? d.size : '', (l.sp || []).filter(x => x !== '?').join(', '), l.mt !== '?' && l.mt].filter(Boolean).join(' · '); return x ? ' <em>(' + esc(x) + ')</em>' : ''; };
   const groupOfLine = (l, o) => o ? o.c.name : ((catBy(l.k) || {}).name || '');
-  function itemBlock(l, n, plain) {
-    const o = lineProduct(l), d = describe(l, o), b = plain ? '' : '*';
-    return [b + (n ? n + '. ' : '') + l.n + b, 'Group: ' + groupOfLine(l, o), d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + l.q].filter(Boolean).join('\n');
+  // one line as a short description under its name, for the cart, orders and messages
+  function lineSub(l, o, html) {
+    if (lb(l)) { const x = [l.c, ts(l.s)].filter(Boolean).join(' · '); return html ? esc(x) : x; }
+    const d = describe(l, o);
+    if (!html) return [d.size && 'Size: ' + d.size, d.spec && 'Specs: ' + d.spec, d.mat && 'Material: ' + d.mat].filter(Boolean).join(' · ');
+    const part = (k, v) => v ? '<span class="lp"><i>' + esc(t(k)) + '</i> ' + (/^to confirm/.test(v) ? '<u>' + esc(v) + '</u>' : esc(v)) + '</span>' : '';
+    return part('Size', d.size) + part('Specs & ratings', d.spec) + part('Material', d.mat);
   }
-  const itemsText = (ls, plain) => ls.map((l, i) => itemBlock(l, ls.length > 1 ? i + 1 : 0, plain)).join('\n\n');
-  // the chosen parts on a cart line: Size / Specs / Material, "to confirm" in amber
-  function lineParts(l, o) {
-    const d = describe(l, o), part = (k, v) => v ? '<span class="lp"><i>' + k + '</i> ' + (/^to confirm/.test(v) ? '<u>' + esc(v) + '</u>' : esc(v)) + '</span>' : '';
-    return part('Size', d.size) + part('Specs', d.spec) + part('Material', d.mat);
+  const lineImg = (l, o) => o ? o.img : '';
+  const lineName = l => lb(l) ? tn(l.n) : l.n;
+
+  /* ================= orders ================= */
+  const getOrders = () => store.get(K.orders, []);
+  const putOrders = list => store.set(K.orders, list.slice(0, 300));
+  function nextOrderNo() {
+    const d = new Date(Date.now() + 4 * 3600e3), p2 = n => String(n).padStart(2, '0');
+    const stamp = BAM ? d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) : p2(d.getUTCDate()) + p2(d.getUTCMonth() + 1) + String(d.getUTCFullYear()).slice(2);
+    const pre = (BAM ? 'BAM-' : 'AQ-') + stamp + '-';
+    const used = getOrders().filter(o => o.no.indexOf(pre) === 0).map(o => +o.no.slice(pre.length) || 0);
+    return pre + String((used.length ? Math.max.apply(null, used) : 0) + 1).padStart(BAM ? 3 : 2, '0');
   }
-  /* ================= the order form PDF (orderform.js) ================= */
-  function orderPdfData(x) {
+  const when2 = ms => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // the order as text: for WhatsApp and "Copy order as text" (always English, the shop reads it)
+  function orderText(x) {
+    const c = x.cust || {}, out = [BR.name + ' - Order ' + x.no, 'Date: ' + when2(x.at)];
+    if (c.name) out.push('Customer: ' + c.name);
+    if (c.phone) out.push('Phone: ' + c.phone);
+    if (c.site) out.push('Location: ' + c.site);
+    if (!BAM) out.push('Delivery: ' + (c.delivery === 'deliver' ? 'Deliver to the customer' : 'Customer collects from the Al Quoz shop'));
+    if (c.pay) out.push('Payment: ' + c.pay);
+    if (c.by) out.push('Needed by: ' + c.by);
+    if (c.person) out.push('Contact: ' + c.person);
+    const items = x.lines.map((l, i) => {
+      const o = lineProduct(l), num = (x.lines.length > 1 ? (i + 1) + '. ' : '');
+      if (lb(l)) return num + l.n + '\n   ' + [l.c, l.s].filter(Boolean).concat(['Qty ' + nfmt(l.q) + (l.p != null ? ' x ' + money(l.p) + ' = ' + money(round2(l.p * l.q)) : ' - price on request')]).join(' · ');
+      const d = describe(l, o);
+      return [num + l.n, 'Group: ' + groupOfLine(l, o), d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + nfmt(l.q)].filter(Boolean).join('\n');
+    });
+    let tail = '';
+    const tt = totals(x.lines, true);
+    if (tt.priced) tail = '\n\nTotal: ' + money(tt.sum) + (tt.ask ? '\n' + tt.ask + (tt.ask === 1 ? ' item' : ' items') + ' on request, quoted separately.' : '');
+    else tail = '\n\nPlease confirm price and stock.';
+    return out.join('\n') + '\n\nItems (' + x.lines.length + '):\n\n' + items.join('\n\n') + tail + (c.note ? '\n\nNote: ' + c.note : '');
+  }
+  function pdfData(x) {
+    const c = x.cust || {};
     return {
-      no: x.no, at: x.at, cust: x.cust,
-      rows: x.lines.map(l => { const o = lineProduct(l), d = describe(l, o); return { n: l.n, group: groupOfLine(l, o), img: o ? o.img : '', size: d.size, spec: d.spec, mat: d.mat, q: l.q }; }),
-      shop: { name: SHOP_NAME, address: ADDRESS, city: 'Al Quoz, Dubai', phone: PHONE, wa: WA_SHOW, email: CFG.email || 'dxbsales@ftools.com', logo: 'img/logo-lockup.png' }
+      no: x.no, at: x.at, cust: c, priced: x.lines.some(l => lb(l) && l.p != null), brand: BR.id, accent: BR.pdfAccent, dark: BR.pdfDark,
+      rows: x.lines.map(l => {
+        const o = lineProduct(l);
+        if (lb(l)) return { src: 'bam', n: l.n, group: o ? o.c.name : ((catBy(l.k) || {}).name || ''), img: lineImg(l, o), code: l.c || '', size: l.s || '', q: l.q, p: l.p };
+        const d = describe(l, o);
+        return { src: 'fk', n: l.n, group: groupOfLine(l, o), img: lineImg(l, o), size: d.size, spec: d.spec, mat: d.mat, q: l.q, p: null };
+      }),
+      shop: { name: BR.full, short: BR.name, address: BR.address, city: BR.city, phone: BR.phone, wa: BR.waShow, email: BR.email, logo: BR.pdfLogo, pickup: BAM ? 'shop' : 'Al Quoz shop' }
     };
   }
   let pdfBusy = false;
-  // browser / iPhone: hand the file to the share menu; Safari needs a fresh tap if making the PDF took too long
-  function webPdf(b64, name, cap) {
-    const bin = atob(b64), u8 = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-    let file = null; try { file = new File([u8], name, { type: 'application/pdf' }); } catch (e) {}
-    const viaShare = () => navigator.share({ files: [file], title: cap }).catch(e => { if (e && e.name === 'NotAllowedError') toast('Order form ready', 'Share PDF', viaShare, 12000); });
-    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return viaShare();
-    const url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
-    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  }
-  // to = 'shop' (Mr Hussain's WhatsApp), a customer's phone, or '' for the phone's share menu
-  async function sharePdf(x, to) {
+  // how: 'view' (open it), 'wa' (WhatsApp: the shop's chat for Fakhri Tools, choose a chat for Bait Al Maqdis) or 'share'
+  async function orderPdf(x, how) {
     if (pdfBusy) return; pdfBusy = true;
-    toast('Making the order form…');
+    toast(t('Making the order form…'));
     try {
-      const b64 = await window.FT_ORDER_PDF(orderPdfData(x));
-      const name = 'Order-form-' + x.no + '.pdf', cap = 'Order form ' + x.no + (x.cust.name ? ' · ' + x.cust.name : '');
-      if (N && N.shareFile) N.shareFile(b64, name, 'application/pdf', cap, to === 'shop' ? WA : (to ? phoneDigits(to) : ''));
-      else webPdf(b64, name, cap);
+      const b64 = await window.FT_ORDER_PDF(pdfData(x));
+      const name = 'Order-form-' + x.no + '.pdf', cap = BR.name + ' order ' + x.no + (x.cust && x.cust.name ? ' · ' + x.cust.name : '');
       window.__lastPdf = b64;
-      toast('Order form ready');
-    } catch (e) { toast('Could not make the order form. Try again.'); }
+      if (N && how === 'view' && N.viewFile) N.viewFile(b64, name, 'application/pdf');
+      else if (N && N.shareFile) N.shareFile(b64, name, 'application/pdf', how === 'wa' ? orderText(x) : cap, how === 'wa' ? (BR.wa || 'wa') : '');
+      else webPdf(b64, name, cap, how === 'view');
+      toast(t('Order form ready'));
+    } catch (e) { toast(t('Could not make the order form. Try again.')); }
     pdfBusy = false;
   }
-  const today = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const PAY = ['Cash', 'Card', 'Bank transfer', 'Cheque', 'Credit account'];
-  function orderMsg(x) {
-    const c = x.cust, out = ['NEW ORDER ' + x.no, 'Date: ' + new Date(x.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })];
-    if (c.name) out.push('Customer: ' + c.name);
-    if (c.person) out.push('Contact: ' + c.person);
-    if (c.phone) out.push('Phone: ' + c.phone);
-    if (c.site) out.push('Location: ' + c.site);
-    out.push('Delivery: ' + (c.delivery === 'deliver' ? 'Deliver to the customer' : 'Customer collects from the Al Quoz shop'));
-    if (c.by) out.push('Needed by: ' + new Date(c.by + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }));
-    if (c.pay) out.push('Payment: ' + c.pay);
-    return out.join('\n') + '\n\nItems (' + x.lines.length + '):\n\n' + itemsText(x.lines) + (c.note ? '\n\nNote: ' + c.note : '') + '\n\nPlease confirm price and stock.';
-  }
-  function orderMsgCustomer(x) {
-    return 'Hello' + (x.cust.person ? ' ' + x.cust.person : '') + ', thank you for your order with Fakhri Tools.\nOrder number: ' + x.no + '\n\n' +
-      itemsText(x.lines) +
-      '\n\nWe will confirm the price and stock on WhatsApp. Questions: WhatsApp ' + WA_SHOW + ' or call ' + PHONE + '.\n' + SHOP_NAME + '\n' + ADDRESS;
-  }
-  function listMsgCustomer() {
-    return 'Hello, here is the list from Fakhri Tools:\n\n' + itemsText(lines) +
-      '\n\nFor prices and stock, message us on WhatsApp ' + WA_SHOW + ' or call ' + PHONE + '.\n' + SHOP_NAME + '\n' + ADDRESS;
-  }
-  function productText(o) {
-    const sp = sizeSpec(o);
-    const sizes = sp.t === 'sel' ? sp.opts.join(', ') : o.size;
-    return o.name + '\n' + (o.mat ? 'Material: ' + o.mat + '\n' : '') + (o.specs.length ? 'Rating / type: ' + o.specs.join(', ') + '\n' : '') + (sizes ? 'Sizes: ' + sizes + '\n' : '') +
-      '\nFakhri Tools, Al Quoz, Dubai\nWhatsApp ' + WA_SHOW + ' · Call ' + PHONE;
+  // browser / iPhone: show the PDF, or hand it to the share menu (Safari needs a fresh tap if making it took long)
+  function webPdf(b64, name, cap, view) {
+    const bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    if (window.FT_PDF_VIEW) return window.FT_PDF_VIEW(u8, name);   // a page that shows PDFs itself (the browser preview)
+    const blob = new Blob([u8], { type: 'application/pdf' }), url = URL.createObjectURL(blob);
+    let file = null; try { file = new File([u8], name, { type: 'application/pdf' }); } catch (e) {}
+    const viaShare = () => navigator.share({ files: [file], title: cap }).catch(e => { if (e && e.name === 'NotAllowedError') toast(t('Order form ready'), t('Share'), viaShare, 12000); });
+    if (!view && file && navigator.canShare && navigator.canShare({ files: [file] })) return viaShare();
+    if (view && window.open(url, '_blank')) return;
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
   const waLink = (digits, text) => 'https://wa.me/' + (digits || '') + '?text=' + encodeURIComponent(text);
   function phoneDigits(p) {
@@ -296,102 +471,180 @@
     return d.length >= 9 ? d : '';
   }
   function open(url) { if (N && N.open) N.open(url); else if (/^(tel|mailto|sms):/.test(url)) location.href = url; else window.open(url, '_blank'); }
-  function share(title, text, img) {
-    if (N && img && N.sharePhoto) return N.sharePhoto(img, title, text);
-    if (N && N.share) return N.share(title, text);
-    if (navigator.share) navigator.share({ title, text }).catch(() => {});
-    else copy(text);
-  }
-  function copy(text) {
-    const done = () => toast('Copied. Paste it anywhere.');
+  function copy(text, msg) {
+    const done = () => toast(msg || t('Copied'));
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => oldCopy(text, done));
     else oldCopy(text, done);
   }
-  function oldCopy(text, done) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove(); done(); }
-
-  /* ================= recent ================= */
-  let recent = store.get('ft-recent', []);
-  function seen(o) { recent = [o.id].concat(recent.filter(x => x !== o.id)).slice(0, 14); store.set('ft-recent', recent); }
-
-  /* ================= toast ================= */
-  let toastT;
-  function toast(msg, act, fn, ms) {
-    const t = $('#toast');
-    t.innerHTML = '<span>' + esc(msg) + '</span>' + (act ? '<button>' + esc(act) + '</button>' : '');
-    if (act) $('button', t).onclick = () => { t.classList.remove('is-on'); fn(); };
-    t.classList.add('is-on');
-    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('is-on'), ms || (act ? 6000 : 2600));
-  }
+  function oldCopy(text, done) { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); done(); }
 
   /* ================= pieces of UI ================= */
-  // a photo on its paper background, fading in once loaded
+  // a photo on white, fading in once loaded
   function photo(src, alt, extra) {
     return '<div class="ph' + (src ? ' is-loading' : ' ph--none') + (extra ? ' ' + extra : '') + '">' + (src ? '<img src="' + esc(src) + '" alt="' + esc(alt || '') + '" decoding="async" loading="lazy">' : '') + '</div>';
   }
-  function wirePhotos(root) {
-    $$('.ph img', root).forEach(img => {
+  function wirePhotos(r) {
+    $$('.ph img', r).forEach(img => {
+      if (img.__wired) return; img.__wired = true;
       const done = () => { img.classList.add('is-in'); img.parentNode.classList.remove('is-loading'); };
       if (img.complete && img.naturalWidth) done();
-      else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', () => { img.parentNode.classList.remove('is-loading'); img.parentNode.classList.add('ph--none'); img.remove(); }, { once: true }); }
+      else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', () => { const p = img.parentNode; if (!p) return; p.classList.remove('is-loading'); p.classList.add('ph--none'); img.remove(); }, { once: true }); }
     });
   }
-  const catCard = (c, d) => '<button class="ccard tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.slug + '">' + photo(c.coverImg, c.name) +
-    '<div class="ccard__t"><b>' + esc(c.name) + '</b><span>' + countWord(c.items.length, 'product') + '</span></div></button>';
-  // a category on Home: its photo and its name, like a shop's category tiles
-  const catTile = (c, d) => '<button class="ctile tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.slug + '">' + photo(c.coverImg, c.name) + '<b>' + esc(c.name) + '</b><span>' + countWord(c.items.length, 'item') + '</span></button>';
-  const sizeShort = o => { const s = (o.size || '').split(' · ')[0]; return s.length > 26 ? s.slice(0, 24) + '…' : s; };
-  const prodCard = (o, d) => '<div class="pcard tile" style="animation-delay:' + d + 'ms" data-go="p/' + o.id.replace(':', '/') + '" role="button" tabindex="0">' +
-    (inList(o) ? '<span class="listtag">In cart</span>' : '') +
-    '<button class="qadd' + (inList(o) ? ' is-in' : '') + '" data-add="' + o.id + '" aria-label="Add to cart">' + (inList(o) ? I.check : I.plus) + '</button>' +
-    photo(o.img, o.name) + '<div class="pcard__t"><small>' + esc(o.c.name) + '</small><b>' + esc(o.name) + '</b></div></div>';
-  const prodRow = (o, mark) => '<button class="prow" data-go="p/' + o.id.replace(':', '/') + '">' + photo(o.img, o.name) +
-    '<div><small>' + esc(o.c.name) + '</small><b>' + (mark ? mark(o.name) : esc(o.name)) + '</b></div></button>';
-  const bar = (title, right) => '<header class="bar"><button class="ib" data-back aria-label="Back">' + I.back + '</button><div class="bar__t">' + esc(title) + '</div>' + (right || '') + '</header>';
-
-  // keep "In list" marks in step everywhere
-  function refreshMarks() {
-    $$('.pcard').forEach(card => {
-      const id = $('[data-add]', card).dataset.add, o = byId.get(id); if (!o) return;
-      const on = inList(o), b = $('[data-add]', card);
-      b.classList.toggle('is-in', on); b.innerHTML = on ? I.check : I.plus;
-      const tag = $('.listtag', card);
-      if (on && !tag) card.insertAdjacentHTML('afterbegin', '<span class="listtag">In cart</span>'); else if (!on && tag) tag.remove();
-    });
-    const cont = $('#homeCont'); if (cont) cont.replaceWith(contCard());
-    const cv = stacks.cart && stacks.cart[0]; if (cv && tab !== 'cart') cv.dirty = true;
-    const ov = stacks.orders && stacks.orders[0]; if (ov && ov.onShow && tab === 'orders') ov.onShow();
+  const bar = (title, right) => '<header class="bar"><button class="ib" data-back aria-label="' + esc(t('Back')) + '">' + I.back + '</button><div class="bar__t">' + esc(title) + '</div>' + (right || '') + '</header>';
+  const pageHead = (title, right, backLabel) => '<header class="phead">' + (backLabel ? '<button class="phead__back" data-back>' + I.back + esc(backLabel) + '</button>' : '') + '<div class="phead__row"><h1>' + esc(title) + '</h1>' + (right || '') + '</div></header>';
+  function stepper(q, attrs) {
+    return '<div class="st"' + (attrs || '') + '><button data-st="-1" aria-label="Less">−</button><input inputmode="numeric" aria-label="Quantity" value="' + q + '"><button data-st="1" aria-label="More">+</button></div>';
+  }
+  function qtyBox(start, onChange) {
+    let n = start;
+    const el = h(stepper(n));
+    const inp = $('input', el);
+    const set = v => { n = Math.max(1, Math.min(99999, v)); inp.value = n; onChange && onChange(n); };
+    el.addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (b) { set(n + +b.dataset.st); buzz(); } });
+    inp.addEventListener('change', () => { const d = String(inp.value).replace(/[\s,']/g, '').match(/\d+/); set(d ? +d[0] : n); });
+    inp.addEventListener('focus', () => inp.select());
+    return { el, get: () => n, set };
   }
   function updateBadge(pop) {
-    const b = $('#badge'), n = lines.length;
+    const b = $('#badge'); if (!b) return;
+    const n = lines.length;
     b.hidden = !n; b.textContent = n > 99 ? '99+' : n;
     if (pop) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
   }
+  function flyToCart(src) {
+    updateBadge(true); buzz();
+    const tb = $('#tabs [data-tab="cart"]');
+    if (!src || !tb || reduce || !src.getAttribute) return;
+    const a = src.getBoundingClientRect(), tr = tb.getBoundingClientRect();
+    if (!a.width) return;
+    const s = Math.min(a.width, a.height, 140);
+    const f = h('<div class="fly"><img src="' + esc(src.getAttribute('src') || '') + '" alt=""></div>');
+    Object.assign(f.style, { left: (a.left + a.width / 2 - s / 2) + 'px', top: (a.top + a.height / 2 - s / 2) + 'px', width: s + 'px', height: s + 'px' });
+    document.body.appendChild(f);
+    const dx = tr.left + tr.width / 2 - (a.left + a.width / 2), dy = tr.top + 14 - (a.top + a.height / 2);
+    f.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: 'translate(' + dx * .35 + 'px,' + (dy * .2 - 70) + 'px) scale(.7)', opacity: 1, offset: .4 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.12)', opacity: .5 }
+    ], { duration: 720, easing: 'cubic-bezier(.5,0,.3,1)' }).onfinish = () => { f.remove(); updateBadge(true); };
+  }
+
+  /* ---- Bait Al Maqdis: price line on a card, and one size row with its price and Add ---- */
+  function priceLine(o) {
+    const ps = o.r.map(r => r[2]).filter(p => p != null);
+    if (!ps.length) return '<span class="pl pl--ask">' + esc(t('Price on request')) + '</span>';
+    const lo = Math.min.apply(null, ps), same = ps.length === o.r.length && ps.every(p => p === lo);
+    return '<span class="pl">' + (same ? '' : '<i>' + esc(t('from')) + '</i> ') + money(lo) + '</span>';
+  }
+  const sizesLine = o => o.r.length > 1 ? cnt(o.r.length, 'size') : (ts(o.r[0][1]) || o.r[0][0] || '');
+  function rowHTML(o, j) {
+    const r = o.r[j], q = qtyOf(o, j);
+    return '<div class="row' + (q ? ' is-in' : '') + '" data-row="' + o.id + '|' + j + '"><div class="row__l"><b>' + esc(ts(r[1]) || r[0]) + '</b>' + (r[1] && r[0] ? '<small>' + esc(r[0]) + '</small>' : '') + '</div>' +
+      '<div class="row__r"><span class="row__p">' + (r[2] != null ? money(r[2]) : '<em>' + esc(t('On request')) + '</em>') + '</span>' +
+      (q ? stepper(q) : '<button class="radd" data-radd>+ ' + esc(t('Add')) + '</button>') + '</div></div>';
+  }
+  const qtyTag = o => { const q = qtyAll(o); return '<span class="qtag"' + (q ? '' : ' hidden') + '>' + (q ? esc(nfmt(q) + ' ' + t('in cart')) : '') + '</span>'; };
+  // the card in a category: the front shows the product, a tap flips it over to every size with its price
+  function flipCard(o, d) {
+    const name = esc(tn(o.n));
+    return '<div class="flip tile" style="animation-delay:' + d + 'ms" data-item="' + o.id + '">' +
+      '<div class="flip__in">' +
+        '<div class="face face--front" data-flip role="button" tabindex="0">' + photo(o.img, o.n) + qtyTag(o) +
+          '<div class="face__t"><b>' + name + '</b><span class="face__s">' + esc(sizesLine(o)) + '</span>' + priceLine(o) + '</div>' +
+          '<i class="flipi" aria-hidden="true">' + I.flip + '</i></div>' +
+        '<div class="face face--back"><div class="back__h" data-flip><b>' + name + '</b><i class="flipi flipi--back">' + I.flip + '</i></div>' +
+          '<div class="rows">' + o.r.map((r, j) => rowHTML(o, j)).join('') + '</div>' +
+          (o.spec.length ? '<button class="specbtn" data-spec="' + o.id + '">' + I.zoom + esc(t('Spec sheet')) + '</button>' : '') +
+        '</div>' +
+      '</div></div>';
+  }
+  // the same sizes and prices in a sheet (from search and the cart)
+  function itemSheet(o) {
+    const body = h('<div data-item="' + o.id + '" class="isheet"><div class="shead">' + photo(o.img, o.n, 'ph--zoom') + '<div><small>' + esc(tn(o.c.name)) + ' · ' + esc(tn(o.sec)) + '</small><b>' + esc(tn(o.n)) + '</b>' + qtyTag(o) + '</div></div>' +
+      '<div class="rows rows--sheet">' + o.r.map((r, j) => rowHTML(o, j)).join('') + '</div>' +
+      (o.spec.length ? '<button class="specbtn" data-spec="' + o.id + '">' + I.zoom + esc(t('Spec sheet')) + '</button>' : '') +
+      '<button class="btn btn--ghost btn--full" style="margin-top:14px" data-go="c/' + o.c.id + '">' + esc(tn(o.c.name)) + ' ' + I.chev + '</button></div>');
+    const ph = $('.ph', body); ph.addEventListener('click', () => o.img && zoom(o.img));
+    openSheet(body);
+  }
+  // after the cart changes, every place that shows this product shows the new quantities
+  function paintItem(o) {
+    $$('[data-item="' + o.id + '"]').forEach(box => {
+      if (isB(o)) $$('.row', box).forEach(r => {
+        const j = +r.dataset.row.split('|')[1];
+        if (r.contains(document.activeElement)) return;
+        const fresh = h(rowHTML(o, j)); r.replaceWith(fresh);
+      });
+      const tag = $('.qtag', box); if (tag) { const q = qtyAll(o); tag.hidden = !q; tag.textContent = q ? nfmt(q) + ' ' + t('in cart') : ''; }
+      const add = $('.qadd', box); if (add) { const on = qtyAll(o) > 0; add.classList.toggle('is-in', on); add.innerHTML = on ? I.check : I.plus; }
+    });
+  }
+  // size rows: + Add, the − / + stepper, or a typed quantity (anywhere on screen)
+  document.addEventListener('click', e => {
+    const row = e.target.closest('[data-row]'); if (!row) return;
+    const [id, j] = row.dataset.row.split('|'), o = byId.get(id); if (!o) return;
+    if (e.target.closest('[data-radd]')) { e.stopPropagation(); setRowQty(o, +j, 1); flyToCart($('.ph img.is-in', row.closest('[data-item]') || document.body)); toast(t('Added to the cart'), t('Open cart'), () => switchTab('cart')); return; }
+    const st = e.target.closest('[data-st]'); if (st) { e.stopPropagation(); buzz(); setRowQty(o, +j, qtyOf(o, +j) + +st.dataset.st); }
+  });
+  document.addEventListener('change', e => {
+    const row = e.target.closest('[data-row]'); if (!row || e.target.tagName !== 'INPUT') return;
+    const [id, j] = row.dataset.row.split('|'), o = byId.get(id), d = String(e.target.value).replace(/[\s,']/g, '').match(/\d+/);
+    e.target.blur();
+    if (o) setRowQty(o, +j, d ? +d[0] : qtyOf(o, +j));
+  });
+  document.addEventListener('focusin', e => { if (e.target.closest('.st') && e.target.tagName === 'INPUT') e.target.select(); });
+
+  /* ---- Fakhri Tools: a product card (tap = product page, + = add) ---- */
+  const fkCard = (o, d) => '<div class="pcard tile" style="animation-delay:' + d + 'ms" data-item="' + o.id + '" data-go="p/' + o.id + '" role="button" tabindex="0">' +
+    '<button class="qadd' + (qtyAll(o) ? ' is-in' : '') + '" data-add="' + o.id + '" aria-label="' + esc(t('Add to cart')) + '">' + (qtyAll(o) ? I.check : I.plus) + '</button>' +
+    photo(o.img, o.n) + '<div class="pcard__t"><b>' + esc(o.n) + '</b>' + (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '') + '</div></div>';
+  // one row in search results and lists
+  const openAttr = o => isB(o) ? 'data-sheet="' + o.id + '"' : 'data-go="p/' + o.id + '"';
+  const pName = o => isB(o) ? tn(o.n) : o.n;
+  const cName = c => c.src === 'bam' ? tn(c.name) : c.name;
+  const prodRow = (o, mark) => '<button class="prow" ' + openAttr(o) + '>' + photo(o.img, o.n) +
+    '<div class="prow__t"><small>' + esc(isB(o) ? tn(o.c.name) : shortCat(o.c.name)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
+    (isB(o) ? '<span>' + esc(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
 
   /* ================= views and tabs ================= */
   const stage = $('#stage');
-  const TABS = ['home', 'orders', 'cart'];
-  const stacks = { home: [], orders: [], cart: [] };
+  const TABS = BCATS.length && window.BAM_DATA.pdfs && window.BAM_DATA.pdfs.length ? ['home', 'orders', 'pdfs', 'cart'] : ['home', 'orders', 'cart'];
+  const TAB_ICON = {
+    home: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+    orders: '<svg viewBox="0 0 24 24"><path d="M6 3h12v18H6z"/><path d="M9 3v2h6V3M9 10h6M9 14h6"/></svg>',
+    pdfs: '<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><text x="7.4" y="17.6" font-size="5.2" font-weight="700" stroke="none" fill="currentColor" font-family="sans-serif">PDF</text></svg>',
+    cart: '<svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>'
+  };
+  const TAB_NAME = { home: 'Home', orders: 'Orders', pdfs: 'PDFs', cart: 'Cart' };
+  $('#tabs').innerHTML = '<div class="tabs__in" style="grid-template-columns:repeat(' + TABS.length + ',1fr)">' + TABS.map(tb => '<button data-tab="' + tb + '"' + (tb === 'home' ? ' class="is-on"' : '') + '>' + TAB_ICON[tb] + '<span>' + esc(t(TAB_NAME[tb])) + '</span>' + (tb === 'cart' ? '<b id="badge" hidden>0</b>' : '') + '</button>').join('') +
+    '<i id="tabInk" style="width:' + (100 / TABS.length) + '%"></i></div>';
+  const stacks = {}; TABS.forEach(tb => { stacks[tb] = []; });
   let tab = 'home', busy = false;
-  const top = () => stacks[tab][stacks[tab].length - 1];
+  const top = () => { const st = stacks[tab]; return st ? st[st.length - 1] : null; };
 
   function build(route) {
     const [kind, a, b] = route.split('/');
-    let v;
+    let v = null;
     if (kind === 'home') v = viewHome();
-    else if (kind === 'cats') v = viewCats(a);
     else if (kind === 'c') v = viewCat(a);
-    else if (kind === 'p') v = viewProduct(a + ':' + b);
-    else if (kind === 'search') v = viewSearch(a ? decodeURIComponent(a) : '');
+    else if (kind === 'p') v = viewProduct(a + '/' + b);
+    else if (kind === 'search') v = viewSearch();
+    else if (kind === 'settings') v = viewSettings();
     else if (kind === 'cart') v = viewCart();
+    else if (kind === 'checkout') v = viewCheckout();
+    else if (kind === 'placed') v = viewPlaced(a);
     else if (kind === 'orders') v = viewOrders();
-    else if (kind === 'order') v = viewOrder();
-    if (!v) v = viewHome();
+    else if (kind === 'order') v = viewOrder(a);
+    else if (kind === 'pdfs' && TABS.indexOf('pdfs') >= 0) v = viewPdfs();
+    if (!v) v = kind === 'cart' || kind === 'orders' || kind === 'pdfs' ? viewCart() : viewHome();
     v.el.classList.add('view');
     v.route = route;
     wirePhotos(v.el);
     return v;
   }
   function show(v, on) { v.el.style.visibility = on ? '' : 'hidden'; v.el.classList.toggle('is-under', !on); if (on && v.onShow) v.onShow(); if (!on && v.onHide) v.onHide(); }
+  const rtl = () => root.dir === 'rtl';
 
   let fromImg = null;   // the photo that was tapped, for the zoom-into-place animation
   function go(route, opts = {}) {
@@ -404,15 +657,15 @@
     if (opts.instant || reduce) { if (prev) show(prev, false); show(v, true); fromImg = null; return; }
     busy = true;
     const hero = fromImg && $('[data-hero]', v.el);
-    const ease = 'cubic-bezier(.16,1,.3,1)';
+    const ease = 'cubic-bezier(.16,1,.3,1)', dir = rtl() ? -1 : 1;
     let anim, prevAnim;
     if (hero && fromImg.isConnected) {
-      anim = v.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' });
+      anim = v.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, easing: 'ease-out' });
       flyHero(fromImg, hero);
-      if (prev) prevAnim = prev.el.animate([{ opacity: 1, transform: 'none' }, { opacity: .2, transform: 'scale(.96)' }], { duration: 420, easing: ease, fill: 'forwards' });
+      if (prev) prevAnim = prev.el.animate([{ opacity: 1, transform: 'none' }, { opacity: .2, transform: 'scale(.96)' }], { duration: 400, easing: ease, fill: 'forwards' });
     } else {
-      anim = v.el.animate([{ transform: 'translateX(100%)', boxShadow: '-30px 0 60px rgba(0,0,0,.6)' }, { transform: 'none', boxShadow: '0 0 0 rgba(0,0,0,0)' }], { duration: 460, easing: ease });
-      if (prev) prevAnim = prev.el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(-26%)', opacity: .35 }], { duration: 460, easing: ease, fill: 'forwards' });
+      anim = v.el.animate([{ transform: 'translateX(' + (100 * dir) + '%)' }, { transform: 'none' }], { duration: 440, easing: ease });
+      if (prev) prevAnim = prev.el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(' + (-26 * dir) + '%)', opacity: .35 }], { duration: 440, easing: ease, fill: 'forwards' });
     }
     show(v, true);
     fromImg = null;
@@ -428,13 +681,12 @@
     document.body.appendChild(g);
     dst.style.visibility = 'hidden';
     requestAnimationFrame(() => {
-      const b = dst.getBoundingClientRect();
-      const ip = getComputedStyle(img).padding;
+      const b = dst.getBoundingClientRect(), ip = getComputedStyle(img).padding;
       const an = g.animate([
         { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', borderRadius: r0 },
         { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', borderRadius: getComputedStyle(dst).borderRadius }
-      ], { duration: 520, easing: 'cubic-bezier(.2,.9,.2,1)', fill: 'forwards' });
-      $('img', g).animate([{ padding: getComputedStyle(src).padding }, { padding: ip }], { duration: 520, easing: 'cubic-bezier(.2,.9,.2,1)', fill: 'forwards' });
+      ], { duration: 500, easing: 'cubic-bezier(.2,.9,.2,1)', fill: 'forwards' });
+      $('img', g).animate([{ padding: getComputedStyle(src).padding }, { padding: ip }], { duration: 500, easing: 'cubic-bezier(.2,.9,.2,1)', fill: 'forwards' });
       an.onfinish = () => { dst.style.visibility = ''; const di = $('img', dst); if (di) { di.classList.add('is-in'); dst.classList.remove('is-loading'); } g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 }).onfinish = () => g.remove(); };
     });
   }
@@ -447,41 +699,43 @@
     if (prev.dirty && prev.refresh) prev.refresh();
     if (instant || reduce) { v.el.remove(); if (v.onHide) v.onHide(); return true; }
     busy = true;
-    const ease = 'cubic-bezier(.16,1,.3,1)';
-    prev.el.animate([{ transform: 'translateX(-26%)', opacity: .35 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: ease });
+    const ease = 'cubic-bezier(.16,1,.3,1)', dir = rtl() ? -1 : 1;
+    prev.el.animate([{ transform: 'translateX(' + (-26 * dir) + '%)', opacity: .35 }, { transform: 'none', opacity: 1 }], { duration: 400, easing: ease });
     if (v.onHide) v.onHide();
-    v.el.animate([{ transform: 'none' }, { transform: 'translateX(100%)' }], { duration: 420, easing: ease }).onfinish = () => { v.el.remove(); busy = false; };
+    v.el.animate([{ transform: 'none' }, { transform: 'translateX(' + (100 * dir) + '%)' }], { duration: 400, easing: ease }).onfinish = () => { v.el.remove(); busy = false; };
     return true;
   }
-  function switchTab(t, route) {
-    if (busy) return;
-    $$('#tabs [data-tab]').forEach(b => b.classList.toggle('is-on', b.dataset.tab === t));
-    $('#tabInk').style.transform = 'translateX(' + (TABS.indexOf(t) * 100) + '%)';
-    if (t === tab && !route) {
+  // drop every screen above the first in a tab, with no animation
+  function resetTab(tb) { const st = stacks[tb]; while (st.length > 1) { const v = st.pop(); v.el.remove(); } }
+  function switchTab(tb, route) {
+    if (busy || !stacks[tb]) return;
+    $$('#tabs [data-tab]').forEach(b => b.classList.toggle('is-on', b.dataset.tab === tb));
+    $('#tabInk').style.transform = 'translateX(' + (TABS.indexOf(tb) * 100 * (rtl() ? -1 : 1)) + '%)';
+    if (tb === tab && !route) {
       const st = stacks[tab];
       if (st.length > 1) { while (st.length > 2) { const v = st.splice(st.length - 2, 1)[0]; v.el.remove(); } pop(); }
       else if (st[0]) { st[0].el.scrollTo({ top: 0, behavior: 'smooth' }); if (st[0].onRetap) st[0].onRetap(); }
       return;
     }
     const was = top();
-    tab = t;
-    if (!stacks[t].length) { const v = build(route || t); stage.appendChild(v.el); stacks[t].push(v); }
-    else if (route) { go(route); }
+    tab = tb;
+    if (!stacks[tb].length) { const v = build(tb); stage.appendChild(v.el); stacks[tb].push(v); }
     const v = top();
     if (was && was !== v) show(was, false);
     show(v, true);
     if (v.dirty && v.refresh) v.refresh();
-    if (!reduce) v.el.animate([{ opacity: 0, transform: 'translateY(14px) scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.16,1,.3,1)' });
+    if (!reduce) v.el.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'cubic-bezier(.16,1,.3,1)' });
     saveRoutes();
+    if (route) go(route);
   }
-  function saveRoutes() { try { sessionStorage.setItem('ft-routes', JSON.stringify({ tab, st: Object.fromEntries(TABS.map(t => [t, stacks[t].map(v => v.route)])) })); } catch (e) {} }
+  function saveRoutes() { try { sessionStorage.setItem('ft-routes', JSON.stringify({ brand: brandId, tab, st: Object.fromEntries(TABS.map(tb => [tb, stacks[tb].map(v => v.route)])) })); } catch (e) {} }
 
   // Android back button: close what is open, then step back, then go Home; false = leave the app
   function back() {
     if (!$('#zoom').hidden) { closeZoom(); return true; }
-    if (!$('#present').hidden) { closePresent(); return true; }
     if (!$('#sheet').hidden) { closeSheet(); return true; }
     if (busy) return true;
+    const fl = $('.flip.is-flipped', top() && top().el); if (fl) { fl.classList.remove('is-flipped'); return true; }
     if (pop()) return true;
     if (tab !== 'home') { switchTab('home'); return true; }
     return false;
@@ -489,162 +743,118 @@
 
   // one tap handler for everything
   document.addEventListener('click', e => {
-    const t = e.target;
-    const add = t.closest('[data-add]');
+    const tg = e.target;
+    const add = tg.closest('[data-add]');
     if (add) { e.stopPropagation(); quickAdd(byId.get(add.dataset.add), add); return; }
-    const goEl = t.closest('[data-go]');
-    if (goEl) { fromImg = $('.ph img.is-in', goEl) || null; if (goEl.closest('#sheet')) closeSheet(); go(goEl.dataset.go); return; }
-    if (t.closest('[data-back]')) { back(); return; }
-    const tb = t.closest('[data-tab]');
+    const sh = tg.closest('[data-sheet]');
+    if (sh) { const o = byId.get(sh.dataset.sheet); if (o) itemSheet(o); return; }
+    const sp = tg.closest('[data-spec]');
+    if (sp) { const o = byId.get(sp.dataset.spec); if (o) zoom(o.spec[0]); return; }
+    const goEl = tg.closest('[data-go]');
+    if (goEl) {
+      fromImg = $('.ph img.is-in', goEl) || null;
+      if (goEl.closest('#sheet')) { closeSheet(); fromImg = null; }
+      const r = goEl.dataset.go;
+      if (r === 'search' || r.indexOf('c/') === 0 || r.indexOf('p/') === 0 || r === 'settings') { if (tab !== 'home') { switchTab('home'); setTimeout(() => go(r), 360); return; } }
+      go(r); return;
+    }
+    if (tg.closest('[data-back]')) { back(); return; }
+    const tb = tg.closest('[data-tab]');
     if (tb) { switchTab(tb.dataset.tab); return; }
-    const ext = t.closest('[data-open]');
+    if (tg.closest('[data-lang]')) { setLang(lang === 'ar' ? 'en' : 'ar'); return; }
+    const ext = tg.closest('[data-open]');
     if (ext) { open(ext.dataset.open); return; }
   });
-  // sticky bars turn solid once the page scrolls under them
-  function solidBar(v, at) {
-    const b = $('.bar', v.el); if (!b) return;
-    v.el.addEventListener('scroll', () => b.classList.toggle('is-solid', v.el.scrollTop > at), { passive: true });
-  }
+  function setLang(l) { store.set('app-lang', l); saveRoutes(); try { sessionStorage.setItem('ft-reload', '1'); } catch (e) {} location.reload(); }
+  const langPill = () => BCATS.length || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
 
   /* ================= HOME ================= */
-  const SHOWCASE = (() => {
-    const out = [], seenCat = new Set();
-    P.forEach(o => { if (o.img && !seenCat.has(o.c.slug) && out.length < 12) { seenCat.add(o.c.slug); out.push(o); } });
-    return out;
-  })();
-  const SIZES_TOTAL = P.reduce((n, o) => n + sizeCount(o), 0);
-  function openNow() {
-    const now = new Date(Date.now() + 4 * 3600e3);          // Dubai time
-    const d = now.getUTCDay(), hr = now.getUTCHours() + now.getUTCMinutes() / 60;
-    const days = CFG.openDays || [1, 2, 3, 4, 5, 6], from = CFG.openFrom || 7.5, to = CFG.openTo || 18;
-    return days.includes(d) && hr >= from && hr < to;
+  // a category tile: Bait Al Maqdis tiles carry their name in the picture, Fakhri Tools tiles are a photo with the name under it
+  function catTile(c, i) {
+    const d = Math.min(i, 14) * 28;
+    if (c.src === 'bam') return '<button class="ctile ctile--img tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '"><img src="' + esc(c.tile) + '" alt="' + esc(c.name) + '" loading="lazy"><span class="vh">' + esc(tn(c.name)) + '</span></button>';
+    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(shortCat(c.name)) + '</b></button>';
   }
-  const hoursText = () => 'Mon – Sat · 7:30 am – 6:00 pm · Sunday closed';
-  function contCard() {
-    if (!lines.length) return h('<div id="homeCont"></div>');
-    const n = lines.reduce((s, l) => s + l.q, 0);
-    return h('<button id="homeCont" class="cont tile" data-tab="cart"><span class="cont__n">' + lines.length + '</span><div><b>Cart in progress</b><span>' +
-      countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs · tap to place the order</span></div>' + I.chev + '</button>');
-  }
-  function shopCard() {
-    const on = openNow();
-    return '<div class="shopcard"><span class="open' + (on ? ' is-open' : '') + '"><i></i>' + (on ? 'Open now' : 'Closed now') + '</span>' +
-      '<h3>Fakhri Tools<br>Al Quoz</h3><p>' + esc(ADDRESS) + '. Next to Ajyad Traditional Kitchen.</p><p class="hrs">' + hoursText() + '</p>' +
-      '<div class="shopbtns"><button data-open="' + esc(waLink(WA, 'Hello Fakhri Tools, ')) + '">' + I.wa + 'WhatsApp</button><button data-open="' + esc(PHONE_LINK) + '">' + I.phone + 'Call</button><button data-open="' + esc(MAPS) + '">' + I.pin + 'Directions</button></div></div>';
-  }
-  // Home, Noon style: the logo, search, then every category as a photo tile
   function viewHome() {
     const el = h('<section class="home">' +
-      '<div class="top"><img class="top__logo" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC"></div>' +
-      '<div class="sbar2"><button class="searchbox" data-go="search">' + I.search + '<span>Search ' + nfmt(P.length) + ' products</span></button></div>' +
-      '<div class="view__pad">' +
-        '<div id="homeCont"></div>' +
-        '<div class="sec"><h2>Product <em>categories</em></h2><span>' + CATS.length + ' ranges · ' + nfmt(P.length) + ' products</span></div>' +
-        '<div class="cats">' + CATS.map((c, i) => catTile(c, Math.min(i, 12) * 30)).join('') + '</div>' +
-        '<div class="sec"><h2>The <em>shop</em></h2></div>' + shopCard() +
-        '<div class="sec"><h2>Catalogue</h2></div><div id="catBox"></div>' +
-        '<div class="foot" id="homeFoot"></div>' +
-      '</div></section>');
-    const v = { el };
-    v.onShow = () => { stamp(); refreshNet(); };
-    v.refresh = () => { const c = $('#homeCont', el); if (c) c.replaceWith(contCard()); v.dirty = false; };
-    v.intro = () => {};
-    setTimeout(() => { v.refresh(); stamp(); }, 0);
-    function stamp() {
-      const cb = $('#catBox', el); if (cb && !$('.spin', cb)) cb.innerHTML = catalogueBox();
-      const f = $('#homeFoot', el); if (!f) return;
-      f.innerHTML = 'Prices are never shown. The shop sends prices on WhatsApp.<br>' + esc(SHOP_NAME) + (N && N.version ? '<br>App version ' + esc(N.version()) : '');
-    }
-    return v;
-  }
-  function countUp(root) {
-    $$('[data-count]', root).forEach(b => {
-      const to = +b.dataset.count, t0 = performance.now(), dur = 1400;
-      const tick = t => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 4); b.textContent = nfmt(Math.round(to * e)); if (p < 1) requestAnimationFrame(tick); };
-      if (reduce) b.textContent = nfmt(to); else requestAnimationFrame(tick);
-    });
-  }
-  function when(ms) {
-    const d = (Date.now() - ms) / 1000;
-    if (d < 90) return 'just now';
-    if (d < 3600) return Math.round(d / 60) + ' min ago';
-    if (d < 86400) return Math.round(d / 3600) + ' h ago';
-    return new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  }
-
-  /* ================= ALL RANGES ================= */
-  function viewCats() {
-    const el = h('<section>' + bar('All categories') + '<div class="view__pad"><div class="sec" style="margin-top:6px"><h2>Product <em>categories</em></h2><span>' + CATS.length + ' ranges · ' + nfmt(P.length) + ' products</span></div>' +
-      '<div class="cats">' + CATS.map((c, i) => catTile(c, Math.min(i, 12) * 30)).join('') + '</div></div></section>');
+      '<div class="home__top"><button class="ib ib--soft" data-go="settings" aria-label="' + esc(t('Settings')) + '">' + I.gear + '</button>' + langPill() + '</div>' +
+      '<div class="hero">' + (BAM ? '<img class="hero__logo" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>'
+        : '<img class="hero__logo hero__logo--fk" src="img/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
+      '<button class="searchbox" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
+      '<h2 class="sech">' + I.dots + '<span>' + esc(t('Product')) + ' <em>' + esc(t('Categories')) + '</em></span></h2>' +
+      '<div class="cats">' + OWN.map(catTile).join('') + '</div>' +
+      (OTHER.length ? '<h2 class="sech sech--more">' + I.dots + '<span>' + esc(t('More from')) + ' <em>' + esc(OTHER_BR.name) + '</em></span></h2>' +
+        '<p class="sech__n">' + esc(t('{n} more products. They go on the same order form.', { n: nfmt(OTHER.reduce((a, c) => a + c.items.length, 0)) })) + '</p>' +
+        '<div class="cats">' + OTHER.map((c, i) => catTile(c, i + OWN.length)).join('') + '</div>' : '') +
+      '<p class="foot">' + esc(BR.full) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
+      '</section>');
     return { el };
   }
 
-  /* ================= ONE RANGE ================= */
-  function viewCat(slug) {
-    const c = catBy(slug);
+  /* ================= ONE CATEGORY ================= */
+  function viewCat(id) {
+    const c = catBy(id);
     if (!c) return null;
-    const items = c.items.map((_, i) => byId.get(c.slug + ':' + i));
-    const groups = [...new Set(items.map(o => o.group).filter(Boolean))];
+    const CB = c.src === 'bam';
+    const groups = CB ? c.secs : [...new Set(c.items.map(o => o.group).filter(Boolean))];
+    const gOf = o => CB ? o.sec : o.group;
+    const gName = g => CB ? tn(g) : g;
     let cur = '';
-    const el = h('<section>' + bar(c.name, '<button class="ib" data-present aria-label="Show the customer">' + I.play + '</button>') +
-      '<div class="view__pad"><div class="chead2"><p>' + countWord(items.length, 'product') + '</p><button class="present-btn" data-present>' + I.play + 'Show customer</button></div>' +
-      (groups.length > 1 ? '<div class="mats">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g || 'All') + ' <b>' + (g ? items.filter(o => o.group === g).length : items.length) + '</b></button>').join('') + '</div>' : '') +
-      '<div class="pgrid" id="pgrid"></div></div></section>');
+    const el = h('<section>' + bar(cName(c), '<button class="ib" data-go="search" aria-label="' + esc(t('Search')) + '">' + I.search + '</button>') +
+      (groups.length > 1 ? '<div class="chips">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g ? gName(g) : t('All')) + ' <b>' + (g ? c.items.filter(o => gOf(o) === g).length : c.items.length) + '</b></button>').join('') + '</div>' : '') +
+      '<div class="view__pad"><p class="hint">' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + (CB ? ' · ' + esc(t('Tap a card to see the prices')) : '') + '</p><div id="grid"></div></div></section>');
     const v = { el };
-    const shown = () => items.filter(o => !cur || o.group === cur);
-    function fill() { const g = $('#pgrid', el); g.innerHTML = shown().map((o, i) => prodCard(o, Math.min(i, 8) * 40)).join(''); wirePhotos(g); }
+    function fill() {
+      const g = $('#grid', el), list = c.items.filter(o => !cur || gOf(o) === cur);
+      let html = '', last = null, i = 0;
+      list.forEach(o => {
+        if (CB && !cur && groups.length > 1 && o.sec !== last) { if (last !== null) html += '</div>'; html += '<h3 class="gsec">' + esc(tn(o.sec)) + '</h3><div class="pgrid">'; last = o.sec; }
+        else if (last === null) { html += '<div class="pgrid">'; last = ''; }
+        html += CB ? flipCard(o, Math.min(i, 8) * 40) : fkCard(o, Math.min(i, 8) * 40);
+        i++;
+      });
+      g.innerHTML = html + '</div>';
+      wirePhotos(g);
+    }
     fill();
-    $('.mats', el) && $('.mats', el).addEventListener('click', e => {
-      const b = e.target.closest('[data-g]'); if (!b) return;
-      cur = b.dataset.g; $$('.mats .chip', el).forEach(x => x.classList.toggle('is-on', x === b)); fill();
+    el.addEventListener('click', e => {
+      const ch = e.target.closest('.chip[data-g]');
+      if (ch) { cur = ch.dataset.g; $$('.chip', el).forEach(x => x.classList.toggle('is-on', x === ch)); fill(); el.scrollTo({ top: 0 }); ch.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); return; }
+      const f = e.target.closest('[data-flip]');
+      if (f && !e.target.closest('[data-row]')) { const card = f.closest('.flip'); card.classList.toggle('is-flipped'); buzz(); }
     });
-    $$('[data-present]', el).forEach(b => b.addEventListener('click', () => present(shown(), 0, c.name)));
-    v.refresh = () => { refreshMarks(); v.dirty = false; };
+    v.refresh = () => { c.items.forEach(paintItemQuiet); v.dirty = false; };
     return v;
   }
+  function paintItemQuiet(o) { if ($('[data-item="' + o.id + '"]')) paintItem(o); }
 
-  /* ================= ONE PRODUCT ================= */
-  // the faded Fakhri logo sits on photos only in the opened product (cards stay clean), like the website
+  /* ================= ONE PRODUCT (Fakhri Tools) ================= */
   const WM = '<img class="wm" src="img/logo-stacked.png" alt="" aria-hidden="true" draggable="false">';
   function viewProduct(id) {
     const o = byId.get(id);
-    if (!o) return null;
-    seen(o);
-    const sp = sizeSpec(o);
-    const sibs = o.c.items.map((_, i) => byId.get(o.c.slug + ':' + i)).filter(x => x !== o);
-    const el = h('<section>' + bar(o.name, '<button class="ib" data-share aria-label="Share">' + I.share + '</button>') +
-      '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.name) + '</div>' + (o.img ? WM : '') + (o.img ? '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
-      '<div class="pbody">' +
-        '<button class="crumb" data-go="c/' + o.c.slug + '">' + esc(o.c.name) + ' ' + I.chev + '</button>' +
-        '<h1>' + esc(o.name) + '</h1>' +
+    if (!o || isB(o)) return null;
+    const sibs = o.c.items.filter(x => x !== o);
+    const el = h('<section class="pview">' + bar(o.n) +
+      '<div class="phero"><div data-hero class="ph-wrap">' + photo(o.img, o.n) + '</div>' + (o.img ? WM + '<button class="phero__zoom" data-zoom aria-label="Zoom">' + I.zoom + '</button>' : '') + '</div>' +
+      '<div class="pbody" data-item="' + o.id + '">' +
+        '<button class="crumb" data-go="c/' + o.c.id + '">' + esc(shortCat(o.c.name)) + ' ' + I.chev + '</button>' +
+        '<h1>' + esc(o.n) + '</h1>' +
         '<div id="pk"></div>' +
-        '<div class="addrow"><div class="qty" id="qty"></div><button class="btn btn--red" id="addBtn">' + I.plus + 'Add to cart</button></div>' +
-        '<div class="prow2"><button class="btn btn--wa" id="askShop">' + I.wa + 'Ask the shop</button><button class="btn btn--ghost" data-share>' + I.share + 'Share</button></div>' +
-        '<button class="btn btn--ghost btn--full" style="margin-top:10px" id="showBtn">' + I.play + 'Show this to the customer</button>' +
-        (sibs.length ? '<div class="h-sec"><h2>More in this range</h2><button data-go="c/' + o.c.slug + '">All ' + o.c.items.length + ' ' + I.chev + '</button></div><div class="rail">' + sibs.slice(0, 12).map(x => '<button class="mini" data-go="p/' + x.id.replace(':', '/') + '">' + photo(x.img, x.name) + '<b>' + esc(x.name) + '</b></button>').join('') + '</div>' : '') +
+        '<div class="addrow"><div id="qty"></div><button class="btn btn--main" id="addBtn">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
+        (sibs.length ? '<h3 class="rail__h">' + esc(t('More in this category')) + '</h3><div class="rail">' + sibs.slice(0, 12).map(x => '<button class="mini" data-go="p/' + x.id + '">' + photo(x.img, x.n) + '<b>' + esc(x.n) + '</b></button>').join('') + '</div>' : '') +
       '</div></section>');
-    const hw = $('.ph-wrap', el); hw.style.cssText = 'position:absolute;top:0;right:0;bottom:0;left:0;border-radius:0 0 34px 34px;overflow:hidden';
     const v = { el };
     const pk = picker(o); $('#pk', el).appendChild(pk.el);
     const q = qtyBox(1); $('#qty', el).replaceWith(q.el);
     $('#addBtn', el).addEventListener('click', () => {
       if (!pk.check()) return;
-      addLines(o, pk.read(), q.get());
-      flyToList($('.phero .ph img', el) || $('.phero .ph', el));
-      toast('Added to the cart', 'Open cart', () => switchTab('cart'));
+      addFk(o, pk.read(), q.get());
+      flyToCart($('.phero .ph img', el));
+      toast(t('Added to the cart'), t('Open cart'), () => switchTab('cart'));
       pk.reset(); q.set(1);
     });
-    $('#askShop', el).addEventListener('click', () => {
-      const p = pk.read(), l = { k: o.c.slug, n: o.name, m: o.matSet, s: p.s, sp: p.sp, mt: p.mt, q: q.get() };
-      open(waLink(WA, 'Hello Fakhri Tools, please send me a price for:\n\n' + itemBlock(l) + '\n\nThank you.'));
-    });
-    $$('[data-share]', el).forEach(b => b.addEventListener('click', () => share(o.name, productText(o), o.img)));
-    $('#showBtn', el).addEventListener('click', () => { const all = o.c.items.map((_, i) => byId.get(o.c.slug + ':' + i)); present(all, all.indexOf(o), o.c.name); });
     const z = $('[data-zoom]', el); if (z) z.addEventListener('click', () => zoom(o.img));
     $('.phero .ph', el).addEventListener('click', () => o.img && zoom(o.img));
-    const hero = $('.phero', el);
-    el.addEventListener('scroll', () => { const y = el.scrollTop; if (y < 600) hero.style.transform = 'translateY(' + (y * .35) + 'px)'; }, { passive: true });
-    solidBar(v, 300);
     return v;
   }
 
@@ -654,30 +864,30 @@
     const sp = sizeSpec(o), specs = specOpts(o), m = matOpts(o);
     const el = h('<div class="pk"></div>');
     let s = sp.t === 'one' ? sp.v : '', a = '', b = '', sps = new Set(specs.length === 1 ? specs : []), mt = '';
-    const hdr = (t, x) => '<div class="pk__h"><b>' + t + '</b>' + (x ? '<span>' + esc(x) + '</span>' : '') + '</div>';
-    const chip = (row, v, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-row="' + row + '" data-v="' + esc(v) + '">' + esc(v === '?' ? 'Not sure' : v) + '</button>';
+    const hdr = (x, y) => '<div class="pk__h"><b>' + esc(t(x)) + '</b>' + (y ? '<span>' + esc(t(y)) + '</span>' : '') + '</div>';
+    const chip = (row, val, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-row2="' + row + '" data-v="' + esc(val) + '">' + esc(val === '?' ? t('Not sure') : val) + '</button>';
     function draw() {
       let x = '';
       if (sp.t === 'one') x = '<div class="pkg">' + hdr('Size') + '<div class="sizes">' + chip('one', sp.v, true) + '</div></div>';
-      else if (sp.t === 'sel') x = '<div class="pkg" data-g="size">' + hdr('Size', 'choose one') + '<div class="sizes">' + sp.opts.map(v => chip('s', v, s === v)).join('') + chip('s', '?', s === '?', ' sz--ask') + '</div></div>';
+      else if (sp.t === 'sel') x = '<div class="pkg" data-g="size">' + hdr('Size', 'choose one') + '<div class="sizes">' + sp.opts.map(val => chip('s', val, s === val)).join('') + chip('s', '?', s === '?', ' sz--ask') + '</div></div>';
       else if (sp.t === 'pair') {
         const lim = sp.lt && a && a !== '?' ? rung(a) : 99;
         x = '<div class="pkg" data-g="size">' + hdr('Size', sp.lt ? 'big end, then small end' : 'both ends') +
-          '<p class="pk__sub">' + (sp.lt ? 'Big end' : 'First end') + '</p><div class="sizes">' + sp.L.map(v => chip('a', v, a === v)).join('') + chip('a', '?', a === '?', ' sz--ask') + '</div>' +
-          '<p class="pk__sub">' + (sp.lt ? 'Small end' : 'Second end') + '</p><div class="sizes">' + sp.S.map(v => chip('b', v, b === v, sp.lt && rung(v) >= lim ? ' is-off' : '')).join('') + chip('b', '?', b === '?', ' sz--ask') + '</div></div>';
+          '<p class="pk__sub">' + (sp.lt ? 'Big end' : 'First end') + '</p><div class="sizes">' + sp.L.map(val => chip('a', val, a === val)).join('') + chip('a', '?', a === '?', ' sz--ask') + '</div>' +
+          '<p class="pk__sub">' + (sp.lt ? 'Small end' : 'Second end') + '</p><div class="sizes">' + sp.S.map(val => chip('b', val, b === val, sp.lt && rung(val) >= lim ? ' is-off' : '')).join('') + chip('b', '?', b === '?', ' sz--ask') + '</div></div>';
       } else if (o.size || sp.len) x = '<div class="pkg">' + hdr('Size', sp.hint ? 'we offer ' + sp.hint : '') + '<input class="field" data-t maxlength="40" placeholder="' + esc(sp.hint ? 'Type the size (' + sp.hint + ')' : 'Size, if the customer knows it') + '"></div>';
       if (sp.len) x += '<p class="pk__sub">Length</p><input class="field" data-len maxlength="30" placeholder="Length (' + esc(sp.len) + ')">';
       if (sp.note) x += '<p class="note">' + esc(sp.note) + '</p>';
-      if (specs.length) x += '<div class="pkg" data-g="specs">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(v => chip('sp', v, sps.has(v))).join('') + (specs.length > 1 ? chip('sp', '?', sps.has('?'), ' sz--ask') : '') + '</div></div>';
-      if (m.opts.length) x += '<div class="pkg" data-g="mat">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + '<div class="sizes">' + (m.opts.length > 1 ? m.opts.map(v => chip('mt', v, mt === v)).join('') : '<button class="sz' + (mt !== '?' ? ' is-on' : '') + '" data-row="mt" data-v="' + esc(m.opts[0]) + '">' + esc(m.full) + '</button>') + chip('mt', '?', mt === '?', ' sz--ask') + '</div>' + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
-      const keep = { t: $('[data-t]', el) && $('[data-t]', el).value, len: $('[data-len]', el) && $('[data-len]', el).value };
+      if (specs.length) x += '<div class="pkg" data-g="specs">' + hdr('Specs & ratings', specs.length > 1 ? 'tap the ones you need' : '') + '<div class="sizes">' + specs.map(val => chip('sp', val, sps.has(val))).join('') + (specs.length > 1 ? chip('sp', '?', sps.has('?'), ' sz--ask') : '') + '</div></div>';
+      if (m.opts.length) x += '<div class="pkg" data-g="mat">' + hdr('Material', m.opts.length > 1 ? 'choose one' : '') + '<div class="sizes">' + (m.opts.length > 1 ? m.opts.map(val => chip('mt', val, mt === val)).join('') : '<button class="sz' + (mt !== '?' ? ' is-on' : '') + '" data-row2="mt" data-v="' + esc(m.opts[0]) + '">' + esc(m.full) + '</button>') + chip('mt', '?', mt === '?', ' sz--ask') + '</div>' + (m.note && m.opts.length > 1 ? '<p class="pk__n">' + esc(m.note) + '</p>' : '') + '</div>';
+      const keep = { tx: $('[data-t]', el) && $('[data-t]', el).value, len: $('[data-len]', el) && $('[data-len]', el).value };
       el.innerHTML = x;
-      if (keep.t && $('[data-t]', el)) $('[data-t]', el).value = keep.t;
+      if (keep.tx && $('[data-t]', el)) $('[data-t]', el).value = keep.tx;
       if (keep.len && $('[data-len]', el)) $('[data-len]', el).value = keep.len;
     }
     el.addEventListener('click', e => {
       const c = e.target.closest('.sz'); if (!c) return;
-      const row = c.dataset.row, val = c.dataset.v;
+      const row = c.dataset.row2, val = c.dataset.v;
       if (row === 'one') return;
       if (row === 's') s = s === val ? '' : val;
       else if (row === 'a') { a = a === val ? '' : val; if (sp.lt && a && a !== '?' && b && b !== '?' && rung(b) >= rung(a)) b = ''; }
@@ -690,10 +900,10 @@
       const [base, len] = String(cur.s || '').split(' · ');
       if (sp.t === 'sel' && (sp.opts.includes(base) || base === '?')) s = base;
       if (sp.t === 'pair' && base) { const [x, y] = base === '?' ? ['?', '?'] : base.split(' × '); a = x || ''; b = y || ''; }
-      sps = new Set((cur.sp || []).filter(v => v === '?' ? specs.length > 1 : specs.includes(v)));
+      sps = new Set((cur.sp || []).filter(val => val === '?' ? specs.length > 1 : specs.includes(val)));
       mt = (m.opts.length > 1 && m.opts.includes(cur.mt)) || (cur.mt === '?' && m.opts.length) ? cur.mt : '';
       draw();
-      const t = $('[data-t]', el); if (t && base && base !== '?') t.value = base;
+      const tx = $('[data-t]', el); if (tx && base && base !== '?') tx.value = base;
       const l = $('[data-len]', el); if (l && len) l.value = len;
     } else draw();
     function read() {
@@ -701,10 +911,10 @@
       if (sp.t === 'one') size = sp.v;
       else if (sp.t === 'sel') size = s || (o.size ? '?' : '');
       else if (sp.t === 'pair') size = !a && !b ? '?' : (a === '?' || !a) && (b === '?' || !b) ? '?' : (sp.L.length === 1 ? sp.L[0] : a || '?') + ' × ' + (b || '?');
-      else { const t = $('[data-t]', el); size = (t ? t.value.replace(/[|·¦]/g, ' ').trim() : '') || (o.size ? '?' : ''); }
+      else { const tx = $('[data-t]', el); size = (tx ? tx.value.replace(/[|·¦]/g, ' ').trim() : '') || (o.size ? '?' : ''); }
       const l = $('[data-len]', el), len = l ? l.value.replace(/[|·¦]/g, ' ').trim() : '';
       if (len) size = (size || '?') + ' · ' + len;
-      return { s: size, sp: specs.filter(v => sps.has(v)).concat(sps.has('?') ? ['?'] : []), mt: m.opts.length > 1 || mt === '?' ? mt : '' };
+      return { s: size, sp: specs.filter(val => sps.has(val)).concat(sps.has('?') ? ['?'] : []), mt: m.opts.length > 1 || mt === '?' ? mt : '' };
     }
     // like the website: a size, the specs and the material (when there are several) need a pick or "Not sure" first
     function check() {
@@ -713,59 +923,34 @@
       const g = $('[data-g="' + miss + '"]', el);
       if (g) { g.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (!reduce) g.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); g.classList.remove('is-miss'); void g.offsetWidth; g.classList.add('is-miss'); }
       buzz();
-      toast({ size: 'Choose a size, or tap Not sure', specs: 'Choose the specs & ratings, or tap Not sure', mat: 'Choose a material, or tap Not sure' }[miss]);
+      toast(t({ size: 'Choose a size, or tap Not sure', specs: 'Choose the specs & ratings, or tap Not sure', mat: 'Choose a material, or tap Not sure' }[miss]));
       return false;
     }
-    function reset() { s = sp.t === 'one' ? sp.v : ''; a = ''; b = ''; mt = ''; sps = new Set(specs.length === 1 ? specs : []); const t = $('[data-t]', el); if (t) t.value = ''; const l = $('[data-len]', el); if (l) l.value = ''; draw(); }
+    function reset() { s = sp.t === 'one' ? sp.v : ''; a = ''; b = ''; mt = ''; sps = new Set(specs.length === 1 ? specs : []); const tx = $('[data-t]', el); if (tx) tx.value = ''; const l = $('[data-len]', el); if (l) l.value = ''; draw(); }
     return { el, read, reset, check };
   }
-  function qtyBox(start, onChange) {
-    let n = start;
-    const el = h('<div class="qty"><button aria-label="Less">−</button><input inputmode="numeric" aria-label="Quantity" value="' + n + '"><button aria-label="More">+</button></div>');
-    const [m, inp, p] = [$$('button', el)[0], $('input', el), $$('button', el)[1]];
-    const set = v => { n = Math.max(1, Math.min(99999, v)); inp.value = n; onChange && onChange(n); };
-    m.onclick = () => { set(n - 1); buzz(); }; p.onclick = () => { set(n + 1); buzz(); };
-    inp.addEventListener('change', () => { const d = String(inp.value).replace(/[\s,']/g, '').match(/\d+/); set(d ? +d[0] : n); });
-    inp.addEventListener('focus', () => inp.select());
-    return { el, get: () => n, set };
-  }
-  function flyToList(src) {
-    updateBadge(true); buzz();
-    if (!src || reduce) return;
-    const a = src.getBoundingClientRect(), t = $('#tabs [data-tab="cart"]').getBoundingClientRect();
-    const s = Math.min(a.width, a.height, 160);
-    const f = h('<div class="fly"><img src="' + esc(src.getAttribute && src.getAttribute('src') || '') + '" alt=""></div>');
-    Object.assign(f.style, { left: (a.left + a.width / 2 - s / 2) + 'px', top: (a.top + a.height / 2 - s / 2) + 'px', width: s + 'px', height: s + 'px' });
-    document.body.appendChild(f);
-    const dx = t.left + t.width / 2 - (a.left + a.width / 2), dy = t.top + 12 - (a.top + a.height / 2);
-    f.animate([
-      { transform: 'translate(0,0) scale(1)', opacity: 1 },
-      { transform: 'translate(' + dx * .35 + 'px,' + (dy * .2 - 80) + 'px) scale(.7)', opacity: 1, offset: .4 },
-      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.12)', opacity: .5 }
-    ], { duration: 750, easing: 'cubic-bezier(.5,0,.3,1)' }).onfinish = () => { f.remove(); updateBadge(true); };
-  }
-  // the + on a card: products with one size go straight in, others ask for the size first
+  // the + on a Fakhri Tools card: one-size products go straight in, others ask for the choices first
   function quickAdd(o, btn) {
     if (!o) return;
     const card = btn.closest('.pcard');
     if (!hasChoices(o)) {
-      addLines(o, picker(o).read(), 1);
-      flyToList(card && $('.ph img', card));
-      toast('Added: ' + o.name, 'Open cart', () => switchTab('cart'));
+      addFk(o, picker(o).read(), 1);
+      flyToCart(card && $('.ph img', card));
+      toast(t('Added to the cart'), t('Open cart'), () => switchTab('cart'));
       return;
     }
     const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div>' +
-      '<div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div>' +
-      '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id.replace(':', '/') + '">See full details</button></div>');
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div>' +
+      '<div class="addrow"><div id="sq"></div><button class="btn btn--main" id="sadd">' + I.plus + esc(t('Add to cart')) + '</button></div>' +
+      '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-go="p/' + o.id + '">' + esc(t('See full details')) + '</button></div>');
     $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
     $('#sadd', body).addEventListener('click', () => {
       if (!pk.check()) return;
-      addLines(o, pk.read(), q.get());
+      addFk(o, pk.read(), q.get());
       const src = card && $('.ph img', card);
       closeSheet();
-      setTimeout(() => flyToList(src), 120);
-      toast('Added: ' + o.name, 'Open cart', () => switchTab('cart'));
+      setTimeout(() => flyToCart(src), 120);
+      toast(t('Added to the cart'), t('Open cart'), () => switchTab('cart'));
     });
     openSheet(body);
   }
@@ -779,35 +964,46 @@
       .replace(/\bs\.s\.?/g, 'ss').replace(/\bc\.s\.?/g, 'cs').replace(/\bg\.i\.?/g, 'gi').replace(/\bm\.s\.?/g, 'ms').replace(/\bc\.i\.?/g, 'ci').replace(/\bd\.i\.?/g, 'di')
       .replace(/\bss\s?(304|316)l?\b/g, 'ss $1').replace(/(\d)\s*#/g, '$1 lb').replace(/\bnrv\b/g, 'non return check')
       .replace(/stainless( steel)?/g, 'stainless ss').replace(/carbon steel/g, 'carbon cs').replace(/galvani[sz]ed/g, 'galvanised gi').replace(/mild steel/g, 'mild ms').replace(/cast iron/g, 'cast ci').replace(/ductile( iron)?/g, 'ductile di')
-      .replace(/[^\w"½¼¾⅜⅛ ]+/g, ' ').replace(/\s+/g, ' ').trim();
+      .replace(/(\d)\s*mm\b/g, '$1mm').replace(/[^\w"½¼¾⅜⅛؀-ۿ ]+/g, ' ').replace(/\s+/g, ' ').trim();
   }
+  const codeN = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const HAY = new Map();
   function hay(o) {
     if (HAY.has(o.id)) return HAY.get(o.id);
-    const sp = sizeSpec(o);
-    const sizes = new Set((sp.t === 'sel' ? sp.opts : sp.t === 'pair' ? sp.L.concat(sp.S) : sp.t === 'one' ? [sp.v] : []).map(s => s.replace(/\s/g, '')));
-    const x = { name: norm(o.name).split(' '), rest: norm([o.mat, o.specs.join(' '), o.c.name, famName(o.c.fam)].join(' ')).split(' '), sizes, raw: o.size.replace(/\s/g, '') };
+    let x;
+    if (isB(o)) {
+      const ar = tn(o.n) !== o.n ? tn(o.n) : (BAR_[o.n] || BLOW[o.n.toLowerCase()] || '');
+      x = { name: norm(o.n + ' ' + ar).split(' '), rest: norm([o.sec, o.c.name, BAR_[o.sec] || '', BAR_[o.c.name] || ''].join(' ')).split(' '),
+        codes: o.r.map(r => codeN(r[0])).filter(Boolean), sizes: new Set(o.r.map(r => norm(r[1] || '').replace(/\s/g, '')).filter(Boolean)), raw: o.r.map(r => norm(r[1] || '')).join(' ') };
+    } else {
+      const sp = sizeSpec(o);
+      x = { name: norm(o.n).split(' '), rest: norm([o.mat, o.specs.join(' '), o.c.name].join(' ')).split(' '), codes: [],
+        sizes: new Set((sp.t === 'sel' ? sp.opts : sp.t === 'pair' ? sp.L.concat(sp.S) : sp.t === 'one' ? [sp.v] : []).map(z => z.replace(/\s/g, ''))), raw: o.size.replace(/\s/g, '') };
+    }
     HAY.set(o.id, x); return x;
   }
   function search(q) {
-    const toks = norm(q).split(' ').filter(Boolean);
+    const toks = norm(q).split(' ').filter(Boolean), qc = codeN(q);
     if (!toks.length) return [];
     const out = [];
     P.forEach((o, idx) => {
       const hh = hay(o); let score = 0;
-      for (const t of toks) {
-        const isSize = /^\d+[½¼¾⅜⅛]?"$|^[½¼¾⅜⅛]"$/.test(t);
-        if (isSize) { if (hh.sizes.has(t) || hh.raw.includes(t)) { score += 1; continue; } return; }
-        if (hh.name.some(w => w.startsWith(t))) score += 3;
-        else if (hh.rest.some(w => w.startsWith(t))) score += 1;
-        else if (/^\d+$/.test(t) && (hh.sizes.has(t + '"') || hh.raw.includes(t + '"'))) score += 1;
+      if (qc.length >= 3 && hh.codes.some(c => c === qc)) { out.push({ o, score: 100, idx }); return; }
+      if (qc.length >= 3 && hh.codes.some(c => c.indexOf(qc) === 0)) { out.push({ o, score: 50, idx }); return; }
+      for (const tk of toks) {
+        const isSize = /^\d+[½¼¾⅜⅛]?"$|^[½¼¾⅜⅛]"$/.test(tk);
+        if (isSize) { if (hh.sizes.has(tk) || hh.raw.includes(tk)) { score += 1; continue; } return; }
+        if (hh.name.some(w => w.startsWith(tk))) score += 3;
+        else if (hh.rest.some(w => w.startsWith(tk))) score += 1;
+        else if (/^\d+$/.test(tk) && (hh.sizes.has(tk + '"') || hh.raw.includes(tk))) score += 1;
+        else if (hh.raw.includes(tk)) score += 1;
         else return;
       }
       out.push({ o, score, idx });
     });
     return out.sort((x, y) => y.score - x.score || x.idx - y.idx).map(x => x.o);
   }
-  // typing mistakes ("camlok", "flang", "gaskit"): a word one or two letters off still counts
+  // typing mistakes ("camlok", "flang", "hamer"): a word one or two letters off still counts
   function near(a, b) {
     if (Math.abs(a.length - b.length) > 2) return 99;
     const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
@@ -817,25 +1013,24 @@
   }
   function fuzzy(q) {
     const toks = norm(q).split(' ').filter(Boolean);
-    if (!toks.length || toks.every(t => t.length < 4)) return [];
+    if (!toks.length || toks.every(tk => tk.length < 4)) return [];
     return P.filter(o => {
       const hh = hay(o), words = hh.name.concat(hh.rest);
-      return toks.every(t => t.length < 4 ? words.some(w => w.startsWith(t)) || hh.raw.includes(t) : words.some(w => w.startsWith(t) || near(t, w.slice(0, t.length + 1)) <= (t.length > 6 ? 2 : 1) || near(t, w) <= (t.length > 6 ? 2 : 1)));
+      return toks.every(tk => tk.length < 4 ? words.some(w => w.startsWith(tk)) || hh.raw.includes(tk) : words.some(w => w.startsWith(tk) || near(tk, w.slice(0, tk.length + 1)) <= (tk.length > 6 ? 2 : 1) || near(tk, w) <= (tk.length > 6 ? 2 : 1)));
     });
   }
-  let recentQ = store.get('ft-searches', []);
-  function viewSearch(q0) {
-    const el = h('<section><div class="sbar" style="display:flex;gap:6px;align-items:center;padding-left:6px"><button class="ib" data-back aria-label="Back">' + I.back + '</button><label class="sfield" style="flex:1">' + I.search + '<input type="search" enterkeyhint="search" autocomplete="off" placeholder="Gate valve, camlock, 2&quot; elbow, ss316…"><button class="ib" data-clear aria-label="Clear" hidden>' + I.x + '</button></label></div><div class="view__pad" id="sres"></div></section>');
+  let recentQ = store.get(K.searches, []);
+  function viewSearch() {
+    const el = h('<section><div class="sbar"><button class="ib" data-back aria-label="' + esc(t('Back')) + '">' + I.back + '</button><label class="sfield">' + I.search + '<input type="search" enterkeyhint="search" autocomplete="off" placeholder="' + esc(t(BCATS.length ? 'Search products, sizes or part numbers' : 'Search products or sizes')) + '"><button class="ib" data-clear aria-label="' + esc(t('Clear')) + '" hidden>' + I.x + '</button></label></div><div class="view__pad" id="sres"></div></section>');
     const v = { el }, inp = $('input', el), res = $('#sres', el), clr = $('[data-clear]', el);
-    let t = null;
-    const ideas = ['Gate valve', 'Ball valve', 'Camlock', 'Flange', 'Elbow', 'Y strainer', 'Hammer union', 'Gasket', 'SS316', '2"'];
+    let tm = null;
     function idle() {
-      res.innerHTML = (recentQ.length ? '<div class="h-sec" style="margin-top:14px"><h2>Recent</h2><button data-clr>Clear</button></div><div class="sugg">' + recentQ.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' : '') +
-        '<div class="h-sec" style="margin-top:' + (recentQ.length ? 30 : 14) + 'px"><h2>Try</h2></div><div class="sugg">' + ideas.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' +
-        '<div class="h-sec"><h2>Jump to a range</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.slug + '">' + photo(c.coverImg, c.name) + '<div><b>' + esc(c.name) + '</b><span>' + countWord(c.items.length, 'product') + '</span></div></button>').join('') + '</div>';
+      res.innerHTML = (recentQ.length ? '<div class="h-sec"><h2>' + esc(t('Recent')) + '</h2><button data-clr>' + esc(t('Clear')) + '</button></div><div class="sugg">' + recentQ.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' : '') +
+        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + (c.src === 'bam' ? '<div class="ph ph--tile"><img src="' + esc(c.tile) + '" alt="" class="is-in"></div>' : photo(c.tile, c.name)) + '<div class="prow__t"><b>' + esc(c.src === 'bam' ? tn(c.name) : shortCat(c.name)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
       wirePhotos(res);
     }
-    function run(remember) {
+    function remember(q) { recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set(K.searches, recentQ); }
+    function run(rem) {
       const q = inp.value.trim();
       clr.hidden = !q;
       if (!q) return idle();
@@ -844,256 +1039,349 @@
       const toks = q.toLowerCase().split(/\s+/).filter(x => x.length > 0).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       const rx = toks.length ? new RegExp('(' + toks.join('|') + ')', 'gi') : null;
       const mark = s => rx && !fz ? esc(s).replace(rx, '<mark>$1</mark>') : esc(s);
-      res.innerHTML = '<p class="scount">' + (r.length ? countWord(r.length, 'product') + (fz ? ' with a similar spelling' : ' found') : '') + '</p>' + (r.length ? '<div class="plist">' + r.slice(0, 120).map(o => prodRow(o, mark)).join('') + '</div>' :
-        '<div class="empty">' + I.search.replace('<svg', '<svg width="56" height="56"') + '<b>Nothing found for "' + esc(q) + '"</b>Try a shorter word, or ask the shop on WhatsApp.<br><br><button class="btn btn--wa" data-open="' + esc(waLink(WA, 'Do you have: ' + q + '?')) + '">' + I.wa + 'Ask the shop</button></div>');
+      res.innerHTML = '<p class="scount">' + (r.length ? esc(fz ? t('{n} with a similar spelling', { n: cnt(r.length, 'product') }) : t('{n} found', { n: cnt(r.length, 'product') })) : '') + '</p>' + (r.length ? '<div class="plist">' + r.slice(0, 150).map(o => prodRow(o, mark)).join('') + '</div>' :
+        '<div class="empty">' + I.search.replace('<svg', '<svg width="56" height="56"') + '<b>' + esc(t('Nothing found for "{q}"', { q })) + '</b>' + esc(t('Try a shorter word or a part number.')) + '</div>');
       wirePhotos(res);
-      if (remember && r.length) { recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set('ft-searches', recentQ); }
+      if (rem && r.length) remember(q);
     }
-    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => run(false), 120); });
+    inp.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(() => run(false), 120); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') { run(true); inp.blur(); } });
     res.addEventListener('click', e => {
       const c = e.target.closest('[data-q]'); if (c) { inp.value = c.dataset.q; run(true); return; }
-      if (e.target.closest('[data-clr]')) { recentQ = []; store.set('ft-searches', []); idle(); return; }
-      if (e.target.closest('[data-go]') && inp.value.trim()) { const q = inp.value.trim(); recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set('ft-searches', recentQ); }
+      if (e.target.closest('[data-clr]')) { recentQ = []; store.set(K.searches, []); idle(); return; }
+      if (e.target.closest('[data-go],[data-sheet]') && inp.value.trim()) remember(inp.value.trim());
     });
     clr.addEventListener('click', e => { e.preventDefault(); inp.value = ''; run(false); inp.focus(); });
     el.addEventListener('scroll', () => { if (document.activeElement === inp) inp.blur(); }, { passive: true });
-    inp.value = q0 || ''; run(false);
-    v.onShow = () => { if (!inp.value) setTimeout(() => inp.focus(), 380); };
-    v.onRetap = () => { inp.focus(); inp.select(); };
+    run(false);
+    v.onShow = () => { if (!inp.value) setTimeout(() => inp.focus(), 360); };
     return v;
+  }
+
+  /* ================= SETTINGS ================= */
+  function when(ms) {
+    const d = (Date.now() - ms) / 1000;
+    if (d < 90) return t('just now');
+    if (d < 3600) return Math.round(d / 60) + ' min ago';
+    if (d < 86400) return Math.round(d / 3600) + ' h ago';
+    return new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+  function catalogueBox() {
+    const kv = [[t('Products'), cnt(P.length, 'product') + ' · ' + CATS.length + ' ' + (lang === 'ar' ? 'فئة' : 'categories')]];
+    const two = BCATS.length && FCATS.length, of = (k, b) => two ? k + ' · ' + b.name : k;
+    BRAND_ORDER.forEach(b => {
+      if (b.id === 'bam' && BCATS.length) kv.push([of(t('Prices'), b), t('Prices are packed in the app. New prices come with an app update.')]);
+      if (b.id === 'fakhri' && FCATS.length) {
+        const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
+        kv.push([of(t('Product list'), b), N ? (ch ? t('Updated from the website {w}', { w: when(ch) }) : t('As packed in the app')) : t('Always the newest from the website')]);
+        if (N) kv.push([t('Last check'), ck ? when(ck) : t('Not yet')]);
+        kv.push([of(t('Prices'), b), t('Prices are not shown. The shop confirms prices on WhatsApp.')]);
+      }
+    });
+    return '<div class="kv">' + kv.map(r => '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
+      (FCATS.length ? '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + esc(t('Check for new products')) + '</button>' : '');
+  }
+  function viewSettings() {
+    const el = h('<section>' + bar(t('Settings')) + '<div class="view__pad">' +
+      (LOCK ? '' : '<h3 class="slab">' + esc(t('Branch')) + '</h3><div class="blist">' + Object.keys(BRANDS).map(id => branchCard(id, id === brandId)).join('') + '</div>') +
+      '<h3 class="slab">' + esc(t('Language')) + '</h3><div class="segs"><button class="seg' + (lang === 'en' ? ' is-on' : '') + '" data-setlang="en">English</button><button class="seg' + (lang === 'ar' ? ' is-on' : '') + '" data-setlang="ar">العربية</button></div>' +
+      '<h3 class="slab">' + esc(t('Products')) + '</h3><div id="catBox">' + catalogueBox() + '</div>' +
+      '<p class="foot">' + esc(BR.full) + '<br>' + esc(BR.address) + '<br>' + esc(BR.phone) + ' · ' + esc(BR.email) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
+      '</div></section>');
+    el.addEventListener('click', e => {
+      const b = e.target.closest('[data-brand]');
+      if (b && b.dataset.brand !== brandId) {
+        const to = BRANDS[b.dataset.brand];
+        confirmSheet(t('Switch to {b}?', { b: to.name }), t('The app icon, name, colours and order form change to {b}. Each branch keeps its own cart and orders.', { b: to.name }), t('Switch'), () => setBrand(to.id));
+        return;
+      }
+      const l = e.target.closest('[data-setlang]'); if (l && l.dataset.setlang !== lang) setLang(l.dataset.setlang);
+    });
+    return { el, onShow() { const cb = $('#catBox', el); if (cb && !$('.spin', cb)) cb.innerHTML = catalogueBox(); } };
   }
 
   /* ================= CART ================= */
   function viewCart() {
     const el = h('<section></section>');
     const v = { el };
-    function count() { return lines.reduce((s, l) => s + l.q, 0); }
     function draw() {
-      el.innerHTML = '<header class="bar bar--fixed" style="padding-left:var(--pad)"><div class="bar__t">Cart</div>' + (lines.length ? '<button class="ib" data-clearall aria-label="Empty the cart">' + I.trash + '</button>' : '') + '</header>' +
-        '<div class="view__pad"><div class="ptitle" style="padding:0"><p class="mono eyebrow" id="cartCount">' + (lines.length ? countWord(lines.length, 'item') + ' · ' + nfmt(count()) + ' pcs' : 'Empty') + '</p><h1 style="margin-top:10px">Cart</h1></div>' +
+      const tt = totals(lines), mixed = tt.b > 0;
+      el.innerHTML = pageHead(t('Cart'), lines.length ? '<button class="ib ib--soft" data-clearall aria-label="' + esc(t('Empty cart')) + '">' + I.trash + '</button>' : '') + '<div class="view__pad">' +
         (lines.length ? '<div class="lines">' + lines.map((l, i) => {
-          const o = lineProduct(l);
-          return '<div class="line" data-i="' + i + '"><div class="line__top">' + photo(o ? o.img : '', l.n) + '<div class="line__t"' + (o ? ' data-go="p/' + o.id.replace(':', '/') + '"' : '') + '><small>' + esc(groupOfLine(l, o)) + '</small><b>' + esc(l.n) + '</b>' + lineParts(l, o) + (o ? '' : '<span class="lp" style="color:var(--amber)">No longer in the catalogue</span>') + '</div></div>' +
-            '<div class="line__bot"><div class="line__q" data-q="' + i + '"></div>' + (o && hasChoices(o) ? '<button class="chg" data-chg="' + i + '">Change</button>' : '') + '</div><button class="line__x" data-del="' + i + '" aria-label="Remove">' + I.x + '</button></div>';
+          const o = lineProduct(l), p = linePrice(l, o);
+          return '<div class="line" data-i="' + i + '">' + photo(lineImg(l, o), l.n) +
+            '<div class="line__t"' + (o ? ' ' + openAttr(o) : '') + '><b>' + esc(lineName(l)) + '</b><span class="line__s">' + lineSub(l, o, true) + '</span>' +
+              (mixed ? '<span class="line__p">' + (p != null ? money(p) + (l.q > 1 ? ' <i>× ' + nfmt(l.q) + ' = ' + money(round2(p * l.q)) + '</i>' : '') : '<em>' + esc(t('Price on request')) + '</em>') + '</span>' : '') +
+              (o ? '' : '<span class="line__s warn">' + esc(t('No longer in the catalogue')) + '</span>') + '</div>' +
+            '<div class="line__bot">' + stepper(l.q, ' data-lq="' + i + '"') + '<span class="line__links">' + (!lb(l) && o && hasChoices(o) ? '<button data-chg="' + i + '">' + esc(t('Change')) + '</button>' : '') + '<button data-del="' + i + '">' + esc(t('Remove')) + '</button></span></div></div>';
         }).join('') + '</div>' +
-        '<button class="btn btn--ghost btn--full" style="margin-top:12px" data-browse>' + I.plus + 'Add more products</button>' +
-        '<div class="sendbar"><button class="btn btn--red btn--full" data-checkout>' + I.box + 'Place order</button><div class="prow2"><button class="btn btn--wa" data-k="ask">' + I.wa + 'Price check</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'To customer</button></div></div>'
-        : '<div class="empty">' + I.box.replace('<svg', '<svg width="56" height="56"') + '<b>Your cart is empty</b>Open any product and tap "Add to cart". When the customer is ready, place the order from here.<br><br><button class="btn btn--red" data-browse>Browse products</button></div>') +
+        '<div class="card sum">' + sumRows(tt) +
+          '<button class="btn btn--main btn--full" data-checkout>' + esc(t('Proceed to checkout')) + '</button>' +
+          '<button class="btn btn--ghost btn--full" data-clearall>' + esc(t('Empty cart')) + '</button></div>'
+        : '<div class="empty">' + I.cartBig.replace('<svg', '<svg width="60" height="60"') + '<b>' + esc(t('Your cart is empty')) + '</b>' + esc(t('Add products, then place the order from here.')) + '<br><br><button class="btn btn--main" data-tab="home">' + esc(t('Browse products')) + '</button></div>') +
         '</div>';
-      $$('[data-q]', el).forEach(box => {
-        const i = +box.dataset.q;
-        box.appendChild(qtyBox(lines[i].q, n2 => { lines[i].q = n2; saveLines(); $('#cartCount', el).textContent = countWord(lines.length, 'item') + ' · ' + nfmt(count()) + ' pcs'; }).el);
-      });
       wirePhotos(el);
       v.dirty = false;
     }
     el.addEventListener('click', e => {
-      const t = e.target;
-      const d = t.closest('[data-del]');
+      const tg = e.target;
+      const st = tg.closest('[data-lq] [data-st]');
+      if (st) { const i = +st.closest('[data-lq]').dataset.lq, l = lines[i]; l.q = Math.max(1, Math.min(99999, l.q + +st.dataset.st)); buzz(); saveLines(); afterChange(l); draw(); return; }
+      const d = tg.closest('[data-del]');
       if (d) {
         const i = +d.dataset.del, row = d.closest('.line'), gone = lines[i];
         row.classList.add('is-gone');
-        setTimeout(() => { lines.splice(i, 1); saveLines(); refreshMarks(); draw(); toast('Removed ' + gone.n, 'Undo', () => { lines.splice(i, 0, gone); saveLines(); refreshMarks(); draw(); }); }, 280);
+        setTimeout(() => { lines.splice(i, 1); saveLines(); afterChange(gone); draw(); toast(t('Removed'), t('Undo'), () => { lines.splice(i, 0, gone); saveLines(); afterChange(gone); draw(); }); }, 260);
         return;
       }
-      if (t.closest('[data-clearall]')) { confirmSheet('Empty the cart?', 'All ' + countWord(lines.length, 'item') + ' will be removed from the cart.', 'Empty cart', () => { lines = []; saveLines(); refreshMarks(); draw(); }); return; }
-      if (t.closest('[data-checkout]')) { go('order'); return; }
-      const cg = t.closest('[data-chg]');
-      if (cg) {
-        const i = +cg.dataset.chg, l = lines[i], o = lineProduct(l); if (!o) return;
-        const pk = picker(o, l);
-        const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><button class="btn btn--red btn--full" style="margin-top:18px" id="ssave">' + I.check + 'Save changes</button></div>');
-        $('#spk', body).appendChild(pk.el);
-        $('#ssave', body).onclick = () => {
-          if (!pk.check()) return;
-          const pick = pk.read(), nl = Object.assign({}, l, { s: pick.s, sp: pick.sp, mt: pick.mt });
-          const dup = lines.findIndex((x, j) => j !== i && lineKey(x) === lineKey(nl));
-          if (dup > -1) { lines[dup].q = Math.min(99999, lines[dup].q + l.q); lines.splice(i, 1); } else lines[i] = nl;
-          saveLines(); refreshMarks(); closeSheet(); draw(); toast('Changed');
-        };
-        openSheet(body);
-        return;
-      }
-      const k = t.closest('[data-k]');
-      if (k && k.dataset.k === 'ask') { open(waLink(WA, 'Hello Fakhri Tools, please send me a price for ' + (lines.length === 1 ? 'this item' : 'these ' + lines.length + ' items') + ':\n\n' + itemsText(lines) + '\n\nThank you.')); return; }
-      if (k && k.dataset.k === 'cust') { sendTo('Send the list to the customer', listMsgCustomer(), cust.phone); return; }
+      if (tg.closest('[data-clearall]')) { confirmSheet(t('Empty the cart?'), t('All {n} will be removed.', { n: cnt(lines.length, 'item') }), t('Empty cart'), () => { const was = lines; lines = []; saveLines(); was.forEach(afterChange); draw(); }); return; }
+      if (tg.closest('[data-checkout]')) { go('checkout'); return; }
+      const cg = tg.closest('[data-chg]');
+      if (cg) { changeLine(+cg.dataset.chg, draw); return; }
+    });
+    el.addEventListener('change', e => {
+      const box = e.target.closest('[data-lq]'); if (!box) return;
+      const i = +box.dataset.lq, d = String(e.target.value).replace(/[\s,']/g, '').match(/\d+/);
+      lines[i].q = Math.max(1, Math.min(99999, d ? +d[0] : lines[i].q)); saveLines(); afterChange(lines[i]); draw();
     });
     draw();
     v.refresh = draw;
     v.onShow = () => { if (v.dirty) draw(); };
     return v;
   }
-  // a WhatsApp chat with the customer, or any app, or copy
-  function sendTo(title, msg, phone) {
-    const d = phoneDigits(phone);
-    const body = h('<div><h3>' + esc(title) + '</h3><p class="sub">No prices are included. The shop\'s WhatsApp and phone are at the end.</p>' +
-      (d ? '<button class="choice" data-k="wa"><i style="background:#1fa855">' + I.wa + '</i><div><b>WhatsApp ' + esc(phone) + '</b><span>Opens the chat with the message typed in</span></div></button>' : '') +
-      '<button class="choice" data-k="wa0"><i style="background:#1fa855">' + I.wa + '</i><div><b>WhatsApp, choose the chat</b><span>Pick the customer in WhatsApp</span></div></button>' +
-      '<button class="choice" data-k="share"><i style="background:var(--navy)">' + I.share + '</i><div><b>Share with any app</b><span>SMS, email and more</span></div></button>' +
-      '<button class="choice" data-k="copy"><i style="background:var(--ink-5)">' + I.copy + '</i><div><b>Copy the text</b><span>Paste it anywhere</span></div></button></div>');
-    body.addEventListener('click', e => {
-      const c = e.target.closest('[data-k]'); if (!c) return;
-      closeSheet();
-      const k = c.dataset.k;
-      if (k === 'wa') open(waLink(d, msg)); else if (k === 'wa0') open(waLink('', msg)); else if (k === 'share') share('Fakhri Tools', msg); else copy(msg);
-    });
+  function afterChange(l) { const o = lineProduct(l); if (o) paintItemQuiet(o); }
+  function sumRows(tt, snap) {
+    const r = (k, val, cls) => '<div class="sum__r' + (cls ? ' ' + cls : '') + '"><span>' + esc(k) + '</span><b>' + val + '</b></div>';
+    if (!tt.priced) return r(t('Items'), esc(nfmt(tt.items))) + r(t('Pieces'), esc(nfmt(tt.q))) + '<p class="sum__n">' + esc(t(tt.b ? 'Prices on request. The shop quotes them separately.' : 'Prices are not shown. The shop confirms prices on WhatsApp.')) + '</p>';
+    return r(t('Items'), esc(nfmt(tt.items))) + (tt.ask ? r(t('Priced subtotal'), money(tt.sum)) + r(t('Awaiting price'), esc(cnt(tt.ask, 'item'))) : '') +
+      r(t('Total'), money(tt.sum), 'sum__r--total') + (tt.ask ? '<p class="sum__n">' + esc(t('{n} on request, quoted separately', { n: cnt(tt.ask, 'item') })) + '</p>' : '');
+  }
+  function changeLine(i, redraw) {
+    const l = lines[i], o = lineProduct(l); if (!o) return;
+    const pk = picker(o, l);
+    const body = h('<div><div class="shead">' + photo(o.img, o.n) + '<div><small>' + esc(shortCat(o.c.name)) + '</small><b>' + esc(o.n) + '</b></div></div><div id="spk"></div><button class="btn btn--main btn--full" style="margin-top:18px" id="ssave">' + I.check + esc(t('Save changes')) + '</button></div>');
+    $('#spk', body).appendChild(pk.el);
+    $('#ssave', body).onclick = () => {
+      if (!pk.check()) return;
+      const pick = pk.read(), nl = Object.assign({}, l, { s: pick.s, sp: pick.sp, mt: pick.mt });
+      const dup = lines.findIndex((x, j) => j !== i && lineKey(x) === lineKey(nl));
+      if (dup > -1) { lines[dup].q = Math.min(99999, lines[dup].q + l.q); lines.splice(i, 1); } else lines[i] = nl;
+      saveLines(); closeSheet(); redraw(); toast(t('Changed'));
+    };
     openSheet(body);
   }
 
-  /* ================= ORDER FORM ================= */
-  function nextOrderNo() {
-    const d = new Date(Date.now() + 4 * 3600e3), stamp = String(d.getUTCDate()).padStart(2, '0') + String(d.getUTCMonth() + 1).padStart(2, '0') + String(d.getUTCFullYear()).slice(2);
-    const n = store.get('ft-orders', []).filter(o => o.no.indexOf('AQ-' + stamp) === 0).length + 1;
-    return 'AQ-' + stamp + '-' + String(n).padStart(2, '0');
-  }
-  function viewOrder() {
+  /* ================= CHECKOUT: place the order (no WhatsApp needed) ================= */
+  const PAY = ['Cash', 'Card', 'Bank transfer', 'Cheque', 'Credit account'];
+  function viewCheckout() {
     const el = h('<section></section>');
     const v = { el };
-    if (!cust.delivery) cust.delivery = 'pickup';
-    const opt = (key, val, label) => '<button class="seg' + (cust[key] === val ? ' is-on' : '') + '" data-opt="' + key + '" data-val="' + esc(val) + '">' + esc(label) + '</button>';
-    function draw() {
-      const n = lines.reduce((s, l) => s + l.q, 0);
-      el.innerHTML = bar('New order') + '<div class="view__pad"><div class="ptitle" style="padding:0"><p class="mono eyebrow">Order form</p><h1 style="margin-top:10px">New order</h1></div>' +
-        (!lines.length ? '<div class="empty">' + I.box.replace('<svg', '<svg width="56" height="56"') + '<b>The cart is empty</b>Add the products first, then come back to place the order.<br><br><button class="btn btn--red" data-browse>Browse products</button></div></div>' :
-        '<div class="form">' +
-          '<p class="flabel">1 · Customer</p>' +
-          '<input class="field" data-c="name" placeholder="Company or workshop *" value="' + esc(cust.name || '') + '">' +
-          '<input class="field" data-c="person" placeholder="Contact person" value="' + esc(cust.person || '') + '">' +
-          '<input class="field" data-c="phone" inputmode="tel" placeholder="Phone / WhatsApp *" value="' + esc(cust.phone || '') + '">' +
-          '<input class="field" data-c="site" placeholder="Location or site (area, building)" value="' + esc(cust.site || '') + '">' +
-          '<p class="flabel">2 · Delivery</p><div class="segs2">' + opt('delivery', 'pickup', 'Collect from shop') + opt('delivery', 'deliver', 'Deliver') + '</div>' +
-          (cust.delivery === 'deliver' ? '<p class="note" style="margin-top:0">Delivery anywhere in the UAE is for orders from AED 5,000. The shop confirms it with the price.</p>' : '') +
-          '<label class="flab2">Needed by (optional)<input class="field" type="date" data-c="by" value="' + esc(cust.by || '') + '"></label>' +
-          '<p class="flabel">3 · Payment</p><div class="segs2 segs2--wrap">' + PAY.map(p => opt('pay', p, p)).join('') + '</div>' +
-          '<p class="flabel">4 · Note</p><textarea class="field" data-c="note" placeholder="Anything the shop should know (threading, cut lengths, timing)">' + esc(cust.note || '') + '</textarea>' +
-          '<p class="flabel">5 · Items</p>' +
-          '<div class="kv osum">' + lines.map(l => '<div><span style="color:var(--hd)">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '<div><span>Total</span><b>' + countWord(lines.length, 'item') + ' · ' + nfmt(n) + ' pcs</b></div></div>' +
-          '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-tab="cart">Change items in the cart</button>' +
-        '</div>' +
-        '<div class="sendbar"><button class="btn btn--wa btn--full" data-place>' + I.wa + 'Send order to the shop</button><p class="fine">Opens WhatsApp to Mr Hussain (' + esc(WA_SHOW) + ') with the order typed in. Press send there.</p></div></div>');
-      wirePhotos(el);
+    if (!BAM && !cust.delivery) cust.delivery = 'pickup';
+    const saveCust = () => store.set(K.cust, cust);
+    let bookOpen = false, region = -1, bq = '';
+    const CL = BAM && window.BAM_CLIENTS ? window.BAM_CLIENTS : { r: [], l: [] };
+    const field = (key, label, ph, type, req) => '<label class="flab">' + esc(label) + (req ? ' *' : '') + (type === 'area' ? '<textarea class="field" data-c="' + key + '" placeholder="' + esc(ph) + '">' + esc(cust[key] || '') + '</textarea>' :
+      '<input class="field" data-c="' + key + '"' + (type === 'tel' ? ' inputmode="tel" type="tel"' : '') + ' placeholder="' + esc(ph) + '" value="' + esc(cust[key] || '') + '">') + '</label>';
+    const seg = (key, val, label) => '<button class="seg' + (cust[key] === val ? ' is-on' : '') + '" data-opt="' + key + '" data-val="' + esc(val) + '">' + esc(t(label)) + '</button>';
+    function book() {
+      const saved = store.get(K.saved, []);
+      const list = CL.l.filter(c => (region < 0 || c[1] === region) && (!bq || c[0].toLowerCase().indexOf(bq.toLowerCase()) > -1));
+      const mine = saved.filter(c => !bq || (c.name + ' ' + (c.phone || '')).toLowerCase().indexOf(bq.toLowerCase()) > -1);
+      return '<div class="book' + (bookOpen ? ' is-open' : '') + '"><button class="book__h" data-book>' + I.user + '<b>' + esc(t('Saved customers')) + '</b><span>' + (CL.l.length + saved.length) + '</span>' + I.down + '</button>' +
+        (bookOpen ? '<div class="book__b"><label class="sfield sfield--sm">' + I.search + '<input data-bq placeholder="' + esc(t('Find a customer')) + '" value="' + esc(bq) + '"></label>' +
+          (CL.r.length ? '<div class="chips chips--wrap">' + ['-1'].concat(CL.r.map((_, i) => String(i))).map(i => '<button class="chip' + (+i === region ? ' is-on' : '') + '" data-region="' + i + '">' + esc(+i < 0 ? t('All') : CL.r[+i]) + ' <b>' + (+i < 0 ? CL.l.length : CL.l.filter(c => c[1] === +i).length) + '</b></button>').join('') + '</div>' : '') +
+          '<div class="book__list">' + (mine.length ? '<p class="book__sub">' + esc(t('Saved on this phone')) + '</p>' + mine.map((c, i) => '<button data-pickmine="' + saved.indexOf(c) + '"><b>' + esc(c.name) + '</b>' + (c.phone ? '<span>' + esc(c.phone) + '</span>' : '') + '</button>').join('') : '') +
+            list.slice(0, 300).map(c => '<button data-pick="' + esc(c[0]) + '"><b>' + esc(c[0]) + '</b><span>' + esc(CL.r[c[1]] || '') + '</span></button>').join('') + '</div></div>' : '') + '</div>';
     }
-    el.addEventListener('input', e => { const f = e.target.closest('[data-c]'); if (!f) return; cust[f.dataset.c] = f.value; f.classList.remove('is-bad'); store.set('ft-cust', cust); });
-    el.addEventListener('click', e => {
-      const o = e.target.closest('[data-opt]');
-      if (o) { const k = o.dataset.opt; cust[k] = cust[k] === o.dataset.val && k === 'pay' ? '' : o.dataset.val; store.set('ft-cust', cust); buzz(); const y = el.scrollTop; draw(); el.scrollTop = y; return; }
-      if (e.target.closest('[data-place]')) place();
+    function draw() {
+      const tt = totals(lines);
+      el.innerHTML = pageHead(t('Checkout'), '', t('Back to cart')) + '<div class="view__pad">' +
+        (!lines.length ? '<div class="empty">' + I.cartBig.replace('<svg', '<svg width="60" height="60"') + '<b>' + esc(t('Your cart is empty')) + '</b><br><button class="btn btn--main" data-tab="home">' + esc(t('Browse products')) + '</button></div></div>' :
+        '<div class="card sum">' + sumRows(tt) + '</div>' +
+        (BAM ? '<div id="book">' + book() + '</div>' +
+          field('name', t('Customer name'), t('Full name'), 'text', true) + field('phone', t('Phone number (optional)'), '05X XXX XXXX', 'tel') + field('note', t('Note (optional)'), t('Delivery address, site name, anything else'), 'area')
+          : field('name', t('Customer (company or workshop)'), '', 'text', true) + field('phone', t('Phone / WhatsApp'), '05X XXX XXXX', 'tel', true) + field('site', t('Location or site (optional)'), '', 'text') +
+            '<p class="flab">' + esc(t('Delivery')) + '</p><div class="segs">' + seg('delivery', 'pickup', 'Collect from shop') + seg('delivery', 'deliver', 'Deliver') + '</div>' +
+            (cust.delivery === 'deliver' ? '<p class="note">' + esc(t('Delivery anywhere in the UAE is for orders from AED 5,000. The shop confirms it with the price.')) + '</p>' : '') +
+            '<p class="flab">' + esc(t('Payment (optional)')) + '</p><div class="segs segs--wrap">' + PAY.map(p => seg('pay', p, p)).join('') + '</div>' +
+            field('note', t('Note (optional)'), t('Anything the shop should know'), 'area')) +
+        '<button class="btn btn--main btn--full btn--big" data-place>' + esc(t('Place order')) + '</button>' +
+        (BAM ? '<button class="btn btn--ghost btn--full" data-savecust>' + esc(t('Save these details')) + '</button>' : '') +
+        '</div>');
+    }
+    const redrawBook = () => { const b = $('#book', el); if (!b) return; const y = $('.book__list', b) ? $('.book__list', b).scrollTop : 0; b.innerHTML = book(); const l = $('.book__list', b); if (l) l.scrollTop = y; };
+    el.addEventListener('input', e => {
+      const f = e.target.closest('[data-c]'); if (f) { cust[f.dataset.c] = f.value; f.classList.remove('is-bad'); saveCust(); return; }
+      if (e.target.matches('[data-bq]')) { bq = e.target.value; const b = $('#book', el); const list = h(book()); $('.book__list', b).replaceWith($('.book__list', list)); }
     });
-    function place() {
-      const bad = [['name', !String(cust.name || '').trim()], ['phone', !phoneDigits(cust.phone)]].filter(x => x[1]).map(x => x[0]);
-      if (bad.length) {
-        bad.forEach(k => { const f = $('[data-c="' + k + '"]', el); f.classList.add('is-bad'); f.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); });
-        $('[data-c="' + bad[0] + '"]', el).scrollIntoView({ block: 'center', behavior: 'smooth' });
-        toast(bad[0] === 'name' ? 'Type the customer\'s company or name' : 'Type a phone number the shop can call');
-        return;
+    el.addEventListener('click', e => {
+      const tg = e.target;
+      const o = tg.closest('[data-opt]');
+      if (o) { const k = o.dataset.opt; cust[k] = cust[k] === o.dataset.val && k === 'pay' ? '' : o.dataset.val; saveCust(); buzz(); const y = el.scrollTop; draw(); el.scrollTop = y; return; }
+      if (tg.closest('[data-book]')) { bookOpen = !bookOpen; redrawBook(); return; }
+      const rg = tg.closest('[data-region]'); if (rg) { region = +rg.dataset.region; redrawBook(); return; }
+      const pk = tg.closest('[data-pick]'); if (pk) { cust.name = pk.dataset.pick; saveCust(); bookOpen = false; const y = el.scrollTop; draw(); el.scrollTop = y; buzz(); return; }
+      const pm = tg.closest('[data-pickmine]');
+      if (pm) { const c = store.get(K.saved, [])[+pm.dataset.pickmine]; if (c) { cust.name = c.name; cust.phone = c.phone || ''; saveCust(); } bookOpen = false; const y = el.scrollTop; draw(); el.scrollTop = y; buzz(); return; }
+      if (tg.closest('[data-savecust]')) {
+        if (!String(cust.name || '').trim()) { bad(['name']); return; }
+        const saved = store.get(K.saved, []).filter(c => c.name.toLowerCase() !== cust.name.trim().toLowerCase());
+        saved.unshift({ name: cust.name.trim(), phone: (cust.phone || '').trim() }); store.set(K.saved, saved.slice(0, 200));
+        toast(t('Saved')); redrawBook(); return;
       }
-      const x = { id: Date.now().toString(36), no: nextOrderNo(), at: Date.now(), cust: Object.assign({}, cust), lines: lines.map(l => Object.assign({}, l)), status: 'sent' };
-      const all = store.get('ft-orders', []); all.unshift(x); store.set('ft-orders', all.slice(0, 200));
-      open(waLink(WA, orderMsg(x)));
-      lines = []; saveLines(); refreshMarks();
-      cust = { delivery: 'pickup' }; store.set('ft-cust', cust);
+      if (tg.closest('[data-place]')) place();
+    });
+    function bad(keys) {
+      keys.forEach(k => { const f = $('[data-c="' + k + '"]', el); if (!f) return; f.classList.add('is-bad'); if (!reduce) f.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], { duration: 300 }); });
+      const f0 = $('[data-c="' + keys[0] + '"]', el); if (f0) f0.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      buzz(); toast(keys[0] === 'name' ? t('Type the customer name') : t('Type a phone number the shop can call'));
+    }
+    function place() {
+      const miss = [['name', !String(cust.name || '').trim()], ['phone', !BAM && !phoneDigits(cust.phone)]].filter(x => x[1]).map(x => x[0]);
+      if (miss.length) return bad(miss);
+      const c = {}; Object.keys(cust).forEach(k => { const val = String(cust[k] == null ? '' : cust[k]).trim(); if (val) c[k] = val; });
+      const x = { id: Date.now().toString(36), no: nextOrderNo(), at: Date.now(), cust: c, lines: lines.map(l => { const z = Object.assign({}, l); if (lb(l)) z.p = linePrice(l); return z; }) };
+      if (totals(x.lines, true).priced) x.total = totals(x.lines, true).sum;
+      const all = getOrders(); all.unshift(x); putOrders(all);
+      const was = lines; lines = []; saveLines(); was.forEach(afterChange);
+      cust = BAM ? {} : { delivery: 'pickup' }; saveCust();
       const ov = stacks.orders[0]; if (ov) ov.dirty = true;
-      setTimeout(() => success(x), 400);
+      buzz();
+      resetTab('cart'); const cv = stacks.cart[0]; if (cv) cv.refresh();
+      stage.appendChild(el); // keep this screen on top while the next one slides in
+      stacks.cart.push(v);
+      go('placed/' + x.id);
+      setTimeout(() => { const i = stacks.cart.indexOf(v); if (i > -1) { stacks.cart.splice(i, 1); el.remove(); saveRoutes(); } }, 600);
     }
     draw();
     v.refresh = draw;
     return v;
   }
-  function success(x) {
-    const body = h('<div class="done"><div class="done__tick"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div><h3>Order ' + esc(x.no) + ' sent</h3><p class="sub">It is saved in Orders. If WhatsApp did not open, use "Send again" there.</p>' +
-      '<button class="btn btn--wa btn--full" data-k="pdfshop">' + I.pdf + 'Send the order form (PDF) to the shop</button>' +
-      '<div class="prow2"><button class="btn btn--ghost" data-k="pdfcust">' + I.pdf + 'PDF to customer</button><button class="btn btn--ghost" data-k="pdf">' + I.share + 'Share or save</button></div>' +
-      '<button class="btn btn--ghost btn--full" style="margin-top:10px" data-k="cust">' + I.share + 'Send the customer a text copy</button><button class="btn btn--red btn--full" style="margin-top:10px" data-k="orders">See all orders</button></div>');
-    body.addEventListener('click', e => {
+
+  /* ================= ORDER PLACED ================= */
+  function viewPlaced(id) {
+    const x = getOrders().find(z => z.id === id);
+    if (!x) return null;
+    const tt = totals(x.lines, true);
+    const el = h('<section class="placed"><div class="view__pad">' +
+      '<div class="done"><div class="done__tick"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>' +
+      '<h1>' + esc(t('Order placed')) + '</h1><p>' + esc(t('Order number')) + '</p><p class="done__no">' + esc(x.no) + '</p>' +
+      '<p class="done__sub">' + esc(x.cust.name || '') + ' · ' + esc(cnt(tt.items, 'item')) + (tt.priced ? ' · ' + money(tt.sum) : ' · ' + esc(pcs(tt.q))) + '</p></div>' +
+      '<button class="btn btn--main btn--full btn--big" data-k="pdf">' + I.pdf + esc(t('Order form (PDF)')) + '</button>' +
+      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BAM ? 'Send on WhatsApp' : 'Send to the shop on WhatsApp')) + '</button>' +
+      '<button class="btn btn--ghost btn--full" data-k="orders">' + esc(t('View my orders')) + '</button>' +
+      '<button class="btn btn--link btn--full" data-k="more">' + esc(t('Continue shopping')) + '</button>' +
+      '</div></section>');
+    el.addEventListener('click', e => {
       const k = e.target.closest('[data-k]'); if (!k) return;
-      if (k.dataset.k === 'pdfshop') sharePdf(x, 'shop');
-      else if (k.dataset.k === 'pdfcust') sharePdf(x, x.cust.phone);
-      else if (k.dataset.k === 'pdf') sharePdf(x, '');
-      else if (k.dataset.k === 'cust') { closeSheet(); setTimeout(() => sendTo('Send a copy to the customer', orderMsgCustomer(x), x.cust.phone), 380); }
-      else { closeSheet(); switchTab('orders'); }
+      const w = k.dataset.k;
+      if (w === 'pdf') orderPdf(x, 'view');
+      else if (w === 'wa') orderPdf(x, 'wa');
+      else if (w === 'orders') { resetTab('cart'); switchTab('orders'); setTimeout(() => go('order/' + x.id), 380); }
+      else { resetTab('cart'); switchTab('home'); }
     });
-    openSheet(body);
-    buzz();
-    // back on the cart, which is now empty
-    while (stacks[tab].length > 1) pop(true);
-    const cv = stacks.cart[0]; if (cv) cv.refresh();
+    return { el };
   }
 
   /* ================= ORDERS ================= */
   function ordersHTML(list) {
-    if (!list.length) return '<div class="empty">' + I.box.replace('<svg', '<svg width="56" height="56"') + '<b>No orders yet</b>Orders you send to the shop are kept here, so you can send them again or repeat them.</div>';
+    if (!list.length) return '<div class="empty">' + I.doc.replace('<svg', '<svg width="60" height="60"') + '<b>' + esc(t('No orders yet')) + '</b>' + esc(t('Orders you place will be listed here.')) + '</div>';
     let last = '';
     return list.map(x => {
       const day = new Date(x.at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
       const head = day !== last ? '<p class="oday">' + esc(day) + '</p>' : ''; last = day;
-      const pcs = x.lines.reduce((s, l) => s + l.q, 0);
-      return head + '<button class="order tile" data-order="' + x.id + '"><div class="order__top"><b>' + esc(x.cust.name || 'No name') + '</b><span class="pill">' + esc(x.no) + '</span></div>' +
-        '<span>' + countWord(x.lines.length, 'item') + ' · ' + nfmt(pcs) + ' pcs · ' + (x.cust.delivery === 'deliver' ? 'Delivery' : 'Collect') + ' · ' + new Date(x.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</span>' +
-        '<div class="order__thumbs">' + x.lines.slice(0, 5).map(l => { const o = lineProduct(l); return photo(o ? o.img : '', l.n); }).join('') + (x.lines.length > 5 ? '<i>+' + (x.lines.length - 5) + '</i>' : '') + '</div></button>';
+      const tt = totals(x.lines, true);
+      return head + '<button class="order tile" data-order="' + x.id + '"><div class="order__top"><b>' + esc(x.cust.name || '—') + '</b><span class="pill">' + esc(x.no) + '</span></div>' +
+        '<span class="order__s">' + esc(cnt(tt.items, 'item')) + ' · ' + (tt.priced ? money(tt.sum) : esc(pcs(tt.q))) + ' · ' + new Date(x.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</span>' +
+        '<div class="order__thumbs">' + x.lines.slice(0, 5).map(l => photo(lineImg(l, lineProduct(l)), l.n)).join('') + (x.lines.length > 5 ? '<i>+' + (x.lines.length - 5) + '</i>' : '') + '</div></button>';
     }).join('');
   }
   function viewOrders() {
     const el = h('<section></section>');
     const v = { el };
     let q = '';
+    const match = x => (x.no + ' ' + (x.cust.name || '') + ' ' + (x.cust.phone || '') + ' ' + x.lines.map(l => l.n + ' ' + (l.c || '')).join(' ')).toLowerCase().indexOf(q.toLowerCase()) > -1;
     function draw() {
-      const all = store.get('ft-orders', []);
-      const list = q ? all.filter(x => (x.no + ' ' + x.cust.name + ' ' + x.cust.person + ' ' + x.cust.phone + ' ' + x.lines.map(l => l.n).join(' ')).toLowerCase().includes(q.toLowerCase())) : all;
-      const week = all.filter(x => Date.now() - x.at < 7 * 864e5).length;
-      el.innerHTML = '<header class="bar bar--fixed" style="padding-left:var(--pad)"><div class="bar__t">Orders</div></header><div class="view__pad">' +
-        '<div class="ptitle" style="padding:0"><p class="mono eyebrow">' + countWord(all.length, 'order') + ' · ' + week + ' this week</p><h1 style="margin-top:10px">Orders</h1></div>' +
-        '<button class="newo" data-new><span class="newo__i">' + I.plus + '</span><div><b>New order</b><span>' + (lines.length ? 'Cart has ' + countWord(lines.length, 'item') + '. Fill in the customer and send.' : 'Add products to the cart, then fill the form') + '</span></div>' + I.chev + '</button>' +
-        (all.length > 3 ? '<label class="sfield" style="margin-top:14px;height:50px">' + I.search + '<input type="search" placeholder="Find an order: customer, number, product" value="' + esc(q) + '"></label>' : '') +
-        '<div class="orders" id="olist">' + ordersHTML(list) + '</div></div>';
+      const all = getOrders();
+      el.innerHTML = pageHead(t('Orders')) + '<div class="view__pad">' +
+        (all.length > 3 ? '<label class="sfield sfield--sm">' + I.search + '<input type="search" placeholder="' + esc(t('Find an order')) + '" value="' + esc(q) + '"></label>' : '') +
+        '<div class="orders" id="olist">' + ordersHTML(q ? all.filter(match) : all) + '</div></div>';
       wirePhotos(el);
       const inp = $('input', el);
-      if (inp) inp.addEventListener('input', () => { q = inp.value; const ol = $('#olist', el); const all2 = store.get('ft-orders', []); ol.innerHTML = ordersHTML(q ? all2.filter(x => (x.no + ' ' + x.cust.name + ' ' + x.cust.person + ' ' + x.cust.phone + ' ' + x.lines.map(l => l.n).join(' ')).toLowerCase().includes(q.toLowerCase())) : all2); wirePhotos(ol); });
+      if (inp) inp.addEventListener('input', () => { q = inp.value; const ol = $('#olist', el); ol.innerHTML = ordersHTML(getOrders().filter(match)); wirePhotos(ol); });
       v.dirty = false;
     }
-    el.addEventListener('click', e => {
-      if (e.target.closest('[data-new]')) { if (lines.length) go('order'); else { toast('Add products to the cart first'); switchTab('home'); setTimeout(() => { if (!stacks.home.some(v => v.route === 'cats')) go('cats'); }, 520); } return; }
-      const o = e.target.closest('[data-order]'); if (o) openOrder(o.dataset.order);
-    });
+    el.addEventListener('click', e => { const o = e.target.closest('[data-order]'); if (o) go('order/' + o.dataset.order); });
     draw();
     v.refresh = draw;
-    v.onShow = () => { if (v.dirty) draw(); else { const n = $('.newo span:not(.newo__i)', el); if (n) n.textContent = lines.length ? 'Cart has ' + countWord(lines.length, 'item') + '. Fill in the customer and send.' : 'Add products to the cart, then fill the form'; } };
+    v.onShow = () => { if (v.dirty) draw(); };
     return v;
   }
-  function openOrder(id) {
-    const x = store.get('ft-orders', []).find(z => z.id === id); if (!x) return;
-    const c = x.cust;
-    const body = h('<div><p class="mono" style="color:var(--red-2)">' + esc(x.no) + '</p><h3 style="margin-top:6px">' + esc(c.name || 'Order') + '</h3><p class="sub">' + new Date(x.at).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</p>' +
-      '<div class="kv">' + [['Contact', c.person], ['Phone', c.phone], ['Location', c.site], ['Delivery', c.delivery === 'deliver' ? 'Deliver' : 'Collect from shop'], ['Needed by', c.by], ['Payment', c.pay], ['Note', c.note]].filter(r => r[1]).map(r => '<div><span>' + r[0] + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
-      '<div class="kv osum">' + x.lines.map(l => '<div><span style="color:var(--hd)">' + esc(l.n) + shortOf(l) + '</span><b>× ' + nfmt(l.q) + '</b></div>').join('') + '</div>' +
-      '<button class="btn btn--red btn--full" style="margin-top:16px" data-k="pdf">' + I.pdf + 'Order form (PDF)</button>' +
-      '<div class="prow2"><button class="btn btn--ghost" data-k="pdfshop">' + I.pdf + 'PDF to shop</button><button class="btn btn--ghost" data-k="pdfcust">' + I.pdf + 'PDF to customer</button></div>' +
-      '<div class="prow2"><button class="btn btn--wa" data-k="wa">' + I.wa + 'Send again</button><button class="btn btn--ghost" data-k="cust">' + I.share + 'Text to customer</button></div>' +
-      '<div class="prow2"><button class="btn btn--ghost" data-k="repeat">' + I.sync + 'Repeat order</button><button class="btn btn--ghost" data-k="del">' + I.trash + 'Delete</button></div></div>');
-    body.addEventListener('click', e => {
+  function viewOrder(id) {
+    const x = getOrders().find(z => z.id === id);
+    if (!x) return null;
+    const c = x.cust, tt = totals(x.lines, true);
+    const kv = [[t('Placed on'), new Date(x.at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })], [t('Name'), c.name], [t('Phone'), c.phone], [t('Location'), c.site],
+      [t('Delivery'), BAM ? '' : c.delivery === 'deliver' ? t('Deliver') : t('Collect from shop')], [t('Payment'), c.pay ? t(c.pay) : ''], ['Needed by', c.by], ['Contact', c.person], [t('Note'), c.note]].filter(r => r[1]);
+    const el = h('<section>' + pageHead(x.no, '', t('All orders')) + '<div class="view__pad">' +
+      '<div class="card kv2">' + kv.map(r => '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>').join('') +
+        '<div class="sum__r sum__r--total"><span>' + esc(t('Total')) + '</span><b>' + (tt.priced ? money(tt.sum) : esc(cnt(tt.items, 'item') + ' · ' + pcs(tt.q))) + '</b></div>' +
+        (tt.priced && tt.ask ? '<p class="sum__n">' + esc(t('{n} on request, quoted separately', { n: cnt(tt.ask, 'item') })) + '</p>' : '') + '</div>' +
+      '<div class="lines lines--ro">' + x.lines.map(l => { const o = lineProduct(l);
+        return '<div class="line">' + photo(lineImg(l, o), l.n) + '<div class="line__t"' + (o ? ' ' + openAttr(o) : '') + '><b>' + esc(lineName(l)) + '</b><span class="line__s">' + (lb(l) ? esc([l.c, ts(l.s), 'qty ' + nfmt(l.q)].filter(Boolean).join(' · ')) : lineSub(l, o, true)) + '</span>' +
+          (lb(l) ? '<span class="line__p">' + (l.p != null ? money(round2(l.p * l.q)) : '<em>' + esc(t('On request')) + '</em>') + '</span>' : '<span class="line__q">× ' + nfmt(l.q) + '</span>') + '</div></div>'; }).join('') + '</div>' +
+      '<button class="btn btn--main btn--full btn--big" data-k="pdf">' + I.pdf + esc(t('Order form (PDF)')) + '</button>' +
+      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BAM ? 'Send on WhatsApp' : 'Send to the shop on WhatsApp')) + '</button>' +
+      '<button class="btn btn--ghost btn--full" data-k="copy">' + I.copy + esc(t('Copy order as text')) + '</button>' +
+      '<button class="btn btn--ghost btn--full" data-k="repeat">' + I.sync + esc(t('Repeat order')) + '</button>' +
+      '<button class="btn btn--danger btn--full" data-k="del">' + I.trash + esc(t('Delete order')) + '</button>' +
+      '</div></section>');
+    el.addEventListener('click', e => {
       const b = e.target.closest('[data-k]'); if (!b) return;
       const k = b.dataset.k;
-      if (k === 'wa') open(waLink(WA, orderMsg(x)));
-      else if (k === 'pdf') sharePdf(x, '');
-      else if (k === 'pdfshop') sharePdf(x, 'shop');
-      else if (k === 'pdfcust') sharePdf(x, c.phone);
-      else if (k === 'cust') { closeSheet(); setTimeout(() => sendTo('Send a copy to the customer', orderMsgCustomer(x), c.phone), 380); }
+      if (k === 'pdf') orderPdf(x, 'view');
+      else if (k === 'wa') orderPdf(x, 'wa');
+      else if (k === 'copy') copy(orderText(x), t('Order copied'));
       else if (k === 'repeat') {
-        const load = () => { lines = x.lines.map(l => Object.assign({}, l)); cust = Object.assign({}, c, { by: '', note: '' }); store.set('ft-cust', cust); saveLines(); refreshMarks(); closeSheet(); switchTab('cart'); const cv = stacks.cart[0]; cv && cv.refresh(); toast('Order copied into the cart. Change anything, then place it.'); };
-        if (lines.length) { closeSheet(); setTimeout(() => confirmSheet('Replace the cart?', 'The cart already has ' + countWord(lines.length, 'item') + '. They will be replaced by this order.', 'Replace', load), 380); } else load();
+        const load = () => {
+          lines = x.lines.filter(l => lineProduct(l)).map(l => { const z = Object.assign({}, l); if (lb(l)) z.p = linePrice(l); return z; });
+          cust = Object.assign({}, c, { note: '' }); store.set(K.cust, cust); saveLines(); lines.forEach(afterChange);
+          resetTab('cart'); const cv = stacks.cart[0]; if (cv) cv.refresh();
+          switchTab('cart'); toast(t('Order copied into the cart'));
+        };
+        if (lines.length) confirmSheet(t('Replace the cart?'), t('The cart already has {n}. They will be replaced by this order.', { n: cnt(lines.length, 'item') }), t('Replace'), load); else load();
       }
-      else if (k === 'del') { closeSheet(); setTimeout(() => confirmSheet('Delete order ' + x.no + '?', 'It is only removed from this phone. The WhatsApp message stays.', 'Delete', () => { store.set('ft-orders', store.get('ft-orders', []).filter(z => z.id !== id)); const ov = stacks.orders[0]; if (ov) ov.refresh(); toast('Order deleted'); }), 380); }
+      else if (k === 'del') confirmSheet(t('Delete order {no}?', { no: x.no }), t('It is only removed from this phone.'), t('Delete'), () => {
+        putOrders(getOrders().filter(z => z.id !== id)); const ov = stacks.orders[0]; if (ov) ov.dirty = true; pop(); toast(t('Order deleted'));
+      });
     });
-    openSheet(body);
+    return { el };
   }
 
-  /* catalogue status and updates, shown at the end of Home */
-  function catalogueBox() {
-    if (!N) return '<div class="kv"><div><span>Products</span><b>' + nfmt(P.length) + ' in ' + CATS.length + ' ranges</b></div><div><span>List</span><b>Always the newest from the website</b></div><div><span>Works offline</span><b>Yes, the products and photos you have opened</b></div></div>' +
-      '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + 'Check for new products</button>';
-    const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
-    return '<div class="kv"><div><span>Products</span><b>' + nfmt(P.length) + ' in ' + CATS.length + ' ranges</b></div><div><span>List</span><b>' + (ch ? 'Updated from the website ' + when(ch) : 'As packed in the app') + '</b></div><div><span>Last check</span><b>' + (ck ? when(ck) : 'Not yet') + '</b></div><div><span>Works offline</span><b>Yes, all products and photos</b></div></div>' +
-      '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + 'Check for new products</button>';
+  /* ================= PDFs (Bait Al Maqdis's printed catalogues) ================= */
+  function viewPdfs() {
+    const list = window.BAM_DATA.pdfs || [];
+    const el = h('<section>' + pageHead(t('PDFs')) + '<div class="view__pad"><p class="hint">' + esc(t('Catalogues to open or send')) + '</p>' + list.map((p, i) =>
+      '<div class="card pdfc tile" style="animation-delay:' + i * 60 + 'ms"><div class="pdfc__h">' + I.pdf + '<div><b>' + esc(t(p.title)) + '</b><span>' + esc(t(p.sub)) + ' · ' + p.mb + ' MB</span></div></div>' +
+      '<div class="pdfc__b"><button class="btn btn--ghost" data-pdf="' + i + '" data-how="open">' + esc(t('Open')) + '</button><button class="btn btn--main" data-pdf="' + i + '" data-how="share">' + I.share + esc(t('Share')) + '</button></div></div>').join('') + '</div></section>');
+    el.addEventListener('click', e => {
+      const b = e.target.closest('[data-pdf]'); if (!b) return;
+      const p = list[+b.dataset.pdf], path = 'bam/' + p.file;
+      if (N && N.viewAsset && b.dataset.how === 'open') N.viewAsset(path);
+      else if (N && N.shareAsset) N.shareAsset(path, p.title);
+      else if (window.FT_PDF_VIEW) fetch(path).then(r => r.arrayBuffer()).then(buf => window.FT_PDF_VIEW(new Uint8Array(buf), p.title));
+      else if (b.dataset.how === 'open') window.open(path, '_blank');
+      else shareWebFile(path, p.title);
+    });
+    return { el };
+  }
+  async function shareWebFile(path, title) {
+    try {
+      const blob = await (await fetch(path)).blob(), name = path.split('/').pop();
+      const file = new File([blob], name, { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title }).catch(() => {});
+    } catch (e) {}
+    const a = document.createElement('a'); a.href = path; a.download = path.split('/').pop(); document.body.appendChild(a); a.click(); a.remove();
   }
 
   /* ================= sheet ================= */
@@ -1119,20 +1407,20 @@
     p.addEventListener('touchend', () => { if (y0 === null) return; p.style.transition = ''; p.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; });
   })();
   function confirmSheet(title, text, act, fn) {
-    const b = h('<div><h3>' + esc(title) + '</h3><p class="sub">' + esc(text) + '</p><div class="prow2"><button class="btn btn--ghost" data-close>Cancel</button><button class="btn btn--red" data-ok>' + esc(act) + '</button></div></div>');
+    const b = h('<div><h3>' + esc(title) + '</h3><p class="sub">' + esc(text) + '</p><div class="prow2"><button class="btn btn--ghost" data-close>' + esc(t('Cancel')) + '</button><button class="btn btn--main" data-ok>' + esc(act) + '</button></div></div>');
     $('[data-ok]', b).onclick = () => { closeSheet(); fn(); };
-    $('[data-close]', b).onclick = closeSheet;
     openSheet(b);
   }
 
   /* ================= zoom (pinch, drag, double-tap) ================= */
   let zs = 1, zx = 0, zy = 0;
-  const zimg = $('#zoom img');
+  const zimg = $('#zoom .zoom__img img');
+  $('.zoom__hint').textContent = t('Pinch or double-tap to zoom');
   function zoom(src) {
-    const z = $('#zoom'); zimg.src = src; zs = 1; zx = 0; zy = 0; apply();
+    const z = $('#zoom'); zimg.src = src; zs = 1; $('.wm', z).hidden = /^bam\//.test(src);   // the Fakhri Tools mark only on Fakhri Tools photos zx = 0; zy = 0; apply();
     z.hidden = false; $('.zoom__hint', z).style.opacity = 1;
     setTimeout(() => { $('.zoom__hint', z).style.opacity = 0; }, 2200);
-    if (!reduce) z.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.16,1,.3,1)' });
+    if (!reduce) z.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.16,1,.3,1)' });
   }
   function closeZoom() { const z = $('#zoom'); if (reduce) { z.hidden = true; return; } z.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200 }).onfinish = () => { z.hidden = true; }; }
   function apply() { zimg.style.transformOrigin = 'center'; zimg.style.transform = 'translate(' + zx + 'px,' + zy + 'px) scale(' + zs + ')'; }
@@ -1141,7 +1429,7 @@
     z.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeZoom(); });
     z.addEventListener('pointerdown', e => { if (e.target.closest('[data-close]')) return; z.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
       if (pts.size === 2) { const [a, b] = [...pts.values()]; d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); s0 = zs; }
-      if (pts.size === 1) { const now = Date.now(); if (now - last < 300) { zs = zs > 1.2 ? 1 : 2.6; if (zs === 1) { zx = 0; zy = 0; } zimg.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1)'; apply(); setTimeout(() => zimg.style.transition = '', 360); } last = now; px = e.clientX; py = e.clientY; }
+      if (pts.size === 1) { const now = Date.now(); if (now - last < 300) { zs = zs > 1.2 ? 1 : 2.6; if (zs === 1) { zx = 0; zy = 0; } zimg.style.transition = 'transform .35s cubic-bezier(.16,1,.3,1)'; apply(); setTimeout(() => { zimg.style.transition = ''; }, 360); } last = now; px = e.clientX; py = e.clientY; }
     });
     z.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
       if (pts.size === 2) { const [a, b] = [...pts.values()]; zs = Math.max(1, Math.min(5, s0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / d0)); apply(); }
@@ -1151,77 +1439,31 @@
     z.addEventListener('pointerup', up); z.addEventListener('pointercancel', up);
   })();
 
-  /* ================= show the customer: full-screen swipe through a range ================= */
-  function present(list, start, title) {
-    if (!list.length) return;
-    const p = $('#present');
-    p.innerHTML = '<div class="pr__top"><span class="mono">' + esc(title) + ' · <b id="prN">1</b> / ' + list.length + '</span><button class="ib" data-close aria-label="Close">' + I.x + '</button></div><div class="pr__prog"><i></i></div>' +
-      '<div class="pr__track">' + list.map(o => '<div class="pr__s">' + photo(o.img, o.name) + (o.img ? WM : '') + '<div class="pr__info"><small>' + esc(o.c.name) + '</small><b>' + esc(o.name) + '</b></div></div>').join('') + '</div>' +
-      '<div class="pr__bot"><button class="btn btn--red" data-padd>' + I.plus + 'Add to cart</button><button class="btn btn--ghost" style="background:var(--ink)" data-pshare>' + I.share + 'Send</button></div>';
-    $('#toast').classList.remove('is-on');
-    p.hidden = false; document.body.classList.add('is-nobar', 'is-presenting'); p.classList.remove('is-clean');
-    wirePhotos(p);
-    const tr = $('.pr__track', p);
-    let cur = start;
-    const upd = () => { const i = Math.round(tr.scrollLeft / tr.clientWidth); { cur = Math.max(0, Math.min(list.length - 1, i)); $('#prN', p).textContent = cur + 1; $('.pr__prog i', p).style.transform = 'scaleX(' + ((cur + 1) / list.length) + ')'; } };
-    requestAnimationFrame(() => { tr.scrollLeft = start * tr.clientWidth; upd(); });
-    tr.addEventListener('scroll', () => requestAnimationFrame(upd), { passive: true });
-    p.onclick = e => {
-      if (e.target.closest('[data-close]')) return closePresent();
-      if (e.target.closest('[data-padd]')) { quickAddFromPresent(list[cur]); return; }
-      if (e.target.closest('[data-pshare]')) { const o = list[cur]; share(o.name, productText(o), o.img); return; }
-      if (e.target.closest('.pr__s')) p.classList.toggle('is-clean');
-    };
-    if (!reduce) p.animate([{ opacity: 0, transform: 'scale(1.04)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
-  }
-  function quickAddFromPresent(o) {
-    if (!hasChoices(o)) { addLines(o, picker(o).read(), 1); updateBadge(true); buzz(); toast('Added: ' + o.name); return; }
-    const pk = picker(o), q = qtyBox(1);
-    const body = h('<div><div class="shead">' + photo(o.img, o.name) + '<div><span class="mono" style="color:var(--steel)">' + esc(o.c.name) + '</span><b>' + esc(o.name) + '</b></div></div><div id="spk"></div><div class="addrow"><div id="sq"></div><button class="btn btn--red" id="sadd">' + I.plus + 'Add to cart</button></div></div>');
-    $('#spk', body).appendChild(pk.el); $('#sq', body).replaceWith(q.el);
-    $('#sadd', body).onclick = () => { if (!pk.check()) return; addLines(o, pk.read(), q.get()); updateBadge(true); buzz(); closeSheet(); toast('Added: ' + o.name); };
-    openSheet(body);
-  }
-  function closePresent() {
-    const p = $('#present');
-    document.body.classList.remove('is-nobar', 'is-presenting');
-    const done = () => { p.hidden = true; p.innerHTML = ''; };
-    if (reduce) return done();
-    p.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.97)' }], { duration: 260, easing: 'ease-in' }).onfinish = done;
-  }
-
-  /* ================= online / updates ================= */
-  let syncing = false;
-  function refreshNet(sync) {
-    if (sync !== undefined) syncing = sync;
-    const n = $('#net'); if (!n) return;
-    const on = N && N.online ? N.online() : navigator.onLine;
-    n.className = 'net' + (syncing ? ' is-sync' : on ? ' is-on' : '');
-    $('em', n).textContent = syncing ? 'Updating' : on ? 'Online' : 'Offline';
-  }
-  addEventListener('online', () => refreshNet()); addEventListener('offline', () => refreshNet());
-  function reloadKeepingPlace() { try { sessionStorage.setItem('ft-reload', '1'); } catch (e) {} location.reload(); }
+  /* ================= online / updates (Fakhri Tools list) ================= */
+  function reloadKeepingPlace() { saveRoutes(); try { sessionStorage.setItem('ft-reload', '1'); } catch (e) {} location.reload(); }
   let asked = false;
-  const FT = window.FT = {
+  window.FT = {
     back,
-    pdfData: id => { const x = store.get('ft-orders', []).find(z => z.id === id); return x ? orderPdfData(x) : null; },   // used by the automated test
+    brand: brandId,
+    pdfData: id => { const x = getOrders().find(z => z.id === id); return x ? pdfData(x) : null; },   // used by the automated test
+    orderText: id => { const x = getOrders().find(z => z.id === id); return x ? orderText(x) : null; },
+    top: () => { const v = top(); return v ? v.el : null; },
     onSync(r) {
-      refreshNet(false);
       const cb = $('#catBox'); if (cb) cb.innerHTML = catalogueBox();
-      if (r === 'updated' || r === 'updated-partial') toast('New products from the shop are ready', 'Refresh', reloadKeepingPlace, 12000);
-      else if (r === 'same' && asked) toast('You already have the newest list');
-      else if (r === 'offline') toast('No internet. The saved catalogue still works.');
-      else if (r === 'failed' && asked) toast('Could not reach the website. Try again later.');
+      if (!FCATS.length && r !== 'updated') return;
+      if (r === 'updated' || r === 'updated-partial') toast(t('New products from the shop are ready'), t('Refresh'), reloadKeepingPlace, 12000);
+      else if (r === 'same' && asked) toast(t('You already have the newest list'));
+      else if (r === 'offline') toast(t('No internet. The saved catalogue still works.'));
+      else if (r === 'failed' && asked) toast(t('Could not reach the website. Try again later.'));
       asked = false;
     }
   };
   document.addEventListener('click', e => {
     const b = e.target.closest('#syncBtn'); if (!b) return;
-    if (!N || !N.syncNow) { b.innerHTML = '<span class="spin"></span>Checking…'; reloadKeepingPlace(); return; }
-    asked = true; b.innerHTML = '<span class="spin"></span>Checking…'; refreshNet(true); N.syncNow();
+    b.innerHTML = '<span class="spin"></span>' + esc(t('Checking…'));
+    if (!N || !N.syncNow) { reloadKeepingPlace(); return; }
+    asked = true; N.syncNow();
   });
-  // "Browse products" from the cart or the order form goes to Home > All ranges
-  document.addEventListener('click', e => { if (e.target.closest('[data-browse]')) { if (!$('#sheet').hidden) closeSheet(); switchTab('home'); setTimeout(() => { if (!stacks.home.some(v => v.route === 'cats')) go('cats'); }, 520); } });
   // keyboard up (the page gets much shorter): hide the tab bar so the form has room
   let tallest = innerHeight, wide = innerWidth;
   addEventListener('resize', () => {
@@ -1234,33 +1476,30 @@
   updateBadge();
   let restore = null;
   try { if (sessionStorage.getItem('ft-reload')) { restore = JSON.parse(sessionStorage.getItem('ft-routes') || 'null'); sessionStorage.removeItem('ft-reload'); } } catch (e) {}
-  if (restore && restore.st) {
-    TABS.forEach(t => (restore.st[t] || []).forEach((r, i) => { tab = t; try { const v = build(r); stage.appendChild(v.el); stacks[t].push(v); show(v, false); } catch (e) {} }));
-    tab = restore.tab && stacks[restore.tab].length ? restore.tab : 'home';
+  if (restore && restore.st && restore.brand === brandId) {
+    TABS.forEach(tb => (restore.st[tb] || []).forEach(r => { tab = tb; try { const v = build(r); stage.appendChild(v.el); stacks[tb].push(v); show(v, false); } catch (e) {} }));
+    tab = restore.tab && stacks[restore.tab] && stacks[restore.tab].length ? restore.tab : 'home';
     if (!stacks.home.length) { const v = build('home'); stage.appendChild(v.el); stacks.home.push(v); show(v, false); }
     const t0 = tab; tab = ''; switchTab(t0);
-    $('#splash').remove(); document.body.classList.remove('is-booting');
-    toast('Catalogue updated: ' + nfmt(P.length) + ' products');
+    const s = $('#splash'); if (s) s.remove(); document.body.classList.remove('is-booting');
   } else {
     const hv = build('home'); stage.appendChild(hv.el); stacks.home.push(hv); show(hv, true);
     $('#tabInk').style.transform = 'translateX(0)';
-    splash(() => hv.intro());
+    splash();
   }
 
-  function splash(done) {
+  // opening: the branch's logo on its own colour, then the app rises into place
+  function splash() {
     const s = $('#splash');
-    if (reduce) { s.remove(); document.body.classList.remove('is-booting'); done(); return; }
+    if (!s) return;
+    $('.sp__logo', s).src = BAM ? 'bam/logo.png' : 'img/logo-lockup.png';
+    if (reduce) { s.remove(); document.body.classList.remove('is-booting'); return; }
     const ease = 'cubic-bezier(.16,1,.3,1)';
-    $('.sp__glow', s).animate([{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 1200, easing: ease, fill: 'forwards' });
-    $('.sp__mark', s).animate([{ transform: 'none' }, { transform: 'translateY(-46px) scale(.82) rotate(0deg)' }], { duration: 900, delay: 120, easing: ease, fill: 'forwards' });
-    $('.sp__line span', s).animate([{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: 800, delay: 380, easing: ease, fill: 'forwards' });
-    $('.sp__sub span', s).animate([{ transform: 'translateY(120%)' }, { transform: 'none' }], { duration: 800, delay: 520, easing: ease, fill: 'forwards' });
-    $('.sp__word', s).animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-46px)' }], { duration: 900, delay: 120, easing: ease, fill: 'forwards' });
-    $('.sp__bar i', s).animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1100, delay: 200, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
+    $('.sp__logo', s).animate([{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'none' }], { duration: 700, easing: ease, fill: 'forwards' });
+    $('.sp__bar i', s).animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 900, delay: 150, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' });
     setTimeout(() => {
       document.body.classList.remove('is-booting');
-      done();
-      s.animate([{ opacity: 1, clipPath: 'inset(0 0 0 0)' }, { opacity: 1, clipPath: 'inset(0 0 100% 0)' }], { duration: 750, easing: 'cubic-bezier(.76,0,.24,1)', fill: 'forwards' }).onfinish = () => s.remove();
-    }, 1550);
+      s.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-in', fill: 'forwards' }).onfinish = () => s.remove();
+    }, 1150);
   }
 })();
