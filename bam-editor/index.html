@@ -40,7 +40,7 @@
   header h1 b { color:var(--or); }
   header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 320px; min-width:200px; font-weight:700; color:var(--ink); background:#fff; }
   header input[type=search] { padding:10px 14px; border-radius:12px; border:0; flex:0 1 300px; min-width:180px; color:var(--ink); }
-  .spacer { flex:1; }
+  .hbtns { display:flex; flex-wrap:wrap; gap:10px; margin-left:auto; }
   .count { font-size:15px; opacity:.85; }
   .notice { margin:14px 20px 0; padding:12px 18px; border-radius:14px; background:#fff; border:2px solid #b9e4c9; }
   .notice b { color:var(--green); }
@@ -55,6 +55,8 @@
   .catbox .ph { width:120px; height:120px; border-radius:18px; flex:0 0 auto; }
   .catbox .fields { flex:1 1 300px; display:grid; gap:8px; }
   .catbox .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .catbox.is-new { box-shadow:inset 0 0 0 2px #7cc79a; }
+  .newcat { color:var(--green); font-weight:700; font-size:15px; }
   label.lb { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:3px; }
   .in { width:100%; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; background:#fff; }
   .in:focus { outline:none; border-color:var(--or); box-shadow:0 0 0 3px rgba(238,122,20,.18); }
@@ -78,7 +80,7 @@
   .card.is-changed { box-shadow:inset 0 0 0 2px #f2b46b; }
   .card.drag { opacity:.4; }
   .card.over { border-color:var(--or); border-style:dashed; }
-  .tag { position:absolute; top:10px; right:12px; font-size:12px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+  .tag { position:absolute; z-index:2; top:10px; right:12px; font-size:12px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
   .tag.new { background:#e3f5ea; color:var(--green); }
   .tag.ch { background:#fdf0e1; color:var(--or-d); }
   .where { font-size:13px; color:var(--muted); font-weight:700; }
@@ -127,6 +129,7 @@
     header { position:static; padding:12px 14px; }
     header h1 { width:100%; font-size:19px; }
     header select, header input[type=search] { flex:1 1 100%; min-width:0; }
+    .hbtns { width:100%; margin-left:0; }
     header .btn { flex:1 1 auto; padding:10px 12px; font-size:15px; }
     .notice, .catbox { margin-left:12px; margin-right:12px; }
     details.help { padding:12px 14px; }
@@ -158,17 +161,20 @@
   <select id="cat" aria-label="Category"></select>
   <input id="q" type="search" placeholder="Search all products, sizes or part numbers" aria-label="Search">
   <span class="count" id="count"></span>
-  <span class="spacer"></span>
-  <button class="btn ghost" id="newSec">New group</button>
-  <button class="btn ghost" id="undo">Undo</button>
-  <button class="btn ghost" id="reset">Start over</button>
-  <button class="btn or" id="save">Save changes file</button>
+  <div class="hbtns">
+    <button class="btn ghost" id="newCat">New category</button>
+    <button class="btn ghost" id="newSec">New group</button>
+    <button class="btn ghost" id="undo">Undo</button>
+    <button class="btn ghost" id="reset">Start over</button>
+    <button class="btn or" id="save">Save changes file</button>
+  </div>
 </header>
 <div class="notice" id="notice"></div>
 <details class="help" id="help">
   <summary>How to use the editor</summary>
   <p>Pick a category at the top, or search for any product or part number. Type straight into the boxes to change a name, a size, a part number or a price. Leave a price empty if it is on request.</p>
   <p><b>+ Add size</b> adds a line to a product, and <b>✕</b> removes a line. <b>+ Add product</b> adds a new card to a group, <b>Copy</b> makes a second card with the same details, and <b>Delete</b> removes a card. Move a card with the <b>↑ ↓</b> buttons, by dragging it on a computer, or to another group with <b>Move to</b>.</p>
+  <p><b>New category</b> makes a whole new product range (like Hoses or Safety Items) with its first group; then add its products with <b>+ Add product</b>, and give it a picture at the top. <b>New group</b> adds a group inside the category you are in.</p>
   <p>To change a photo, tap it and choose a photo, drop a photo on it, or click the card and press Ctrl+V. The category picture at the top works the same way.</p>
   <p>Your work is kept on this phone or computer if you close the page. When you finish, press <b>Save changes file</b> and send the file you get. New cards show a green edge and changed cards an orange edge.</p>
 </details>
@@ -179,7 +185,8 @@
       <div><label class="lb" for="catName">Category name</label><input class="in" id="catName" maxlength="80"></div>
       <div><label class="lb" for="catAr">Arabic name</label><input class="in" id="catAr" dir="rtl" maxlength="80"></div>
     </div>
-    <div class="row"><button class="sbtn" id="coverPick" type="button">Change category picture</button><button class="sbtn" id="newSec2" type="button">+ New group</button></div>
+    <div class="row"><button class="sbtn" id="coverPick" type="button">Change category picture</button><button class="sbtn" id="newSec2" type="button">+ New group</button><button class="sbtn" id="newCat2" type="button">+ New category</button><button class="sbtn del" id="delCat" type="button" hidden>Remove this category</button></div>
+    <div class="newcat" id="newCatNote" hidden>New category: it goes into the app when you send the changes file.</div>
   </div>
 </div>
 <div id="grid"></div>
@@ -190,7 +197,7 @@
 <div class="modal" id="modal" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="mTitle"><h2 id="mTitle"></h2><div id="mBody"></div><div class="modal__btns" id="mBtns"></div></div></div>
 <input type="file" id="file" accept="image/*" hidden>
 
-<script>window.BAM_BUILD = "66f1ecbc3a34-2610211857";</script>
+<script>window.BAM_BUILD = "66f1ecbc3a34-2610211910";</script>
 <script>
 'use strict';
 (() => {
@@ -306,8 +313,8 @@
   function undo() {
     const s = history.pop(); if (!s) return;
     const o = JSON.parse(s); state.cats = o.cats; state.dirty = o.dirty; state.seq = o.seq;
-    if (cur >= state.cats.length) cur = 0;
-    persist(); render(); note(); toast('Undone');
+    if (cur >= state.cats.length) cur = state.cats.length - 1;
+    persist(); buildCatSelect(); render(); note(); toast('Undone');
     $('#undo').disabled = $('#undo2').disabled = !history.length;
   }
 
@@ -347,7 +354,7 @@
   }
   function buildCatSelect() {
     const s = $('#cat');
-    s.innerHTML = state.cats.map((c, i) => '<option value="' + i + '">' + esc(c.name) + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')</option>').join('');
+    s.innerHTML = state.cats.map((c, i) => '<option value="' + i + '">' + catLabel(c) + '</option>').join('');
     s.value = cur;
   }
   const total = () => state.cats.reduce((a, c) => a + c.secs.reduce((b, s) => b + s.items.length, 0), 0);
@@ -393,6 +400,8 @@
     }
     const c = cat();
     $('#catName').value = c.name; $('#catAr').value = c.ar || '';
+    const empty = !c.secs.some(s => s.items.length);
+    $('#catbox').classList.toggle('is-new', !!c.isNew); $('#newCatNote').hidden = !c.isNew; $('#delCat').hidden = !(c.isNew && empty);
     const ci = cur;
     $('#coverImg').dataset.p = c.cover || ''; $('#coverImg').removeAttribute('src');
     $('#coverPh').classList.toggle('empty', !c.cover); $('#coverHint').textContent = c.cover ? 'Change category picture' : 'No picture yet: tap to add one';
@@ -406,7 +415,8 @@
     fillPhotos(g);
     buildCatSelectCounts();
   }
-  function buildCatSelectCounts() { [...$('#cat').options].forEach((o, i) => { const c = state.cats[i]; o.textContent = c.name + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')'; }); }
+  function buildCatSelectCounts() { [...$('#cat').options].forEach((o, i) => { const c = state.cats[i]; if (c) o.textContent = catLabel(c); }); }
+  const catLabel = c => esc((c.name || 'New category') + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')' + (c.isNew ? ' · new' : ''));
 
   /* ---------- typing ---------- */
   let typingSnap = null;
@@ -573,6 +583,29 @@
     setTimeout(() => $('#nsName').focus(), 50);
   };
   $('#newSec').addEventListener('click', newSec); $('#newSec2').addEventListener('click', newSec);
+  const newCat = () => {
+    $('#q').value = '';
+    modal('New category', '<p>A whole new product range, with its first group. You can add more groups after.</p>' +
+      '<p><label class="lb" for="ncName">Category name</label><input class="in" id="ncName" maxlength="80" placeholder="For example: Power Tools"></p>' +
+      '<p><label class="lb" for="ncAr">Arabic name (optional)</label><input class="in" id="ncAr" dir="rtl" maxlength="80"></p>' +
+      '<p><label class="lb" for="ncSec">First group name</label><input class="in" id="ncSec" maxlength="80" placeholder="For example: Drills"></p>' +
+      '<p><label class="lb" for="ncSecAr">Arabic group name (optional)</label><input class="in" id="ncSecAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Make category', () => {
+      const n = $('#ncName').value.trim(), sn = $('#ncSec').value.trim();
+      if (!n) { $('#ncName').focus(); return; }
+      if (state.cats.some(c => (c.name || '').trim().toLowerCase() === n.toLowerCase())) { toast('There is already a category called ' + n); $('#ncName').focus(); return; }
+      if (!sn) { $('#ncSec').focus(); return; }
+      const ar = $('#ncAr').value.trim(), sar = $('#ncSecAr').value.trim(); closeModal();
+      change(() => { const seq = ++state.seq; state.cats.push({ id: 'new-' + seq, isNew: true, name: n, ar, cover: '', secs: [{ k: 's' + (++state.seq), n: sn, ar: sar, items: [] }] }); });
+      cur = state.cats.length - 1; sel = null; buildCatSelect(); render(); window.scrollTo(0, 0);
+      toast('Category made: press + Add product to fill it');
+    }, 'or']]);
+    setTimeout(() => $('#ncName').focus(), 50);
+  };
+  $('#newCat').addEventListener('click', newCat); $('#newCat2').addEventListener('click', newCat);
+  $('#delCat').addEventListener('click', () => {
+    const c = cat(); if (!c.isNew || c.secs.some(s => s.items.length)) return;
+    change(() => state.cats.splice(cur, 1)); cur = Math.max(0, cur - 1); buildCatSelect(); render(); toast('Category removed', 'Undo');
+  });
   $('#undo').addEventListener('click', undo); $('#undo2').addEventListener('click', undo);
   $('#undo').disabled = $('#undo2').disabled = true;
   document.addEventListener('keydown', ev => { if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !(ev.target.matches && ev.target.matches('input'))) { ev.preventDefault(); undo(); } });
@@ -590,9 +623,10 @@
     out.forEach(c => {
       c.name = t(c.name) || c.name; c.ar = t(c.ar) || '';
       if (!c.name) errs.push('A category has no name.');
+      const none = !c.secs.some(s => s.items.length);   // a whole category with nothing in it gets one line, below
       c.secs = c.secs.filter(s => {
         s.n = t(s.n) || ''; s.ar = t(s.ar) || '';
-        if (!s.items.length) { warn.push('Group “' + (s.n || 'no name') + '” in ' + c.name + ' has no products, so it is left out.'); return false; }
+        if (!s.items.length) { if (!none) warn.push('Group “' + (s.n || 'no name') + '” in ' + c.name + ' has no products, so it is left out.'); return false; }
         if (!s.n) errs.push('A group in ' + c.name + ' has no name.');
         s.items.forEach(it => {
           it.n = t(it.n) || ''; it.ar = t(it.ar) || '';
@@ -611,12 +645,14 @@
         });
         return true;
       });
+      if (!c.secs.length) warn.push(c.isNew ? 'New category “' + (c.name || 'no name') + '” has no products, so it is left out.' : 'Category “' + c.name + '” has no products left, so it will be taken out of the app.');
     });
+    for (let i = out.length - 1; i >= 0; i--) if (out[i].isNew && !out[i].secs.length) out.splice(i, 1);
     Object.keys(parts).forEach(p => { const l = parts[p]; if (l.length > 1 && l.some(x => x[1])) warn.push('Part number ' + p + ' is used ' + l.length + ' times: ' + l.map(x => x[0]).join('; ') + '.'); });
     return { cats: out, warn, errs };
   }
   function summary(cats) {
-    const now = {}, s = { added: 0, deleted: 0, changed: 0, photos: 0 };
+    const now = {}, s = { added: 0, deleted: 0, changed: 0, photos: 0, cats: cats.filter(c => c.isNew).length };
     cats.forEach(c => c.secs.forEach(x => x.items.forEach(it => { now[it.k] = it; })));
     Object.keys(now).forEach(k => { if (!ORIG[k]) s.added++; else if (ORIG[k] !== JSON.stringify([now[k].n, now[k].ar || '', now[k].img || '', now[k].r, now[k].spec || []])) s.changed++; });
     Object.keys(ORIG).forEach(k => { if (!now[k]) s.deleted++; });
@@ -637,7 +673,7 @@
     state.savedAs = FILE; state.dirty = false; persist(); note();
     const file = typeof File === 'function' ? new File([blob], FILE, { type: 'application/json' }) : null;
     const canShare = file && navigator.canShare && navigator.canShare({ files: [file] });
-    const lines = [sm.added + ' new', sm.changed + ' changed', sm.deleted + ' deleted', sm.photos + ' new photo' + (sm.photos === 1 ? '' : 's')];
+    const lines = (sm.cats ? [sm.cats + ' new categor' + (sm.cats === 1 ? 'y' : 'ies')] : []).concat([sm.added + ' new', sm.changed + ' changed', sm.deleted + ' deleted', sm.photos + ' new photo' + (sm.photos === 1 ? '' : 's')]);
     modal('Changes file saved', '<p class="ok">Saved in Downloads as ' + FILE + '.</p><p>' + lines.join(' · ') + '</p>' +
       (r.warn.length ? '<p><b>Worth a look</b> (the file is saved anyway):</p><ul>' + r.warn.slice(0, 25).map(w => '<li>' + esc(w) + '</li>').join('') + '</ul>' + (r.warn.length > 25 ? '<p>…and ' + (r.warn.length - 25) + ' more.</p>' : '') : '') +
       '<p>Now send the file' + (canShare ? ', for example with the Share button below' : '') + '.</p>',
@@ -660,7 +696,7 @@
   }
   function closeModal() { $('#modal').hidden = true; }
   $('#modal').addEventListener('click', ev => { if (ev.target.id === 'modal') closeModal(); });
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#modal').hidden) closeModal(); if (ev.key === 'Enter' && !$('#modal').hidden && ev.target.id === 'nsName') $('#mBtns .or').click(); });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#modal').hidden) closeModal(); if (ev.key === 'Enter' && !$('#modal').hidden && /^(nsName|nsAr|ncName|ncAr|ncSec|ncSecAr)$/.test(ev.target.id)) $('#mBtns .or').click(); });
 
   if (!window.crypto || !crypto.subtle) { document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">This browser is too old for the editor. Please open the link in Chrome or Safari.</p>'; return; }
   boot();
