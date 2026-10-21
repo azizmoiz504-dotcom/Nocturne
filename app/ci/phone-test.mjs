@@ -37,7 +37,10 @@ function page(ws) {
       first: () => one,
       async click() {
         for (let i = 0; i < 20; i++) {
-          const ok = await evaluate(`(() => { const el = ${finder(sel)}; if (!el) return false; el.scrollIntoView({ block: 'center' }); el.click(); return true; })()`);
+          // a tap while a screen slides in or out is ignored by the app, as on a phone: wait for the slide to end
+          const ok = await evaluate(`(() => { const el = ${finder(sel)}; if (!el) return false;
+            if (${i} < 8 && document.getAnimations && document.getAnimations().some(a => a.playState === 'running' && !(window.CSSAnimation && a instanceof CSSAnimation) && !(window.CSSTransition && a instanceof CSSTransition))) return false;
+            el.scrollIntoView({ block: 'center' }); el.click(); return true; })()`);
           if (ok) return; await wait(500);
         }
         throw new Error('not found: ' + sel);
