@@ -10,12 +10,21 @@ FAILS=0
 log() { echo "$(date +%T) $*" | tee -a $OUT/log.txt; }
 check() { if [ "$1" = 0 ]; then log "PASS $2"; else log "FAIL $2"; FAILS=$((FAILS + 1)); fi; }
 installs() { local r; r=$(timeout 300 "$ADB" install $1 "$2" 2>&1); log "adb install $1: $(echo "$r" | tail -1)"; echo "$r" | grep -q '^Success'; }
+# a few minutes after a fresh emulator starts, Google Play Services updates and restarts itself, and Android
+# closes every app using its font service with it; that is the emulator starting up, not the app
+gmskills() { adb logcat -d 2>/dev/null | grep -c "Killing [0-9]*:$PKG.*depends on provider com.google.android.gms"; }
 opens() {    # tap the home-screen icon, then the app must be on screen and not crashed
+  local k; k=$(gmskills)
   adb shell input keyevent 3; sleep 2
   adb shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1; sleep 12
   adb exec-out screencap -p > "$OUT/$1.png"
   local top; top=$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | tr -d '\r' | tr -s ' \n' ' '); log "on screen: $top"
-  echo "$top" | grep -q "$PKG/"   # shows the icon's name (.MainActivity), not the screen's
+  echo "$top" | grep -q "$PKG/" && return 0   # shows the icon's name (.MainActivity), not the screen's
+  if [ "${2:-}" != again ] && [ "$(gmskills)" -gt "$k" ]; then
+    log "Play Services restarted itself on the test phone and Android closed the app with it; opening again"
+    opens "$1" again; return
+  fi
+  return 1
 }
 version() { adb shell dumpsys package $PKG | grep -m1 -o 'versionName=[^ ]*' | tr -d '\r'; }
 
