@@ -171,6 +171,44 @@ S = {
     'esc': ('Esc', 'Esc'),
     'loading': ('Loading…', 'جارٍ التحميل…'),
     'offline': ('Could not load the search. Check the internet and try again.', 'تعذّر تحميل البحث. تحقّق من الإنترنت وحاول مرة أخرى.'),
+
+    # the new look (v2)
+    'h_products': ('{n} products.', '{n} منتجًا.'),
+    'h_sizes': ('{n} sizes.', '{n} مقاسًا.'),
+    'h_order': ('All in order.', 'وكلّ شيء في مكانه.'),
+    'find_part': ('Find a part number', 'ابحث عن رقم قطعة'),
+    'scroll_sort': ('Scroll to sort', 'مرّر للترتيب'),
+    'sorted_eyebrow': ('{r} ranges · {g} groups', '{r} تشكيلة · {g} مجموعة'),
+    'sorted_h': ('Sorted by trade.', 'مرتّبة حسب المهنة.'),
+    'map_hint': ('Pick a range to open it', 'اختر تشكيلة لفتحها'),
+    'every_range': ('Every range', 'كل التشكيلات'),
+    'every_range_sub': ('{r} ranges in one showroom. Open one to see every product, size and part number.',
+                        '{r} تشكيلة في صالة عرض واحدة. افتح أي تشكيلة لترى كل منتج ومقاس ورقم قطعة.'),
+    'featured': ('Featured range', 'تشكيلة مميزة'),
+    'board_eyebrow': ('Search', 'البحث'),
+    'board_h': ('Search by name, size or part number.', 'ابحث بالاسم أو المقاس أو رقم القطعة.'),
+    'board_sub': ('Every product is listed with its sizes and part numbers. Type any of them.',
+                  'كل منتج مدرج بمقاساته وأرقام قطعه. اكتب أيًّا منها.'),
+    'board_name': ('Parts board', 'لوحة القطع'),
+    'b_product': ('Product', 'المنتج'),
+    'b_range': ('Range', 'التشكيلة'),
+    'try': ('Try', 'جرّب'),
+    'search_big': ('Search {n} products', 'ابحث في {n} منتج'),
+    'req_eyebrow': ('No prices on this website', 'لا أسعار على هذا الموقع'),
+    'req_h': ('Prices on request.', 'الأسعار عند الطلب.'),
+    'example': ('Example', 'مثال'),
+    'sent': ('Sent', 'أُرسل'),
+    'to': ('To', 'إلى'),
+    'books_eyebrow': ('Catalogues', 'الكتالوجات'),
+    'visit_h2': ('Showroom No. 06', 'صالة العرض رقم 06'),
+    'visit_label': ('Visit', 'العنوان'),
+    'phone': ('Phone', 'الهاتف'),
+    'of_n': ('{a} of {b}', '{a} من {b}'),
+    'view': ('View', 'عرض'),
+    'open': ('Open', 'افتح'),
+    'skip_intro': ('Skip', 'تخطّي'),
+    'groups_in': ('Groups in {name}', 'مجموعات {name}'),
+    'back_ranges': ('All ranges', 'كل التشكيلات'),
 }
 
 # Arabic for lines of theirs that their own word list (app/bam/ar.js) does not have yet, in the same style
@@ -187,7 +225,7 @@ JS_KEYS = ['n_sizes', 'one_size', 'size', 'part', 'qty', 'add', 'added', 'add_to
            'removed', 'copied', 'cleared', 'undo', 'added_toast', 'open_list', 'mail_subject', 'mail_hello', 'mail_ask', 'mail_thanks', 'long_mail',
            'print_title', 'print_date', 'print_from', 'print_product', 'print_foot', 'res_products', 'res_groups', 'res_ranges', 'no_results',
            'loading', 'offline', 'n_products', 'one_product', 'f_name', 'f_company', 'f_phone', 'f_note', 'shown', 'none_here', 'brand', 'legal',
-           'address1', 'address2', 'price_note', 'zoom', 'search_all']
+           'address1', 'address2', 'price_note', 'zoom', 'search_all', 'view', 'open', 'b_product', 'b_range', 'skip_intro', 'n_groups', 'one_group']
 
 
 def t(lang, key, **kw):

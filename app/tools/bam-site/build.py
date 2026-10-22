@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Builds the Bait Al Maqdis products website, with no prices, from the private catalogue in app/bam/.
 
-    python3 app/tools/bam-site/build.py [--bam DIR] [--out DIR]
+    python3 app/tools/bam-site/build.py [--bam DIR] [--out DIR] [--design v1|v2]
 
 Writes app/build/bait-al-maqdis/ (default): English pages, Arabic pages in ar/, photos, the printed catalogues
-and a search list. Every link is relative, so the folder works at any address; it is published at
+and a search list. --design v2 builds the new look (v2/templates, v2/static) into app/build/bait-al-maqdis-new/. Every link is relative, so the folder works at any address; it is published at
 <website>/bait-al-maqdis/.
 Prices never leave this script: a product's lines are read as [part no., size] only (public_rows), and
 check_no_prices() looks through everything written before the build counts as done.
@@ -28,6 +28,11 @@ CONTACT = {
     'maps': 'https://www.google.com/maps/search/?api=1&query=' + quote('Bait Al Maqdis Building Materials Trading, Jurf Industrial Zone 1, Ajman'),
 }
 URL = 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis/'   # where it is published: only for the picture shown when a link is shared
+DESIGNS = {   # where each look keeps its pages and files, where it is built and where it is published
+    'v1': {'dir': '.', 'out': 'bait-al-maqdis', 'url': URL},
+    'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis-new/'},
+}
+WALL_CELL, WALL_COLS = 96, 25   # the home page's wall of every product: one small square per product in one picture
 BIG = 100            # a range with at least this many products gets a big tile on the home page
 PHOTO = 640          # longest side of product photos on the site
 SPEC = 1600          # longest side of the specifications pictures
@@ -56,11 +61,12 @@ ICONS = {
     'plus': '<path class="i-plus" d="M12 5v14M5 12h14"/>',
     'check': '<path class="i-check" d="M5 12.5l4.5 4.5L19 7.5"/>',
     'wa': '<path fill="currentColor" stroke="none" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.2-.9.9-.9 2.2s.9 2.6 1.1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.7-.3z"/>',
+    'box': '<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/>',
     'dome': '<path d="M10.5 3.2a1.6 1.6 0 0 0 3 0"/><path d="M12 4.6v2"/><path d="M6.5 13C6.5 9 9 6.6 12 6.6S17.5 9 17.5 13"/><path d="M5.5 13h13M6 13v2M18 13v2M3.5 15h17"/><path d="M6 21v-3a1.5 1.5 0 0 1 3 0v3M10.5 21v-3.5a1.5 1.5 0 0 1 3 0V21M15 21v-3a1.5 1.5 0 0 1 3 0v3M3 21h18"/>',
 }
 
 
-JS_ICONS = ('x', 'arrow', 'plus', 'check', 'mail', 'copy', 'info', 'dome', 'list')   # drawn by the page's script
+JS_ICONS = ('x', 'arrow', 'plus', 'check', 'mail', 'copy', 'info', 'dome', 'list', 'search', 'box')   # drawn by the page's script
 
 
 def icon(name, cls=''):
@@ -94,8 +100,10 @@ def split_words(html):
 
 
 class Site:
-    def __init__(self, bam, out, url=URL):
-        self.bam, self.out, self.url = bam, out, url
+    def __init__(self, bam, out, url=URL, design='v1'):
+        self.bam, self.out, self.url, self.design = bam, out, url, design
+        self.dir = os.path.normpath(os.path.join(HERE, DESIGNS[design]['dir']))
+        self.clean = {}
         self.written = set()
         self.data, ar = load(bam)
         self.dict = ar['dict']
@@ -169,7 +177,7 @@ class Site:
                     ph = self.photo(it['img'], PHOTO) if it.get('img') else None
                     specs = [x for x in (self.photo(sp, SPEC) for sp in (it.get('spec') or [])) if x]
                     p = {'slug': ps, 'name': {'en': it['n'], 'ar': self.ar(it['n']) or it['n']}, 'rows': rows,     # no Arabic name yet: the English one
-                         'img': ph[0] if ph else '', 'w': ph[1] if ph else 0, 'h': ph[2] if ph else 0,
+                         'img': ph[0] if ph else '', 'w': ph[1] if ph else 0, 'h': ph[2] if ph else 0, 'range': c['id'],
                          'square': bool(ph) and it['img'] not in spec_paths and 0.8 <= ph[1] / ph[2] <= 1.25,
                          'specs': [x[0] for x in specs], 'g': gi}
                     if ph and not g['thumb']: g['thumb'] = ph[0]
@@ -236,6 +244,101 @@ class Site:
                            'photos': picks[n::len(ARCHES)] or picks[:1]})
         return arches
 
+    # ---------- the new look (v2): the wall of products, the departures board, the featured ranges ----------
+    def is_clean(self, rel):
+        """a photo on plain white: (nearly) all of its edge is white, so it can stand on the page without its box"""
+        if rel not in self.clean:
+            with Image.open(os.path.join(self.out, rel)) as im:
+                g = im.convert('L'); w, h = g.size; b = max(2, int(min(w, h) * .02))
+                edges = [g.crop((0, 0, w, b)), g.crop((0, h - b, w, h)), g.crop((0, 0, b, h)), g.crop((w - b, 0, w, h))]
+                white = sum(sum(e.histogram()[240:]) for e in edges)
+                self.clean[rel] = white / sum(e.width * e.height for e in edges) >= 0.96
+        return self.clean[rel]
+
+    def wall(self):
+        """every product in one picture, a small square each (in catalogue order), and the list the page needs to place them"""
+        items = [p for r in self.ranges for p in r['items']]
+        rows = -(-len(items) // WALL_COLS)
+        atlas = Image.new('RGB', (WALL_COLS * WALL_CELL, rows * WALL_CELL), (255, 255, 255))
+        pad = int(WALL_CELL * .06)
+        for i, p in enumerate(items):
+            if not p['img']: continue
+            with Image.open(os.path.join(self.out, p['img'])) as im:
+                im = im.convert('RGB'); im.thumbnail((WALL_CELL - 2 * pad, WALL_CELL - 2 * pad), Image.LANCZOS)
+                x, y = (i % WALL_COLS) * WALL_CELL, (i // WALL_COLS) * WALL_CELL
+                atlas.paste(im, (x + (WALL_CELL - im.width) // 2, y + (WALL_CELL - im.height) // 2))
+        dst = self.path('img/wall.webp')
+        atlas.save(dst + '.part', 'WEBP', quality=72, method=6); os.replace(dst + '.part', dst)
+        av = hashlib.sha1(open(dst, 'rb').read()).hexdigest()[:10]
+        rix = {r['id']: i for i, r in enumerate(self.ranges)}
+        first = lambda p: next((c for c, _ in p['rows'] if c), '')
+        tiles = [[rix[p['range']], p['slug'], p['name']['en'], p['name']['ar'], first(p), p['img'], 1 if p['img'] and self.is_clean(p['img']) else 0] for p in items]
+        # the departures board: products with a part number and a size, taken in turn from every range
+        pools = [[p for p in r['items'] if any(c and z for c, z in p['rows'])] for r in self.ranges]
+        for pool in pools: pool.sort(key=lambda p: hashlib.sha1(('b' + p['slug']).encode()).hexdigest())
+        board, i = [], 0
+        while len(board) < 48 and any(pools):
+            pool = pools[i % len(pools)]
+            if pool:
+                p = pool.pop(0); c, z = next((c, z) for c, z in p['rows'] if c and z)
+                board.append([c, p['name']['en'], p['name']['ar'], z, self.ar_size(z), rix[p['range']], p['slug']])
+            i += 1
+        self.board = board
+        data = {'cell': WALL_CELL, 'cols': WALL_COLS, 'src': 'img/wall.webp?v=' + av,
+                'r': [[r['id'], r['name']['en'], r['name']['ar'], r['count']] for r in self.ranges], 't': tiles, 'b': board}
+        text = self.js(data)
+        self.write('data/wall.json', text)
+        self.versions['wall'] = hashlib.sha1(text.encode()).hexdigest()[:10]
+
+    def v2_extras(self):
+        self.wall()
+        for r in self.ranges:
+            clean = [p for p in r['items'] if p['img'] and self.is_clean(p['img'])]
+            pool = [p for p in clean if p['square']] or clean
+            pool = sorted(pool, key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())
+            r['feature'] = pool[:7]
+            r['belt'] = (clean or [p for p in r['items'] if p['img']])[:18]
+        # the example price request on the home page: three real lines from the catalogue
+        demo = []
+        def line(rid, want, q):
+            rng = next((x for x in self.ranges if x['id'] == rid), None)
+            if not rng: return
+            for p in rng['items']:
+                for c, z in p['rows']:
+                    if z and (c == want or not want):
+                        demo.append({'name': p['name'], 'size': {'en': z, 'ar': self.ar_size(z)}, 'pn': c or '', 'q': q, 'img': p['img']}); return
+        line('kapusi', 'K-0026', 6); line('castor', '', 24); line('safety', '', 50)
+        return {'board': self.board[:6], 'demo': demo}
+
+    def og_v2(self, logo):
+        """the picture shown when a link is shared: their logo, the numbers, and a few of their products"""
+        W, H = 1200, 630
+        og = Image.new('RGB', (W, H), (18, 19, 22))
+        m = logo.copy(); m.thumbnail((300, 170), Image.LANCZOS); og.paste(m, (72, 64), m)
+        f = os.path.join(self.dir, 'static', 'fonts', 'archivo-100-900-latin.woff2')
+        from PIL import ImageDraw, ImageFont
+        dr = ImageDraw.Draw(og)
+        big = ImageFont.truetype(f, 70); big.set_variation_by_axes([800, 125])
+        sm = ImageFont.truetype(f, 22); sm.set_variation_by_axes([500, 100])
+        y = 330
+        for txt in ('%d PRODUCTS.' % self.stats['products'], '%s SIZES.' % self.stats['lines_fmt']):
+            dr.text((72, y), txt, font=big, fill=(236, 235, 230)); y += 82
+        dr.rectangle((72, 516, 72 + 64, 522), fill=(255, 90, 31))
+        dr.text((72, 540), 'Jurf Industrial Zone 1, Ajman · Prices on request', font=sm, fill=(154, 158, 166))
+        from PIL import ImageChops
+        picks = []
+        for r in self.ranges:
+            pool = sorted((p for p in r['items'] if p['img'] and p['square'] and self.is_clean(p['img'])), key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())
+            picks += pool[:2 if r['big'] else 1]
+        for k, p in enumerate(picks[:16]):
+            cx, cy = 690 + (k % 4) * 118, 64 + (k // 4) * 128
+            tile = Image.new('RGB', (108, 118), (236, 235, 230)); white = Image.new('RGB', (108, 118), (255, 255, 255))
+            with Image.open(os.path.join(self.out, p['img'])) as im:
+                im = im.convert('RGB'); im.thumbnail((92, 92), Image.LANCZOS)
+                white.paste(im, ((108 - im.width) // 2, (118 - im.height) // 2))
+            og.paste(ImageChops.multiply(tile, white), (cx, cy))
+        og.save(self.path('assets/og.jpg'), quality=86)
+
     # ---------- words ----------
     def summary(self, p, lang):
         rows = p['rows']
@@ -258,14 +361,15 @@ class Site:
     def build(self):
         self.gather()
         books = self.pdfs()
-        arches = self.arcade()
+        arches = self.arcade() if self.design == 'v1' else []
         self.assets()
         year = datetime.date.today().year
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(HERE, 'templates')), autoescape=True, trim_blocks=True, lstrip_blocks=True)
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(self.dir, 'templates')), autoescape=True, trim_blocks=True, lstrip_blocks=True)
         index = self.search_index()
         v = self.versions
         v['index'] = hashlib.sha1(index.encode()).hexdigest()[:10]
         self.write('data/index.json', index)
+        extra = self.v2_extras() if self.design == 'v2' else {}
         for lang in LANGS:
             T = lambda key, **kw: t(lang, key, **kw)
             for r in self.ranges:
@@ -283,12 +387,13 @@ class Site:
                 home = root + ('ar/' if lang == 'ar' else '')
                 other = root + ('' if lang == 'ar' else 'ar/') + (rel[:-len('index.html')])
                 cfg = {'lang': lang, 'root': root, 'home': home, 'index': root + 'data/index.json?v=' + v['index'],
+                       'wall': (root + 'data/wall.json?v=' + v['wall']) if 'wall' in v else '',
                        't': {k: t(lang, k) for k in JS_KEYS}, 'contact': {k: CONTACT[k] for k in ('email', 'phone', 'tel', 'whatsapp')},
                        'page': kind, 'range': r['id'] if r else '', 'icons': {k: ICONS[k] for k in JS_ICONS}}
                 ctx = dict(lang=lang, T=T, icon=icon, split=split_words, root=root, home=home or './', other_url=other or './', page=kind, site_url=self.url,
                            page_url=self.url + full[:-len('index.html')],
                            ranges=self.ranges, stats=self.stats, contact=CONTACT, year=year, v=v, pdfs=books, arches=arches,
-                           config=Markup(self.js(cfg)))
+                           config=Markup(self.js(cfg)), **extra)
                 if kind == 'home':
                     ctx.update(title=T('home_title'), description=T('home_desc', p=self.stats['products'], r=self.stats['ranges']))
                     html = env.get_template('home.html').render(**ctx)
@@ -325,12 +430,18 @@ class Site:
         return self.js({'r': rs, 'g': gs, 'p': ps})
 
     def assets(self):
-        st = os.path.join(HERE, 'static')
+        st = os.path.join(self.dir, 'static')
         self.versions = {}
-        for name in ('site.css', 'site.js'):
+        for name in ('site.css', 'site.js', 'motion.js'):
             src = os.path.join(st, name)
+            if not os.path.isfile(src): continue
             shutil.copyfile(src, self.path('assets/' + name))
-            self.versions[name.split('.')[1]] = hashlib.sha1(open(src, 'rb').read()).hexdigest()[:10]
+            self.versions[name.replace('.', '_') if name == 'motion.js' else name.split('.')[1]] = hashlib.sha1(open(src, 'rb').read()).hexdigest()[:10]
+        if os.path.isdir(os.path.join(st, 'vendor')):
+            vh = hashlib.sha1()
+            for f in sorted(os.listdir(os.path.join(st, 'vendor'))):
+                shutil.copyfile(os.path.join(st, 'vendor', f), self.path('assets/vendor/' + f)); vh.update(open(os.path.join(st, 'vendor', f), 'rb').read())
+            self.versions['vendor'] = vh.hexdigest()[:10]
         fh = hashlib.sha1()
         for f in sorted(os.listdir(os.path.join(st, 'fonts'))):
             shutil.copyfile(os.path.join(st, 'fonts', f), self.path('assets/fonts/' + f)); fh.update(open(os.path.join(st, 'fonts', f), 'rb').read())
@@ -344,11 +455,15 @@ class Site:
         white = Image.new('RGBA', dome.size, (255, 255, 255, 0)); white.putalpha(dome.getchannel('A'))
         white.save(self.path('assets/mark.png'), optimize=True)
         full = Image.new('RGBA', logo.size, (255, 255, 255, 0)); full.putalpha(a); full.save(self.path('assets/logo.png'), optimize=True)
-        for size, bg, rel in ((192, (15, 110, 92), 'assets/icon-192.png'), (512, (15, 110, 92), 'assets/icon-512.png')):
+        ink = (15, 110, 92) if self.design == 'v1' else (18, 19, 22)
+        for size, bg, rel in ((192, ink, 'assets/icon-192.png'), (512, ink, 'assets/icon-512.png')):
             ic = Image.new('RGB', (size, size), bg); m = white.copy(); m.thumbnail((int(size * .68), int(size * .62)), Image.LANCZOS)
             ic.paste(m, ((size - m.width) // 2, (size - m.height) // 2 + int(size * .02)), m); ic.save(self.path(rel), optimize=True)
-        og = Image.new('RGB', (1200, 630), (42, 36, 27)); m = full.copy(); m.thumbnail((640, 400), Image.LANCZOS)
-        og.paste(m, ((1200 - m.width) // 2, (630 - m.height) // 2), m); og.save(self.path('assets/og.jpg'), quality=86)
+        if self.design == 'v1':
+            og = Image.new('RGB', (1200, 630), (42, 36, 27)); m = full.copy(); m.thumbnail((640, 400), Image.LANCZOS)
+            og.paste(m, ((1200 - m.width) // 2, (630 - m.height) // 2), m); og.save(self.path('assets/og.jpg'), quality=86)
+        else:
+            self.og_v2(full)
 
     def prune(self):
         for base, dirs, files in os.walk(self.out, topdown=False):
@@ -371,6 +486,13 @@ def check_no_prices(out, data):
     for p in idx['p']:
         for row in p[5]:
             if len(row) != 3 or (row[2] is not None and not isinstance(row[2], str)): bad.append('index.json line ' + p[0])
+    wall = os.path.join(out, 'data', 'wall.json')
+    if os.path.isfile(wall):    # the new look's wall and board: names, part numbers and sizes only
+        w = json.load(open(wall, encoding='utf-8'))
+        for x in w['t']:
+            if len(x) != 7: bad.append('wall.json product ' + str(x[1]))
+        for x in w['b']:
+            if len(x) != 7 or not isinstance(x[3], str) or not isinstance(x[4], str): bad.append('wall.json board ' + str(x[6]))
     if bad: sys.exit('STOPPED: something that looks like a price was written: ' + ', '.join(sorted(set(bad))[:10]))
     if not priced: sys.exit('STOPPED: empty catalogue')
 
@@ -378,11 +500,13 @@ def check_no_prices(out, data):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--bam', default=os.path.join(APP, 'bam'))
-    ap.add_argument('--out', default=os.path.join(APP, 'build', 'bait-al-maqdis'))
-    ap.add_argument('--url', default=URL, help='the address it is published at, ending in /')
+    ap.add_argument('--design', default='v1', choices=sorted(DESIGNS))
+    ap.add_argument('--out', help='default: app/build/bait-al-maqdis/ (v1) or app/build/bait-al-maqdis-new/ (v2)')
+    ap.add_argument('--url', help='the address it is published at, ending in /')
     a = ap.parse_args()
-    os.makedirs(a.out, exist_ok=True)
-    Site(a.bam, a.out, a.url).build()
+    out = a.out or os.path.join(APP, 'build', DESIGNS[a.design]['out'])
+    os.makedirs(out, exist_ok=True)
+    Site(a.bam, out, a.url or DESIGNS[a.design]['url'], a.design).build()
 
 
 if __name__ == '__main__':
