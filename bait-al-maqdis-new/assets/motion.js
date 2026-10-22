@@ -631,8 +631,9 @@
         requestAnimationFrame(() => { if (window.__vt) G.set(sp.lines, { yPercent: 0 }); else G.to(sp.lines, { yPercent: 0, duration: 1.25, stagger: .08, ease: 'expo.out' }); });
       } else if (!window.__vt) tl.from(name, { autoAlpha: 0, y: 30, duration: 1 }, 0);
     }
-    tl.from('.rh__alt', { autoAlpha: 0, y: 18, duration: .8, ease: 'power3.out' }, .25)
-      .from($$('.rh__copy > *', rh), { autoAlpha: 0, y: 28, duration: .9, stagger: .08, ease: 'power3.out' }, .3);
+    const alt = $$('.rh__alt', rh);
+    if (alt.length) tl.from(alt, { autoAlpha: 0, y: 18, duration: .8, ease: 'power3.out' }, .25);
+    tl.from($$('.rh__copy > *', rh), { autoAlpha: 0, y: 28, duration: .9, stagger: .08, ease: 'power3.out' }, .3);
     if (frame) {
       tl.fromTo(frame, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'expo.inOut' }, .15);
       if (fimg) tl.from(fimg, { scale: 1.3, duration: 1.6, ease: 'expo.out' }, .35);
