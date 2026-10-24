@@ -1,0 +1,16 @@
+08:54:27 Android 15 (API 35)
+08:54:30 adb install : Success
+08:54:30 PASS the old app (v1.5) installs
+08:54:47 on screen:  topResumedActivity=ActivityRecord{9ca383b u0 com.fakhritools.catalogue/.MainActivity t8} 
+08:54:47 PASS the old app opens (versionName=1.5)
+08:54:51 adb install -r: Success
+08:54:51 PASS the new app installs over the old one
+08:54:51 PASS the phone now has the new version (versionName=2.4)
+08:55:07 on screen:  topResumedActivity=ActivityRecord{da5fe23 u0 com.fakhritools.catalogue/.MainActivity t9} 
+08:55:07 PASS the updated app opens from its icon
+08:55:13 adb install : Success
+08:55:13 PASS the new app installs on a phone without it
+08:55:30 on screen:  topResumedActivity=ActivityRecord{e47e056 u0 com.fakhritools.catalogue/.MainActivity t10} 
+08:55:30 PASS the new app opens from its icon
+08:55:31 PASS no crash while installing and opening
+08:55:31 ALL CHECKS PASSED
