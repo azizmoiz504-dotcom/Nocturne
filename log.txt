@@ -1,0 +1,117 @@
+08:56:23 Play Services start-up restarts seen: 3, phone up 139 s
+08:56:23 devices List of devices attached emulator-5554 device 
+08:56:23 boot 1
+08:56:23 icons after install: .MainActivity
+args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.fakhritools.catalogue"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.fakhritools.catalogue"
+data="android.intent.category.LAUNCHER"
+08:56:25 attach retry fetch failed
+08:56:29 shot 00-opening
+08:56:33 shot 01-pick-branch
+08:56:33 PASS first start asks which branch
+08:56:40 PASS Bait Al Maqdis picked: the app turns orange, light look
+08:56:40 shot 02-bam-home
+08:56:40 PASS home shows one list of categories, Bait Al Maqdis first, then Fakhri Tools
+08:56:41 shot 03-bam-home-end
+08:56:42 PASS category pictures load from inside the app (24)
+08:56:46 icons after picking Bait Al Maqdis: .BrandBam
+08:56:46 PASS home-screen icon and name switched to Bait Al Maqdis
+args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.fakhritools.catalogue"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.fakhritools.catalogue"
+data="android.intent.category.LAUNCHER"
+08:56:52 PASS the Bait Al Maqdis icon opens the app
+08:56:53 shot 04-bam-reopened
+08:56:56 shot 05-bam-category
+08:57:33 shot 05b-bam-category-end
+08:57:33 PASS every photo in a 250-product category shows (250 of 250)
+08:57:35 shot 06-flip-prices
+08:57:37 shot 07-flip-added
+08:57:37 PASS a size went into the cart from the flip card
+08:57:37 PASS after + Add the card shows − 1 + (1,1)
+08:57:39 PASS + twice shows 3 and the cart has 3 (3,3)
+08:57:40 PASS − twice goes back to 1 (1,1)
+08:57:40 shot 07b-flip-stepper
+08:57:41 PASS phone Back turns the card back first
+08:57:45 shot 08-fakhri-category-in-bam
+08:57:49 shot 09-fakhri-product
+08:57:50 PASS Add asks for the size first
+08:57:53 shot 10-fakhri-added
+08:57:53 PASS Fakhri Tools product went into the same cart
+08:57:55 shot 11-zoom
+08:57:56 PASS Back closes the zoom
+08:58:03 shot 12-search-part-no
+08:58:03 PASS search finds part number K-0026
+08:58:04 shot 13-item-sheet
+08:58:05 PASS Back closes the sizes sheet
+08:58:08 shot 14-cart
+08:58:09 shot 15-checkout
+08:58:13 shot 16-placed
+08:58:13 PASS order saved and cart emptied, without WhatsApp
+08:58:13 PASS placing the order stays in the app
+08:58:13 PASS order form PDF is made (28128 chars)
+08:58:19 shot 17-pdf-open
+08:58:19 PASS Order form button hands the PDF to the phone
+08:58:19 after PDF:     topResumedActivity=ActivityRecord{af29669 u0 com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity} t11}   ResumedActivity: ActivityRecord{af29669 u0 com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity} t11}
+08:58:27 shot 18-send-whatsapp
+08:58:31 shot 19-pdfs
+08:58:31 PASS PDFs tab lists the catalogues
+08:58:36 shot 20-catalogue-open
+08:58:36 after catalogue:     topResumedActivity=ActivityRecord{3c38dc1 u0 com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity} t12}   ResumedActivity: ActivityRecord{3c38dc1 u0 com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity} t12}
+08:58:40 shot 21-orders
+08:58:42 shot 22-order-details
+08:58:49 PASS Arabic turns the screens right to left
+08:58:49 shot 23-arabic
+08:58:54 shot 24-settings
+08:58:57 shot 24b-dark-look
+08:58:57 PASS Settings turns on the dark look
+08:59:00 shot 25-switch-confirm
+08:59:05 PASS switched to Fakhri Tools: white and red
+08:59:06 shot 26-fakhri-home
+08:59:06 PASS each branch keeps its own cart and orders
+08:59:07 shot 27-fakhri-home-end
+08:59:11 icons after switching to Fakhri Tools: .MainActivity
+08:59:11 PASS home-screen icon and name switched to Fakhri Tools
+args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.fakhritools.catalogue"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.fakhritools.catalogue"
+data="android.intent.category.LAUNCHER"
+08:59:17 PASS the Fakhri Tools icon opens the app
+08:59:27 shot 28-fakhri-cart
+08:59:29 PASS Fakhri Tools asks for the phone number first
+08:59:32 shot 29-fakhri-checkout
+08:59:35 shot 30-fakhri-placed
+08:59:35 PASS Fakhri Tools order saved, without WhatsApp
+08:59:35 PASS no screen scrolls sideways
+08:59:39 PASS checked the website for a newer Fakhri Tools list
+08:59:47 PASS Back on Home leaves the app
+args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+ arg: "-p"
+ arg: "com.fakhritools.catalogue"
+ arg: "-c"
+ arg: "android.intent.category.LAUNCHER"
+ arg: "1"
+data="com.fakhritools.catalogue"
+data="android.intent.category.LAUNCHER"
+08:59:57 shot 31-offline-home
+09:00:00 shot 32-offline-fakhri
+09:00:00 PASS Fakhri Tools photos show with no internet (6)
+09:00:06 shot 33-offline-bam
+09:00:06 PASS Bait Al Maqdis photos show with no internet (6)
+09:00:06 PASS orders kept after closing the app
+09:00:12 PASS a PDF viewer can open a catalogue PDF (bam/pdf/castor-catalogue.pdf, 10916 bytes)
+09:00:13 PASS a PDF viewer can open an order form PDF (share/Order-form-BAM-20261024-001.pdf, 21096 bytes)
+09:00:13 ALL CHECKS PASSED
