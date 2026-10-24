@@ -1,0 +1,16 @@
+08:54:53 Android 14 (API 34)
+08:54:57 adb install : Success
+08:54:57 PASS the old app (v1.5) installs
+08:55:13 on screen:  topResumedActivity=ActivityRecord{1d95ec9 u0 com.fakhritools.catalogue/.MainActivity t9} 
+08:55:13 PASS the old app opens (versionName=1.5)
+08:55:15 adb install -r: Success
+08:55:15 PASS the new app installs over the old one
+08:55:15 PASS the phone now has the new version (versionName=2.4)
+08:55:30 on screen:  topResumedActivity=ActivityRecord{5d66f88 u0 com.fakhritools.catalogue/.MainActivity t10} 
+08:55:30 PASS the updated app opens from its icon
+08:55:33 adb install : Success
+08:55:33 PASS the new app installs on a phone without it
+08:55:48 on screen:  topResumedActivity=ActivityRecord{13d7c94 u0 com.fakhritools.catalogue/.MainActivity t11} 
+08:55:48 PASS the new app opens from its icon
+08:55:48 PASS no crash while installing and opening
+08:55:48 ALL CHECKS PASSED
