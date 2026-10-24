@@ -122,9 +122,13 @@ check(await pg.evaluate(() => FTNative.brand() === 'bam' && !document.getElement
 await shot('04-bam-reopened');
 
 /* ---------- a Bait Al Maqdis product: flip card with prices ---------- */
-await tap(L + '[data-go="c/b-kapusi"]', 1500); await shot('05-bam-category');
-// a big category: scroll to the end, every photo must be drawn
-const drawn = await pg.evaluate(async () => { const v = FT.top(); for (let y = 0; y <= v.scrollHeight; y += 500) { v.scrollTo(0, y); await new Promise(r => setTimeout(r, 150)); } await new Promise(r => setTimeout(r, 1500)); const im = [...v.querySelectorAll('.ph img')]; return [im.filter(i => i.complete && i.naturalWidth > 0 && i.classList.contains('is-in')).length, im.length]; });
+await tap(L + '[data-go="c/b-kapusi"]', 1500);
+for (let i = 0; i < 20 && !(await pg.evaluate(() => FT.top().querySelectorAll('.ph img').length >= 250)); i++) await wait(500);
+await shot('05-bam-category');
+// a big category: scroll to the end one screen at a time (each step its own short call), every photo must be drawn
+for (let y = 0, h = 1; y <= h; y += 600) { h = await pg.evaluate(y => { const v = FT.top(); v.scrollTo(0, y); return v.scrollHeight; }, y); await wait(200); }
+await wait(2000);
+const drawn = await pg.evaluate(() => { const im = [...FT.top().querySelectorAll('.ph img')]; return [im.filter(i => i.complete && i.naturalWidth > 0 && i.classList.contains('is-in')).length, im.length]; });
 await shot('05b-bam-category-end');
 check(drawn[1] >= 250 && drawn[0] === drawn[1], 'every photo in a 250-product category shows (' + drawn.join(' of ') + ')');
 await scroll(0); await wait(800);

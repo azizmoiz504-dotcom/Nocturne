@@ -24,3 +24,4 @@ grep -iE "fakhri|chromium|AndroidRuntime|FATAL|WebView|lowmemory|ActivityManager
 cat app/ci/out/log.txt
 # save the results straight away (the emulator sometimes hangs while shutting down)
 (cd app/ci/out && echo "commit $GITHUB_SHA run $GITHUB_RUN_ID" > run.txt && rm -rf .git && git init -q && git checkout -q -b r && git add -A && git -c user.name="catalogue test" -c user.email="test@users.noreply.github.com" commit -qm "Phone test results for $GITHUB_SHA" && git push -fq "$PUSH_URL" "r:${RESULTS_BRANCH:-catalogue-app-test-results}") || echo "could not save results"
+grep -q "ALL CHECKS PASSED" app/ci/out/log.txt || { echo "the phone test did not pass"; exit 1; }
