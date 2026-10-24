@@ -123,9 +123,21 @@ await shot('04-bam-reopened');
 
 /* ---------- a Bait Al Maqdis product: flip card with prices ---------- */
 await tap(L + '[data-go="c/b-kapusi"]', 1500); await shot('05-bam-category');
+// a big category: scroll to the end, every photo must be drawn
+const drawn = await pg.evaluate(async () => { const v = FT.top(); for (let y = 0; y <= v.scrollHeight; y += 500) { v.scrollTo(0, y); await new Promise(r => setTimeout(r, 150)); } await new Promise(r => setTimeout(r, 1500)); const im = [...v.querySelectorAll('.ph img')]; return [im.filter(i => i.complete && i.naturalWidth > 0 && i.classList.contains('is-in')).length, im.length]; });
+await shot('05b-bam-category-end');
+check(drawn[1] >= 250 && drawn[0] === drawn[1], 'every photo in a 250-product category shows (' + drawn.join(' of ') + ')');
+await scroll(0); await wait(800);
 await tap(L + '.flip [data-flip]', 1000); await shot('06-flip-prices');
 await tap(L + '.flip.is-flipped [data-radd]', 900); await shot('07-flip-added');
 check(await ls('bam-list', 1), 'a size went into the cart from the flip card');
+const rowQ = () => pg.evaluate(() => { const r = document.querySelector('#stage > .view:not(.is-under) .flip.is-flipped .row'); const i = r && r.querySelector('input'); return [i ? i.value : 'add', (JSON.parse(localStorage.getItem('bam-list') || '[]')[0] || {}).q]; });
+check((await rowQ()).join() === '1,1', 'after + Add the card shows − 1 + (' + (await rowQ()) + ')');
+await tap(L + '.flip.is-flipped .row [data-st="1"]', 600); await tap(L + '.flip.is-flipped .row [data-st="1"]', 600);
+check((await rowQ()).join() === '3,3', '+ twice shows 3 and the cart has 3 (' + (await rowQ()) + ')');
+await tap(L + '.flip.is-flipped .row [data-st="-1"]', 600); await tap(L + '.flip.is-flipped .row [data-st="-1"]', 600);
+check((await rowQ()).join() === '1,1', '− twice goes back to 1 (' + (await rowQ()) + ')');
+await shot('07b-flip-stepper');
 await key(4);
 check(await pg.evaluate(() => !document.querySelector('.flip.is-flipped')), 'phone Back turns the card back first');
 await key(4);

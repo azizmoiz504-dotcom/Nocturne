@@ -39,8 +39,8 @@ def main():
         secs = []
         for s in range(2):
             items = []
-            for i in range(4):
-                n = len(items) + s * 4 + 1
+            for i in range(125 if cid == 'kapusi' else 4):   # Kapusi is big, like the real one (about 250 products)
+                n = len(items) + s * 1000 + 1
                 shutil.copy(photos[(code * 7) % len(photos)], os.path.join(OUT, 'p', cid, f'{n}.jpg'))
                 rows = []
                 for j in range(1 + (i % 3)):
