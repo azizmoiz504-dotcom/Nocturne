@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1c1c1f">
+<title>Bait Al Maqdis Product Editor</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --ink:#1c1c1f; --or:#ee7a14; --or-d:#c9620a; --line:#dcdfe3; --bg:#f1f2f4; --muted:#5d6570; --soft:#f7f8f9; --red:#c81e1e; --green:#11703a; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; font:17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
+  select, button, input { font:inherit; color:inherit; }
+  input, select { font-size:16px; }
+  button { cursor:pointer; }
+
+  /* password screen */
+  #lock { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; background:var(--ink); }
+  .lockbox { background:#fff; border-radius:22px; padding:28px 24px; width:100%; max-width:420px; box-shadow:0 30px 60px -30px rgba(0,0,0,.6); }
+  .lockbox h1 { margin:0 0 4px; font-size:24px; }
+  .lockbox p { margin:0 0 18px; color:var(--muted); }
+  .lockbox label { display:block; font-weight:700; margin-bottom:6px; }
+  .lockbox input[type=password], .lockbox input[type=text] { width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; letter-spacing:.04em; }
+  .lockbox input:focus { outline:none; border-color:var(--or); }
+  .lockbox .rem { display:flex; gap:10px; align-items:center; margin:14px 0 18px; color:var(--muted); font-weight:400; }
+  .lockbox .rem input { width:20px; height:20px; accent-color:var(--or); }
+  .lockbox .err { color:var(--red); font-weight:700; margin:-6px 0 14px; }
+  .lockbox .go { width:100%; }
+
+  .btn { border:0; border-radius:999px; padding:11px 20px; background:#fff; color:var(--ink); font-weight:700; font-size:16px; white-space:nowrap; }
+  .btn.or { background:var(--or); color:#fff; }
+  .btn.ghost { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.55); }
+  .btn:hover { filter:brightness(1.07); }
+  .btn:disabled { opacity:.45; cursor:default; filter:none; }
+
+  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
+  header h1 { font-size:20px; margin:0 8px 0 0; }
+  header h1 b { color:var(--or); }
+  header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 320px; min-width:200px; font-weight:700; color:var(--ink); background:#fff; }
+  header input[type=search] { padding:10px 14px; border-radius:12px; border:0; flex:0 1 300px; min-width:180px; color:var(--ink); }
+  .hbtns { display:flex; flex-wrap:wrap; gap:10px; margin-left:auto; }
+  .count { font-size:15px; opacity:.85; }
+  .notice { margin:14px 20px 0; padding:12px 18px; border-radius:14px; background:#fff; border:2px solid #b9e4c9; }
+  .notice b { color:var(--green); }
+  .notice.warn { border-color:var(--red); background:#fff5f5; }
+  .notice.warn b { color:var(--red); }
+  .notice button { margin:8px 10px 0 0; }
+  details.help { background:#fff; border-bottom:1px solid var(--line); padding:12px 20px; color:var(--muted); }
+  details.help summary { cursor:pointer; color:var(--ink); font-weight:700; }
+  details.help p { margin:8px 0 0; }
+
+  .catbox { margin:16px 20px 0; background:#fff; border-radius:18px; padding:16px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  .catbox .ph { width:120px; height:120px; border-radius:18px; flex:0 0 auto; }
+  .catbox .fields { flex:1 1 300px; display:grid; gap:8px; }
+  .catbox .two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .catbox.is-new { box-shadow:inset 0 0 0 2px #7cc79a; }
+  .newcat { color:var(--green); font-weight:700; font-size:15px; }
+  label.lb { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:3px; }
+  .in { width:100%; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; background:#fff; }
+  .in:focus { outline:none; border-color:var(--or); box-shadow:0 0 0 3px rgba(238,122,20,.18); }
+  .in[dir=rtl] { text-align:right; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; }
+  .sbtn { border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:7px 14px; font-weight:700; font-size:15px; }
+  .sbtn:hover { border-color:var(--or); }
+  .sbtn.or { background:var(--or); border-color:var(--or); color:#fff; }
+  .sbtn.del { color:var(--red); }
+  .sbtn.del:hover { border-color:var(--red); }
+
+  #grid { padding:6px 20px 120px; }
+  .sec { margin-top:22px; }
+  .sech { display:flex; flex-wrap:wrap; gap:10px; align-items:end; background:#fff; border-radius:16px; padding:12px 14px; border-left:6px solid var(--or); }
+  .sech .f { flex:1 1 220px; }
+  .sech .n { color:var(--muted); font-size:15px; padding-bottom:9px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); gap:16px; margin-top:12px; }
+  .card { background:#fff; border-radius:18px; padding:14px; border:2px solid transparent; position:relative; display:flex; flex-direction:column; gap:9px; }
+  .card.is-sel { border-color:var(--or); }
+  .card.is-new { box-shadow:inset 0 0 0 2px #7cc79a; }
+  .card.is-changed { box-shadow:inset 0 0 0 2px #f2b46b; }
+  .card.drag { opacity:.4; }
+  .card.over { border-color:var(--or); border-style:dashed; }
+  .tag { position:absolute; z-index:2; top:10px; right:12px; font-size:12px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; }
+  .tag.new { background:#e3f5ea; color:var(--green); }
+  .tag.ch { background:#fdf0e1; color:var(--or-d); }
+  .where { font-size:13px; color:var(--muted); font-weight:700; }
+  .ph { background:#fff; border:1.5px dashed var(--line); border-radius:14px; height:190px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; cursor:pointer; }
+  .ph img { max-width:100%; max-height:100%; object-fit:contain; }
+  .ph .hint { position:absolute; left:8px; right:8px; bottom:8px; text-align:center; font-size:13px; font-weight:700; background:rgba(28,28,31,.78); color:#fff; border-radius:999px; padding:4px 8px; opacity:0; transition:opacity .15s; }
+  .ph:hover .hint, .ph.empty .hint { opacity:1; }
+  .ph.empty { background:var(--soft); }
+  .ph.empty img { display:none; }
+  .ph.hot { border-color:var(--or); background:#fff7ef; }
+  .specs { display:flex; gap:6px; align-items:center; font-size:13px; color:var(--muted); }
+  .specs img { width:38px; height:38px; object-fit:contain; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  table.rows { width:100%; border-collapse:collapse; }
+  table.rows th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); text-align:left; padding:0 3px 3px; }
+  table.rows td { padding:3px; }
+  table.rows td:nth-child(1) { width:32%; }
+  table.rows td:nth-child(2) { width:34%; }
+  table.rows td:nth-child(3) { width:24%; }
+  table.rows td:nth-child(4) { width:10%; text-align:center; }
+  table.rows .in { padding:7px 8px; }
+  .in.bad { border-color:var(--red); background:#fff5f5; }
+  .x { border:0; background:none; color:var(--muted); font-size:20px; line-height:1; padding:6px; border-radius:8px; }
+  .x:hover { color:var(--red); background:#fff0f0; }
+  .acts { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border-top:1px solid var(--line); padding-top:10px; margin-top:auto; }
+  .acts select { border:1.5px solid var(--line); border-radius:999px; padding:6px 10px; font-size:15px; font-weight:700; background:#fff; max-width:100%; }
+  .empty-sec { color:var(--muted); background:#fff; border-radius:16px; padding:16px; margin-top:12px; }
+  .more { display:block; margin:18px auto 0; }
+
+  .toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%, 30px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:999px; font-weight:700; opacity:0; pointer-events:none; transition:.2s; z-index:20; max-width:calc(100% - 32px); text-align:center; }
+  .toast.on { opacity:1; transform:translate(-50%, 0); pointer-events:auto; }
+  .toast button { margin-left:12px; background:var(--or); color:#fff; border:0; border-radius:999px; padding:4px 12px; font-weight:800; }
+  .modal { position:fixed; inset:0; background:rgba(10,10,12,.55); display:flex; align-items:center; justify-content:center; padding:16px; z-index:30; }
+  .modal__box { background:#fff; border-radius:20px; padding:22px; width:100%; max-width:560px; max-height:calc(100vh - 32px); overflow:auto; }
+  .modal__box h2 { margin:0 0 10px; font-size:22px; }
+  .modal__box ul { padding-left:20px; }
+  .modal__btns { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; margin-top:18px; }
+  .modal__btns .btn { border:1.5px solid var(--line); }
+  .modal__btns .btn.or { border-color:var(--or); }
+  .ok { color:var(--green); font-weight:700; }
+  .bad-t { color:var(--red); font-weight:700; }
+
+  .savebar { display:none; position:fixed; left:0; right:0; bottom:0; z-index:6; background:var(--ink); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); gap:10px; }
+  .savebar .btn { flex:1; }
+  @media (max-width:700px) {
+    body { font-size:16px; }
+    header { position:static; padding:12px 14px; }
+    header h1 { width:100%; font-size:19px; }
+    header select, header input[type=search] { flex:1 1 100%; min-width:0; }
+    .hbtns { width:100%; margin-left:0; }
+    header .btn { flex:1 1 auto; padding:10px 12px; font-size:15px; }
+    .notice, .catbox { margin-left:12px; margin-right:12px; }
+    details.help { padding:12px 14px; }
+    #grid { padding:6px 12px 120px; }
+    .cards { grid-template-columns:1fr; gap:12px; }
+    .catbox .ph { width:96px; height:96px; }
+    .catbox .two { grid-template-columns:1fr; }
+    .savebar { display:flex; }
+  }
+</style>
+</head>
+<body>
+
+<div id="lock" hidden>
+  <form class="lockbox" id="lockForm" autocomplete="off">
+    <h1>Bait Al Maqdis</h1>
+    <p>Product editor. Type the password you were given.</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <label class="rem"><input type="checkbox" id="remember" checked> Remember on this phone or computer</label>
+    <div class="err" id="pwErr" hidden></div>
+    <button class="btn or go" id="pwGo" type="submit">Open the editor</button>
+  </form>
+</div>
+
+<div id="app" hidden>
+<header>
+  <h1>Bait Al Maqdis <b>Product Editor</b></h1>
+  <select id="cat" aria-label="Category"></select>
+  <input id="q" type="search" placeholder="Search all products, sizes or part numbers" aria-label="Search">
+  <span class="count" id="count"></span>
+  <div class="hbtns">
+    <button class="btn ghost" id="newCat">New category</button>
+    <button class="btn ghost" id="newSec">New group</button>
+    <button class="btn ghost" id="undo">Undo</button>
+    <button class="btn ghost" id="reset">Start over</button>
+    <button class="btn or" id="save">Save changes file</button>
+  </div>
+</header>
+<div class="notice" id="notice"></div>
+<details class="help" id="help">
+  <summary>How to use the editor</summary>
+  <p>Pick a category at the top, or search for any product or part number. Type straight into the boxes to change a name, a size, a part number or a price. Leave a price empty if it is on request.</p>
+  <p><b>+ Add size</b> adds a line to a product, and <b>✕</b> removes a line. <b>+ Add product</b> adds a new card to a group, <b>Copy</b> makes a second card with the same details, and <b>Delete</b> removes a card. Move a card with the <b>↑ ↓</b> buttons, by dragging it on a computer, or to another group with <b>Move to</b>.</p>
+  <p><b>New category</b> makes a whole new product range (like Hoses or Safety Items) with its first group; then add its products with <b>+ Add product</b>, and give it a picture at the top. <b>New group</b> adds a group inside the category you are in.</p>
+  <p>To change a photo, tap it and choose a photo, drop a photo on it, or click the card and press Ctrl+V. The category picture at the top works the same way.</p>
+  <p>Your work is kept on this phone or computer if you close the page. When you finish, press <b>Save changes file</b> and send the file you get. New cards show a green edge and changed cards an orange edge.</p>
+</details>
+<div class="catbox" id="catbox">
+  <div class="ph" id="coverPh" title="Tap, drop or paste the category picture"><img id="coverImg" alt=""><span class="hint" id="coverHint">Change category picture</span></div>
+  <div class="fields">
+    <div class="two">
+      <div><label class="lb" for="catName">Category name</label><input class="in" id="catName" maxlength="80"></div>
+      <div><label class="lb" for="catAr">Arabic name</label><input class="in" id="catAr" dir="rtl" maxlength="80"></div>
+    </div>
+    <div class="row"><button class="sbtn" id="coverPick" type="button">Change category picture</button><button class="sbtn" id="newSec2" type="button">+ New group</button><button class="sbtn" id="newCat2" type="button">+ New category</button><button class="sbtn del" id="delCat" type="button" hidden>Remove this category</button></div>
+    <div class="newcat" id="newCatNote" hidden>New category: it goes into the app when you send the changes file.</div>
+  </div>
+</div>
+<div id="grid"></div>
+<div class="savebar"><button class="btn ghost" id="undo2">Undo</button><button class="btn or" id="save2">Save changes file</button></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="mTitle"><h2 id="mTitle"></h2><div id="mBody"></div><div class="modal__btns" id="mBtns"></div></div></div>
+<input type="file" id="file" accept="image/*" hidden>
+
+<script>window.BAM_BUILD = "bed353291cd0-2610240842";</script>
+<script>
+'use strict';
+(() => {
+  const $ = s => document.querySelector(s);
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const PWKEY = 'bam-editor-pw', KEYKEY = 'bam-editor-key';   // the first: where older copies kept the password itself
+  const keep = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} } };
+
+  /* ---------- reading the locked files ---------- */
+  // a file is "BAME1" + salt(16) + iv(12) + AES-GCM data, or "BAMP1" + the plain data
+  let key = null, saltHex = '';
+  const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+  const unhex = h => new Uint8Array(h.match(/../g).map(x => parseInt(x, 16)));
+  async function fetchBin(path) {
+    const r = await fetch(path + '?v=' + (window.BAM_BUILD || Date.now()), { cache: 'no-cache' });
+    if (!r.ok) throw new Error('missing ' + path);
+    return new Uint8Array(await r.arrayBuffer());
+  }
+  async function makeKey(pw, salt) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 310000, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+  }
+  async function open(bytes) {
+    const magic = dec.decode(bytes.slice(0, 5));
+    if (magic === 'BAMP1') return bytes.slice(5);
+    if (magic !== 'BAME1') throw new Error('not an editor file');
+    const salt = bytes.slice(5, 21), iv = bytes.slice(21, 33);
+    if (!key || hex(salt) !== saltHex) throw new Error('locked');
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, bytes.slice(33)));
+  }
+
+  /* ---------- start: password, then the list ---------- */
+  let DATA = null;
+  // pw: the password typed, or null to use the key kept on this device
+  async function unlock(pw, raw) {
+    if (dec.decode(raw.slice(0, 5)) === 'BAME1') {
+      saltHex = hex(raw.slice(5, 21));
+      if (pw == null) {
+        let kept = null; try { kept = JSON.parse(keep.get(KEYKEY) || 'null'); } catch (e) {}
+        if (!kept || kept.s !== saltHex || !/^[0-9a-f]{64}$/.test(kept.k || '')) throw new Error('no key kept for this list');
+        key = await crypto.subtle.importKey('raw', unhex(kept.k), 'AES-GCM', false, ['decrypt']);
+      } else key = await makeKey(pw, raw.slice(5, 21));
+    }
+    return JSON.parse(dec.decode(await open(raw)));
+  }
+  // "Remember" keeps the key made from the password, never the password itself
+  async function remember() { try { keep.set(KEYKEY, JSON.stringify({ s: saltHex, k: hex(await crypto.subtle.exportKey('raw', key)) })); } catch (e) {} }
+  async function boot() {
+    let raw;
+    try { raw = await fetchBin('data.bin'); } catch (e) { document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">Could not load the editor. Check the internet and refresh the page.</p>'; return; }
+    const locked = dec.decode(raw.slice(0, 5)) === 'BAME1';
+    const old = keep.get(PWKEY);
+    if (!locked || old || keep.get(KEYKEY)) {
+      try {
+        DATA = await unlock(!locked ? '' : old || null, raw);
+        if (old) { keep.set(PWKEY, null); await remember(); }
+        return start();
+      } catch (e) { keep.set(PWKEY, null); keep.set(KEYKEY, null); }
+    }
+    $('#lock').hidden = false; $('#pw').focus();
+    $('#lockForm').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const pw = $('#pw').value.trim(); if (!pw) return;
+      $('#pwGo').disabled = true; $('#pwGo').textContent = 'Opening…'; $('#pwErr').hidden = true;
+      try {
+        DATA = await unlock(pw, raw);
+        if ($('#remember').checked) await remember(); else keep.set(KEYKEY, null);
+        $('#lock').hidden = true; start();
+      } catch (e) {
+        $('#pwErr').textContent = 'That password is not right. Check it and try again.'; $('#pwErr').hidden = false;
+        $('#pwGo').disabled = false; $('#pwGo').textContent = 'Open the editor';
+      }
+    });
+  }
+
+  /* ---------- photos: one locked bundle per category, opened when needed ---------- */
+  const urls = {}, bundles = {};
+  const bundleOf = p => /^covers\//.test(p) ? 'covers' : (p.split('/')[1] || '');
+  function loadBundle(b) {
+    if (!b || !DATA.bundles.includes(b)) return Promise.resolve();
+    if (!bundles[b]) bundles[b] = fetchBin('photos/' + b + '.bin').then(open).then(buf => {
+      const n = new DataView(buf.buffer, buf.byteOffset).getUint32(0);
+      const idx = JSON.parse(dec.decode(buf.slice(4, 4 + n)));
+      Object.keys(idx).forEach(p => { const [o, l] = idx[p]; urls[p] = URL.createObjectURL(new Blob([buf.slice(4 + n + o, 4 + n + o + l)], { type: 'image/jpeg' })); });
+    }).catch(() => { delete bundles[b]; });
+    return bundles[b];
+  }
+  const photoUrl = p => !p ? '' : (state.images[p] || urls[p] || '');
+  function fillPhotos(root) {
+    root.querySelectorAll('img[data-p]').forEach(img => {
+      const p = img.dataset.p, u = photoUrl(p);
+      if (u) { if (img.src !== u) img.src = u; return; }
+      loadBundle(bundleOf(p)).then(() => { const v = photoUrl(p); if (v) img.src = v; });
+    });
+  }
+
+  /* ---------- the editor ---------- */
+  let state, history = [], cur = 0, sel = null, ORIG = {};
+  const DB = 'bam-editor', STORE = 'kv';
+  function idb() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(STORE); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+  async function idbGet(k) { const db = await idb(); return new Promise(res => { const t = db.transaction(STORE).objectStore(STORE).get(k); t.onsuccess = () => res(t.result); t.onerror = () => res(null); }); }
+  async function idbSet(k, v) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction(STORE, 'readwrite'); t.objectStore(STORE).put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+  let saveTimer = null, storeOk = true;
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => idbSet('state', JSON.stringify(state)).then(() => { if (!storeOk) { storeOk = true; note(); } }).catch(() => { storeOk = false; note(); }), 250);
+  }
+  const fresh = () => ({ ver: DATA.ver, dirty: false, savedAs: '', seq: 0, cats: JSON.parse(JSON.stringify(DATA.cats)), images: {} });
+  const snap = () => JSON.stringify({ cats: state.cats, dirty: state.dirty, seq: state.seq });
+  function push(s) { history.push(s || snap()); if (history.length > 60) history.shift(); $('#undo').disabled = $('#undo2').disabled = false; }
+  function change(fn, s) { push(s); fn(); state.dirty = true; persist(); note(); }
+  function undo() {
+    const s = history.pop(); if (!s) return;
+    const o = JSON.parse(s); state.cats = o.cats; state.dirty = o.dirty; state.seq = o.seq;
+    if (cur >= state.cats.length) cur = state.cats.length - 1;
+    persist(); buildCatSelect(); render(); note(); toast('Undone');
+    $('#undo').disabled = $('#undo2').disabled = !history.length;
+  }
+
+  // every product and group carries a key (k) so the app knows what was renamed or moved
+  const cat = () => state.cats[cur];
+  const itemKey = () => 'n' + (++state.seq);
+  function start() {
+    $('#app').hidden = false;
+    DATA.cats.forEach(c => c.secs.forEach(s => s.items.forEach(it => { ORIG[it.k] = JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]); })));
+    idbGet('state').then(v => {
+      let old = null; try { old = v ? JSON.parse(v) : null; } catch (e) {}
+      if (old && old.ver === DATA.ver) state = old;
+      else if (old && old.dirty) { state = old; stale = true; }
+      else state = fresh();
+      state.images = state.images || {};
+      buildCatSelect(); render(); note();
+    }).catch(() => { storeOk = false; state = fresh(); buildCatSelect(); render(); note(); });
+  }
+  let stale = false;
+  function note() {
+    const n = $('#notice'), parts = [];
+    n.className = 'notice';
+    if (!storeOk) { n.className = 'notice warn'; n.innerHTML = '<b>This browser could not keep your work.</b> Your newest changes may be lost if you close the page. Press <b>Save changes file</b> now and send it.'; return; }
+    if (stale) { n.className = 'notice warn'; n.innerHTML = '<b>The product list was updated after you started.</b> Your changes are still here. Press <b>Save changes file</b> and send it, then press <b>Start over</b> to get the new list.'; return; }
+    const ch = changedCount();
+    if (!state.dirty && !ch) parts.push('<b>Ready.</b> ' + DATA.total + ' products in ' + DATA.cats.length + ' categories. Your work is kept on this device until you press Start over.');
+    else if (state.savedAs && !state.dirty) parts.push('<b>Saved.</b> Your changes file is in Downloads as ' + esc(state.savedAs) + '. Send it, and keep working here if you need to.');
+    else parts.push('<b>' + ch + ' card' + (ch === 1 ? '' : 's') + ' changed.</b> Your work is kept on this device. Press <b>Save changes file</b> when you finish.');
+    n.innerHTML = parts.join(' ');
+  }
+  function changedCount() {
+    let n = 0;
+    const seen = new Set();
+    state.cats.forEach(c => c.secs.forEach(s => s.items.forEach(it => { seen.add(it.k); if (!ORIG[it.k] || ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []])) n++; })));
+    Object.keys(ORIG).forEach(k => { if (!seen.has(k)) n++; });   // deleted
+    return n;
+  }
+  function buildCatSelect() {
+    const s = $('#cat');
+    s.innerHTML = state.cats.map((c, i) => '<option value="' + i + '">' + catLabel(c) + '</option>').join('');
+    s.value = cur;
+  }
+  const total = () => state.cats.reduce((a, c) => a + c.secs.reduce((b, s) => b + s.items.length, 0), 0);
+
+  /* ---------- drawing the cards ---------- */
+  const priceText = v => v == null || v === '' ? '' : String(v);
+  function card(ci, si, ii, showWhere) {
+    const it = state.cats[ci].secs[si].items[ii];
+    const isNew = !ORIG[it.k], isCh = !isNew && ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]);
+    const rows = it.r.map((r, ri) => '<tr data-r="' + ri + '"><td><input class="in" data-f="pn" value="' + esc(r[0]) + '" aria-label="Part number"></td><td><input class="in" data-f="sz" value="' + esc(r[1]) + '" aria-label="Size"></td><td><input class="in' + (badPrice(r[2]) ? ' bad' : '') + '" data-f="pr" inputmode="decimal" placeholder="On request" value="' + esc(priceText(r[2])) + '" aria-label="Price in AED"></td><td><button class="x" data-a="delr" title="Remove this line" aria-label="Remove this line">✕</button></td></tr>').join('');
+    const specs = (it.spec || []).length ? '<div class="specs">' + it.spec.map(p => '<img data-p="' + esc(p) + '" alt="">').join('') + '<span>specs picture' + (it.spec.length > 1 ? 's' : '') + ' (kept as they are)</span></div>' : '';
+    return '<div class="card' + (isNew ? ' is-new' : isCh ? ' is-changed' : '') + (sel && sel.k === it.k ? ' is-sel' : '') + '" data-c="' + ci + '" data-s="' + si + '" data-i="' + ii + '" draggable="false">' +
+      (isNew ? '<span class="tag new">New</span>' : isCh ? '<span class="tag ch">Changed</span>' : '') +
+      (showWhere ? '<div class="where">' + esc(state.cats[ci].name) + ' › ' + esc(state.cats[ci].secs[si].n) + '</div>' : '') +
+      '<div class="ph' + (it.img ? '' : ' empty') + '" data-a="photo">' + (it.img ? '<img data-p="' + esc(it.img) + '" alt="">' : '') + '<span class="hint">' + (it.img ? 'Change photo' : 'No photo yet: tap to add one') + '</span></div>' + specs +
+      '<div><label class="lb">Product name</label><input class="in" data-f="n" value="' + esc(it.n) + '"></div>' +
+      '<div><label class="lb">Arabic name</label><input class="in" data-f="ar" dir="rtl" value="' + esc(it.ar) + '"></div>' +
+      '<table class="rows"><thead><tr><th>Part no.</th><th>Size</th><th>Price AED</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="row"><button class="sbtn" data-a="addr" type="button">+ Add size</button></div>' +
+      '<div class="acts"><button class="sbtn" data-a="up" title="Move up" aria-label="Move up">↑</button><button class="sbtn" data-a="down" title="Move down" aria-label="Move down">↓</button><button class="sbtn" data-a="copy">Copy</button>' +
+      '<select data-a="move" aria-label="Move to another group"><option value="">Move to…</option>' + moveOptions(ci, si) + '</select><button class="sbtn del" data-a="del">Delete</button></div></div>';
+  }
+  function moveOptions(ci, si) {
+    return state.cats.map((c, cj) => '<optgroup label="' + esc(c.name) + '">' + c.secs.map((s, sj) => (cj === ci && sj === si) ? '' : '<option value="' + cj + ':' + sj + '">' + esc(s.n) + '</option>').join('') + '</optgroup>').join('');
+  }
+  const badPrice = v => v != null && v !== '' && !(typeof v === 'number' && isFinite(v) && v >= 0);
+  let shown = 60;
+  function render() {
+    const q = $('#q').value.trim().toLowerCase();
+    const g = $('#grid');
+    $('#catbox').hidden = !!q;
+    $('#count').textContent = total() + ' products';
+    if (q) {
+      const hits = [];
+      state.cats.forEach((c, ci) => c.secs.forEach((s, si) => s.items.forEach((it, ii) => {
+        const hay = (it.n + ' ' + (it.ar || '') + ' ' + it.r.map(r => (r[0] || '') + ' ' + (r[1] || '')).join(' ') + ' ' + s.n + ' ' + c.name).toLowerCase();
+        if (q.split(/\s+/).every(w => hay.includes(w))) hits.push([ci, si, ii]);
+      })));
+      g.innerHTML = '<div class="sec"><div class="sech"><div class="f"><b>' + hits.length + ' found</b> for “' + esc($('#q').value.trim()) + '”</div><button class="sbtn" data-a="clearq">Clear search</button></div>' +
+        (hits.length ? '<div class="cards">' + hits.slice(0, shown).map(h => card(h[0], h[1], h[2], true)).join('') + '</div>' : '<div class="empty-sec">Nothing found. Try fewer words or a part number.</div>') +
+        (hits.length > shown ? '<button class="sbtn more" data-a="more">Show more (' + (hits.length - shown) + ' left)</button>' : '') + '</div>';
+      fillPhotos(g); return;
+    }
+    const c = cat();
+    $('#catName').value = c.name; $('#catAr').value = c.ar || '';
+    const empty = !c.secs.some(s => s.items.length);
+    $('#catbox').classList.toggle('is-new', !!c.isNew); $('#newCatNote').hidden = !c.isNew; $('#delCat').hidden = !(c.isNew && empty);
+    const ci = cur;
+    $('#coverImg').dataset.p = c.cover || ''; $('#coverImg').removeAttribute('src');
+    $('#coverPh').classList.toggle('empty', !c.cover); $('#coverHint').textContent = c.cover ? 'Change category picture' : 'No picture yet: tap to add one';
+    fillPhotos($('#catbox'));
+    g.innerHTML = c.secs.map((s, si) => '<div class="sec" data-s="' + si + '"><div class="sech">' +
+      '<div class="f"><label class="lb">Group name</label><input class="in" data-f="secn" value="' + esc(s.n) + '"></div>' +
+      '<div class="f"><label class="lb">Arabic group name</label><input class="in" data-f="secar" dir="rtl" value="' + esc(s.ar) + '"></div>' +
+      '<span class="n">' + s.items.length + ' product' + (s.items.length === 1 ? '' : 's') + '</span>' +
+      '<button class="sbtn or" data-a="addp">+ Add product</button>' + (s.items.length ? '' : '<button class="sbtn del" data-a="delsec">Remove group</button>') + '</div>' +
+      (s.items.length ? '<div class="cards">' + s.items.map((it, ii) => card(ci, si, ii)).join('') + '</div>' : '<div class="empty-sec">No products in this group yet. Press + Add product.</div>') + '</div>').join('');
+    fillPhotos(g);
+    buildCatSelectCounts();
+  }
+  function buildCatSelectCounts() { [...$('#cat').options].forEach((o, i) => { const c = state.cats[i]; if (c) o.textContent = catLabel(c); }); }
+  const catLabel = c => esc((c.name || 'New category') + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')' + (c.isNew ? ' · new' : ''));
+
+  /* ---------- typing ---------- */
+  let typingSnap = null;
+  document.addEventListener('focusin', ev => { if (ev.target.matches && ev.target.matches('.in')) typingSnap = snap(); });
+  const at = el => { const c = el.closest('.card'); return c ? { ci: +c.dataset.c, si: +c.dataset.s, ii: +c.dataset.i, it: state.cats[+c.dataset.c].secs[+c.dataset.s].items[+c.dataset.i] } : null; };
+  const parsePrice = v => { const t = String(v).trim().replace(/,/g, '.').replace(/^aed\s*/i, ''); if (!t) return null; const n = Number(t); return isFinite(n) && n >= 0 && /^\d*\.?\d*$/.test(t) ? Math.round(n * 1000) / 1000 : t; };
+  document.addEventListener('input', ev => {
+    const el = ev.target; if (!el.dataset || !el.dataset.f || !state) return;
+    const f = el.dataset.f;
+    if (typingSnap) { push(typingSnap); typingSnap = null; }
+    if (f === 'catName') return;
+    const a = at(el);
+    if (a) {
+      const it = a.it;
+      if (f === 'n') it.n = el.value;
+      else if (f === 'ar') it.ar = el.value;
+      else {
+        const r = it.r[+el.closest('tr').dataset.r];
+        if (f === 'pn') r[0] = el.value === '' ? null : el.value;
+        else if (f === 'sz') r[1] = el.value === '' ? null : el.value;
+        else if (f === 'pr') { r[2] = parsePrice(el.value); el.classList.toggle('bad', badPrice(r[2])); }
+      }
+      markCard(el.closest('.card'), it);
+    } else {
+      const s = el.closest('.sec'); if (!s) return;
+      const sec = cat().secs[+s.dataset.s];
+      if (f === 'secn') sec.n = el.value; else if (f === 'secar') sec.ar = el.value;
+    }
+    state.dirty = true; persist(); note();
+  });
+  function markCard(el, it) {
+    const isNew = !ORIG[it.k], isCh = !isNew && ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]);
+    el.classList.toggle('is-new', isNew); el.classList.toggle('is-changed', isCh);
+    const t = el.querySelector('.tag'); if (t) t.remove();
+    if (isNew || isCh) el.insertAdjacentHTML('afterbegin', isNew ? '<span class="tag new">New</span>' : '<span class="tag ch">Changed</span>');
+  }
+  $('#catName').addEventListener('input', ev => { if (typingSnap) { push(typingSnap); typingSnap = null; } cat().name = ev.target.value; state.dirty = true; persist(); note(); buildCatSelectCounts(); });
+  $('#catAr').addEventListener('input', ev => { if (typingSnap) { push(typingSnap); typingSnap = null; } cat().ar = ev.target.value; state.dirty = true; persist(); note(); });
+
+  /* ---------- buttons on the cards ---------- */
+  const blankItem = () => ({ k: itemKey(), n: '', ar: '', img: '', r: [[null, null, null]] });
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-a]'); if (!b || !state) return;
+    const a = b.dataset.a;
+    if (a === 'move') return;
+    const c = at(b);
+    if (c) sel = { k: c.it.k };
+    if (a === 'clearq') { $('#q').value = ''; shown = 60; render(); return; }
+    if (a === 'more') { shown += 60; render(); return; }
+    if (a === 'photo') { pick = { kind: 'item', k: c.it.k }; $('#file').value = ''; $('#file').click(); return; }
+    if (a === 'addr') { change(() => c.it.r.push([null, null, null])); redraw(c.it.k, 'tr:last-child [data-f=sz]'); return; }
+    if (a === 'delr') {
+      const ri = +b.closest('tr').dataset.r;
+      if (c.it.r.length === 1) { change(() => { c.it.r[0] = [null, null, null]; }); redraw(c.it.k); toast('A product keeps at least one line, so this line was emptied'); return; }
+      change(() => c.it.r.splice(ri, 1)); redraw(c.it.k); return;
+    }
+    if (a === 'up' || a === 'down') {
+      const list = state.cats[c.ci].secs[c.si].items, j = c.ii + (a === 'up' ? -1 : 1);
+      if (j < 0 || j >= list.length) { toast(a === 'up' ? 'Already first in this group' : 'Already last in this group'); return; }
+      change(() => { list.splice(j, 0, list.splice(c.ii, 1)[0]); }); render(); scrollToCard(c.it.k); return;
+    }
+    if (a === 'copy') {
+      const cp = JSON.parse(JSON.stringify(c.it)); cp.k = itemKey(); cp.n = c.it.n;
+      change(() => state.cats[c.ci].secs[c.si].items.splice(c.ii + 1, 0, cp)); sel = { k: cp.k }; render(); scrollToCard(cp.k); toast('Copied: change the new card’s details');
+      return;
+    }
+    if (a === 'del') {
+      const name = c.it.n || 'this product';
+      change(() => state.cats[c.ci].secs[c.si].items.splice(c.ii, 1)); render();
+      toast('Deleted ' + name, 'Undo'); return;
+    }
+    const sEl = b.closest('.sec');
+    if (a === 'addp') {
+      const si = +sEl.dataset.s, it = blankItem();
+      change(() => cat().secs[si].items.push(it)); sel = { k: it.k }; render(); scrollToCard(it.k, '[data-f=n]'); return;
+    }
+    if (a === 'delsec') { const si = +sEl.dataset.s; change(() => cat().secs.splice(si, 1)); render(); toast('Group removed', 'Undo'); return; }
+  });
+  document.addEventListener('change', ev => {
+    const b = ev.target; if (!b.dataset || b.dataset.a !== 'move' || !b.value) return;
+    const c = at(b), [cj, sj] = b.value.split(':').map(Number);
+    change(() => { state.cats[c.ci].secs[c.si].items.splice(c.ii, 1); state.cats[cj].secs[sj].items.push(c.it); });
+    toast('Moved to ' + state.cats[cj].name + ' › ' + state.cats[cj].secs[sj].n);
+    render();
+  });
+  function redraw(k, focusSel) {
+    const el = cardEl(k); if (!el) return render();
+    const tmp = document.createElement('div'); tmp.innerHTML = card(+el.dataset.c, +el.dataset.s, +el.dataset.i, !!el.querySelector('.where'));
+    const n = tmp.firstChild; el.replaceWith(n); fillPhotos(n);
+    if (focusSel) { const f = n.querySelector(focusSel); if (f) f.focus(); }
+  }
+  const cardEl = k => { for (const el of document.querySelectorAll('.card')) { const a = at(el); if (a && a.it.k === k) return el; } return null; };
+  function scrollToCard(k, focusSel) { const el = cardEl(k); if (!el) return; el.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (focusSel) { const f = el.querySelector(focusSel); if (f) setTimeout(() => f.focus({ preventScroll: true }), 300); } }
+  document.addEventListener('mousedown', ev => { const c = ev.target.closest && ev.target.closest('.card'); document.querySelectorAll('.card.is-sel').forEach(x => x.classList.remove('is-sel')); if (c) { c.classList.add('is-sel'); sel = { k: at(c).it.k }; c.draggable = !ev.target.closest('input,select,button,.ph'); } else if (!ev.target.closest('#catbox')) sel = null; });
+
+  /* ---------- dragging cards (computer) ---------- */
+  let dragK = null;
+  document.addEventListener('dragstart', ev => { const c = ev.target.closest && ev.target.closest('.card'); if (!c || ev.target.matches('input')) return; dragK = at(c).it.k; c.classList.add('drag'); ev.dataTransfer.effectAllowed = 'move'; try { ev.dataTransfer.setData('text/plain', 'card'); } catch (e) {} });
+  document.addEventListener('dragend', () => { dragK = null; document.querySelectorAll('.drag,.over').forEach(x => x.classList.remove('drag', 'over')); });
+  document.addEventListener('dragover', ev => {
+    const c = ev.target.closest && ev.target.closest('.card'), ph = ev.target.closest && ev.target.closest('.ph');
+    if (!dragK && ph && [...(ev.dataTransfer.types || [])].includes('Files')) { ev.preventDefault(); ph.classList.add('hot'); return; }
+    if (!dragK || !c) return; ev.preventDefault(); document.querySelectorAll('.over').forEach(x => x.classList.remove('over')); c.classList.add('over');
+  });
+  document.addEventListener('dragleave', ev => { const ph = ev.target.closest && ev.target.closest('.ph'); if (ph) ph.classList.remove('hot'); });
+  document.addEventListener('drop', ev => {
+    const ph = ev.target.closest && ev.target.closest('.ph');
+    if (!dragK && ph && ev.dataTransfer.files && ev.dataTransfer.files[0]) {
+      ev.preventDefault(); ph.classList.remove('hot');
+      if (ph.id === 'coverPh') pick = { kind: 'cover' }; else { const a = at(ph); if (!a) return; pick = { kind: 'item', k: a.it.k }; }
+      usePhoto(ev.dataTransfer.files[0]); return;
+    }
+    const c = ev.target.closest && ev.target.closest('.card'); if (!dragK || !c) return; ev.preventDefault();
+    const to = at(c), from = findK(dragK); if (!from || to.it.k === dragK) return;
+    change(() => { const it = state.cats[from.ci].secs[from.si].items.splice(from.ii, 1)[0]; const t = findK(to.it.k); state.cats[t.ci].secs[t.si].items.splice(t.ii + (from.ci === t.ci && from.si === t.si && from.ii <= t.ii ? 1 : 0), 0, it); });
+    render();
+  });
+  const findK = k => { for (let ci = 0; ci < state.cats.length; ci++) for (let si = 0; si < state.cats[ci].secs.length; si++) { const ii = state.cats[ci].secs[si].items.findIndex(x => x.k === k); if (ii > -1) return { ci, si, ii }; } return null; };
+  document.addEventListener('dragover', ev => { if (!(ev.target.closest && ev.target.closest('.ph')) && !dragK) ev.preventDefault(); });
+  document.addEventListener('drop', ev => { if (!(ev.target.closest && ev.target.closest('.ph')) && !dragK) ev.preventDefault(); });
+
+  /* ---------- photos: choose, drop or paste ---------- */
+  let pick = null;
+  $('#coverPh').addEventListener('click', () => { pick = { kind: 'cover' }; sel = null; $('#file').value = ''; $('#file').click(); });
+  $('#coverPick').addEventListener('click', () => $('#coverPh').click());
+  $('#file').addEventListener('change', ev => { const f = ev.target.files && ev.target.files[0]; if (f) usePhoto(f); });
+  document.addEventListener('paste', ev => {
+    if (ev.target.matches && ev.target.matches('input')) return;
+    const f = [...((ev.clipboardData && ev.clipboardData.files) || [])].find(x => /^image\//.test(x.type)); if (!f) return;
+    if (sel) pick = { kind: 'item', k: sel.k }; else if (!$('#catbox').hidden) pick = { kind: 'cover' }; else { toast('Click a card first, then paste'); return; }
+    ev.preventDefault(); usePhoto(f);
+  });
+  function usePhoto(file) {
+    if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name || '')) { toast('That file is not a photo'); return; }
+    const p = pick; pick = null; if (!p) return;
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const max = p.kind === 'cover' ? 700 : 1000, s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const cv = document.createElement('canvas'); cv.width = Math.round(img.naturalWidth * s); cv.height = Math.round(img.naturalHeight * s);
+      const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      const id = 'new/' + (++state.seq) + '.jpg';
+      state.images[id] = cv.toDataURL('image/jpeg', 0.86);
+      if (p.kind === 'cover') { change(() => { cat().cover = id; }); render(); toast('Category picture changed'); return; }
+      const f = findK(p.k); if (!f) return;
+      change(() => { state.cats[f.ci].secs[f.si].items[f.ii].img = id; }); redraw(p.k); toast('Photo changed');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); toast('This photo could not be opened. Try a JPG or PNG.'); };
+    img.src = url;
+  }
+
+  /* ---------- header buttons ---------- */
+  $('#cat').addEventListener('change', ev => { cur = +ev.target.value; sel = null; $('#q').value = ''; render(); window.scrollTo(0, 0); });
+  let qt = null;
+  $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { shown = 60; render(); }, 200); });
+  const newSec = () => {
+    $('#q').value = '';
+    modal('New group', '<p>Name of the new group in ' + esc(cat().name) + ':</p><input class="in" id="nsName" maxlength="80" placeholder="For example: Wrenches"><p><label class="lb" for="nsAr">Arabic name (optional)</label><input class="in" id="nsAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Add group', () => {
+      const n = $('#nsName').value.trim(); if (!n) { $('#nsName').focus(); return; }
+      const ar = $('#nsAr').value.trim(); closeModal();
+      change(() => cat().secs.push({ k: 's' + (++state.seq), n, ar, items: [] })); render();
+      const last = [...document.querySelectorAll('.sec')].pop(); if (last) last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 'or']]);
+    setTimeout(() => $('#nsName').focus(), 50);
+  };
+  $('#newSec').addEventListener('click', newSec); $('#newSec2').addEventListener('click', newSec);
+  const newCat = () => {
+    $('#q').value = '';
+    modal('New category', '<p>A whole new product range, with its first group. You can add more groups after.</p>' +
+      '<p><label class="lb" for="ncName">Category name</label><input class="in" id="ncName" maxlength="80" placeholder="For example: Power Tools"></p>' +
+      '<p><label class="lb" for="ncAr">Arabic name (optional)</label><input class="in" id="ncAr" dir="rtl" maxlength="80"></p>' +
+      '<p><label class="lb" for="ncSec">First group name</label><input class="in" id="ncSec" maxlength="80" placeholder="For example: Drills"></p>' +
+      '<p><label class="lb" for="ncSecAr">Arabic group name (optional)</label><input class="in" id="ncSecAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Make category', () => {
+      const n = $('#ncName').value.trim(), sn = $('#ncSec').value.trim();
+      if (!n) { $('#ncName').focus(); return; }
+      if (state.cats.some(c => (c.name || '').trim().toLowerCase() === n.toLowerCase())) { toast('There is already a category called ' + n); $('#ncName').focus(); return; }
+      if (!sn) { $('#ncSec').focus(); return; }
+      const ar = $('#ncAr').value.trim(), sar = $('#ncSecAr').value.trim(); closeModal();
+      change(() => { const seq = ++state.seq; state.cats.push({ id: 'new-' + seq, isNew: true, name: n, ar, cover: '', secs: [{ k: 's' + (++state.seq), n: sn, ar: sar, items: [] }] }); });
+      cur = state.cats.length - 1; sel = null; buildCatSelect(); render(); window.scrollTo(0, 0);
+      toast('Category made: press + Add product to fill it');
+    }, 'or']]);
+    setTimeout(() => $('#ncName').focus(), 50);
+  };
+  $('#newCat').addEventListener('click', newCat); $('#newCat2').addEventListener('click', newCat);
+  $('#delCat').addEventListener('click', () => {
+    const c = cat(); if (!c.isNew || c.secs.some(s => s.items.length)) return;
+    change(() => state.cats.splice(cur, 1)); cur = Math.max(0, cur - 1); buildCatSelect(); render(); toast('Category removed', 'Undo');
+  });
+  $('#undo').addEventListener('click', undo); $('#undo2').addEventListener('click', undo);
+  $('#undo').disabled = $('#undo2').disabled = true;
+  document.addEventListener('keydown', ev => { if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !(ev.target.matches && ev.target.matches('input'))) { ev.preventDefault(); undo(); } });
+  $('#reset').addEventListener('click', () => {
+    modal('Start over?', '<p>This removes every change on this device and loads the list as it is now.' + (state.dirty || changedCount() ? ' <b class="bad-t">Your changes are not saved in a file yet</b> unless you pressed Save changes file.' : '') + '</p>', [['Cancel', closeModal], ['Save changes file first', () => { closeModal(); saveFile(); }], ['Start over', () => {
+      closeModal(); state = fresh(); history = []; stale = false; cur = 0; sel = null; $('#q').value = '';
+      $('#undo').disabled = $('#undo2').disabled = true; persist(); buildCatSelect(); render(); note(); toast('Started over');
+    }, 'or']]);
+  });
+
+  /* ---------- saving the changes file ---------- */
+  function tidy() {
+    const out = JSON.parse(JSON.stringify(state.cats)), warn = [], errs = [], parts = {};
+    const t = v => v == null ? null : (String(v).replace(/\s+/g, ' ').trim() || null);
+    out.forEach(c => {
+      c.name = t(c.name) || c.name; c.ar = t(c.ar) || '';
+      if (!c.name) errs.push('A category has no name.');
+      const none = !c.secs.some(s => s.items.length);   // a whole category with nothing in it gets one line, below
+      c.secs = c.secs.filter(s => {
+        s.n = t(s.n) || ''; s.ar = t(s.ar) || '';
+        if (!s.items.length) { if (!none) warn.push('Group “' + (s.n || 'no name') + '” in ' + c.name + ' has no products, so it is left out.'); return false; }
+        if (!s.n) errs.push('A group in ' + c.name + ' has no name.');
+        s.items.forEach(it => {
+          it.n = t(it.n) || ''; it.ar = t(it.ar) || '';
+          const where = c.name + ' › ' + (s.n || '?') + ' › ' + (it.n || 'card with no name');
+          if (!it.n) errs.push('A card in ' + c.name + ' › ' + (s.n || '?') + ' has no product name.');
+          it.r = it.r.map(r => [t(r[0]), t(r[1]), r[2] == null || r[2] === '' ? null : r[2]]);
+          const filled = it.r.filter(r => r[0] != null || r[1] != null || r[2] != null);
+          it.r = filled.length ? filled : [[null, null, null]];
+          it.r.forEach(r => {
+            if (badPrice(r[2])) errs.push(where + ': the price “' + r[2] + '” is not a number.');
+            if (r[0]) { const key = r[0].toUpperCase(); (parts[key] = parts[key] || []).push([where, !ORIG[it.k] || ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []])]); }
+          });
+          const touched = !ORIG[it.k] || ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]);
+          if (touched && !filled.length) warn.push(where + ': no size, part number or price yet.');
+          if (touched && !it.img) warn.push(where + ': no photo.');
+        });
+        return true;
+      });
+      if (!c.secs.length) warn.push(c.isNew ? 'New category “' + (c.name || 'no name') + '” has no products, so it is left out.' : 'Category “' + c.name + '” has no products left, so it will be taken out of the app.');
+    });
+    for (let i = out.length - 1; i >= 0; i--) if (out[i].isNew && !out[i].secs.length) out.splice(i, 1);
+    Object.keys(parts).forEach(p => { const l = parts[p]; if (l.length > 1 && l.some(x => x[1])) warn.push('Part number ' + p + ' is used ' + l.length + ' times: ' + l.map(x => x[0]).join('; ') + '.'); });
+    return { cats: out, warn, errs };
+  }
+  function summary(cats) {
+    const now = {}, s = { added: 0, deleted: 0, changed: 0, photos: 0, cats: cats.filter(c => c.isNew).length };
+    cats.forEach(c => c.secs.forEach(x => x.items.forEach(it => { now[it.k] = it; })));
+    Object.keys(now).forEach(k => { if (!ORIG[k]) s.added++; else if (ORIG[k] !== JSON.stringify([now[k].n, now[k].ar || '', now[k].img || '', now[k].r, now[k].spec || []])) s.changed++; });
+    Object.keys(ORIG).forEach(k => { if (!now[k]) s.deleted++; });
+    const ph = new Set(); cats.forEach(c => { if (/^new\//.test(c.cover || '')) ph.add(c.cover); c.secs.forEach(x => x.items.forEach(it => { if (/^new\//.test(it.img || '')) ph.add(it.img); })); }); s.photos = ph.size;
+    return s;
+  }
+  const FILE = 'bait-al-maqdis-product-changes.json';
+  function saveFile() {
+    const r = tidy();
+    if (r.errs.length) { modal('Fix these first', '<ul>' + r.errs.slice(0, 30).map(e => '<li>' + esc(e) + '</li>').join('') + '</ul>' + (r.errs.length > 30 ? '<p>…and ' + (r.errs.length - 30) + ' more.</p>' : ''), [['OK', closeModal, 'or']]); return; }
+    const sm = summary(r.cats);
+    const used = new Set(); r.cats.forEach(c => { if (/^new\//.test(c.cover || '')) used.add(c.cover); c.secs.forEach(x => x.items.forEach(it => { if (/^new\//.test(it.img || '')) used.add(it.img); })); });
+    const images = {}; used.forEach(id => { if (state.images[id]) images[id] = state.images[id]; });
+    const body = { kind: 'bam-product-changes', v: 1, ver: state.ver, saved: new Date().toISOString(), summary: sm, cats: r.cats, images };
+    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = FILE; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    state.savedAs = FILE; state.dirty = false; persist(); note();
+    const file = typeof File === 'function' ? new File([blob], FILE, { type: 'application/json' }) : null;
+    const canShare = file && navigator.canShare && navigator.canShare({ files: [file] });
+    const lines = (sm.cats ? [sm.cats + ' new categor' + (sm.cats === 1 ? 'y' : 'ies')] : []).concat([sm.added + ' new', sm.changed + ' changed', sm.deleted + ' deleted', sm.photos + ' new photo' + (sm.photos === 1 ? '' : 's')]);
+    modal('Changes file saved', '<p class="ok">Saved in Downloads as ' + FILE + '.</p><p>' + lines.join(' · ') + '</p>' +
+      (r.warn.length ? '<p><b>Worth a look</b> (the file is saved anyway):</p><ul>' + r.warn.slice(0, 25).map(w => '<li>' + esc(w) + '</li>').join('') + '</ul>' + (r.warn.length > 25 ? '<p>…and ' + (r.warn.length - 25) + ' more.</p>' : '') : '') +
+      '<p>Now send the file' + (canShare ? ', for example with the Share button below' : '') + '.</p>',
+      (canShare ? [['Share the file', () => { navigator.share({ files: [file], title: 'Bait Al Maqdis product changes' }).catch(() => {}); }]] : []).concat([['Done', closeModal, 'or']]));
+  }
+  $('#save').addEventListener('click', saveFile); $('#save2').addEventListener('click', saveFile);
+  window.addEventListener('beforeunload', () => { if (saveTimer) { clearTimeout(saveTimer); idbSet('state', JSON.stringify(state)).catch(() => {}); } });
+
+  /* ---------- small helpers ---------- */
+  let tt = null;
+  function toast(msg, action) {
+    const t = $('#toast'); t.innerHTML = esc(msg) + (action ? '<button type="button">' + esc(action) + '</button>' : ''); t.classList.add('on');
+    if (action) t.querySelector('button').onclick = () => { t.classList.remove('on'); undo(); };
+    clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), action ? 6000 : 2600);
+  }
+  function modal(title, html, btns) {
+    $('#mTitle').textContent = title; $('#mBody').innerHTML = html;
+    $('#mBtns').innerHTML = ''; btns.forEach(([label, fn, cls]) => { const b = document.createElement('button'); b.className = 'btn' + (cls ? ' ' + cls : ''); b.textContent = label; b.onclick = fn; $('#mBtns').appendChild(b); });
+    $('#modal').hidden = false;
+  }
+  function closeModal() { $('#modal').hidden = true; }
+  $('#modal').addEventListener('click', ev => { if (ev.target.id === 'modal') closeModal(); });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#modal').hidden) closeModal(); if (ev.key === 'Enter' && !$('#modal').hidden && /^(nsName|nsAr|ncName|ncAr|ncSec|ncSecAr)$/.test(ev.target.id)) $('#mBtns .or').click(); });
+
+  if (!window.crypto || !crypto.subtle) { document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">This browser is too old for the editor. Please open the link in Chrome or Safari.</p>'; return; }
+  boot();
+})();
+</script>
+</body>
+</html>

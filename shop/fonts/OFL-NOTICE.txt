@@ -1,0 +1,7 @@
+Fonts in this folder: Barlow, Barlow Condensed and Barlow Semi Condensed.
+Designer: Jeremy Tribby. Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow).
+
+These fonts are licensed under the SIL Open Font License, Version 1.1.
+The full licence text is available at https://openfontlicense.org
+The fonts may be used, bundled and redistributed with this website free of charge.
+They may not be sold on their own.
