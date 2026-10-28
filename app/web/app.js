@@ -84,7 +84,7 @@
   paintTheme();
 
   /* ================= branch ================= */
-  const LOCK = WEB && WEB.brand ? WEB.brand : '';    // the iPhone web app is Fakhri Tools only
+  const LOCK = WEB && WEB.brand ? WEB.brand : (window.FT_SHOP || '');   // the iPhone web app is Fakhri Tools only; the Mabrook app is Mabrook only
   // Each shop sees only its own products. Two kinds of list:
   //   'fk'    the Fakhri Tools website's list (sizes, specs and material picked on the product, no prices): Fakhri Tools and Mabrook
   //   'rows'  a packed list where every product has lines [part no., size, price]: Bait Al Maqdis (bam/) and Modern Electric (me/)
@@ -849,7 +849,7 @@
     if (ext) { open(ext.dataset.open); return; }
   });
   function setLang(l) { store.set('app-lang', l); saveRoutes(); try { sessionStorage.setItem('ft-reload', '1'); } catch (e) {} location.reload(); }
-  const langPill = () => !LOCK || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
+  const langPill = () => !(WEB && WEB.brand) || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
 
   /* ================= HOME ================= */
   // a category tile: a product photo on white with the name under it, for both companies

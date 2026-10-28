@@ -61,7 +61,7 @@ jobs:
           git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" r:catalogue-app-test-results-${{ matrix.name }}
 
   # Installs the app the way a salesman does, on newer Android: over the old Fakhri Tools app (v1.5)
-  # and on a phone that never had it, then opens it. Built as a normal release (not a test build).
+  # and on a phone that never had it, then opens it; then the Mabrook-only app next to it. Built as a normal release (not a test build).
   install-test:
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -84,6 +84,7 @@ jobs:
           (cd /tmp/v15 && app/build.sh /tmp/t.jks testpass) && cp /tmp/v15/app/build/fakhri-catalogue.apk /tmp/old.apk
           python3 app/ci/fake-bam.py
           app/build.sh /tmp/t.jks testpass && cp app/build/fakhri-catalogue.apk /tmp/new.apk
+          SHOP=mabrook app/build.sh /tmp/t.jks testpass && cp app/build/mabrook-catalogue.apk /tmp/mabrook.apk
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -102,4 +103,4 @@ jobs:
           profile: pixel_6
           ram-size: 4096M
           emulator-options: -no-window -gpu ${{ matrix.gpu }} -no-snapshot -noaudio -no-boot-anim
-          script: bash app/ci/install-test.sh /tmp/old.apk /tmp/new.apk
+          script: bash app/ci/install-test.sh /tmp/old.apk /tmp/new.apk /tmp/mabrook.apk

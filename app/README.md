@@ -12,6 +12,9 @@ Each shop shows only its own products.
 - Works with no signal: all products, photos and PDFs are packed inside the app. When online it checks the live website for a newer Fakhri Tools list (the one the product editor saves) and downloads any new photos. Bait Al Maqdis and Modern Electric changes come with an app update.
 - Placing an order saves it straight away (no WhatsApp needed). The order form PDF can then be opened, shared or sent on WhatsApp.
 
+The Mabrook-only app (`SHOP=mabrook`) is a second app with its own package (com.mabrookhardware.catalogue), name and icon,
+so it installs next to the main app. It holds only the Mabrook shop (the Fakhri Tools list), no Bait Al Maqdis or Modern Electric data.
+
 ## Build
 
 ```
@@ -20,6 +23,7 @@ app/tools/import-bam.sh <BaitAlMaqdis.apk>   # once, or copy the ready app/bam/ 
 # and copy app/me/ from the project files (fakhri/app/me-catalogue)
 app/build.sh <keystore.jks> <password>      # -> app/build/fakhri-catalogue.apk
 app/build.sh --www                          # only the screens, in app/build/apk/assets/www (open index.html in a browser)
+SHOP=mabrook app/build.sh <keystore.jks> <password>   # -> app/build/mabrook-catalogue.apk, the Mabrook-only app
 ```
 
 `app/bam/` and `app/me/` are not in GitHub on purpose: this repository is public and the folders hold the shops' prices and Bait Al Maqdis's customer list.
@@ -31,7 +35,7 @@ The Fakhri Tools launcher entry keeps the name `.MainActivity` (the launcher of 
 - `web/` the app's screens (HTML, CSS, JS)
 - `android/` the Android shell (a full-screen WebView that serves the packed files and fetches updates)
 - `tools/` the Bait Al Maqdis import, and `tools/preview/` the private browser preview (photos packed into a few files, PDFs shown on the page)
-- `tools/bam-editor/` the password-locked product editor for Bait Al Maqdis and Modern Electric, one link for both (`build.py` makes it, `apply.py --dir app/bam` or `--dir app/me` applies the changes file it saves)
+- `tools/bam-editor/` the product editor for Bait Al Maqdis (behind a password) and Modern Electric (open), one link for both (`build.py` makes it, `apply.py --dir app/bam` or `--dir app/me` applies the changes file it saves)
 - `tools/bam-site/` the public Bait Al Maqdis products website, with no prices (see below)
 - `ci/` the automated phone test run by `.github/workflows/catalogue-app.yml`
 - `build-web.sh` the iPhone web app (Fakhri Tools only, since it is public)

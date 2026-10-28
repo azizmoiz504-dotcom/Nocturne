@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Install check, run inside the emulator job: does the app install the way a salesman installs it,
 # both over the old Fakhri Tools app (v1.5) and on a phone that never had it, and does it open?
-#   usage: app/ci/install-test.sh <old v1.5 apk> <new apk>      (writes app/ci/out/)
+# Then the Mabrook-only app: does it install next to the main app, and open as Mabrook?
+#   usage: app/ci/install-test.sh <old v1.5 apk> <new apk> <Mabrook apk>      (writes app/ci/out/)
 set -u
 ADB=$(command -v adb); adb() { timeout 90 "$ADB" "$@"; }   # a phone that stops answering must not hang the check
-OLD=$1 NEW=$2 PKG=com.fakhritools.catalogue OUT=app/ci/out
+OLD=$1 NEW=$2 MB=$3 PKG=com.fakhritools.catalogue MBPKG=com.mabrookhardware.catalogue OUT=app/ci/out
 mkdir -p $OUT; : > $OUT/log.txt
 FAILS=0
 log() { echo "$(date +%T) $*" | tee -a $OUT/log.txt; }
@@ -48,8 +49,18 @@ adb uninstall $PKG > /dev/null 2>&1
 installs "" "$NEW"; check $? "the new app installs on a phone without it"
 opens 3-fresh-app; check $? "the new app opens from its icon"
 
+# 4. the Mabrook app next to it: its own icon and name, and the main app stays
+adb uninstall $MBPKG > /dev/null 2>&1
+installs "" "$MB"; check $? "the Mabrook app installs next to the main app"
+adb shell pm list packages | tr -d '\r' | grep -qx "package:$PKG"; check $? "the main app is still on the phone"
+launchers=$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | tr -d '\r' | grep -E "$PKG|$MBPKG"); log "home-screen icons: $(echo $launchers)"
+echo "$launchers" | grep -q "$MBPKG/com.fakhritools.catalogue.BrandMabrook"; check $? "the Mabrook app has its own home-screen icon"
+[ "$(adb shell dumpsys package $MBPKG | grep -c 'versionName=')" -ge 1 ]; check $? "the Mabrook app is installed ($(adb shell dumpsys package $MBPKG | grep -m1 -o 'versionName=[^ ]*' | tr -d '\r'))"
+MAIN=$PKG; PKG=$MBPKG; opens 4-mabrook-app; check $? "the Mabrook app opens from its icon"; PKG=$MAIN
+opens 5-main-app-again; check $? "the main app still opens"
+
 adb logcat -d > $OUT/logcat-full.txt 2>&1
-grep -E "FATAL EXCEPTION|AndroidRuntime: Process: $PKG" $OUT/logcat-full.txt > $OUT/crashes.txt
+grep -E "FATAL EXCEPTION|AndroidRuntime: Process: ($PKG|$MBPKG)" $OUT/logcat-full.txt > $OUT/crashes.txt
 [ ! -s $OUT/crashes.txt ]; check $? "no crash while installing and opening"
 tail -c 3000000 $OUT/logcat-full.txt > $OUT/l && mv $OUT/l $OUT/logcat-full.txt
 

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
@@ -19,9 +20,8 @@ import java.io.OutputStream;
 /** Hands a product photo, an order form PDF the app made, or a packed Bait Al Maqdis catalogue PDF
  *  to WhatsApp, a PDF viewer or any app. Read-only. */
 public class PhotoProvider extends ContentProvider {
-    static final String AUTH = "com.fakhritools.catalogue.photos";
-
-    static Uri uriFor(String rel) { return Uri.parse("content://" + AUTH + "/" + rel); }
+    // "<package>.photos": the main app and the Mabrook-only app each have their own (two apps cannot share one)
+    static Uri uriFor(Context c, String rel) { return Uri.parse("content://" + c.getPackageName() + ".photos/" + rel); }
 
     @Override public boolean onCreate() { return true; }
 

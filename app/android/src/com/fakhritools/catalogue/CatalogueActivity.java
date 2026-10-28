@@ -81,7 +81,8 @@ public class CatalogueActivity extends Activity {
         super.onCreate(state);
         root = new File(getFilesDir(), "www");
         prefs = getSharedPreferences("ft", MODE_PRIVATE);
-        brand = prefs.getString("brand", "");
+        fixed = fixedShop();
+        brand = fixed != null ? fixed : prefs.getString("brand", "");
         theme = prefs.getString("theme", "light");
         getWindow().setBackgroundDrawable(new ColorDrawable(bg()));
         paintBars();
@@ -159,6 +160,16 @@ public class CatalogueActivity extends Activity {
     // the launcher entry of each, in the same order. Fakhri Tools keeps .MainActivity, its name in v1.5 and earlier
     static final String[] ALIASES = { ".MainActivity", ".BrandBam", ".BrandMabrook", ".BrandModern" };
     volatile String brand = "";
+    /** set in a one-shop app (the Mabrook app): its manifest names the shop, and the icon never switches */
+    String fixed = null;
+    String fixedShop() {
+        try {
+            Bundle m = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA).metaData;
+            String s = m != null ? m.getString("shop") : null;
+            for (String x : BRANDS) if (x.equals(s)) return x;
+        } catch (Exception e) { /* the main app */ }
+        return null;
+    }
     int brandIndex() { for (int i = 0; i < BRANDS.length; i++) if (BRANDS[i].equals(brand)) return i; return 0; }
 
     /** light (the default) or dark, picked in the app's Settings */
@@ -193,6 +204,7 @@ public class CatalogueActivity extends Activity {
     void applyBrand(String b) {
         brand = "fakhri";
         for (String x : BRANDS) if (x.equals(b)) brand = x;
+        if (fixed != null) brand = fixed;
         prefs.edit().putString("brand", brand).apply();
         paintBars();
         getWindow().setBackgroundDrawable(new ColorDrawable(bg()));
@@ -201,7 +213,7 @@ public class CatalogueActivity extends Activity {
     /** Switch the home-screen icon and name to the branch: its launcher alias on, the others off.
      *  Done when the app is not on screen (onStop), because some phones close an app whose launcher entry changes. */
     void switchIcon() {
-        if (brand.isEmpty()) return;
+        if (brand.isEmpty() || fixed != null) return;
         PackageManager pm = getPackageManager();
         int me = brandIndex();
         try {
@@ -447,7 +459,7 @@ public class CatalogueActivity extends Activity {
                 public void run() {
                     Intent i = new Intent(Intent.ACTION_SEND);
                     if (img != null && img.startsWith("p/") && !img.contains("..")) {
-                        Uri u = PhotoProvider.uriFor(img);
+                        Uri u = PhotoProvider.uriFor(CatalogueActivity.this, img);
                         i.setType(img.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg");
                         i.putExtra(Intent.EXTRA_STREAM, u);
                         i.setClipData(ClipData.newRawUri(title, u));
@@ -521,27 +533,27 @@ public class CatalogueActivity extends Activity {
         @JavascriptInterface
         public void shareFile(final String b64, final String name, final String mime, final String caption, final String waDigits) {
             final String safe = keep(b64, name);
-            if (safe != null) ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor("share/" + safe), safe, mime, caption, waDigits); } });
+            if (safe != null) ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(CatalogueActivity.this, "share/" + safe), safe, mime, caption, waDigits); } });
         }
 
         /** Open a file the page made (the order form PDF) in the phone's PDF viewer; with no viewer, the share menu. */
         @JavascriptInterface
         public void viewFile(final String b64, final String name, final String mime) {
             final String safe = keep(b64, name);
-            if (safe != null) ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor("share/" + safe), safe, mime); } });
+            if (safe != null) ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor(CatalogueActivity.this, "share/" + safe), safe, mime); } });
         }
 
         /** Open one of the PDFs packed in the app (Bait Al Maqdis catalogues), e.g. "bam/pdf/kapusi-catalogue.pdf". */
         @JavascriptInterface
         public void viewAsset(final String path) {
             if (!okAsset(path)) return;
-            ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor(path), path.substring(path.lastIndexOf('/') + 1), mime(path)); } });
+            ui.post(new Runnable() { public void run() { viewUri(PhotoProvider.uriFor(CatalogueActivity.this, path), path.substring(path.lastIndexOf('/') + 1), mime(path)); } });
         }
 
         @JavascriptInterface
         public void shareAsset(final String path, final String title) {
             if (!okAsset(path)) return;
-            ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(path), title, mime(path), title, ""); } });
+            ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(CatalogueActivity.this, path), title, mime(path), title, ""); } });
         }
 
         /** The branch the salesman picked ("fakhri", "bam", "mabrook" or "me"): icon, name and colours follow it. */

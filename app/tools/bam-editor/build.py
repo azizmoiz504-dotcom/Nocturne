@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Builds the product editor: one locked web page for Bait Al Maqdis and Modern Electric
+"""Builds the product editor: one web page for Bait Al Maqdis and Modern Electric
 (change prices, sizes, part numbers, names, Arabic names, photos, groups and categories).
 
     python3 app/tools/bam-editor/build.py [--password-file FILE] [--out DIR]
 
 Reads the private catalogues in app/bam/ and app/me/ and writes the page to app/build/bam-editor/ (default):
     index.html              the editor (tools/bam-editor/editor.html)
-    check.bin               the shops and their counts: opening it proves the password
+    check.bin               the shops, their counts and which need the password (never locked)
+    <shop>/key.bin          only for a shop that needs the password: opening it proves the password
     <shop>/data.bin         the shop's product list (shop: bam or me)
     <shop>/photos/<g>.bin   small copies of the photos, one file per category
     logo-<shop>.png         the shop logos for the shop picker
-With --password-file, every .bin is locked (AES-GCM, key from the password with PBKDF2-SHA256),
-so the page can sit on a public website and only people with the password see the prices.
-Without it they are plain: only for a private place.
+With --password-file, the files of the shops in LOCKED are locked (AES-GCM, key from the password with
+PBKDF2-SHA256), so the page can sit on a public website and only people with the password see their prices.
+The other shops are open to anyone with the link (the user's choice, 2026-10-28: Modern Electric free for all,
+Bait Al Maqdis behind the password). Without --password-file nothing is locked: only for a private place.
 The person editing picks a shop, then presses "Save changes file"; app/tools/bam-editor/apply.py puts
 that file into the shop's folder.
 """
@@ -25,6 +27,7 @@ from bamdata import APP, SHOPS, load, version, item_key, sec_key
 
 ITER = 310000          # PBKDF2 rounds: the same number is in editor.html
 THUMB = 320            # longest side of the photo copies in the editor
+LOCKED = ('bam',)      # the shops behind the password
 
 
 def thumb(path):
@@ -95,8 +98,8 @@ def main():
         salt = bytes.fromhex(open(sf).read().strip())
         key = AESGCM(PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITER).derive(pw.encode()))
 
-    def seal(raw):
-        if not key: return b'BAMP1' + raw
+    def seal(raw, lock):
+        if not (key and lock): return b'BAMP1' + raw
         iv = os.urandom(12)
         return b'BAME1' + salt + iv + key.encrypt(iv, raw, None)
 
@@ -105,23 +108,26 @@ def main():
     shops, stamp_ver, report = [], [], []
     for sid, S in SHOPS.items():
         payload, groups = shop_payload(S['dir'])
+        lock = bool(key) and sid in LOCKED
         os.makedirs(os.path.join(a.out, sid, 'photos'))
-        with open(os.path.join(a.out, sid, 'data.bin'), 'wb') as fh: fh.write(seal(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()))
+        with open(os.path.join(a.out, sid, 'data.bin'), 'wb') as fh: fh.write(seal(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode(), lock))
+        if lock:
+            with open(os.path.join(a.out, sid, 'key.bin'), 'wb') as fh: fh.write(seal(json.dumps({'ok': 1, 'shop': sid}).encode(), True))
         size = 0
         for g, files in groups.items():
             raw = pack(files); size += len(raw)
-            with open(os.path.join(a.out, sid, 'photos', g + '.bin'), 'wb') as fh: fh.write(seal(raw))
+            with open(os.path.join(a.out, sid, 'photos', g + '.bin'), 'wb') as fh: fh.write(seal(raw, lock))
         shutil.copy(LOGOS[sid], os.path.join(a.out, 'logo-%s.png' % sid))
-        shops.append({'id': sid, 'name': S['name'], 'total': payload['total'], 'cats': len(payload['cats']), 'ver': payload['ver']})
+        shops.append({'id': sid, 'name': S['name'], 'total': payload['total'], 'cats': len(payload['cats']), 'ver': payload['ver'], 'locked': lock})
         stamp_ver.append(payload['ver'][:6])
-        report.append('%s %s: %d products, %d categories, %d photo files (%.1f MB)' % (S['name'], payload['ver'], payload['total'], len(payload['cats']), len(groups), size / 1e6))
-    with open(os.path.join(a.out, 'check.bin'), 'wb') as fh: fh.write(seal(json.dumps({'ok': 1, 'shops': shops}, separators=(',', ':')).encode()))
+        report.append('%s %s (%s): %d products, %d categories, %d photo files (%.1f MB)' % (S['name'], payload['ver'], 'password' if lock else 'open', payload['total'], len(payload['cats']), len(groups), size / 1e6))
+    with open(os.path.join(a.out, 'check.bin'), 'wb') as fh: fh.write(seal(json.dumps({'ok': 1, 'shops': shops}, separators=(',', ':')).encode(), False))
     page = open(os.path.join(HERE, 'editor.html'), encoding='utf-8').read()
     stamp = '-'.join(stamp_ver) + '-' + time.strftime('%y%m%d%H%M')
     page = page.replace('<script>\n\'use strict\';', '<script>window.BAM_BUILD = %s;</script>\n<script>\n\'use strict\';' % json.dumps(stamp), 1)
     if 'BAM_BUILD = ' not in page: sys.exit('could not stamp editor.html')
     with open(os.path.join(a.out, 'index.html'), 'w', encoding='utf-8') as fh: fh.write(page)
-    print('editor %s, %s' % (stamp, 'LOCKED with the password' if key else 'NOT locked'))
+    print('editor %s, %s' % (stamp, ('password for: ' + ', '.join(SHOPS[x]['name'] for x in LOCKED)) if key else 'NOTHING locked'))
     for r in report: print('  ' + r)
 
 
