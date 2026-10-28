@@ -48,7 +48,7 @@
     set: function (v) { var k = key(v); if (!k) return srcProp.set.call(this, v); this.removeAttribute('src'); want(this, k); }
   });
   // '<img src="p/…">' in HTML the app builds: no request for a file that is not there, the observer below fills it
-  var RE = /(<img\b[^>]*?\s)src=(["'])((?:bam\/)?p\/[^"']+)\2/g, html = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+  var RE = /(<img\b[^>]*?\s)src=(["'])((?:(?:bam|me)\/)?p\/[^"']+)\2/g, html = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   Object.defineProperty(Element.prototype, 'innerHTML', {
     configurable: true, enumerable: true, get: html.get,
     set: function (v) { html.set.call(this, typeof v === 'string' && v.indexOf('p/') > -1 ? v.replace(RE, '$1data-want=$2$3$2') : v); }

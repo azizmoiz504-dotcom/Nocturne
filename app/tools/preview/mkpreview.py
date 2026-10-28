@@ -1,5 +1,5 @@
 # Builds the private browser preview of the sales app (a claude.ai artifact, never a public page: it carries
-# the Bait Al Maqdis prices) from app/build/apk/assets/www, made by app/build.sh --www. Product photos go into
+# the Bait Al Maqdis and Modern Electric prices) from app/build/apk/assets/www, made by app/build.sh --www. Product photos go into
 # a few "photo pack" scripts (an artifact holds a few hundred files at most); everything else is copied as it is.
 # usage: python3 -I app/tools/preview/mkpreview.py <www> <out>, then copy preview.js and sales-app-preview.html into <out>
 # and publish sales-app-preview.html with every other file in <out>.
@@ -11,7 +11,7 @@ if os.path.exists(OUT):
     shutil.rmtree(OUT)
 os.makedirs(OUT)
 
-skip = ('p/', 'bam/p/')
+skip = ('p/', 'bam/p/', 'me/p/')
 files = []
 for root, _, fs in os.walk(WWW):
     for f in fs:
@@ -32,11 +32,11 @@ open(css, 'w').write(t2)
 
 # photo packs: about 4 MB each, smaller photos than the phone gets (it is a preview)
 photos = []
-for top in ('p', 'bam/p'):
+for top in ('p', 'bam/p', 'me/p'):
     for root, _, fs in os.walk(os.path.join(WWW, top)):
         for f in sorted(fs):
             photos.append(os.path.relpath(os.path.join(root, f), WWW))
-photos.sort(key=lambda p: (not p.startswith('bam/'), p))
+photos.sort(key=lambda p: (not p.startswith(('bam/', 'me/')), p))
 packs, cur, size = [], {}, 0
 for rel in photos:
     im = Image.open(os.path.join(WWW, rel))
