@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1c1c1f">
-<title>Bait Al Maqdis Product Editor</title>
+<title>Product Editor</title>
 <link rel="icon" href="data:,">
 <style>
-  :root { --ink:#1c1c1f; --or:#ee7a14; --or-d:#c9620a; --line:#dcdfe3; --bg:#f1f2f4; --muted:#5d6570; --soft:#f7f8f9; --red:#c81e1e; --green:#11703a; }
+  :root { --ink:#1c1c1f; --or:#ee7a14; --or-d:#c9620a; --or-bg:#fff7ef; --or-ring:rgba(238,122,20,.18); --line:#dcdfe3; --bg:#f1f2f4; --muted:#5d6570; --soft:#f7f8f9; --red:#c81e1e; --green:#11703a; }
+  /* each shop in its own colours: Bait Al Maqdis orange on black, Modern Electric blue with orange */
+  body[data-shop=me] { --ink:#0b1a3a; --or:#0a3fa6; --or-d:#08317f; --or-bg:#eef3fc; --or-ring:rgba(10,63,166,.18); --bg:#eef1f6; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   body { margin:0; font:17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
@@ -17,8 +19,26 @@
   button { cursor:pointer; }
 
   /* password screen */
-  #lock { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; background:var(--ink); }
-  .lockbox { background:#fff; border-radius:22px; padding:28px 24px; width:100%; max-width:420px; box-shadow:0 30px 60px -30px rgba(0,0,0,.6); }
+  #lock, #pick { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; background:radial-gradient(120% 90% at 0% 0%, #2a2a31 0%, #141417 55%, #0b1a3a 100%); }
+  .lockbox { background:#fff; border-radius:24px; padding:28px 24px; width:100%; max-width:440px; box-shadow:0 30px 60px -30px rgba(0,0,0,.6); }
+  .lockbox .logos { display:flex; gap:12px; align-items:center; margin-bottom:18px; }
+  .lockbox .logos span { flex:1; height:58px; border-radius:14px; display:flex; align-items:center; justify-content:center; padding:8px 12px; }
+  .lockbox .logos img { max-width:100%; max-height:100%; object-fit:contain; }
+  .lg-bam { background:#141417; }
+  .lg-me { background:#fff; border:1.5px solid var(--line); }
+  /* shop picker */
+  .pickbox { width:100%; max-width:560px; color:#fff; }
+  .pickbox h1 { margin:0 0 6px; font-size:28px; }
+  .pickbox > p { margin:0 0 22px; color:rgba(255,255,255,.72); }
+  .shopcard { display:flex; width:100%; gap:16px; align-items:center; text-align:left; background:#fff; color:var(--ink); border:0; border-radius:22px; padding:16px; margin-bottom:14px; box-shadow:0 22px 40px -26px rgba(0,0,0,.8); transition:transform .15s; }
+  .shopcard:hover { transform:translateY(-2px); }
+  .shopcard .lg { width:132px; height:84px; flex:none; border-radius:16px; display:flex; align-items:center; justify-content:center; padding:10px; }
+  .shopcard .lg img { max-width:100%; max-height:100%; object-fit:contain; }
+  .shopcard b { display:block; font-size:21px; }
+  .shopcard span.n { display:block; color:var(--muted); font-size:15px; margin-top:2px; }
+  .shopcard span.w { display:inline-block; margin-top:8px; font-size:13px; font-weight:800; padding:3px 10px; border-radius:999px; background:#fdf0e1; color:#c9620a; }
+  .shopcard .go { margin-left:auto; font-size:28px; color:var(--muted); }
+  @media (max-width:520px) { .shopcard .lg { width:96px; height:66px; } .shopcard b { font-size:18px; } }
   .lockbox h1 { margin:0 0 4px; font-size:24px; }
   .lockbox p { margin:0 0 18px; color:var(--muted); }
   .lockbox label { display:block; font-weight:700; margin-bottom:6px; }
@@ -36,8 +56,12 @@
   .btn:disabled { opacity:.45; cursor:default; filter:none; }
 
   header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:12px 20px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
-  header h1 { font-size:20px; margin:0 8px 0 0; }
+  header h1 { font-size:20px; margin:0 8px 0 0; display:flex; align-items:center; gap:12px; }
   header h1 b { color:var(--or); }
+  body[data-shop=me] header h1 b { color:#f39019; }
+  header .hlogo { height:40px; border-radius:10px; padding:5px 8px; display:flex; align-items:center; }
+  header .hlogo img { height:100%; width:auto; max-width:180px; object-fit:contain; }
+  body[data-shop=me] header .hlogo { background:#fff; }
   header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 320px; min-width:200px; font-weight:700; color:var(--ink); background:#fff; }
   header input[type=search] { padding:10px 14px; border-radius:12px; border:0; flex:0 1 300px; min-width:180px; color:var(--ink); }
   .hbtns { display:flex; flex-wrap:wrap; gap:10px; margin-left:auto; }
@@ -59,7 +83,7 @@
   .newcat { color:var(--green); font-weight:700; font-size:15px; }
   label.lb { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:3px; }
   .in { width:100%; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; background:#fff; }
-  .in:focus { outline:none; border-color:var(--or); box-shadow:0 0 0 3px rgba(238,122,20,.18); }
+  .in:focus { outline:none; border-color:var(--or); box-shadow:0 0 0 3px var(--or-ring); }
   .in[dir=rtl] { text-align:right; }
   .row { display:flex; flex-wrap:wrap; gap:8px; }
   .sbtn { border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:7px 14px; font-weight:700; font-size:15px; }
@@ -74,6 +98,9 @@
   .sech .f { flex:1 1 220px; }
   .sech .n { color:var(--muted); font-size:15px; padding-bottom:9px; }
   .cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); gap:16px; margin-top:12px; }
+  .card { min-width:0; }
+  table.rows { table-layout:fixed; }
+  table.rows .in { width:100%; min-width:0; box-sizing:border-box; }
   .card { background:#fff; border-radius:18px; padding:14px; border:2px solid transparent; position:relative; display:flex; flex-direction:column; gap:9px; }
   .card.is-sel { border-color:var(--or); }
   .card.is-new { box-shadow:inset 0 0 0 2px #7cc79a; }
@@ -90,7 +117,7 @@
   .ph:hover .hint, .ph.empty .hint { opacity:1; }
   .ph.empty { background:var(--soft); }
   .ph.empty img { display:none; }
-  .ph.hot { border-color:var(--or); background:#fff7ef; }
+  .ph.hot { border-color:var(--or); background:var(--or-bg); }
   .specs { display:flex; gap:6px; align-items:center; font-size:13px; color:var(--muted); }
   .specs img { width:38px; height:38px; object-fit:contain; border:1px solid var(--line); border-radius:6px; background:#fff; }
   table.rows { width:100%; border-collapse:collapse; }
@@ -134,7 +161,7 @@
     .notice, .catbox { margin-left:12px; margin-right:12px; }
     details.help { padding:12px 14px; }
     #grid { padding:6px 12px 120px; }
-    .cards { grid-template-columns:1fr; gap:12px; }
+    .cards { grid-template-columns:minmax(0, 1fr); gap:12px; }
     .catbox .ph { width:96px; height:96px; }
     .catbox .two { grid-template-columns:1fr; }
     .savebar { display:flex; }
@@ -145,8 +172,9 @@
 
 <div id="lock" hidden>
   <form class="lockbox" id="lockForm" autocomplete="off">
-    <h1>Bait Al Maqdis</h1>
-    <p>Product editor. Type the password you were given.</p>
+    <div class="logos"><span class="lg-bam"><img src="logo-bam.png" alt="Bait Al Maqdis"></span><span class="lg-me"><img src="logo-me.png" alt="Modern Electric"></span></div>
+    <h1>Product editor</h1>
+    <p>For Bait Al Maqdis and Modern Electric. Type the password you were given.</p>
     <label for="pw">Password</label>
     <input id="pw" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
     <label class="rem"><input type="checkbox" id="remember" checked> Remember on this phone or computer</label>
@@ -155,9 +183,11 @@
   </form>
 </div>
 
+<div id="pick" hidden><div class="pickbox"><h1>Which shop?</h1><p>Pick the shop whose products you want to change. Each shop keeps its own work and its own changes file.</p><div id="pickList"></div></div></div>
+
 <div id="app" hidden>
 <header>
-  <h1>Bait Al Maqdis <b>Product Editor</b></h1>
+  <h1><span class="hlogo" id="hLogo"></span><span><span id="hName"></span> <b>Product Editor</b></span></h1>
   <select id="cat" aria-label="Category"></select>
   <input id="q" type="search" placeholder="Search all products, sizes or part numbers" aria-label="Search">
   <span class="count" id="count"></span>
@@ -166,6 +196,7 @@
     <button class="btn ghost" id="newSec">New group</button>
     <button class="btn ghost" id="undo">Undo</button>
     <button class="btn ghost" id="reset">Start over</button>
+    <button class="btn ghost" id="switchShop">Switch shop</button>
     <button class="btn or" id="save">Save changes file</button>
   </div>
 </header>
@@ -174,7 +205,7 @@
   <summary>How to use the editor</summary>
   <p>Pick a category at the top, or search for any product or part number. Type straight into the boxes to change a name, a size, a part number or a price. Leave a price empty if it is on request.</p>
   <p><b>+ Add size</b> adds a line to a product, and <b>✕</b> removes a line. <b>+ Add product</b> adds a new card to a group, <b>Copy</b> makes a second card with the same details, and <b>Delete</b> removes a card. Move a card with the <b>↑ ↓</b> buttons, by dragging it on a computer, or to another group with <b>Move to</b>.</p>
-  <p><b>New category</b> makes a whole new product range (like Hoses or Safety Items) with its first group; then add its products with <b>+ Add product</b>, and give it a picture at the top. <b>New group</b> adds a group inside the category you are in.</p>
+  <p><b>New category</b> makes a whole new product range (like <span class="ex-cat">Hoses or Safety Items</span>) with its first group; then add its products with <b>+ Add product</b>, and give it a picture at the top. <b>New group</b> adds a group inside the category you are in.</p>
   <p>To change a photo, tap it and choose a photo, drop a photo on it, or click the card and press Ctrl+V. The category picture at the top works the same way.</p>
   <p>Your work is kept on this phone or computer if you close the page. When you finish, press <b>Save changes file</b> and send the file you get. New cards show a green edge and changed cards an orange edge.</p>
 </details>
@@ -197,7 +228,7 @@
 <div class="modal" id="modal" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="mTitle"><h2 id="mTitle"></h2><div id="mBody"></div><div class="modal__btns" id="mBtns"></div></div></div>
 <input type="file" id="file" accept="image/*" hidden>
 
-<script>window.BAM_BUILD = "ad47152ac925-2610271245";</script>
+<script>window.BAM_BUILD = "524d9f-ad0750-2610281702";</script>
 <script>
 'use strict';
 (() => {
@@ -205,6 +236,14 @@
   const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const enc = new TextEncoder(), dec = new TextDecoder();
   const PWKEY = 'bam-editor-pw', KEYKEY = 'bam-editor-key';   // the first: where older copies kept the password itself
+  // the shops this editor works on: each has its own list, its own work kept on the device and its own changes file
+  const SHOPS = {
+    bam: { name: 'Bait Al Maqdis', kind: 'bam-product-changes', file: 'bait-al-maqdis-product-changes.json', store: 'state', code: 'Part no.', search: 'Search all products, sizes or part numbers',
+      exCat: 'Hoses or Safety Items', exSec: 'Wrenches', exNewCat: 'Power Tools', exNewSec: 'Drills' },
+    me: { name: 'Modern Electric', kind: 'me-product-changes', file: 'modern-electric-product-changes.json', store: 'state-me', code: 'Tally item name', search: 'Search all products, sizes or Tally names',
+      exCat: 'Circuit Breakers or Lighting', exSec: 'Junction Boxes', exNewCat: 'Circuit Breakers', exNewSec: 'MCBs' }
+  };
+  let SID = '', SHOP = null, CHECK = null;
   const keep = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} } };
 
   /* ---------- reading the locked files ---------- */
@@ -230,7 +269,7 @@
     return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, bytes.slice(33)));
   }
 
-  /* ---------- start: password, then the list ---------- */
+  /* ---------- start: password, then the shop, then its list ---------- */
   let DATA = null;
   // pw: the password typed, or null to use the key kept on this device
   async function unlock(pw, raw) {
@@ -248,14 +287,14 @@
   async function remember() { try { keep.set(KEYKEY, JSON.stringify({ s: saltHex, k: hex(await crypto.subtle.exportKey('raw', key)) })); } catch (e) {} }
   async function boot() {
     let raw;
-    try { raw = await fetchBin('data.bin'); } catch (e) { document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">Could not load the editor. Check the internet and refresh the page.</p>'; return; }
+    try { raw = await fetchBin('check.bin'); } catch (e) { document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">Could not load the editor. Check the internet and refresh the page.</p>'; return; }
     const locked = dec.decode(raw.slice(0, 5)) === 'BAME1';
     const old = keep.get(PWKEY);
     if (!locked || old || keep.get(KEYKEY)) {
       try {
-        DATA = await unlock(!locked ? '' : old || null, raw);
+        CHECK = await unlock(!locked ? '' : old || null, raw);
         if (old) { keep.set(PWKEY, null); await remember(); }
-        return start();
+        return pickShop();
       } catch (e) { keep.set(PWKEY, null); keep.set(KEYKEY, null); }
     }
     $('#lock').hidden = false; $('#pw').focus();
@@ -264,9 +303,9 @@
       const pw = $('#pw').value.trim(); if (!pw) return;
       $('#pwGo').disabled = true; $('#pwGo').textContent = 'Opening…'; $('#pwErr').hidden = true;
       try {
-        DATA = await unlock(pw, raw);
+        CHECK = await unlock(pw, raw);
         if ($('#remember').checked) await remember(); else keep.set(KEYKEY, null);
-        $('#lock').hidden = true; start();
+        $('#lock').hidden = true; pickShop();
       } catch (e) {
         $('#pwErr').textContent = 'That password is not right. Check it and try again.'; $('#pwErr').hidden = false;
         $('#pwGo').disabled = false; $('#pwGo').textContent = 'Open the editor';
@@ -274,12 +313,37 @@
     });
   }
 
+  // the shop picker; a refresh in the same tab goes straight back to the shop that was open
+  const tabShop = { get: () => { try { return sessionStorage.getItem('editor-shop'); } catch (e) { return null; } }, set: v => { try { if (v) sessionStorage.setItem('editor-shop', v); else sessionStorage.removeItem('editor-shop'); } catch (e) {} } };
+  async function pickShop() {
+    const list = CHECK.shops.filter(x => SHOPS[x.id]);
+    const again = tabShop.get();
+    if (again && list.some(x => x.id === again)) return openShop(again);
+    const unsaved = {};
+    await Promise.all(list.map(x => idbGet(SHOPS[x.id].store).then(v => { try { const o = v ? JSON.parse(v) : null; unsaved[x.id] = !!(o && (o.dirty || o.savedAs)); } catch (e) {} }).catch(() => {})));
+    $('#pickList').innerHTML = list.map(x => '<button class="shopcard" data-shop="' + x.id + '"><span class="lg lg-' + x.id + '"><img src="logo-' + x.id + '.png" alt=""></span><span><b>' + esc(x.name) + '</b><span class="n">' + x.total + ' products · ' + x.cats + ' categories</span>' +
+      (unsaved[x.id] ? '<span class="w">Your work from before is kept</span>' : '') + '</span><span class="go">›</span></button>').join('');
+    $('#pick').hidden = false;
+    $('#pickList').onclick = ev => { const b = ev.target.closest('[data-shop]'); if (b) openShop(b.dataset.shop); };
+  }
+  async function openShop(id) {
+    SID = id; SHOP = SHOPS[id]; tabShop.set(id);
+    document.body.dataset.shop = id; document.title = SHOP.name + ' Product Editor';
+    $('#pick').hidden = true;
+    try { DATA = JSON.parse(dec.decode(await open(await fetchBin(id + '/data.bin')))); }
+    catch (e) { tabShop.set(null); document.body.innerHTML = '<p style="padding:24px;font:18px system-ui">Could not load the ' + esc(SHOP.name) + ' list. Check the internet and refresh the page.</p>'; return; }
+    $('#hName').textContent = SHOP.name; $('#hLogo').innerHTML = '<img src="logo-' + id + '.png" alt="">';
+    $('#q').placeholder = SHOP.search;
+    document.querySelectorAll('.ex-cat').forEach(x => { x.textContent = SHOP.exCat; });
+    start();
+  }
+
   /* ---------- photos: one locked bundle per category, opened when needed ---------- */
   const urls = {}, bundles = {};
   const bundleOf = p => /^covers\//.test(p) ? 'covers' : (p.split('/')[1] || '');
   function loadBundle(b) {
     if (!b || !DATA.bundles.includes(b)) return Promise.resolve();
-    if (!bundles[b]) bundles[b] = fetchBin('photos/' + b + '.bin').then(open).then(buf => {
+    if (!bundles[b]) bundles[b] = fetchBin(SID + '/photos/' + b + '.bin').then(open).then(buf => {
       const n = new DataView(buf.buffer, buf.byteOffset).getUint32(0);
       const idx = JSON.parse(dec.decode(buf.slice(4, 4 + n)));
       Object.keys(idx).forEach(p => { const [o, l] = idx[p]; urls[p] = URL.createObjectURL(new Blob([buf.slice(4 + n + o, 4 + n + o + l)], { type: 'image/jpeg' })); });
@@ -304,7 +368,7 @@
   let saveTimer = null, storeOk = true;
   function persist() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => idbSet('state', JSON.stringify(state)).then(() => { if (!storeOk) { storeOk = true; note(); } }).catch(() => { storeOk = false; note(); }), 250);
+    saveTimer = setTimeout(() => idbSet(SHOP.store, JSON.stringify(state)).then(() => { if (!storeOk) { storeOk = true; note(); } }).catch(() => { storeOk = false; note(); }), 250);
   }
   const fresh = () => ({ ver: DATA.ver, dirty: false, savedAs: '', seq: 0, cats: JSON.parse(JSON.stringify(DATA.cats)), images: {} });
   const snap = () => JSON.stringify({ cats: state.cats, dirty: state.dirty, seq: state.seq });
@@ -324,7 +388,7 @@
   function start() {
     $('#app').hidden = false;
     DATA.cats.forEach(c => c.secs.forEach(s => s.items.forEach(it => { ORIG[it.k] = JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]); })));
-    idbGet('state').then(v => {
+    idbGet(SHOP.store).then(v => {
       let old = null; try { old = v ? JSON.parse(v) : null; } catch (e) {}
       if (old && old.ver === DATA.ver) state = old;
       else if (old && old.dirty) { state = old; stale = true; }
@@ -354,7 +418,7 @@
   }
   function buildCatSelect() {
     const s = $('#cat');
-    s.innerHTML = state.cats.map((c, i) => '<option value="' + i + '">' + catLabel(c) + '</option>').join('');
+    s.innerHTML = state.cats.map((c, i) => '<option value="' + i + '">' + esc(catLabel(c)) + '</option>').join('');
     s.value = cur;
   }
   const total = () => state.cats.reduce((a, c) => a + c.secs.reduce((b, s) => b + s.items.length, 0), 0);
@@ -364,7 +428,7 @@
   function card(ci, si, ii, showWhere) {
     const it = state.cats[ci].secs[si].items[ii];
     const isNew = !ORIG[it.k], isCh = !isNew && ORIG[it.k] !== JSON.stringify([it.n, it.ar || '', it.img || '', it.r, it.spec || []]);
-    const rows = it.r.map((r, ri) => '<tr data-r="' + ri + '"><td><input class="in" data-f="pn" value="' + esc(r[0]) + '" aria-label="Part number"></td><td><input class="in" data-f="sz" value="' + esc(r[1]) + '" aria-label="Size"></td><td><input class="in' + (badPrice(r[2]) ? ' bad' : '') + '" data-f="pr" inputmode="decimal" placeholder="On request" value="' + esc(priceText(r[2])) + '" aria-label="Price in AED"></td><td><button class="x" data-a="delr" title="Remove this line" aria-label="Remove this line">✕</button></td></tr>').join('');
+    const rows = it.r.map((r, ri) => '<tr data-r="' + ri + '"><td><input class="in" data-f="pn" value="' + esc(r[0]) + '" aria-label="' + esc(SHOP.code) + '"></td><td><input class="in" data-f="sz" value="' + esc(r[1]) + '" aria-label="Size"></td><td><input class="in' + (badPrice(r[2]) ? ' bad' : '') + '" data-f="pr" inputmode="decimal" placeholder="On request" value="' + esc(priceText(r[2])) + '" aria-label="Price in AED"></td><td><button class="x" data-a="delr" title="Remove this line" aria-label="Remove this line">✕</button></td></tr>').join('');
     const specs = (it.spec || []).length ? '<div class="specs">' + it.spec.map(p => '<img data-p="' + esc(p) + '" alt="">').join('') + '<span>specs picture' + (it.spec.length > 1 ? 's' : '') + ' (kept as they are)</span></div>' : '';
     return '<div class="card' + (isNew ? ' is-new' : isCh ? ' is-changed' : '') + (sel && sel.k === it.k ? ' is-sel' : '') + '" data-c="' + ci + '" data-s="' + si + '" data-i="' + ii + '" draggable="false">' +
       (isNew ? '<span class="tag new">New</span>' : isCh ? '<span class="tag ch">Changed</span>' : '') +
@@ -372,7 +436,7 @@
       '<div class="ph' + (it.img ? '' : ' empty') + '" data-a="photo">' + (it.img ? '<img data-p="' + esc(it.img) + '" alt="">' : '') + '<span class="hint">' + (it.img ? 'Change photo' : 'No photo yet: tap to add one') + '</span></div>' + specs +
       '<div><label class="lb">Product name</label><input class="in" data-f="n" value="' + esc(it.n) + '"></div>' +
       '<div><label class="lb">Arabic name</label><input class="in" data-f="ar" dir="rtl" value="' + esc(it.ar) + '"></div>' +
-      '<table class="rows"><thead><tr><th>Part no.</th><th>Size</th><th>Price AED</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="rows"><thead><tr><th>' + esc(SHOP.code) + '</th><th>Size</th><th>Price AED</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="row"><button class="sbtn" data-a="addr" type="button">+ Add size</button></div>' +
       '<div class="acts"><button class="sbtn" data-a="up" title="Move up" aria-label="Move up">↑</button><button class="sbtn" data-a="down" title="Move down" aria-label="Move down">↓</button><button class="sbtn" data-a="copy">Copy</button>' +
       '<select data-a="move" aria-label="Move to another group"><option value="">Move to…</option>' + moveOptions(ci, si) + '</select><button class="sbtn del" data-a="del">Delete</button></div></div>';
@@ -416,7 +480,7 @@
     buildCatSelectCounts();
   }
   function buildCatSelectCounts() { [...$('#cat').options].forEach((o, i) => { const c = state.cats[i]; if (c) o.textContent = catLabel(c); }); }
-  const catLabel = c => esc((c.name || 'New category') + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')' + (c.isNew ? ' · new' : ''));
+  const catLabel = c => (c.name || 'New category') + ' (' + c.secs.reduce((a, x) => a + x.items.length, 0) + ')' + (c.isNew ? ' · new' : '');
 
   /* ---------- typing ---------- */
   let typingSnap = null;
@@ -574,7 +638,7 @@
   $('#q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { shown = 60; render(); }, 200); });
   const newSec = () => {
     $('#q').value = '';
-    modal('New group', '<p>Name of the new group in ' + esc(cat().name) + ':</p><input class="in" id="nsName" maxlength="80" placeholder="For example: Wrenches"><p><label class="lb" for="nsAr">Arabic name (optional)</label><input class="in" id="nsAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Add group', () => {
+    modal('New group', '<p>Name of the new group in ' + esc(cat().name) + ':</p><input class="in" id="nsName" maxlength="80" placeholder="For example: ' + esc(SHOP.exSec) + '"><p><label class="lb" for="nsAr">Arabic name (optional)</label><input class="in" id="nsAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Add group', () => {
       const n = $('#nsName').value.trim(); if (!n) { $('#nsName').focus(); return; }
       const ar = $('#nsAr').value.trim(); closeModal();
       change(() => cat().secs.push({ k: 's' + (++state.seq), n, ar, items: [] })); render();
@@ -586,9 +650,9 @@
   const newCat = () => {
     $('#q').value = '';
     modal('New category', '<p>A whole new product range, with its first group. You can add more groups after.</p>' +
-      '<p><label class="lb" for="ncName">Category name</label><input class="in" id="ncName" maxlength="80" placeholder="For example: Power Tools"></p>' +
+      '<p><label class="lb" for="ncName">Category name</label><input class="in" id="ncName" maxlength="80" placeholder="For example: ' + esc(SHOP.exNewCat) + '"></p>' +
       '<p><label class="lb" for="ncAr">Arabic name (optional)</label><input class="in" id="ncAr" dir="rtl" maxlength="80"></p>' +
-      '<p><label class="lb" for="ncSec">First group name</label><input class="in" id="ncSec" maxlength="80" placeholder="For example: Drills"></p>' +
+      '<p><label class="lb" for="ncSec">First group name</label><input class="in" id="ncSec" maxlength="80" placeholder="For example: ' + esc(SHOP.exNewSec) + '"></p>' +
       '<p><label class="lb" for="ncSecAr">Arabic group name (optional)</label><input class="in" id="ncSecAr" dir="rtl" maxlength="80"></p>', [['Cancel', closeModal], ['Make category', () => {
       const n = $('#ncName').value.trim(), sn = $('#ncSec').value.trim();
       if (!n) { $('#ncName').focus(); return; }
@@ -648,7 +712,7 @@
       if (!c.secs.length) warn.push(c.isNew ? 'New category “' + (c.name || 'no name') + '” has no products, so it is left out.' : 'Category “' + c.name + '” has no products left, so it will be taken out of the app.');
     });
     for (let i = out.length - 1; i >= 0; i--) if (out[i].isNew && !out[i].secs.length) out.splice(i, 1);
-    Object.keys(parts).forEach(p => { const l = parts[p]; if (l.length > 1 && l.some(x => x[1])) warn.push('Part number ' + p + ' is used ' + l.length + ' times: ' + l.map(x => x[0]).join('; ') + '.'); });
+    Object.keys(parts).forEach(p => { const l = parts[p]; if (l.length > 1 && l.some(x => x[1])) warn.push(SHOP.code + ' ' + p + ' is used ' + l.length + ' times: ' + l.map(x => x[0]).join('; ') + '.'); });
     return { cats: out, warn, errs };
   }
   function summary(cats) {
@@ -659,14 +723,14 @@
     const ph = new Set(); cats.forEach(c => { if (/^new\//.test(c.cover || '')) ph.add(c.cover); c.secs.forEach(x => x.items.forEach(it => { if (/^new\//.test(it.img || '')) ph.add(it.img); })); }); s.photos = ph.size;
     return s;
   }
-  const FILE = 'bait-al-maqdis-product-changes.json';
   function saveFile() {
+    const FILE = SHOP.file;
     const r = tidy();
     if (r.errs.length) { modal('Fix these first', '<ul>' + r.errs.slice(0, 30).map(e => '<li>' + esc(e) + '</li>').join('') + '</ul>' + (r.errs.length > 30 ? '<p>…and ' + (r.errs.length - 30) + ' more.</p>' : ''), [['OK', closeModal, 'or']]); return; }
     const sm = summary(r.cats);
     const used = new Set(); r.cats.forEach(c => { if (/^new\//.test(c.cover || '')) used.add(c.cover); c.secs.forEach(x => x.items.forEach(it => { if (/^new\//.test(it.img || '')) used.add(it.img); })); });
     const images = {}; used.forEach(id => { if (state.images[id]) images[id] = state.images[id]; });
-    const body = { kind: 'bam-product-changes', v: 1, ver: state.ver, saved: new Date().toISOString(), summary: sm, cats: r.cats, images };
+    const body = { kind: SHOP.kind, shop: SID, v: 1, ver: state.ver, saved: new Date().toISOString(), summary: sm, cats: r.cats, images };
     const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = FILE; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
@@ -677,10 +741,15 @@
     modal('Changes file saved', '<p class="ok">Saved in Downloads as ' + FILE + '.</p><p>' + lines.join(' · ') + '</p>' +
       (r.warn.length ? '<p><b>Worth a look</b> (the file is saved anyway):</p><ul>' + r.warn.slice(0, 25).map(w => '<li>' + esc(w) + '</li>').join('') + '</ul>' + (r.warn.length > 25 ? '<p>…and ' + (r.warn.length - 25) + ' more.</p>' : '') : '') +
       '<p>Now send the file' + (canShare ? ', for example with the Share button below' : '') + '.</p>',
-      (canShare ? [['Share the file', () => { navigator.share({ files: [file], title: 'Bait Al Maqdis product changes' }).catch(() => {}); }]] : []).concat([['Done', closeModal, 'or']]));
+      (canShare ? [['Share the file', () => { navigator.share({ files: [file], title: SHOP.name + ' product changes' }).catch(() => {}); }]] : []).concat([['Done', closeModal, 'or']]));
   }
   $('#save').addEventListener('click', saveFile); $('#save2').addEventListener('click', saveFile);
-  window.addEventListener('beforeunload', () => { if (saveTimer) { clearTimeout(saveTimer); idbSet('state', JSON.stringify(state)).catch(() => {}); } });
+  window.addEventListener('beforeunload', () => { if (saveTimer && SHOP) { clearTimeout(saveTimer); idbSet(SHOP.store, JSON.stringify(state)).catch(() => {}); } });
+  // back to the shop picker: the work is kept first
+  $('#switchShop').addEventListener('click', async () => {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; try { await idbSet(SHOP.store, JSON.stringify(state)); } catch (e) {} }
+    tabShop.set(null); location.reload();
+  });
 
   /* ---------- small helpers ---------- */
   let tt = null;
