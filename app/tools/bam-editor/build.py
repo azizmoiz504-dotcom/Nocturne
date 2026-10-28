@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
-"""Builds the Bait Al Maqdis product editor (a web page to change prices, sizes, names and photos).
+"""Builds the product editor: one locked web page for Bait Al Maqdis and Modern Electric
+(change prices, sizes, part numbers, names, Arabic names, photos, groups and categories).
 
     python3 app/tools/bam-editor/build.py [--password-file FILE] [--out DIR]
 
-Reads the private catalogue in app/bam/ and writes the page to app/build/bam-editor/ (default):
-    index.html          the editor (tools/bam-editor/editor.html)
-    data.bin            the product list
-    photos/<name>.bin   small copies of the photos, one file per category
-With --password-file, data.bin and the photos are locked (AES-GCM, key from the password with
-PBKDF2-SHA256), so the page can sit on a public website and only people with the password see
-the prices. Without it they are plain: only for a private place.
-The person editing presses "Save changes file"; app/tools/bam-editor/apply.py puts that file into app/bam/.
+Reads the private catalogues in app/bam/ and app/me/ and writes the page to app/build/bam-editor/ (default):
+    index.html              the editor (tools/bam-editor/editor.html)
+    check.bin               the shops and their counts: opening it proves the password
+    <shop>/data.bin         the shop's product list (shop: bam or me)
+    <shop>/photos/<g>.bin   small copies of the photos, one file per category
+    logo-<shop>.png         the shop logos for the shop picker
+With --password-file, every .bin is locked (AES-GCM, key from the password with PBKDF2-SHA256),
+so the page can sit on a public website and only people with the password see the prices.
+Without it they are plain: only for a private place.
+The person editing picks a shop, then presses "Save changes file"; app/tools/bam-editor/apply.py puts
+that file into the shop's folder.
 """
-import argparse, io, json, os, struct, sys, time
+import argparse, io, json, os, shutil, struct, sys, time
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from bamdata import APP, load, version, item_key, sec_key
+from bamdata import APP, SHOPS, load, version, item_key, sec_key
 
 ITER = 310000          # PBKDF2 rounds: the same number is in editor.html
 THUMB = 320            # longest side of the photo copies in the editor
@@ -40,16 +44,13 @@ def pack(files):
     return struct.pack('>I', len(head)) + head + body
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--bam', default=os.path.join(APP, 'bam'))
-    ap.add_argument('--out', default=os.path.join(APP, 'build', 'bam-editor'))
-    ap.add_argument('--password-file')
-    a = ap.parse_args()
+LOGOS = {'bam': os.path.join(APP, 'bam', 'logo.png'), 'me': os.path.join(APP, 'web', 'shops', 'me-logo.png')}
 
-    data, ar = load(a.bam)
+
+def shop_payload(folder):
+    """the list as the editor reads it, and the photos it needs grouped by category"""
+    data, ar = load(folder)
     d = ar['dict']
-    ver = version(a.bam)
     cats, paths, total = [], [], 0
     for c in data['cats']:
         cid = c['id']
@@ -64,14 +65,21 @@ def main():
             secs.append({'k': sec_key(cid, si), 'n': s['n'], 'ar': d.get(s['n'], ''), 'items': items})
         cats.append({'id': cid, 'name': c['name'], 'ar': d.get(c['name'], ''), 'cover': c.get('cover') or '', 'secs': secs})
         paths.append(c.get('cover'))
-
     groups = {}
     for p in dict.fromkeys(x for x in paths if x):
-        f = os.path.join(a.bam, p)
+        f = os.path.join(folder, p)
         if not os.path.isfile(f):
             print('photo missing, left out of the editor:', p); continue
         g = 'covers' if p.startswith('covers/') else p.split('/')[1]
         groups.setdefault(g, []).append((p, thumb(f)))
+    return {'ver': version(folder), 'built': time.strftime('%Y-%m-%d %H:%M'), 'total': total, 'cats': cats, 'bundles': sorted(groups)}, groups
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--out', default=os.path.join(APP, 'build', 'bam-editor'))
+    ap.add_argument('--password-file')
+    a = ap.parse_args()
 
     key = salt = None
     if a.password_file:
@@ -92,20 +100,29 @@ def main():
         iv = os.urandom(12)
         return b'BAME1' + salt + iv + key.encrypt(iv, raw, None)
 
-    os.makedirs(os.path.join(a.out, 'photos'), exist_ok=True)
-    for f in os.listdir(os.path.join(a.out, 'photos')): os.remove(os.path.join(a.out, 'photos', f))
-    payload = {'ver': ver, 'built': time.strftime('%Y-%m-%d %H:%M'), 'total': total, 'cats': cats, 'bundles': sorted(groups)}
-    with open(os.path.join(a.out, 'data.bin'), 'wb') as fh: fh.write(seal(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()))
-    size = 0
-    for g, files in groups.items():
-        raw = pack(files); size += len(raw)
-        with open(os.path.join(a.out, 'photos', g + '.bin'), 'wb') as fh: fh.write(seal(raw))
+    if os.path.isdir(a.out): shutil.rmtree(a.out)
+    os.makedirs(a.out)
+    shops, stamp_ver, report = [], [], []
+    for sid, S in SHOPS.items():
+        payload, groups = shop_payload(S['dir'])
+        os.makedirs(os.path.join(a.out, sid, 'photos'))
+        with open(os.path.join(a.out, sid, 'data.bin'), 'wb') as fh: fh.write(seal(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()))
+        size = 0
+        for g, files in groups.items():
+            raw = pack(files); size += len(raw)
+            with open(os.path.join(a.out, sid, 'photos', g + '.bin'), 'wb') as fh: fh.write(seal(raw))
+        shutil.copy(LOGOS[sid], os.path.join(a.out, 'logo-%s.png' % sid))
+        shops.append({'id': sid, 'name': S['name'], 'total': payload['total'], 'cats': len(payload['cats']), 'ver': payload['ver']})
+        stamp_ver.append(payload['ver'][:6])
+        report.append('%s %s: %d products, %d categories, %d photo files (%.1f MB)' % (S['name'], payload['ver'], payload['total'], len(payload['cats']), len(groups), size / 1e6))
+    with open(os.path.join(a.out, 'check.bin'), 'wb') as fh: fh.write(seal(json.dumps({'ok': 1, 'shops': shops}, separators=(',', ':')).encode()))
     page = open(os.path.join(HERE, 'editor.html'), encoding='utf-8').read()
-    stamp = ver + '-' + time.strftime('%y%m%d%H%M')
+    stamp = '-'.join(stamp_ver) + '-' + time.strftime('%y%m%d%H%M')
     page = page.replace('<script>\n\'use strict\';', '<script>window.BAM_BUILD = %s;</script>\n<script>\n\'use strict\';' % json.dumps(stamp), 1)
     if 'BAM_BUILD = ' not in page: sys.exit('could not stamp editor.html')
     with open(os.path.join(a.out, 'index.html'), 'w', encoding='utf-8') as fh: fh.write(page)
-    print('editor %s: %d products, %d categories, %d photo files (%.1f MB), %s' % (stamp, total, len(cats), len(groups), size / 1e6, 'LOCKED with the password' if key else 'NOT locked'))
+    print('editor %s, %s' % (stamp, 'LOCKED with the password' if key else 'NOT locked'))
+    for r in report: print('  ' + r)
 
 
 if __name__ == '__main__':

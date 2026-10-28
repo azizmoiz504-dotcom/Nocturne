@@ -2,7 +2,7 @@
    Sales catalogue app · the order form as a PDF (A4), under the salesman's branch
    FT_ORDER_PDF(order) -> Promise<base64 PDF>
    order = { no, at, brand, accent:[r,g,b], dark:[r,g,b], priced, cust:{...}, shop:{...},
-             rows:[{ src, n, group, img, q, p,  code, size ('bam': Bait Al Maqdis)  |  size, spec, mat ('fk': Fakhri Tools) }] }
+             rows:[{ src, n, group, img, q, p,  code, size ('bam': priced lines, Bait Al Maqdis or Modern Electric)  |  size, spec, mat ('fk': Fakhri Tools or Mabrook) }] }
    priced: the form shows Rate and Amount; a row without a price reads "On request".
    Fakhri Tools products have no prices: the shop confirms them.
    ========================================================= */
@@ -114,7 +114,7 @@
       const ay = Math.max(86, lb + 12);
       font('normal', 8.2, C.mute);
       text(shop.address, M, ay);
-      text([shop.phone && 'Tel ' + shop.phone, shop.wa && 'WhatsApp ' + shop.wa, shop.email].filter(Boolean).join('   ·   '), M, ay + 11);
+      text([shop.phone && 'Tel ' + shop.phone, shop.mobile && 'Mobile ' + shop.mobile, shop.wa && 'WhatsApp ' + shop.wa, shop.email].filter(Boolean).join('   ·   '), M, ay + 11);
       stroke(C.line, 0.8); doc.line(M, ay + 22, W - M, ay + 22);
       return ay + 36;
     }
@@ -167,7 +167,7 @@
     let sum = 0, ask = 0;
     x.rows.forEach((r, i) => {
       font('bold', 9.8); const nl = wrap(r.n, itW);
-      const det = [['Part no.', r.code], ['Specs & ratings', r.spec], ['Material', r.mat]].filter(d => d[1]).map(d => { font('normal', 8.3); return { k: d[0], v: d[1], ls: wrap(d[0] + ': ' + d[1], itW) }; });
+      const det = [[shop.codeLabel || 'Part no.', r.code], ['Specs & ratings', r.spec], ['Material', r.mat]].filter(d => d[1]).map(d => { font('normal', 8.3); return { k: d[0], v: d[1], ls: wrap(d[0] + ': ' + d[1], itW) }; });
       font('bold', 9.5); const sl = wrap(r.size || '-', szW);
       const textH = 11 + nl.length * 11.5 + det.reduce((s, d) => s + d.ls.length * 10.5, 0) + 4;
       const rh = Math.max(56, textH + 10, sl.length * 11.5 + 18);

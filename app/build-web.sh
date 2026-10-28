@@ -27,9 +27,10 @@ sed -e 's#<meta name="theme-color" content="[^"]*">#<meta name="theme-color" con
     -e 's#<script src="choices.js"></script>#<script src="../js/choices.js"></script>#' \
     -e "s#<script src=\"app.js\"></script>#&\n<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>#" \
     -e '/<script src="bam\//d' \
+    -e '/<script src="me\//d' \
     web/index.html > "$W/index.html"
 for k in manifest.webmanifest 'is-web' '../js/data.js' '../js/choices.js' '../js/config.js' 'sw.js' 'brand: "fakhri"'; do grep -q -- "$k" "$W/index.html" || { echo "index.html is missing $k" >&2; exit 1; }; done
-if grep -q 'bam/' "$W/index.html"; then echo "index.html still loads Bait Al Maqdis files" >&2; exit 1; fi
+if grep -q -e 'bam/' -e '"me/' "$W/index.html"; then echo "index.html still loads Bait Al Maqdis or Modern Electric files" >&2; exit 1; fi
 
 cat > "$W/manifest.webmanifest" <<'EOF'
 {

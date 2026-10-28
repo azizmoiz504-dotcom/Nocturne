@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Builds the sales catalogue APK (Fakhri Tools + Bait Al Maqdis) from the website's product list
-# and the Bait Al Maqdis catalogue in app/bam/ (made by app/tools/import-bam.sh).
+# Builds the sales catalogue APK (Fakhri Tools, Bait Al Maqdis, Mabrook, Modern Electric) from the website's product list
+# (Fakhri Tools and Mabrook), the Bait Al Maqdis catalogue in app/bam/ (app/tools/import-bam.sh)
+# and the Modern Electric catalogue in app/me/ (app/tools/me_import.py). Both folders are private: see README.
 #   needs (Ubuntu): apt-get install android-sdk-build-tools android-sdk-platform-23 dalvik-exchange apksigner zipalign imagemagick
 #   usage: app/build.sh <keystore> <store-password>     -> app/build/fakhri-catalogue.apk
 #          app/build.sh --www                           -> only the app's pages in app/build/apk/assets/www (open them in a browser)
@@ -12,6 +13,7 @@ SDK=/usr/lib/android-sdk; JAR=$SDK/platforms/android-23/android.jar
 WWW_ONLY=; [ "${1:-}" = --www ] && WWW_ONLY=1
 [ -n "$WWW_ONLY" ] || { KS=${1:?keystore}; PASS=${2:?password}; }
 [ -f bam/data.js ] || { echo "app/bam/ is missing: run app/tools/import-bam.sh <BaitAlMaqdis.apk> first" >&2; exit 1; }
+[ -f me/data.js ] || { echo "app/me/ is missing: copy it from the project files (fakhri/app/me-catalogue)" >&2; exit 1; }
 VERSION_CODE=$(sed -n 's/.*versionCode=\([0-9]*\).*/\1/p' version.txt); VERSION_NAME=$(sed -n 's/.*versionName=\([^ ]*\).*/\1/p' version.txt)
 
 rm -rf "$OUT/apk" "$OUT/classes" "$OUT/gen" "$OUT/res.zip"; mkdir -p "$OUT/apk/assets/www" "$OUT/classes" "$OUT/gen" "$OUT/photos"
@@ -28,6 +30,8 @@ cp "$SITE"/assets/brands/*.png "$W/brands/"
 cp "$SITE/assets/logo-lockup.png" "$SITE/assets/logo-stacked.png" "$SITE/assets/emblem.png" "$SITE/assets/icon-512.png" "$W/img/"
 cp web/img/*.png "$W/img/"   # logo-lockup-dark.png: the logo with a light grey line for the dark look
 cp -r bam "$W/bam"; rm -rf "$W/bam/tiles"   # their category pictures on black: the app shows them on white (bam/covers, tools/bam_covers.py)
+cp -r me "$W/me"
+cp -r web/shops "$W/shops"   # the Mabrook and Modern Electric logos and the plug sign
 
 # 2. every photo the list uses, made lighter for phones (cached between builds)
 node -e '

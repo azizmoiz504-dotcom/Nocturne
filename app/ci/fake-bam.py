@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Makes a stand-in Bait Al Maqdis catalogue in app/bam/ for the automated phone test.
+"""Makes stand-in Bait Al Maqdis (app/bam/) and Modern Electric (app/me/) catalogues for the automated phone test.
 
 The real one (prices, customer list, catalogue PDFs) is kept out of GitHub on purpose, because this
 repository is public: it lives in the project files and is made by app/tools/import-bam.sh.
 This one has made-up products and prices, Fakhri Tools photos, and text pictures, but the same shape,
-so the test can tap through every Bait Al Maqdis screen.   usage: python3 app/ci/fake-bam.py
+so the test can tap through every Bait Al Maqdis screen. The Modern Electric one is like theirs: no photos yet,
+a drawn picture per category, lines without prices.   usage: python3 app/ci/fake-bam.py
 """
 import json, os, random, shutil, subprocess
 
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.dirname(APP)
 OUT = os.environ.get('BAM_OUT') or os.path.join(APP, 'bam')
+ME_OUT = os.environ.get('ME_OUT') or os.path.join(APP, 'me')
 CATS = [('kapusi', 'Kapusi'), ('sgs', 'SGS'), ('castor', 'Castor Wheels'), ('nails', 'Nails & Fasteners'), ('meshes', 'Meshes'),
         ('shadenet', 'Shade Net'), ('wire', 'GI Binding Wire'), ('chain', 'GI Chain'), ('gifit', 'GI Fittings'), ('safety', 'Safety Items'),
         ('hammers', 'Hammers'), ('hand', 'Hand Equipment'), ('hoses', 'Hoses'), ('ropes', 'Ropes'), ('paint', 'Paint Brushes & Rollers'),
@@ -64,6 +66,32 @@ def main():
     picture(os.path.join(OUT, 'logo.png'), 'BAIT AL MAQDIS', 512, 277, 'none')
     picture(os.path.join(OUT, 'logo-pdf.jpg'), 'BAIT AL MAQDIS', 632, 397, '#141416')
     print('stand-in Bait Al Maqdis catalogue:', sum(len(s['items']) for c in cats for s in c['secs']), 'products in', OUT)
+    fake_me()
+
+
+def fake_me():
+    if os.path.exists(ME_OUT):
+        shutil.rmtree(ME_OUT)
+    os.makedirs(os.path.join(ME_OUT, 'covers'))
+    cats, code = [], 1
+    for cid, name in (('cables-wires', 'Cables & Wires'), ('cable-glands', 'Cable Glands'), ('switches-sockets-plugs', 'Switches, Sockets & Plugs')):
+        picture(os.path.join(ME_OUT, 'covers', cid + '.png'), name.split(' ')[0].upper(), 600, 600, '#eef3fc')
+        secs = []
+        for s in range(2):
+            items = []
+            for i in range(3):
+                rows = []
+                for j in range(2 + i):
+                    rows.append([f'TEST {code:04d} ITEM ( VDU )', f'{(j + 1) * 1.5}mm x {j + 2} Core', None]); code += 1
+                items.append({'n': f'Test {name} product {s * 10 + i + 1} (VDU)', 'img': None, 'r': rows})
+            secs.append({'n': f'{name} group {s + 1}', 'items': items})
+        cats.append({'id': cid, 'name': name, 'title': name, 'lede': '', 'cover': f'covers/{cid}.png', 'secs': secs})
+    with open(os.path.join(ME_OUT, 'data.js'), 'w') as f:
+        f.write('/* stand-in Modern Electric catalogue for the phone test (app/ci/fake-bam.py) */\n')
+        f.write('window.ME_DATA = ' + json.dumps({'cats': cats}) + ';\n')
+    with open(os.path.join(ME_OUT, 'ar.js'), 'w') as f:
+        f.write('window.ME_AR = {"dict": {}, "spec": {}};\n')
+    print('stand-in Modern Electric catalogue:', sum(len(s['items']) for c in cats for s in c['secs']), 'products in', ME_OUT)
 
 
 if __name__ == '__main__':

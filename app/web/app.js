@@ -1,9 +1,10 @@
 /* =========================================================
-   Sales catalogue app: Bait Al Maqdis and Fakhri Tools in one.
+   Sales catalogue app: Fakhri Tools, Bait Al Maqdis, Mabrook and Modern Electric in one.
    The salesman picks his branch once (Settings can change it). The look, logo, products,
-   cart, orders and order form all follow the branch; each branch keeps its own cart and orders.
-   Bait Al Maqdis: bam/data.js (with prices, packed in the app).
-   Fakhri Tools: the website's own js/data.js (no prices, refreshed from the website).
+   cart, orders and order form all follow the branch; each branch sees only its own products
+   and keeps its own cart and orders.
+   Bait Al Maqdis: bam/data.js, Modern Electric: me/data.js (with prices, packed in the app).
+   Fakhri Tools and Mabrook: the website's own js/data.js (no prices, refreshed from the website).
    One page; every screen is a "view" stacked inside its tab, like a native app.
    ========================================================= */
 /* Older phones (built-in browser before 2020) ignore "gap" between items in a row.
@@ -84,24 +85,46 @@
 
   /* ================= branch ================= */
   const LOCK = WEB && WEB.brand ? WEB.brand : '';    // the iPhone web app is Fakhri Tools only
+  // Each shop sees only its own products. Two kinds of list:
+  //   'fk'    the Fakhri Tools website's list (sizes, specs and material picked on the product, no prices): Fakhri Tools and Mabrook
+  //   'rows'  a packed list where every product has lines [part no., size, price]: Bait Al Maqdis (bam/) and Modern Electric (me/)
+  // order: pre + date (ymd or dmy) + a number of `pad` digits, e.g. BAM-20261028-001, AQ-281026-01
   const BRANDS = {
-    bam: {
-      id: 'bam', name: 'Bait Al Maqdis', full: 'Bait Al Maqdis Building Materials Trading LLC', where: 'Jurf, Ajman',
-      logo: 'bam/logo.png', pdfLogo: 'bam/logo-pdf.jpg', icon: 'bam/logo.png', pdfAccent: [245, 130, 31], pdfDark: [20, 20, 22],
-      address: 'Exhibition Showroom No.06, Jurf Industrial Zone 1, Emirate-Ajman', city: 'Jurf, Ajman',
-      phone: '+971 6 529 4533', email: 'baitalmaqdisuae@gmail.com', wa: '', waShow: '',
-      prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches', seq: 'bam-seq' }
-    },
     fakhri: {
-      id: 'fakhri', name: 'Fakhri Tools', full: 'Fakhri Tools & Workshop Materials Trading LLC', where: 'Al Quoz, Dubai',
-      logo: 'img/logo-lockup.png', pdfLogo: 'img/logo-lockup.png', icon: 'img/icon-512.png', pdfAccent: [185, 26, 32], pdfDark: [17, 24, 39],
+      id: 'fakhri', kind: 'fk', name: 'Fakhri Tools', full: 'Fakhri Tools & Workshop Materials Trading LLC', where: 'Al Quoz, Dubai',
+      logo: 'img/logo-lockup.png', pdfLogo: 'img/logo-lockup.png', pdfAccent: [185, 26, 32], pdfDark: [17, 24, 39],
       address: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai', city: 'Al Quoz, Dubai',
       phone: CFG.phoneDisplay || '+971 4 285 0135', email: CFG.email || 'dxbsales@ftools.com',
       wa: CFG.whatsappDigits || '971522767034', waShow: CFG.whatsappDisplay || '+971 52 276 7034',
+      wm: 'img/logo-stacked.png', pickup: 'Al Quoz shop', deliveryNote: true, order: { pre: 'AQ-', date: 'dmy', pad: 2 },
       prices: false, keys: { list: 'ft-list', orders: 'ft-orders', cust: 'ft-cust', saved: 'ft-saved', searches: 'ft-searches', seq: 'ft-seq' }
+    },
+    bam: {
+      id: 'bam', kind: 'rows', dir: 'bam', data: 'BAM_DATA', ar: 'BAM_AR', cid: 'b-', clients: 'BAM_CLIENTS',
+      name: 'Bait Al Maqdis', full: 'Bait Al Maqdis Building Materials Trading LLC', where: 'Jurf, Ajman',
+      logo: 'bam/logo.png', pdfLogo: 'bam/logo-pdf.jpg', pdfAccent: [245, 130, 31], pdfDark: [20, 20, 22],
+      address: 'Exhibition Showroom No.06, Jurf Industrial Zone 1, Emirate-Ajman', city: 'Jurf, Ajman',
+      phone: '+971 6 529 4533', email: 'baitalmaqdisuae@gmail.com', wa: '', waShow: '', order: { pre: 'BAM-', date: 'ymd', pad: 3 },
+      prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches', seq: 'bam-seq' }
+    },
+    mabrook: {
+      id: 'mabrook', kind: 'fk', name: 'Mabrook', full: 'Mabrook Hardware Trading LLC', where: 'Ajman',
+      logo: 'shops/mabrook-logo.png', pdfLogo: 'shops/mabrook-pdf.jpg', pdfAccent: [132, 0, 0], pdfDark: [93, 93, 93],
+      address: 'Ajman, UAE', city: 'Ajman', phone: '', email: '', wa: '', waShow: '',
+      pickup: 'shop', order: { pre: 'MB-', date: 'dmy', pad: 2 },
+      prices: false, keys: { list: 'mb-list', orders: 'mb-orders', cust: 'mb-cust', saved: 'mb-saved', searches: 'mb-searches', seq: 'mb-seq' }
+    },
+    me: {
+      id: 'me', kind: 'rows', dir: 'me', data: 'ME_DATA', ar: 'ME_AR', cid: 'm-', codeLabel: 'Tally item',
+      name: 'Modern Electric', full: 'Modern Electric House Trading L.L.C.', where: 'Jurf, Ajman',
+      logo: 'shops/me-logo.png', pdfLogo: 'shops/me-pdf.jpg', pdfAccent: [10, 63, 166], pdfDark: [243, 144, 25],
+      address: 'Jurf Industrial Area, Zone 2, Ajman, UAE', city: 'Jurf, Ajman',
+      phone: '+971 6 747 0540', mobile: '+971 55 882 6217', email: 'vduelec@gmail.com', wa: '', waShow: '', order: { pre: 'ME-', date: 'ymd', pad: 3 },
+      prices: true, keys: { list: 'me-list', orders: 'me-orders', cust: 'me-cust', saved: 'me-saved', searches: 'me-searches', seq: 'me-seq' }
     }
   };
-  if (!window.BAM_DATA) delete BRANDS.bam;           // a build without Bait Al Maqdis
+  Object.keys(BRANDS).forEach(id => { const b = BRANDS[id]; if (b.kind === 'rows' ? !window[b.data] : !window.FT_CATS) delete BRANDS[id]; });   // a build without that list
+  if (LOCK) Object.keys(BRANDS).forEach(id => { if (id !== LOCK) delete BRANDS[id]; });
   let brandId = LOCK || (N && N.brand ? N.brand() : '') || store.get('app-brand', '');
   if (!BRANDS[brandId]) brandId = Object.keys(BRANDS).length === 1 ? Object.keys(BRANDS)[0] : '';
   // an update from the Fakhri Tools-only app (v1.5 and earlier) with its cart or orders on the phone: that salesman is Fakhri Tools
@@ -109,9 +132,10 @@
     brandId = 'fakhri'; store.set('app-brand', brandId);
     try { if (N && N.setBrand) N.setBrand(brandId); } catch (e) {}
   }
-  const BR = BRANDS[brandId] || BRANDS.fakhri;
+  const BR = BRANDS[brandId] || BRANDS.fakhri || BRANDS[Object.keys(BRANDS)[0]];
   const BAM = brandId === 'bam';
-  root.setAttribute('data-brand', !brandId ? 'none' : BAM ? 'bam' : 'fakhri');
+  const ROWS = BR.kind === 'rows';   // a priced list with part numbers (Bait Al Maqdis, Modern Electric)
+  root.setAttribute('data-brand', brandId && BRANDS[brandId] ? brandId : 'none');
   document.title = BR.name + ' Catalogue';
 
   /* ================= language: English, or Arabic for the screens ================= */
@@ -161,6 +185,7 @@
     'Always the newest from the website': 'دائمًا الأحدث من الموقع', 'Updated from the website {w}': 'تم التحديث من الموقع {w}',
     'Prices are packed in the app. New prices come with an app update.': 'الأسعار مضمّنة في التطبيق. تصل الأسعار الجديدة مع تحديث التطبيق.',
     'Prices are not shown. The shop confirms prices on WhatsApp.': 'لا تظهر الأسعار. يؤكد المحل الأسعار عبر واتساب.',
+    'Prices are not shown. The shop confirms them.': 'لا تظهر الأسعار. يؤكدها المحل.',
     'New products from the shop are ready': 'منتجات جديدة من المحل جاهزة', 'Refresh': 'تحديث', 'You already have the newest list': 'لديك أحدث قائمة',
     'No internet. The saved catalogue still works.': 'لا يوجد إنترنت. الكتالوج المحفوظ يعمل.', 'Could not reach the website. Try again later.': 'تعذر الوصول إلى الموقع. حاول لاحقًا.',
     'Size': 'المقاس', 'Specs & ratings': 'المواصفات', 'Material': 'المادة', 'choose one': 'اختر واحدًا', 'Not sure': 'غير متأكد',
@@ -174,7 +199,8 @@
     'The order could not be saved: the phone is full. Delete some old orders, then try again.': 'تعذّر حفظ الطلب: ذاكرة الهاتف ممتلئة. احذف بعض الطلبات القديمة ثم حاول مرة أخرى.',
     'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.'
   };
-  const BAR_ = (window.BAM_AR && window.BAM_AR.dict) || {}, SPECW = (window.BAM_AR && window.BAM_AR.spec) || {};
+  const RAR = ROWS && window[BR.ar] || {};   // the shop's own Arabic word list (Bait Al Maqdis, Modern Electric)
+  const BAR_ = RAR.dict || {}, SPECW = RAR.spec || {};
   const BLOW = {}; Object.keys(BAR_).forEach(k => { BLOW[k.toLowerCase()] = BAR_[k]; });
   // screen words: t('Search {n} products', { n: 597 })
   const t = (s, v) => { let x = lang === 'ar' ? (AR[s] || BAR_[s] || s) : s; if (v) Object.keys(v).forEach(k => { x = x.split('{' + k + '}').join(v[k]); }); return x; };
@@ -249,21 +275,23 @@
     return;
   }
 
-  /* ================= products: both catalogues in every branch, the branch's own first ================= */
+  /* ================= products: only the branch's own list ================= */
   const K = BR.keys;
-  const BCATS = [], FCATS = [];     // { id, src: 'bam' | 'fk', name, tile, items: [product] }
+  // { id, src, name, tile, items: [product] }; src 'bam' is a product with priced lines (Bait Al Maqdis or Modern Electric), 'fk' a website product
+  const BCATS = [], FCATS = [];
   const P = [], byId = new Map();   // every product
 
-  /* ---- Bait Al Maqdis: every product has rows [part no., size, price or null] ---- */
-  if (window.BAM_DATA) {
-    window.BAM_DATA.cats.forEach(c0 => {
-      const c = { id: 'b-' + c0.id, src: 'bam', name: c0.name, tile: c0.cover ? 'bam/' + c0.cover : '', secs: [], items: [] };
+  /* ---- Bait Al Maqdis and Modern Electric: every product has rows [part no., size, price or null] ---- */
+  const DIR = ROWS ? BR.dir + '/' : '';
+  if (ROWS) {
+    window[BR.data].cats.forEach(c0 => {
+      const c = { id: BR.cid + c0.id, src: 'bam', name: c0.name, tile: c0.cover ? DIR + c0.cover : '', secs: [], items: [] };
       const seen = {};   // two products may share a name (different photo or sizes): x tells them apart in the cart
       c0.secs.forEach(s => {
         c.secs.push(s.n);
         s.items.forEach(it => {
           const x = seen[it.n] = (seen[it.n] || 0) + 1;
-          const o = { id: c.id + '/' + c.items.length, src: 'bam', c, sec: s.n, n: it.n, x: x - 1, img: it.img ? 'bam/' + it.img : '', r: it.r, spec: (it.spec || []).map(x => 'bam/' + x) };
+          const o = { id: c.id + '/' + c.items.length, src: 'bam', c, sec: s.n, n: it.n, x: x - 1, img: it.img ? DIR + it.img : '', r: it.r, spec: (it.spec || []).map(x => DIR + x) };
           c.items.push(o); byId.set(o.id, o);
         });
       });
@@ -272,7 +300,7 @@
     });
   }
 
-  /* ---- Fakhri Tools: the website's list; sizes, specs and material are chosen on the product ---- */
+  /* ---- Fakhri Tools and Mabrook: the website's list; sizes, specs and material are chosen on the product ---- */
   const IMG = WEB && WEB.img ? WEB.img : 'p/';
   const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b|[Cc]ast [Ii]ron/], ['Ductile iron', /\bD\.I\b|\bDI\b|[Dd]uctile/], ['Galvanised', /\bG\.I\b|\bGI\b|[Gg]alvani[sz]ed/], ['Mild steel', /\bM\.S\b|\bMS\b|[Mm]ild [Ss]teel/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene|EPDM|NBR/i], ['PVC', /\bPVC\b/], ['Acrylic', /acrylic/i]];
   function materialOf(name) {
@@ -280,9 +308,9 @@
     MATS.forEach(([m, r]) => { const k = String(name).search(r); if (k > -1 && k < at) { at = k; best = m; } });
     return best;
   }
-  const raw = (window.FT_CATS || []).filter(c => c && Array.isArray(c.items));
+  const raw = ROWS ? [] : (window.FT_CATS || []).filter(c => c && Array.isArray(c.items));
   // a broken download of the Fakhri Tools list never strands the app: go back to the packed one (once)
-  if (!raw.length && N && N.resetData) { let tried = false; try { tried = !!sessionStorage.getItem('ft-reset'); sessionStorage.setItem('ft-reset', '1'); } catch (e) {} if (!tried) { N.resetData(); return; } }
+  if (!ROWS && !raw.length && N && N.resetData) { let tried = false; try { tried = !!sessionStorage.getItem('ft-reset'); sessionStorage.setItem('ft-reset', '1'); } catch (e) {} if (!tried) { N.resetData(); return; } }
   raw.forEach(c0 => {
     const c = { id: c0.slug, src: 'fk', slug: c0.slug, fam: c0.fam, name: c0.name, items: [] };
     c0.items.forEach((it, i) => {
@@ -294,14 +322,10 @@
     c.tile = c0.cover ? IMG + c0.cover : (c.items.find(o => o.img) || {}).img || '';
     FCATS.push(c);
   });
-  const OWN = BAM ? BCATS : FCATS, OTHER = BAM ? FCATS : BCATS;
-  const OTHER_BR = (BAM ? BRANDS.fakhri : BRANDS.bam) || { name: '' };
-  const OWN_SRC = BAM ? 'bam' : 'fk';
-  const BRAND_ORDER = [BR, OTHER_BR].filter(b => b && b.id);
-  const CATS = OWN.concat(OTHER);
+  const CATS = ROWS ? BCATS : FCATS;
   CATS.forEach(c => c.items.forEach(o => P.push(o)));
   const isB = o => !!o && o.src === 'bam';
-  const lb = l => l.src === 'bam';   // a cart line of a Bait Al Maqdis product (older Fakhri Tools lines have no src)
+  const lb = l => l.src === 'bam';   // a cart line of a priced product (older Fakhri Tools lines have no src)
   const catBy = id => CATS.find(c => c.id === id);
   const shortCat = s => String(s).replace(/\s*\(.*\)\s*$/, '').trim();
 
@@ -431,12 +455,13 @@
   const putOrders = list => store.set(K.orders, list.slice(0, 300));
   function nextOrderNo() {
     const d = new Date(Date.now() + 4 * 3600e3), p2 = n => String(n).padStart(2, '0');
-    const stamp = BAM ? d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) : p2(d.getUTCDate()) + p2(d.getUTCMonth() + 1) + String(d.getUTCFullYear()).slice(2);
-    const pre = (BAM ? 'BAM-' : 'AQ-') + stamp + '-';
+    const OR = BR.order;
+    const stamp = OR.date === 'ymd' ? d.getUTCFullYear() + p2(d.getUTCMonth() + 1) + p2(d.getUTCDate()) : p2(d.getUTCDate()) + p2(d.getUTCMonth() + 1) + String(d.getUTCFullYear()).slice(2);
+    const pre = OR.pre + stamp + '-';
     const used = getOrders().filter(o => o.no.indexOf(pre) === 0).map(o => +o.no.slice(pre.length) || 0), last = store.get(K.seq, {});
     const n = Math.max(used.length ? Math.max.apply(null, used) : 0, last.pre === pre ? +last.n || 0 : 0) + 1;   // a deleted order's number is not used again
     store.set(K.seq, { pre, n });
-    return pre + String(n).padStart(BAM ? 3 : 2, '0');
+    return pre + String(n).padStart(OR.pad, '0');
   }
   const when2 = ms => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   // the order as text: for WhatsApp and "Copy order as text" (always English, the shop reads it)
@@ -445,13 +470,13 @@
     if (c.name) out.push('Customer: ' + c.name);
     if (c.phone) out.push('Phone: ' + c.phone);
     if (c.site) out.push('Location: ' + c.site);
-    if (!BAM) out.push('Delivery: ' + (c.delivery === 'deliver' ? 'Deliver to the customer' : 'Customer collects from the Al Quoz shop'));
+    if (c.delivery) out.push('Delivery: ' + (c.delivery === 'deliver' ? 'Deliver to the customer' : 'Customer collects from the ' + (BR.pickup || 'shop')));
     if (c.pay) out.push('Payment: ' + c.pay);
     if (c.by) out.push('Needed by: ' + c.by);
     if (c.person) out.push('Contact: ' + c.person);
     const items = x.lines.map((l, i) => {
       const o = lineProduct(l), num = (x.lines.length > 1 ? (i + 1) + '. ' : '');
-      if (lb(l)) return num + l.n + '\n   ' + [l.c, l.s].filter(Boolean).concat(['Qty ' + nfmt(l.q) + (l.p != null ? ' x ' + money(l.p) + ' = ' + money(round2(l.p * l.q)) : ' - price on request')]).join(' · ');
+      if (lb(l)) return num + l.n + '\n   ' + [l.c && BR.codeLabel ? BR.codeLabel + ': ' + l.c : l.c, l.s].filter(Boolean).concat(['Qty ' + nfmt(l.q) + (l.p != null ? ' x ' + money(l.p) + ' = ' + money(round2(l.p * l.q)) : ' - price on request')]).join(' · ');
       const d = describe(l, o);
       return [num + l.n, 'Group: ' + groupOfLine(l, o), d.size && 'Size: ' + d.size, d.spec && 'Specs & ratings: ' + d.spec, d.mat && 'Material: ' + d.mat, 'Quantity: ' + nfmt(l.q)].filter(Boolean).join('\n');
     });
@@ -471,7 +496,7 @@
         const d = describe(l, o);
         return { src: 'fk', n: l.n, group: groupOfLine(l, o), img: lineImg(l, o), size: d.size, spec: d.spec, mat: d.mat, q: l.q, p: null };
       }),
-      shop: { name: BR.full, short: BR.name, address: BR.address, city: BR.city, phone: BR.phone, wa: BR.waShow, email: BR.email, logo: BR.pdfLogo, pickup: BAM ? 'shop' : 'Al Quoz shop' }
+      shop: { name: BR.full, short: BR.name, address: BR.address, city: BR.city, phone: BR.phone, mobile: BR.mobile || '', wa: BR.waShow, email: BR.email, logo: BR.pdfLogo, pickup: BR.pickup || 'shop', codeLabel: BR.codeLabel || '' }
     };
   }
   let pdfBusy = false;
@@ -661,12 +686,13 @@
   const cName = c => c.src === 'bam' ? tn(c.name) : c.name;
   const catLabel = c => c.src === 'bam' ? tn(c.name) : shortCat(c.name);   // short name, for tiles and lists
   const prodRow = (o, mark) => '<button class="prow" ' + openAttr(o) + '>' + photo(o.img, o.n) +
-    '<div class="prow__t"><small>' + esc(catLabel(o.c)) + (o.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
+    '<div class="prow__t"><small>' + esc(catLabel(o.c)) + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
     (isB(o) ? '<span>' + esc(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
 
   /* ================= views and tabs ================= */
   const stage = $('#stage');
-  const TABS = BCATS.length && window.BAM_DATA.pdfs && window.BAM_DATA.pdfs.length ? ['home', 'orders', 'pdfs', 'cart'] : ['home', 'orders', 'cart'];
+  const PDFS = ROWS && window[BR.data].pdfs || [];   // printed catalogues packed in the app (Bait Al Maqdis)
+  const TABS = PDFS.length ? ['home', 'orders', 'pdfs', 'cart'] : ['home', 'orders', 'cart'];
   const TAB_ICON = {
     home: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
     orders: '<svg viewBox="0 0 24 24"><path d="M6 3h12v18H6z"/><path d="M9 3v2h6V3M9 10h6M9 14h6"/></svg>',
@@ -823,7 +849,7 @@
     if (ext) { open(ext.dataset.open); return; }
   });
   function setLang(l) { store.set('app-lang', l); saveRoutes(); try { sessionStorage.setItem('ft-reload', '1'); } catch (e) {} location.reload(); }
-  const langPill = () => BCATS.length || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
+  const langPill = () => !LOCK || lang === 'ar' ? '<button class="langpill" data-lang>' + (lang === 'ar' ? 'English' : 'عربي') + '</button>' : '';
 
   /* ================= HOME ================= */
   // a category tile: a product photo on white with the name under it, for both companies
@@ -831,11 +857,16 @@
     const d = Math.min(i, 14) * 28;
     return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(catLabel(c)) + '</b></button>';
   }
+  // the branch's logo at the top of Home: Bait Al Maqdis with its tag line, the others as they are
+  function heroLogo() {
+    if (BAM) return '<img class="hero__logo hero__logo--bam" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>';
+    if (brandId === 'fakhri') return '<img class="hero__logo hero__logo--fk" src="' + fkLogo() + '" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">';
+    return '<span class="hero__plate hero__plate--' + brandId + '"><img class="hero__logo hero__logo--' + brandId + '" src="' + esc(BR.logo) + '" alt="' + esc(BR.full) + '"></span>';
+  }
   function viewHome() {
     const el = h('<section class="home">' +
       '<div class="home__top"><button class="ib ib--soft" data-go="settings" aria-label="' + esc(t('Settings')) + '">' + I.gear + '</button>' + langPill() + '</div>' +
-      '<div class="hero">' + (BAM ? '<img class="hero__logo hero__logo--bam" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>'
-        : '<img class="hero__logo hero__logo--fk" src="' + fkLogo() + '" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">') + '</div>' +
+      '<div class="hero">' + heroLogo() + '</div>' +
       '<button class="searchbox" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
       '<h2 class="sech">' + I.dots + '<span>' + esc(t('Product')) + ' <em>' + esc(t('Categories')) + '</em></span></h2>' +
       '<div class="cats">' + CATS.map(catTile).join('') + '</div>' +
@@ -855,7 +886,7 @@
     let cur = '';
     const el = h('<section>' + bar(cName(c), '<button class="ib" data-go="search" aria-label="' + esc(t('Search')) + '">' + I.search + '</button>') +
       (groups.length > 1 ? '<div class="chips">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g ? gName(g) : t('All')) + ' <b>' + (g ? c.items.filter(o => gOf(o) === g).length : c.items.length) + '</b></button>').join('') + '</div>' : '') +
-      '<div class="view__pad"><p class="hint">' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + (CB ? ' · ' + esc(t('Tap a card to see the prices')) : '') + '</p><div id="grid"></div></div></section>');
+      '<div class="view__pad"><p class="hint">' + esc(cnt(c.items.length, 'product')) + (CB ? ' · ' + esc(t('Tap a card to see the prices')) : '') + '</p><div id="grid"></div></div></section>');
     const v = { el };
     function fill() {
       const g = $('#grid', el), list = c.items.filter(o => !cur || gOf(o) === cur);
@@ -882,7 +913,7 @@
   function paintItemQuiet(o) { if ($('[data-item="' + o.id + '"]')) paintItem(o); }
 
   /* ================= ONE PRODUCT (Fakhri Tools) ================= */
-  const WM = '<img class="wm" src="img/logo-stacked.png" alt="" aria-hidden="true" draggable="false">';
+  const WM = BR.wm ? '<img class="wm" src="' + BR.wm + '" alt="" aria-hidden="true" draggable="false">' : '';   // Fakhri Tools marks its own photos
   function viewProduct(id) {
     const o = byId.get(id);
     if (!o || isB(o)) return null;
@@ -1054,8 +1085,7 @@
       }
       out.push({ o, score, idx });
     });
-    // the branch's own products first, then the other company's
-    return out.sort((x, y) => (x.o.src !== OWN_SRC) - (y.o.src !== OWN_SRC) || y.score - x.score || x.idx - y.idx).map(x => x.o);
+    return out.sort((x, y) => y.score - x.score || x.idx - y.idx).map(x => x.o);
   }
   // typing mistakes ("camlok", "flang", "hamer"): a word one or two letters off still counts
   function near(a, b) {
@@ -1075,12 +1105,12 @@
   }
   let recentQ = store.get(K.searches, []);
   function viewSearch() {
-    const el = h('<section><div class="sbar"><button class="ib" data-back aria-label="' + esc(t('Back')) + '">' + I.back + '</button><label class="sfield">' + I.search + '<input type="search" enterkeyhint="search" autocomplete="off" placeholder="' + esc(t(BCATS.length ? 'Search products, sizes or part numbers' : 'Search products or sizes')) + '"><button class="ib" data-clear aria-label="' + esc(t('Clear')) + '" hidden>' + I.x + '</button></label></div><div class="view__pad" id="sres"></div></section>');
+    const el = h('<section><div class="sbar"><button class="ib" data-back aria-label="' + esc(t('Back')) + '">' + I.back + '</button><label class="sfield">' + I.search + '<input type="search" enterkeyhint="search" autocomplete="off" placeholder="' + esc(t(ROWS ? 'Search products, sizes or part numbers' : 'Search products or sizes')) + '"><button class="ib" data-clear aria-label="' + esc(t('Clear')) + '" hidden>' + I.x + '</button></label></div><div class="view__pad" id="sres"></div></section>');
     const v = { el }, inp = $('input', el), res = $('#sres', el), clr = $('[data-clear]', el);
     let tm = null;
     function idle() {
       res.innerHTML = (recentQ.length ? '<div class="h-sec"><h2>' + esc(t('Recent')) + '</h2><button data-clr>' + esc(t('Clear')) + '</button></div><div class="sugg">' + recentQ.map(s => '<button class="chip" data-q="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div>' : '') +
-        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<div class="prow__t"><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + (c.src !== OWN_SRC ? ' · ' + esc(OTHER_BR.name) : '') + '</span></div>' + I.chev + '</button>').join('') + '</div>';
+        '<div class="h-sec"><h2>' + esc(t('Jump to a category')) + '</h2></div><div class="plist">' + CATS.map(c => '<button class="prow" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<div class="prow__t"><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + '</span></div>' + I.chev + '</button>').join('') + '</div>';
       wirePhotos(res);
     }
     function remember(q) { recentQ = [q].concat(recentQ.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8); store.set(K.searches, recentQ); }
@@ -1127,16 +1157,13 @@
   }
   function catalogueBox() {
     const kv = [[t('Products'), cnt(P.length, 'product') + ' · ' + CATS.length + ' ' + (lang === 'ar' ? 'فئة' : 'categories')]];
-    const two = BCATS.length && FCATS.length, of = (k, b) => two ? k + ' · ' + b.name : k;
-    BRAND_ORDER.forEach(b => {
-      if (b.id === 'bam' && BCATS.length) kv.push([of(t('Prices'), b), t('Prices are packed in the app. New prices come with an app update.')]);
-      if (b.id === 'fakhri' && FCATS.length) {
-        const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
-        kv.push([of(t('Product list'), b), N ? (ch ? t('Updated from the website {w}', { w: when(ch) }) : t('As packed in the app')) : t('Always the newest from the website')]);
-        if (N) kv.push([t('Last check'), ck ? when(ck) : t('Not yet')]);
-        kv.push([of(t('Prices'), b), t('Prices are not shown. The shop confirms prices on WhatsApp.')]);
-      }
-    });
+    if (ROWS) kv.push([t('Prices'), t('Prices are packed in the app. New prices come with an app update.')]);
+    else {
+      const ch = N && N.lastChange ? +N.lastChange() : 0, ck = N && N.lastCheck ? +N.lastCheck() : 0;
+      kv.push([t('Product list'), N ? (ch ? t('Updated from the website {w}', { w: when(ch) }) : t('As packed in the app')) : t('Always the newest from the website')]);
+      if (N) kv.push([t('Last check'), ck ? when(ck) : t('Not yet')]);
+      kv.push([t('Prices'), t(BR.wa ? 'Prices are not shown. The shop confirms prices on WhatsApp.' : 'Prices are not shown. The shop confirms them.')]);
+    }
     return '<div class="kv">' + kv.map(r => '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>').join('') + '</div>' +
       (FCATS.length ? '<button class="btn btn--ghost btn--full" style="margin-top:12px" id="syncBtn">' + I.sync + esc(t('Check for new products')) + '</button>' : '');
   }
@@ -1146,7 +1173,7 @@
       '<h3 class="slab">' + esc(t('Language')) + '</h3><div class="segs"><button class="seg' + (lang === 'en' ? ' is-on' : '') + '" data-setlang="en">English</button><button class="seg' + (lang === 'ar' ? ' is-on' : '') + '" data-setlang="ar">العربية</button></div>' +
       '<h3 class="slab">' + esc(t('Look')) + '</h3><div class="segs">' + ['light', 'dark'].map(th => '<button class="seg seg--th' + (theme === th ? ' is-on' : '') + '" data-settheme="' + th + '">' + (th === 'light' ? I.sun : I.moon) + esc(t(th === 'light' ? 'Light' : 'Dark')) + '</button>').join('') + '</div>' +
       '<h3 class="slab">' + esc(t('Products')) + '</h3><div id="catBox">' + catalogueBox() + '</div>' +
-      '<p class="foot">' + esc(BR.full) + '<br>' + esc(BR.address) + '<br>' + esc(BR.phone) + ' · ' + esc(BR.email) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
+      '<p class="foot">' + esc(BR.full) + '<br>' + esc(BR.address) + [[BR.phone, BR.mobile, BR.email].filter(Boolean).join(' · ')].filter(Boolean).map(x => '<br>' + esc(x)).join('') + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
       '</div></section>');
     el.addEventListener('click', e => {
       const b = e.target.closest('[data-brand]');
@@ -1220,7 +1247,7 @@
   function afterChange(l) { const o = lineProduct(l); if (o) paintItemQuiet(o); }
   function sumRows(tt, snap) {
     const r = (k, val, cls) => '<div class="sum__r' + (cls ? ' ' + cls : '') + '"><span>' + esc(k) + '</span><b>' + val + '</b></div>';
-    if (!tt.priced) return r(t('Items'), esc(nfmt(tt.items))) + r(t('Pieces'), esc(nfmt(tt.q))) + '<p class="sum__n">' + esc(t(tt.b ? 'Prices on request. The shop quotes them separately.' : 'Prices are not shown. The shop confirms prices on WhatsApp.')) + '</p>';
+    if (!tt.priced) return r(t('Items'), esc(nfmt(tt.items))) + r(t('Pieces'), esc(nfmt(tt.q))) + '<p class="sum__n">' + esc(t(tt.b ? 'Prices on request. The shop quotes them separately.' : BR.wa ? 'Prices are not shown. The shop confirms prices on WhatsApp.' : 'Prices are not shown. The shop confirms them.')) + '</p>';
     return r(t('Items'), esc(nfmt(tt.items))) + (tt.ask ? r(t('Priced subtotal'), money(tt.sum)) + r(t('Awaiting price'), esc(cnt(tt.ask, 'item'))) : '') +
       r(t('Total'), money(tt.sum), 'sum__r--total') + (tt.ask ? '<p class="sum__n">' + esc(t('{n} on request, quoted separately', { n: cnt(tt.ask, 'item') })) + '</p>' : '');
   }
@@ -1244,10 +1271,10 @@
   function viewCheckout() {
     const el = h('<section></section>');
     const v = { el };
-    if (!BAM && !cust.delivery) cust.delivery = 'pickup';
+    if (!ROWS && !cust.delivery) cust.delivery = 'pickup';
     const saveCust = () => store.set(K.cust, cust);
     let bookOpen = false, region = -1, bq = '';
-    const CL = BAM && window.BAM_CLIENTS ? window.BAM_CLIENTS : { r: [], l: [] };
+    const CL = BR.clients && window[BR.clients] ? window[BR.clients] : { r: [], l: [] };   // the shop's own customer list (Bait Al Maqdis)
     const field = (key, label, ph, type, req) => '<label class="flab">' + esc(label) + (req ? ' *' : '') + (type === 'area' ? '<textarea class="field" data-c="' + key + '" placeholder="' + esc(ph) + '">' + esc(cust[key] || '') + '</textarea>' :
       '<input class="field" data-c="' + key + '"' + (type === 'tel' ? ' inputmode="tel" type="tel"' : '') + ' placeholder="' + esc(ph) + '" value="' + esc(cust[key] || '') + '">') + '</label>';
     const seg = (key, val, label) => '<button class="seg' + (cust[key] === val ? ' is-on' : '') + '" data-opt="' + key + '" data-val="' + esc(val) + '">' + esc(t(label)) + '</button>';
@@ -1266,15 +1293,15 @@
       el.innerHTML = pageHead(t('Checkout'), '', t('Back to cart')) + '<div class="view__pad">' +
         (!lines.length ? '<div class="empty">' + I.cartBig.replace('<svg', '<svg width="60" height="60"') + '<b>' + esc(t('Your cart is empty')) + '</b><br><button class="btn btn--main" data-tab="home">' + esc(t('Browse products')) + '</button></div></div>' :
         '<div class="card sum">' + sumRows(tt) + '</div>' +
-        (BAM ? '<div id="book">' + book() + '</div>' +
+        (ROWS ? '<div id="book">' + book() + '</div>' +
           field('name', t('Customer name'), t('Full name'), 'text', true) + field('phone', t('Phone number (optional)'), '05X XXX XXXX', 'tel') + field('note', t('Note (optional)'), t('Delivery address, site name, anything else'), 'area')
           : field('name', t('Customer (company or workshop)'), '', 'text', true) + field('phone', t('Phone / WhatsApp'), '05X XXX XXXX', 'tel', true) + field('site', t('Location or site (optional)'), '', 'text') +
             '<p class="flab">' + esc(t('Delivery')) + '</p><div class="segs">' + seg('delivery', 'pickup', 'Collect from shop') + seg('delivery', 'deliver', 'Deliver') + '</div>' +
-            (cust.delivery === 'deliver' ? '<p class="note">' + esc(t('Delivery anywhere in the UAE is for orders from AED 5,000. The shop confirms it with the price.')) + '</p>' : '') +
+            (cust.delivery === 'deliver' && BR.deliveryNote ? '<p class="note">' + esc(t('Delivery anywhere in the UAE is for orders from AED 5,000. The shop confirms it with the price.')) + '</p>' : '') +
             '<p class="flab">' + esc(t('Payment (optional)')) + '</p><div class="segs segs--wrap">' + PAY.map(p => seg('pay', p, p)).join('') + '</div>' +
             field('note', t('Note (optional)'), t('Anything the shop should know'), 'area')) +
         '<button class="btn btn--main btn--full btn--big" data-place>' + esc(t('Place order')) + '</button>' +
-        (BAM ? '<button class="btn btn--ghost btn--full" data-savecust>' + esc(t('Save these details')) + '</button>' : '') +
+        (ROWS ? '<button class="btn btn--ghost btn--full" data-savecust>' + esc(t('Save these details')) + '</button>' : '') +
         '</div>');
     }
     const redrawBook = () => { const b = $('#book', el); if (!b) return; const y = $('.book__list', b) ? $('.book__list', b).scrollTop : 0; b.innerHTML = book(); const l = $('.book__list', b); if (l) l.scrollTop = y; };
@@ -1306,7 +1333,7 @@
     }
     function place() {
       if (!lines.length) { draw(); return; }
-      const miss = [['name', !String(cust.name || '').trim()], ['phone', !BAM && !phoneDigits(cust.phone)]].filter(x => x[1]).map(x => x[0]);
+      const miss = [['name', !String(cust.name || '').trim()], ['phone', !ROWS && !phoneDigits(cust.phone)]].filter(x => x[1]).map(x => x[0]);
       if (miss.length) return bad(miss);
       const c = {}; Object.keys(cust).forEach(k => { const val = String(cust[k] == null ? '' : cust[k]).trim(); if (val) c[k] = val; });
       const x = { id: Date.now().toString(36), no: nextOrderNo(), at: Date.now(), cust: c, lines: lines.map(l => { const z = Object.assign({}, l); if (lb(l)) z.p = linePrice(l); return z; }) };
@@ -1314,7 +1341,7 @@
       const all = getOrders(); all.unshift(x);
       if (!putOrders(all)) { toast(t('The order could not be saved: the phone is full. Delete some old orders, then try again.'), '', null, 9000); return; }
       const was = lines; lines = []; saveLines(); was.forEach(afterChange);
-      cust = BAM ? {} : { delivery: 'pickup' }; saveCust();
+      cust = ROWS ? {} : { delivery: 'pickup' }; saveCust();
       const ov = stacks.orders[0]; if (ov) ov.dirty = true;
       buzz();
       resetTab('cart'); const cv = stacks.cart[0]; if (cv) cv.refresh();
@@ -1338,7 +1365,7 @@
       '<h1>' + esc(t('Order placed')) + '</h1><p>' + esc(t('Order number')) + '</p><p class="done__no">' + esc(x.no) + '</p>' +
       '<p class="done__sub">' + esc(x.cust.name || '') + ' · ' + esc(cnt(tt.items, 'item')) + (tt.priced ? ' · ' + money(tt.sum) : ' · ' + esc(pcs(tt.q))) + '</p></div>' +
       '<button class="btn btn--main btn--full btn--big" data-k="pdf">' + I.pdf + esc(t('Order form (PDF)')) + '</button>' +
-      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BAM ? 'Send on WhatsApp' : 'Send to the shop on WhatsApp')) + '</button>' +
+      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BR.wa ? 'Send to the shop on WhatsApp' : 'Send on WhatsApp')) + '</button>' +
       '<button class="btn btn--ghost btn--full" data-k="orders">' + esc(t('View my orders')) + '</button>' +
       '<button class="btn btn--link btn--full" data-k="more">' + esc(t('Continue shopping')) + '</button>' +
       '</div></section>');
@@ -1392,7 +1419,7 @@
     if (!x) return null;
     const c = x.cust, tt = totals(x.lines, true);
     const kv = [[t('Placed on'), new Date(x.at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })], [t('Name'), c.name], [t('Phone'), c.phone], [t('Location'), c.site],
-      [t('Delivery'), BAM ? '' : c.delivery === 'deliver' ? t('Deliver') : t('Collect from shop')], [t('Payment'), c.pay ? t(c.pay) : ''], ['Needed by', c.by], ['Contact', c.person], [t('Note'), c.note]].filter(r => r[1]);
+      [t('Delivery'), !c.delivery ? '' : c.delivery === 'deliver' ? t('Deliver') : t('Collect from shop')], [t('Payment'), c.pay ? t(c.pay) : ''], ['Needed by', c.by], ['Contact', c.person], [t('Note'), c.note]].filter(r => r[1]);
     const el = h('<section>' + pageHead(x.no, '', t('All orders')) + '<div class="view__pad">' +
       '<div class="card kv2">' + kv.map(r => '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>').join('') +
         '<div class="sum__r sum__r--total"><span>' + esc(t('Total')) + '</span><b>' + (tt.priced ? money(tt.sum) : esc(cnt(tt.items, 'item') + ' · ' + pcs(tt.q))) + '</b></div>' +
@@ -1401,7 +1428,7 @@
         return '<div class="line">' + photo(lineImg(l, o), l.n) + '<div class="line__t"' + (o ? ' ' + openAttr(o) : '') + '><b>' + esc(lineName(l)) + '</b><span class="line__s">' + (lb(l) ? esc([l.c, ts(l.s), 'qty ' + nfmt(l.q)].filter(Boolean).join(' · ')) : lineSub(l, o, true)) + '</span>' +
           (lb(l) ? '<span class="line__p">' + (l.p != null ? money(round2(l.p * l.q)) : '<em>' + esc(t('On request')) + '</em>') + '</span>' : '<span class="line__q">× ' + nfmt(l.q) + '</span>') + '</div></div>'; }).join('') + '</div>' +
       '<button class="btn btn--main btn--full btn--big" data-k="pdf">' + I.pdf + esc(t('Order form (PDF)')) + '</button>' +
-      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BAM ? 'Send on WhatsApp' : 'Send to the shop on WhatsApp')) + '</button>' +
+      '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BR.wa ? 'Send to the shop on WhatsApp' : 'Send on WhatsApp')) + '</button>' +
       '<button class="btn btn--ghost btn--full" data-k="copy">' + I.copy + esc(t('Copy order as text')) + '</button>' +
       '<button class="btn btn--ghost btn--full" data-k="repeat">' + I.sync + esc(t('Repeat order')) + '</button>' +
       '<button class="btn btn--danger btn--full" data-k="del">' + I.trash + esc(t('Delete order')) + '</button>' +
@@ -1430,13 +1457,13 @@
 
   /* ================= PDFs (Bait Al Maqdis's printed catalogues) ================= */
   function viewPdfs() {
-    const list = window.BAM_DATA.pdfs || [];
+    const list = PDFS;
     const el = h('<section>' + pageHead(t('PDFs')) + '<div class="view__pad"><p class="hint">' + esc(t('Catalogues to open or send')) + '</p>' + list.map((p, i) =>
       '<div class="card pdfc tile" style="animation-delay:' + i * 60 + 'ms"><div class="pdfc__h">' + I.pdf + '<div><b>' + esc(t(p.title)) + '</b><span>' + esc(t(p.sub)) + ' · ' + p.mb + ' MB</span></div></div>' +
       '<div class="pdfc__b"><button class="btn btn--ghost" data-pdf="' + i + '" data-how="open">' + esc(t('Open')) + '</button><button class="btn btn--main" data-pdf="' + i + '" data-how="share">' + I.share + esc(t('Share')) + '</button></div></div>').join('') + '</div></section>');
     el.addEventListener('click', e => {
       const b = e.target.closest('[data-pdf]'); if (!b) return;
-      const p = list[+b.dataset.pdf], path = 'bam/' + p.file;
+      const p = list[+b.dataset.pdf], path = DIR + p.file;
       if (N && N.viewAsset && b.dataset.how === 'open') N.viewAsset(path);
       else if (N && N.shareAsset) N.shareAsset(path, p.title);
       else if (window.FT_PDF_VIEW) fetch(path).then(r => r.arrayBuffer()).then(buf => window.FT_PDF_VIEW(new Uint8Array(buf), p.title));
@@ -1488,7 +1515,8 @@
   $('.zoom__hint').textContent = t('Pinch or double-tap to zoom');
   function zoom(src) {
     const z = $('#zoom'); zimg.src = src; zs = 1; zx = 0; zy = 0; apply();
-    $('.wm', z).hidden = /^bam\//.test(src);   // the Fakhri Tools mark only on Fakhri Tools photos
+    const wm = $('.wm', z); if (BR.wm) wm.src = BR.wm;
+    wm.hidden = !BR.wm || src.indexOf(IMG) !== 0;   // the Fakhri Tools mark only on Fakhri Tools photos in the Fakhri Tools branch
     z.hidden = false; $('.zoom__hint', z).style.opacity = 1;
     setTimeout(() => { $('.zoom__hint', z).style.opacity = 0; }, 2200);
     if (!reduce) z.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.16,1,.3,1)' });
@@ -1521,7 +1549,7 @@
     top: () => { const v = top(); return v ? v.el : null; },
     onSync(r) {
       const cb = $('#catBox'); if (cb) cb.innerHTML = catalogueBox();
-      if (!FCATS.length && r !== 'updated') return;
+      if (ROWS) return;   // the website's list is not used in this branch
       if (r === 'updated' || r === 'updated-partial') toast(t('New products from the shop are ready'), t('Refresh'), reloadKeepingPlace, 12000);
       else if (r === 'same' && asked) toast(t('You already have the newest list'));
       else if (r === 'offline') toast(t('No internet. The saved catalogue still works.'));
@@ -1563,7 +1591,7 @@
   function splash() {
     const s = $('#splash');
     if (!s) return;
-    $('.sp__logo', s).src = BAM ? 'bam/logo.png' : fkLogo();
+    $('.sp__logo', s).src = brandId === 'fakhri' ? fkLogo() : BR.logo;
     if (reduce) { s.remove(); document.body.classList.remove('is-booting'); return; }
     const ease = 'cubic-bezier(.16,1,.3,1)';
     $('.sp__logo', s).animate([{ opacity: 0, transform: 'scale(.86)' }, { opacity: 1, transform: 'none' }], { duration: 700, easing: ease, fill: 'forwards' });

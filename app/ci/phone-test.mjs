@@ -1,4 +1,4 @@
-// Taps through the sales catalogue app (Bait Al Maqdis + Fakhri Tools) on a real Android phone (emulator)
+// Taps through the sales catalogue app (four shops: Fakhri Tools, Bait Al Maqdis, Mabrook, Modern Electric) on a real Android phone (emulator)
 // and saves a screenshot of each step.
 // Talks to the phone with adb and to the app's pages over the WebView's debugging connection.
 import { execSync } from 'child_process';
@@ -84,7 +84,8 @@ async function launch() {
   await wait(900);
   return attach();
 }
-// which home-screen icons the app shows right now (".MainActivity" = Fakhri Tools, ".BrandBam" = Bait Al Maqdis)
+// which home-screen icons the app shows right now (".MainActivity" = Fakhri Tools, ".BrandBam" = Bait Al Maqdis,
+// ".BrandMabrook" = Mabrook, ".BrandModern" = Modern Electric)
 const icons = () => sh('shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER').split('\n').filter(l => l.includes(PKG)).map(l => l.trim().split('/').pop()).join(' ');
 const resumed = () => sh('shell dumpsys activity activities').split('\n').filter(l => /ResumedActivity/.test(l)).join(' ');
 const ls = (k, n) => pg.evaluate(([k, n]) => JSON.parse(localStorage.getItem(k) || '[]').length === n, [k, n]);
@@ -99,15 +100,21 @@ const scroll = y => pg.evaluate(y => { const v = FT.top(); v.scrollTo(0, y); }, 
 const tap = async (sel, ms = 900) => { await pg.locator(sel).first().click(); await wait(ms); };
 const L = '#stage > .view:not(.is-under) ';   // the screen on top
 // picks the first option in every size / specs / material group still open (the app asks for a pick or Not sure)
+// Settings > pick another shop > OK: the app restarts as that shop
+const switchTo = async id => {
+  await tap('#tabs [data-tab="home"]', 700); await tap('#tabs [data-tab="home"]', 700);
+  await tap(L + '[data-go="settings"]', 1200); await tap(L + '.bcard--' + id, 900); await tap('#sheet [data-ok]', 3500);
+  pg = await attach(); await wait(1500);
+};
 const pickRest = scope => pg.evaluate(async scope => { for (let i = 0; i < 6; i++) { const r = [...document.querySelectorAll(scope + ' .pkg[data-g] .sizes')].find(r => !r.querySelector('.sz.is-on')); if (!r) return; r.querySelector('.sz:not(.is-off)').click(); await new Promise(r => setTimeout(r, 250)); } }, scope);
 
 /* ---------- first start: pick Bait Al Maqdis ---------- */
-check(await pg.evaluate(() => document.querySelectorAll('#first .bcard').length === 2), 'first start asks which branch');
+check(await pg.evaluate(() => [...document.querySelectorAll('#first .bcard')].map(c => c.dataset.brand).join() === 'fakhri,bam,mabrook,me'), 'first start asks which of the 4 shops');
 await tap('#first .bcard--bam', 3500);
 pg = await attach(); await wait(1500);
 check(await pg.evaluate(() => FTNative.brand() === 'bam' && document.documentElement.dataset.brand === 'bam' && document.documentElement.dataset.theme === 'light'), 'Bait Al Maqdis picked: the app turns orange, light look');
 await shot('02-bam-home');
-check(await pg.evaluate(() => { const t = [...document.querySelectorAll('.ctile--fk')], first = t[0] && t[0].getAttribute('data-go'); return t.length >= 40 && /^c\/b-/.test(first) && !document.querySelector('.ctile--img, .sech--more'); }), 'home shows one list of categories, Bait Al Maqdis first, then Fakhri Tools');
+check(await pg.evaluate(() => { const t = [...document.querySelectorAll('#stage .ctile')].map(x => x.getAttribute('data-go')); return t.length === window.BAM_DATA.cats.length && t.every(g => /^c\/b-/.test(g)); }), 'home shows only the Bait Al Maqdis categories');
 await scroll(99999); await wait(900); await shot('03-bam-home-end');
 await scroll(0); await wait(500);
 const imgsOk = await pg.evaluate(() => [...document.querySelectorAll('.ctile img')].filter(i => i.complete && i.naturalWidth > 0).length);
@@ -146,20 +153,8 @@ await key(4);
 check(await pg.evaluate(() => !document.querySelector('.flip.is-flipped')), 'phone Back turns the card back first');
 await key(4);
 
-/* ---------- a Fakhri Tools product inside the Bait Al Maqdis app ---------- */
-await tap(L + '[data-go="c/ball-valves"]', 1500); await shot('08-fakhri-category-in-bam');
-await tap(L + '.pcard', 1400); await shot('09-fakhri-product');
-await scroll(420); await wait(700);
-await tap(L + '#addBtn', 900);
-check(await ls('bam-list', 1) && await pg.evaluate(() => document.querySelector('#stage > .view:not(.is-under) .pkg.is-miss') !== null), 'Add asks for the size first');
-await tap(L + '.sz[data-row2="s"] >> nth=3', 300); await pickRest('#stage > .view:not(.is-under)');
-await tap(L + '#addBtn', 1200); await shot('10-fakhri-added');
-check(await ls('bam-list', 2), 'Fakhri Tools product went into the same cart');
-await scroll(0); await wait(500);
-await tap(L + '[data-zoom]', 900); await shot('11-zoom');
-await key(4);
-check(await pg.evaluate(() => document.getElementById('zoom').hidden), 'Back closes the zoom');
-await key(4); await key(4);
+/* ---------- only Bait Al Maqdis products here ---------- */
+check(await pg.evaluate(() => !document.querySelector('[data-go="c/ball-valves"]')), 'no Fakhri Tools category in the Bait Al Maqdis app');
 
 /* ---------- search by part number ---------- */
 await tap('#tabs [data-tab="home"]', 700); await tap('#tabs [data-tab="home"]', 700);
@@ -234,9 +229,20 @@ check(ic2.includes('MainActivity') && !ic2.includes('BrandBam'), 'home-screen ic
 pg = await launch(); await wait(2500);
 check(await pg.evaluate(() => FTNative.brand() === 'fakhri'), 'the Fakhri Tools icon opens the app');
 
-/* ---------- Fakhri Tools order with a Bait Al Maqdis product ---------- */
-await tap(L + '[data-go="c/b-kapusi"]', 1500);
-await tap(L + '.flip [data-flip]', 900); await tap(L + '.flip.is-flipped [data-radd]', 900);
+/* ---------- a Fakhri Tools order ---------- */
+check(await pg.evaluate(() => { const t = [...document.querySelectorAll('#stage .ctile')].map(x => x.getAttribute('data-go')); return t.length === window.FT_CATS.length && !t.some(g => /^c\/(b|m)-/.test(g)); }), 'Fakhri Tools home shows only its own categories');
+await tap(L + '[data-go="c/ball-valves"]', 1500); await shot('08-fakhri-category');
+await tap(L + '.pcard', 1400); await shot('09-fakhri-product');
+await scroll(420); await wait(700);
+await tap(L + '#addBtn', 900);
+check(await ls('ft-list', 0) && await pg.evaluate(() => document.querySelector('#stage > .view:not(.is-under) .pkg.is-miss') !== null), 'Add asks for the size first');
+await tap(L + '.sz[data-row2="s"] >> nth=3', 300); await pickRest('#stage > .view:not(.is-under)');
+await tap(L + '#addBtn', 1200); await shot('10-fakhri-added');
+check(await ls('ft-list', 1), 'Fakhri Tools product went into the cart');
+await scroll(0); await wait(500);
+await tap(L + '[data-zoom]', 900); await shot('11-zoom');
+await key(4);
+check(await pg.evaluate(() => document.getElementById('zoom').hidden), 'Back closes the zoom');
 await key(4); await key(4);
 await tap('#tabs [data-tab="cart"]', 1200); await shot('28-fakhri-cart');
 await tap(L + '[data-checkout]', 1200);
@@ -274,10 +280,23 @@ await tap(L + '[data-go="c/camlock-couplings"]', 2500);
 let offImgs = await photosIn(); await shot('32-offline-fakhri');
 check(offImgs > 3, 'Fakhri Tools photos show with no internet (' + offImgs + ')');
 await key(4); await wait(800);
+await switchTo('bam');
 await tap(L + '[data-go="c/b-hammers"]', 2500);
 offImgs = await photosIn(); await shot('33-offline-bam');
 check(offImgs > 2, 'Bait Al Maqdis photos show with no internet (' + offImgs + ')');
 check(await ls('ft-orders', 1) && await ls('bam-orders', 1), 'orders kept after closing the app');
+await key(4); await wait(800);
+for (const [id, alias, name, pre] of [['me', 'BrandModern', 'Modern Electric', 'm-'], ['mabrook', 'BrandMabrook', 'Mabrook', null]]) {
+  await switchTo(id);
+  check(await pg.evaluate(id => FTNative.brand() === id && document.documentElement.dataset.brand === id && document.title === ({ me: 'Modern Electric', mabrook: 'Mabrook' })[id] + ' Catalogue', id), 'switched to ' + name);
+  check(await pg.evaluate(pre => { const t = [...document.querySelectorAll('#stage .ctile')].map(x => x.getAttribute('data-go')); return pre ? t.length === window.ME_DATA.cats.length && t.every(g => g.indexOf('c/' + pre) === 0) : t.length === window.FT_CATS.length && !t.some(g => /^c\/(b|m)-/.test(g)); }, pre), name + ' home shows only its own categories');
+  await shot('34-' + id + '-home');
+  await key(3); await wait(3000);
+  const ic = icons(); log('icons after picking ' + name + ':', ic);
+  check(ic.includes(alias) && ['MainActivity', 'BrandBam', 'BrandMabrook', 'BrandModern'].filter(a => ic.includes(a)).length === 1, 'home-screen icon and name switched to ' + name);
+  pg = await launch(); await wait(2500);
+  check(await pg.evaluate(id => FTNative.brand() === id, id), 'the ' + name + ' icon opens the app');
+}
 await d.shell('svc wifi enable'); await d.shell('svc data enable');
 
 /* ---------- PDF viewers and WhatsApp get whole files (many refuse a piece of one: "Not a whole file") ---------- */

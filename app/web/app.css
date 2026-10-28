@@ -40,6 +40,13 @@ html[data-brand=fakhri]{
   --f:'Barlow',system-ui,sans-serif; --fh:'Barlow Condensed','Arial Narrow',system-ui,sans-serif; --fh-w:800; --fh-t:uppercase;
 }
 html[data-brand=fakhri][data-theme=dark]{--accent:#e0303a; --accent-2:#f05a62; --accent-soft:rgba(224,48,58,.5); --accent-bg:rgba(224,48,58,.15)}
+/* Mabrook: the dark red and grey of its logo */
+html[data-brand=mabrook]{--accent:#8a0d0d; --accent-2:#b3201f; --accent-ink:#fff; --accent-soft:rgba(138,13,13,.3); --accent-bg:rgba(138,13,13,.08)}
+html[data-brand=mabrook][data-theme=dark]{--accent:#d63c3c; --accent-2:#e86060; --accent-soft:rgba(214,60,60,.5); --accent-bg:rgba(214,60,60,.15)}
+/* Modern Electric: the blue and orange of its logo */
+html[data-brand=me]{--accent:#0a3fa6; --accent-2:#f39019; --accent-ink:#fff; --accent-soft:rgba(10,63,166,.3); --accent-bg:rgba(10,63,166,.08)}
+html[data-brand=me][data-theme=dark]{--bg:#090e1a; --card:#111a2c; --card-2:#162036; --field:#0d1424; --nav:#101828; --line:#1f2c45; --line-2:#2d3d5c; --text-2:#d5dcea; --muted:#8a97b0; --toast:#1a2540;
+  --accent:#4d86f2; --accent-2:#f7a540; --accent-soft:rgba(77,134,242,.5); --accent-bg:rgba(77,134,242,.15)}
 :root{--pad:16px;--ease:cubic-bezier(.16,1,.3,1);--spring:cubic-bezier(.34,1.56,.64,1);--sab:env(safe-area-inset-bottom,0px);--nav-h:64px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);overflow:hidden}
@@ -118,7 +125,7 @@ body.is-booting #tabs{transform:translateY(160%)}
 .bcard.is-on{border-color:var(--accent)}
 .bcard__logo{width:92px;height:62px;border-radius:14px;display:grid;place-items:center;flex:none;padding:8px}
 .bcard--bam .bcard__logo{background:#0a0a0b;border:1px solid #2a2a30}
-.bcard--fakhri .bcard__logo{background:#fff;border:1px solid var(--line)}
+.bcard--fakhri .bcard__logo,.bcard--mabrook .bcard__logo,.bcard--me .bcard__logo{background:#fff;border:1px solid var(--line)}
 .bcard__logo img{max-width:100%;max-height:100%;object-fit:contain}
 .bcard__t{flex:1;min-width:0}
 .bcard__t b{display:block;font-size:17px;font-weight:700}
@@ -136,6 +143,9 @@ body.is-booting #tabs{transform:translateY(160%)}
 .ph img.is-in{opacity:1}
 .ph--none{background:var(--card-2)}
 .ph--none::after{content:"";position:absolute;top:30%;right:30%;bottom:30%;left:30%;border-radius:50%;border:2px dashed var(--line-2)}
+/* Modern Electric products with no photo yet: their plug sign, faint */
+html[data-brand=me] .ph--none{background:#f4f7fd}
+html[data-brand=me] .ph--none::after{border:0;border-radius:0;top:28%;right:28%;bottom:28%;left:28%;background:url(shops/me-emblem.png) center/contain no-repeat;opacity:.22}
 .ph::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:2;pointer-events:none;background:linear-gradient(100deg,transparent 30%,rgba(0,0,0,.05) 50%,transparent 70%);transform:translateX(-120%)}
 .ph.is-loading::before{animation:shimmer 1.4s 3}
 @keyframes shimmer{to{transform:translateX(120%)}}
@@ -152,6 +162,13 @@ body.is-booting #tabs{transform:translateY(160%)}
 .hero__logo--fk{width:min(270px,72vw);margin-top:4px}
 /* the Bait Al Maqdis logo is white: black on the light look */
 html:not([data-theme=dark]) .hero__logo--bam,html:not([data-theme=dark])[data-brand=bam] .sp__logo{filter:brightness(0)}
+/* Mabrook and Modern Electric logos are made for white: on the dark look they sit on a white plate */
+.hero__plate{display:block;margin-top:6px}
+.hero__logo--mabrook{width:min(280px,74vw)}
+.hero__logo--me{width:min(340px,86vw)}
+html[data-theme=dark] .hero__plate{background:#fff;padding:12px 18px;border-radius:18px}
+html[data-theme=dark][data-brand=mabrook] .sp__logo,html[data-theme=dark][data-brand=me] .sp__logo{background:#fff;padding:12px 16px;border-radius:16px}
+html[data-brand=me] .sp__logo{width:min(340px,80vw)}
 .hero__tag{display:flex;align-items:center;gap:12px;margin-top:10px;color:var(--accent);font-weight:700;font-size:15px;letter-spacing:.32em}
 .hero__tag i{display:block;width:40px;height:2px;background:var(--accent)}
 .searchbox{display:flex;align-items:center;gap:10px;width:100%;height:52px;padding:0 16px;border-radius:16px;background:var(--card);border:1px solid var(--line-2);color:var(--muted);font-size:15px}
@@ -491,3 +508,10 @@ body.is-typing #toast{bottom:16px}
 .ghost{position:fixed;z-index:60;pointer-events:none;overflow:hidden;background:#fff}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* Modern Electric: long range names get three lines; on the back of a card each size takes the full width
+   (size first, price and + under it). The Tally name is in the product sheet, the cart and the order. */
+html[data-brand=me] .ctile b{-webkit-line-clamp:3;min-height:3.24em;font-size:13px}
+html[data-brand=me] .flip .row{flex-direction:column;align-items:stretch;gap:6px;padding:8px 9px}
+html[data-brand=me] .flip .row__l b{font-size:12.5px}
+html[data-brand=me] .flip .row__l small{display:none}
+html[data-brand=me] .flip .row__r{flex-direction:row;align-items:center;justify-content:space-between}

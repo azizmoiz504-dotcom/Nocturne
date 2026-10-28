@@ -53,7 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Sales catalogue (Fakhri Tools + Bait Al Maqdis): a full-screen WebView that shows the catalogue
+ * Sales catalogue (Fakhri Tools, Bait Al Maqdis, Mabrook, Modern Electric): a full-screen WebView that shows the catalogue
  * bundled inside the app (works with no signal) and quietly pulls the newest Fakhri Tools product
  * list and photos from the live website whenever the phone is online. The Bait Al Maqdis catalogue,
  * prices and PDFs are packed in the app (assets/www/bam/).
@@ -153,16 +153,19 @@ public class CatalogueActivity extends Activity {
         });
     }
 
-    /* ---------------- branch: Fakhri Tools or Bait Al Maqdis ---------------- */
+    /* ---------------- branch: Fakhri Tools, Bait Al Maqdis, Mabrook or Modern Electric ---------------- */
 
+    static final String[] BRANDS = { "fakhri", "bam", "mabrook", "me" };
+    // the launcher entry of each, in the same order. Fakhri Tools keeps .MainActivity, its name in v1.5 and earlier
+    static final String[] ALIASES = { ".MainActivity", ".BrandBam", ".BrandMabrook", ".BrandModern" };
     volatile String brand = "";
-    boolean isBam() { return "bam".equals(brand); }
+    int brandIndex() { for (int i = 0; i < BRANDS.length; i++) if (BRANDS[i].equals(brand)) return i; return 0; }
 
     /** light (the default) or dark, picked in the app's Settings */
     volatile String theme = "light";
     boolean isDark() { return "dark".equals(theme); }
     /** the page's background colour, as in app.css */
-    int bg() { return Color.parseColor(!isDark() ? "#F3F4F6" : isBam() ? "#0A0A0B" : "#0B1118"); }
+    int bg() { return Color.parseColor(!isDark() ? "#F3F4F6" : new String[] { "#0B1118", "#0A0A0B", "#0A0A0B", "#090E1A" }[brandIndex()]); }
 
     /** The light look has white bars with dark icons; the dark look has bars in the page's colour with light icons. */
     void paintBars() {
@@ -180,33 +183,38 @@ public class CatalogueActivity extends Activity {
         }
         w.getDecorView().setSystemUiVisibility(bars);
         try {
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), isBam() ? R.mipmap.ic_bam : R.mipmap.ic_launcher);
-            setTaskDescription(new ActivityManager.TaskDescription(getString(isBam() ? R.string.name_bam : R.string.name_fakhri), icon, isDark() ? bg() : Color.WHITE));
+            int i = brandIndex();
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), new int[] { R.mipmap.ic_launcher, R.mipmap.ic_bam, R.mipmap.ic_mabrook, R.mipmap.ic_me }[i]);
+            setTaskDescription(new ActivityManager.TaskDescription(getString(new int[] { R.string.name_fakhri, R.string.name_bam, R.string.name_mabrook, R.string.name_me }[i]), icon, isDark() ? bg() : Color.WHITE));
         } catch (Exception e) { /* the recent-apps card keeps the default look */ }
     }
 
     /** The salesman picked a branch: colours now, the home-screen icon and name once the app leaves the screen. */
     void applyBrand(String b) {
-        brand = "bam".equals(b) ? "bam" : "fakhri";
+        brand = "fakhri";
+        for (String x : BRANDS) if (x.equals(b)) brand = x;
         prefs.edit().putString("brand", brand).apply();
         paintBars();
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor(isBam() ? "#0A0A0B" : "#F3F4F6")));
+        getWindow().setBackgroundDrawable(new ColorDrawable(bg()));
     }
 
-    /** Switch the home-screen icon and name to the branch: one launcher alias on, the other off.
+    /** Switch the home-screen icon and name to the branch: its launcher alias on, the others off.
      *  Done when the app is not on screen (onStop), because some phones close an app whose launcher entry changes. */
     void switchIcon() {
         if (brand.isEmpty()) return;
         PackageManager pm = getPackageManager();
-        ComponentName fk = new ComponentName(this, getPackageName() + ".MainActivity");   // the Fakhri Tools icon keeps v1.5's name, so its home-screen icon survives the update
-        ComponentName bm = new ComponentName(this, getPackageName() + ".BrandBam");
+        int me = brandIndex();
         try {
-            // turn the new one on before the old one off, so there is never a moment with no icon
-            ComponentName on = isBam() ? bm : fk, off = isBam() ? fk : bm;
+            // turn the new one on before the others off, so there is never a moment with no icon
+            ComponentName on = new ComponentName(this, getPackageName() + ALIASES[me]);
             if (pm.getComponentEnabledSetting(on) != PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
                 pm.setComponentEnabledSetting(on, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-            if (pm.getComponentEnabledSetting(off) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-                pm.setComponentEnabledSetting(off, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            for (int i = 0; i < ALIASES.length; i++) {
+                if (i == me) continue;
+                ComponentName off = new ComponentName(this, getPackageName() + ALIASES[i]);
+                if (pm.getComponentEnabledSetting(off) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+                    pm.setComponentEnabledSetting(off, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            }
         } catch (Exception e) { /* the icon stays as it was; the app itself still switches */ }
     }
 
@@ -219,7 +227,7 @@ public class CatalogueActivity extends Activity {
         String mime = mime(rel);
         Map<String, String> h = new HashMap<>();
         h.put("Access-Control-Allow-Origin", "*");
-        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") || rel.startsWith("bam/p/") || rel.startsWith("bam/covers/") || rel.startsWith("bam/fonts/") ? "max-age=31536000" : "no-cache");
+        h.put("Cache-Control", rel.startsWith("p/") || rel.startsWith("fonts/") || rel.startsWith("bam/p/") || rel.startsWith("bam/covers/") || rel.startsWith("bam/fonts/") || rel.startsWith("me/p/") || rel.startsWith("me/covers/") || rel.startsWith("shops/") ? "max-age=31536000" : "no-cache");
         try {
             File f = new File(root, rel);
             if (f.isFile()) return resp(mime, h, new FileInputStream(f));
@@ -536,7 +544,7 @@ public class CatalogueActivity extends Activity {
             ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(path), title, mime(path), title, ""); } });
         }
 
-        /** The branch the salesman picked ("bam" or "fakhri"): icon, name and colours follow it. */
+        /** The branch the salesman picked ("fakhri", "bam", "mabrook" or "me"): icon, name and colours follow it. */
         @JavascriptInterface
         public void setBrand(final String b) {
             ui.post(new Runnable() { public void run() { applyBrand(b); } });

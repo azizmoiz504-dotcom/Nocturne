@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Puts a changes file from the Bait Al Maqdis product editor into the private catalogue (app/bam/).
+"""Puts a changes file from the product editor into that shop's private catalogue:
+Bait Al Maqdis (app/bam/) or Modern Electric (app/me/), as the file says.
 
-    python3 app/tools/bam-editor/apply.py <bait-al-maqdis-product-changes.json> [--check] [--force]
+    python3 app/tools/bam-editor/apply.py <bait-al-maqdis-product-changes.json | modern-electric-product-changes.json> [--check] [--force] [--dir FOLDER]
 
 --check   only shows what the file changes; nothing is written
 --force   apply even if the list was changed after the editor was opened (look at the report first)
-Writes app/bam/data.js, Arabic names into app/bam/ar.js, and new photos into app/bam/p/<category>/ and
-app/bam/covers/. Then: copy app/bam to the shared private copy, rebuild the app and the editor.
+--dir     a copy of the catalogue to apply it to instead (for example an older list the file was made from)
+Writes data.js, Arabic names into ar.js, and new photos into p/<category>/ and covers/.
+Then: copy the folder to the shared private copy, rebuild the app and the editor.
 """
 import argparse, base64, io, json, os, re, sys, time
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from bamdata import APP, load, read_js, write_js, version, item_key
+from bamdata import APP, SHOPS, shop_of, load, read_js, write_js, version, item_key
 
 
 def photo(data_url, path, max_side):
@@ -43,13 +45,18 @@ def new_id(name, taken):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('changes')
-    ap.add_argument('--bam', default=os.path.join(APP, 'bam'))
+    ap.add_argument('--dir', '--bam', dest='dir')
     ap.add_argument('--check', action='store_true')
     ap.add_argument('--force', action='store_true')
     a = ap.parse_args()
 
     ch = json.load(open(a.changes, encoding='utf-8'))
-    if ch.get('kind') != 'bam-product-changes': sys.exit('This is not a Bait Al Maqdis changes file.')
+    sid = next((k for k, s in SHOPS.items() if s['kind'] == ch.get('kind')), None)
+    if not sid: sys.exit('This is not a changes file from the product editor.')
+    SHOP = SHOPS[sid]
+    a.bam = a.dir or SHOP['dir']
+    if shop_of(a.bam) != sid: sys.exit('This changes file is for %s, but %s holds another shop.' % (SHOP['name'], a.bam))
+    print('%s changes file' % SHOP['name'])
     data, ar = load(a.bam)
     d = ar['dict']
     now_ver = version(a.bam)
@@ -183,11 +190,11 @@ def main():
     if a.check: print('(--check: nothing written)'); return
 
     data['cats'] = cats
-    head = read_js(os.path.join(a.bam, 'data.js'), 'BAM_DATA')[0]
-    write_js(os.path.join(a.bam, 'data.js'), 'BAM_DATA', head, data)
+    head = read_js(os.path.join(a.bam, 'data.js'), SHOP['data'])[0]
+    write_js(os.path.join(a.bam, 'data.js'), SHOP['data'], head, data)
     if ar_new:
         d.update(ar_new)
-        write_js(os.path.join(a.bam, 'ar.js'), 'BAM_AR', read_js(os.path.join(a.bam, 'ar.js'), 'BAM_AR')[0], ar)
+        write_js(os.path.join(a.bam, 'ar.js'), SHOP['ar'], read_js(os.path.join(a.bam, 'ar.js'), SHOP['ar'])[0], ar)
     print('Written: data.js%s, %d new photo(s).' % (', ar.js' if ar_new else '', len(saved)))
 
 
