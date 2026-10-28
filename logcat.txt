@@ -1,0 +1,600 @@
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.getEnabledCronetProviders(PG:5)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.createBuilderDelegate(PG:2)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.CronetEngine$Builder.<init>(PG:1)
+10-28 18:08:43.777 D/StrictMode( 3196): 	at org.chromium.net.ExperimentalCronetEngine$Builder.<init>(PG:1)
+10-28 18:08:43.965 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{4216b85 com.google.android.settings.intelligence/10107} BLOCKED
+10-28 18:08:43.966 I/ActivityManager(  488): Killing 3650:com.google.android.settings.intelligence/u0a107 (adj 0): change com.google.android.settings.intelligence
+10-28 18:08:43.970 W/ActivityManager(  488): ProcessRecord{453d53 0:com.google.android.settings.intelligence/u0a107} is attached to a previous process 3650
+10-28 18:08:44.001 V/ActivityManager(  488): Got obituary of 3650:com.google.android.settings.intelligence
+10-28 18:08:44.008 I/ActivityManager(  488): Start proc 4661:com.google.android.settings.intelligence/u0a107 for broadcast {com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryWidgetBootBroadcastReceiver}
+10-28 18:08:44.494 I/cr_CronetUrlRequestContext( 3196): destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@9d19606
+10-28 18:08:44.600 I/ActivityManager(  488): Finished processing BOOT_COMPLETED for u0
+10-28 18:08:45.523 D/PrefCtrlListHelper( 1089): Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+10-28 18:08:45.580 I/ActivityManager(  488): Start proc 4767:com.android.emergency/u0a156 for content provider {com.android.emergency/com.android.emergency.EmergencySearchIndexablesProvider}
+10-28 18:08:45.620 I/ActivityManager(  488): Start proc 4781:com.google.android.gms.ui/u0a120 for content provider {com.google.android.gms/com.google.android.gms.accountsettings.content.SettingsSearchContentProvider}
+10-28 18:08:45.630 I/ActivityManager(  488): Start proc 4784:com.google.android.marvin.talkback/u0a145 for content provider {com.google.android.marvin.talkback/com.google.android.accessibility.talkback.preference.search.TalkBackSearchIndexablesProvider}
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{707366d com.google.android.youtube/10138} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{5f592a2 com.google.android.googlequicksearchbox/10119} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{788fb33 com.google.android.apps.messaging/10112} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{e4eaef0 com.android.camera2/10141} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{e6dcc69 com.google.android.gm/10144} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{b3e36ee com.google.android.setupwizard/10116} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{84e178f com.google.android.apps.docs/10127} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{36f1203 com.google.android.apps.maps/10140} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{c07ca1c com.google.android.apps.photos/10142} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{893f444 com.google.android.calendar/10122} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{c8dc625 com.google.android.settings.intelligence/10107} BLOCKED
+10-28 18:08:45.893 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{5b97eff com.google.android.projection.gearhead/10108} BLOCKED
+10-28 18:08:45.894 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{5ad3fa com.android.remoteprovisioner/10150} BLOCKED
+10-28 18:08:47.139 W/ActivityManager(  488): Receiver with filter android.content.IntentFilter@a0537c7 already registered for pid 1021, callerPackage is com.google.android.apps.nexuslauncher
+10-28 18:08:47.215 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{446d528 com.google.android.gm/10144} BLOCKED
+10-28 18:08:52.363 I/AndroidRuntime( 4232): VM exiting with result code 0, cleanup skipped.
+10-28 18:08:52.367 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 4232) has died: fg  RCVR
+10-28 18:08:52.376 I/ActivityManager(  488): Start proc 5001:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:08:52.441 I/AndroidRuntime( 5001): VM exiting with result code 0, cleanup skipped.
+10-28 18:08:52.451 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5001) has died: fg  RCVR
+10-28 18:08:58.193 W/ActivityManager(  488): Unable to start service Intent { cmp=com.google.android.apps.tachyon/.clientapi.ClientApiService } U=0: not found
+10-28 18:08:58.270 W/ActivityManager(  488): Unable to start service Intent { cmp=com.google.android.apps.tachyon/.clientapi.ClientApiService } U=0: not found
+10-28 18:08:58.318 I/ActivityManager(  488): Background started FGS: Allowed [callingPackage: com.google.android.googlequicksearchbox; callingUid: 10119; uidState: BTOP; intent: Intent { cmp=com.google.android.googlequicksearchbox/com.google.android.libraries.mdi.download.foreground.sting.ForegroundDownloadService (has extras) }; code:ACTIVITY_STARTER; tempAllowListReason:<broadcast:1000:android.intent.action.BOOT_COMPLETED,reason:,reasonCode:BOOT_COMPLETED,duration:20000,callingUid:1000>; targetSdkVersion:31; callerTargetSdkVersion:31; startForegroundCount:0; bindFromPackage:null]
+10-28 18:08:58.895 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{54386a8 com.google.android.googlequicksearchbox/10119} BLOCKED
+10-28 18:08:59.656 W/ActivityManager(  488): Unable to start service Intent { act=com.google.android.play.core.splitinstall.BIND_SPLIT_INSTALL_SERVICE pkg=com.android.vending } U=0: not found
+10-28 18:09:00.596 I/ActivityManager(  488): Background started FGS: Allowed [callingPackage: com.google.android.inputmethod.latin; callingUid: 10131; uidState: IMPB; intent: Intent { cmp=com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.libs.dataservice.superpacks.SuperpacksForegroundTaskService }; code:BOOT_COMPLETED; tempAllowListReason:<broadcast:1000:android.intent.action.BOOT_COMPLETED,reason:,reasonCode:BOOT_COMPLETED,duration:20000,callingUid:1000>; targetSdkVersion:33; callerTargetSdkVersion:33; startForegroundCount:0; bindFromPackage:null]
+10-28 18:09:00.600 W/ActivityManager(  488): Foreground service started from background can not have location/camera/microphone access: service com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.libs.dataservice.superpacks.SuperpacksForegroundTaskService
+10-28 18:09:04.232 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{20f92a9 com.google.android.as/10118} BLOCKED
+10-28 18:09:04.827 I/ActivityManager(  488): Start proc 5295:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:05.498 I/ActivityManager(  488): Start proc 5315:com.google.android.webview/u0a123 for broadcast {com.google.android.webview/com.google.android.libraries.phenotype.client.stable.PhenotypeUpdateBackgroundBroadcastReceiver}
+10-28 18:09:05.509 I/android.webview( 5315): Using CollectorTypeCC GC.
+10-28 18:09:05.510 W/android.webview( 5315): Unexpected CPU variant for x86: x86_64.
+10-28 18:09:05.510 W/android.webview( 5315): Known variants: atom, sandybridge, silvermont, kabylake, default
+10-28 18:09:05.540 W/android.webview( 5315): Entry not found
+10-28 18:09:05.541 D/nativeloader( 5315): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-28 18:09:05.543 D/nativeloader( 5315): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-28 18:09:05.574 V/GraphicsEnvironment( 5315): ANGLE Developer option for 'com.google.android.webview' set to: 'default'
+10-28 18:09:05.579 V/GraphicsEnvironment( 5315): ANGLE GameManagerService for com.google.android.webview: false
+10-28 18:09:05.580 I/cr_WebViewApkApp( 5315): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview
+10-28 18:09:06.288 I/lowmemorykiller(  126): lmkd data connection established
+10-28 18:09:06.313 I/ActivityManager(  488): Start proc 5374:com.google.android.googlequicksearchbox/u0a119 for broadcast {com.google.android.googlequicksearchbox/com.google.android.libraries.phenotype.client.stable.PhenotypeUpdateBackgroundBroadcastReceiver}
+10-28 18:09:06.315 I/lowmemorykiller(  126): Using psi monitors for memory pressure detection
+10-28 18:09:06.315 I/lowmemorykiller(  126): Properties reinitilized
+10-28 18:09:06.316 I/lowmemorykiller( 5373): lmkd updated properties successfully
+10-28 18:09:06.316 I/lowmemorykiller(  126): lmkd data connection dropped
+10-28 18:09:06.316 I/lowmemorykiller(  126): closing lmkd data connection
+10-28 18:09:06.409 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{c850448 com.google.android.settings.intelligence/10107} BLOCKED
+10-28 18:09:06.410 I/ActivityManager(  488): Killing 4661:com.google.android.settings.intelligence/u0a107 (adj 0): change com.google.android.settings.intelligence
+10-28 18:09:06.411 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.settings.intelligence/.modules.routines.impl.ComputeNewInferencesJobService in 1000ms for connection
+10-28 18:09:06.411 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.settings.intelligence/.modules.routines.impl.RoutinesJobIntentService in 11000ms for connection
+10-28 18:09:06.411 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.settings.intelligence/.modules.routines.impl.PruneDatabaseJobService in 21000ms for connection
+10-28 18:09:06.509 D/PrefCtrlListHelper( 1089): Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+10-28 18:09:06.531 V/ActivityManager(  488): Got obituary of 4661:com.google.android.settings.intelligence
+10-28 18:09:06.560 W/ActivityManager(  488): Receiver with filter android.content.IntentFilter@6feee24 already registered for pid 5374, callerPackage is com.google.android.googlequicksearchbox
+10-28 18:09:06.724 D/PrefCtrlListHelper( 1089): Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+10-28 18:09:07.417 I/ActivityManager(  488): Start proc 5426:com.google.android.settings.intelligence/u0a107 for service {com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.routines.impl.ComputeNewInferencesJobService}
+10-28 18:09:08.554 I/AndroidRuntime( 5295): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:08.565 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5295) has died: fg  RCVR
+10-28 18:09:11.409 I/ActivityManager(  488): Start proc 5513:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:11.459 I/AndroidRuntime( 5513): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:11.464 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5513) has died: fg  RCVR
+10-28 18:09:12.650 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{a9ee70e com.google.android.gm/10144} BLOCKED
+10-28 18:09:13.639 I/ActivityManager(  488): Start proc 5558:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:13.720 I/AndroidRuntime( 5558): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:13.726 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5558) has died: fg  RCVR
+10-28 18:09:14.991 I/AppsFilter(  488): interaction: PackageSetting{7ac7621 com.fakhritools.catalogue/10174} -> PackageSetting{2f710ac com.google.android.apps.messaging/10112} BLOCKED
+10-28 18:09:15.046 I/ActivityManager(  488): Start proc 5609:com.google.android.apps.messaging:rcs/u0a112 for service {com.google.android.apps.messaging/com.google.android.ims.binding.SystemBindingService}
+10-28 18:09:15.382 I/ActivityManager(  488): Start proc 5646:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:15.513 I/AndroidRuntime( 5646): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:15.521 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5646) has died: fg  RCVR
+10-28 18:09:16.276 I/ActivityManager(  488): Start proc 5697:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:16.360 I/AndroidRuntime( 5697): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:16.367 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5697) has died: fg  RCVR
+10-28 18:09:17.084 I/ActivityManager(  488): Process com.google.android.gms.persistent (pid 1059) early provider death
+10-28 18:09:17.084 I/ActivityManager(  488): Process com.google.android.gms.persistent (pid 1059) has died: fg  BTOP
+10-28 18:09:17.101 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.auth.setup.devicesignals.LockScreenService in 1000ms for start-requested
+10-28 18:09:17.102 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.contextmanager.service.ContextManagerService in 10999ms for start-requested
+10-28 18:09:17.102 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.common.stats.GmsCoreStatsService in 20999ms for start-requested
+10-28 18:09:17.102 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.gcm.GcmService in 30999ms for start-requested
+10-28 18:09:17.102 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.reporting.service.ReportingAndroidService in 40999ms for connection
+10-28 18:09:17.106 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.internal.server.HardwareArProviderService in 50995ms for connection
+10-28 18:09:17.106 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.gcm.nts.SchedulerService in 60995ms for start-requested
+10-28 18:09:17.107 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.thunderbird.EmergencyPersistentService in 70994ms for start-requested
+10-28 18:09:17.107 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.PersistentIntentOperationService in 80994ms for start-requested
+10-28 18:09:17.107 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.internal.server.GoogleLocationService in 90994ms for start-requested
+10-28 18:09:17.107 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.deviceconnection.service.DeviceConnectionWatcherService in 100994ms for start-requested
+10-28 18:09:17.107 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.location.geocode.GeocodeService in 110994ms for connection
+10-28 18:09:17.108 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.lockbox.service.LockboxBrokerService in 120993ms for connection
+10-28 18:09:17.108 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.location.persistent.LocationPersistentService in 130993ms for start-requested
+10-28 18:09:17.108 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.network.NetworkLocationService in 140993ms for connection
+10-28 18:09:17.108 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.geotimezone.GeoTimeZoneService in 150993ms for connection
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.nearby.sharing.ReceiveSurfaceService in 160992ms for start-requested
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.clearcut.debug.ClearcutDebugDumpService in 170992ms for start-requested
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.auth.account.authenticator.GoogleAccountAuthenticatorService in 180992ms for connection
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.PersistentDirectBootAwareApiService in 190992ms for connection
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.PersistentApiService in 200992ms for connection
+10-28 18:09:17.109 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.PersistentBoundBrokerService in 210992ms for connection
+10-28 18:09:17.110 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.nearby.exposurenotification.service.ExposureMatchingService in 220991ms for start-requested
+10-28 18:09:17.110 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.internal.GoogleLocationManagerService in 230991ms for start-requested
+10-28 18:09:17.110 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/com.google.android.location.fused.FusedLocationService in 240991ms for connection
+10-28 18:09:17.110 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.nearby.messages.service.NearbyMessagesService in 250991ms for start-requested
+10-28 18:09:17.111 W/ActivityManager(  488): ProcessRecord{35693be 0:com.google.android.gms.persistent/u0a120} is attached to a previous process 1059
+10-28 18:09:17.113 W/ActivityManager(  488): ProcessRecord{35693be 0:com.google.android.gms.persistent/u0a120} is attached to a previous process 1059
+10-28 18:09:17.113 V/ActivityManager(  488): Got obituary of 1059:com.google.android.gms.persistent
+10-28 18:09:17.121 I/ActivityManager(  488): Process com.google.android.gms (pid 1299) has died: fg  BTOP
+10-28 18:09:17.125 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.GmsApiService in 260976ms for connection
+10-28 18:09:17.125 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.GmsBoundBrokerService in 270976ms for connection
+10-28 18:09:17.126 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.GmsIntentOperationService in 280975ms for start-requested
+10-28 18:09:17.126 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.wallet.service.PaymentService in 290975ms for connection
+10-28 18:09:17.126 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.icing.service.IndexService in 300975ms for connection
+10-28 18:09:17.126 W/ActivityManager(  488): Scheduling restart of crashed service com.google.android.gms/.chimera.container.ExternalFileApkService in 310975ms for start-requested
+10-28 18:09:17.128 I/ActivityManager(  488): Process com.google.android.gms.ui (pid 4781) has died: cch+85 CEM 
+10-28 18:09:17.132 I/ActivityManager(  488): Start proc 5750:com.google.android.gms.persistent/u0a120 for content provider {com.google.android.gms/com.google.android.gms.chimera.container.GmsModuleProvider}
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.chimera.GmsApiService in 971ms for other
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.chimera.GmsBoundBrokerService in 10971ms for other
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.chimera.GmsIntentOperationService in 20971ms for other
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.wallet.service.PaymentService in 30971ms for other
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.icing.service.IndexService in 40971ms for other
+10-28 18:09:17.154 W/ActivityManager(  488): Rescheduling restart of crashed service com.google.android.gms/.chimera.container.ExternalFileApkService in 50971ms for other
+10-28 18:09:17.245 I/ActivityManager(  488): Start proc 5790:com.google.android.gms/u0a120 for service {com.google.android.gms/com.google.android.gms.chimera.GmsIntentOperationService}
+10-28 18:09:17.253 I/ActivityManager(  488): Start proc 5794:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:17.311 I/AndroidRuntime( 5794): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:17.317 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5794) has died: fg  RCVR
+10-28 18:09:17.795 I/ActivityManager(  488): Start proc 5929:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:17.834 I/AndroidRuntime( 5929): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:17.843 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5929) has died: fg  RCVR
+10-28 18:09:18.300 I/ActivityManager(  488): Start proc 5994:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:18.401 I/AndroidRuntime( 5994): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:18.408 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 5994) has died: fg  RCVR
+10-28 18:09:18.575 W/ActivityManager(  488): Unable to start service Intent { act=com.google.android.gms.home.service.START pkg=com.google.android.gms } U=0: not found
+10-28 18:09:18.576 W/ActivityManager(  488): Unbind failed: could not find connection for android.os.BinderProxy@dc9d8ce
+10-28 18:09:18.667 I/ActivityManager(  488): Start proc 6045:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:18.761 I/AndroidRuntime( 6045): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:18.775 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6045) has died: fg  RCVR
+10-28 18:09:18.973 I/ActivityManager(  488): Start proc 6066:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:19.044 I/AndroidRuntime( 6066): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:19.093 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6066) has died: fg  RCVR
+10-28 18:09:27.922 W/ActivityManager(  488): Unable to start service Intent { act=com.google.android.gms.drive.ApiService.RESET_AFTER_BOOT flg=0x4 cmp=com.google.android.gms/.drive.api.ApiService (has extras) } U=0: not found
+10-28 18:09:30.518 I/ActivityManager(  488): Start proc 6263:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:30.631 I/AndroidRuntime( 6263): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:30.641 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6263) has died: fg  RCVR
+10-28 18:09:30.680 I/ActivityManager(  488): Start proc 6296:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:30.746 I/AndroidRuntime( 6296): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:30.753 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6296) has died: fg  RCVR
+10-28 18:09:30.802 I/ActivityManager(  488): Start proc 6314:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:30.891 I/AndroidRuntime( 6314): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:30.909 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6314) has died: fg  RCVR
+10-28 18:09:30.932 I/ActivityManager(  488): Start proc 6333:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:30.998 I/AndroidRuntime( 6333): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:31.005 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6333) has died: fg  RCVR
+10-28 18:09:31.014 I/ActivityManager(  488): Start proc 6350:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:31.081 I/AndroidRuntime( 6350): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:31.087 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6350) has died: fg  RCVR
+10-28 18:09:31.099 I/ActivityManager(  488): Start proc 6367:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:31.174 I/AndroidRuntime( 6367): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:31.181 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6367) has died: fg  RCVR
+10-28 18:09:31.515 I/ActivityManager(  488): Start proc 6391:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:31.552 I/AndroidRuntime( 6391): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:31.560 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6391) has died: fg  RCVR
+10-28 18:09:34.119 I/ActivityManager(  488): Start proc 6426:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.162 I/AndroidRuntime( 6426): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.166 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6426) has died: fg  RCVR
+10-28 18:09:34.246 I/ActivityManager(  488): Start proc 6443:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.292 I/AndroidRuntime( 6443): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.305 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6443) has died: fg  RCVR
+10-28 18:09:34.314 I/ActivityManager(  488): Start proc 6460:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.381 I/AndroidRuntime( 6460): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.390 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6460) has died: fg  RCVR
+10-28 18:09:34.409 I/ActivityManager(  488): Start proc 6477:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.513 I/AndroidRuntime( 6477): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.518 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6477) has died: fg  RCVR
+10-28 18:09:34.531 I/ActivityManager(  488): Start proc 6507:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.611 I/AndroidRuntime( 6507): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.619 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6507) has died: fg  RCVR
+10-28 18:09:34.632 I/ActivityManager(  488): Start proc 6524:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.712 I/AndroidRuntime( 6524): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.721 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6524) has died: fg  RCVR
+10-28 18:09:34.754 I/ActivityManager(  488): Start proc 6541:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.826 I/AndroidRuntime( 6541): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.830 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6541) has died: fg  RCVR
+10-28 18:09:34.839 I/ActivityManager(  488): Start proc 6558:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.883 I/AndroidRuntime( 6558): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.887 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6558) has died: fg  RCVR
+10-28 18:09:34.910 I/ActivityManager(  488): Start proc 6575:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:34.973 I/AndroidRuntime( 6575): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:34.977 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6575) has died: fg  RCVR
+10-28 18:09:34.989 I/ActivityManager(  488): Start proc 6592:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.036 I/AndroidRuntime( 6592): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.042 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6592) has died: fg  RCVR
+10-28 18:09:35.051 I/ActivityManager(  488): Start proc 6609:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.093 I/AndroidRuntime( 6609): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.097 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6609) has died: fg  RCVR
+10-28 18:09:35.107 I/ActivityManager(  488): Start proc 6626:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.162 I/AndroidRuntime( 6626): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.168 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6626) has died: fg  RCVR
+10-28 18:09:35.177 I/ActivityManager(  488): Start proc 6643:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.235 I/AndroidRuntime( 6643): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.238 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6643) has died: fg  RCVR
+10-28 18:09:35.295 I/ActivityManager(  488): Start proc 6660:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.344 I/AndroidRuntime( 6660): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.353 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6660) has died: fg  RCVR
+10-28 18:09:35.362 I/ActivityManager(  488): Start proc 6677:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.433 I/AndroidRuntime( 6677): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.438 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6677) has died: fg  RCVR
+10-28 18:09:35.448 I/ActivityManager(  488): Start proc 6694:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.499 I/AndroidRuntime( 6694): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.503 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6694) has died: fg  RCVR
+10-28 18:09:35.511 I/ActivityManager(  488): Start proc 6711:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.558 I/AndroidRuntime( 6711): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.562 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6711) has died: fg  RCVR
+10-28 18:09:35.569 I/ActivityManager(  488): Start proc 6728:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.617 I/AndroidRuntime( 6728): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.620 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6728) has died: fg  RCVR
+10-28 18:09:35.628 I/ActivityManager(  488): Start proc 6745:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.675 I/AndroidRuntime( 6745): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.679 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6745) has died: fg  RCVR
+10-28 18:09:35.686 I/ActivityManager(  488): Start proc 6762:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:35.735 I/AndroidRuntime( 6762): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:35.739 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6762) has died: fg  RCVR
+10-28 18:09:37.553 I/ActivityManager(  488): Start proc 6806:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:37.655 I/AndroidRuntime( 6806): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:37.659 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6806) has died: fg  RCVR
+10-28 18:09:37.667 I/ActivityManager(  488): Start proc 6837:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:37.732 I/AndroidRuntime( 6837): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:37.738 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6837) has died: fg  RCVR
+10-28 18:09:37.746 I/ActivityManager(  488): Start proc 6854:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:37.800 I/AndroidRuntime( 6854): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:37.806 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6854) has died: fg  RCVR
+10-28 18:09:37.829 I/ActivityManager(  488): Start proc 6871:com.google.android.apps.maps:server_recovery_process/u0a140 for broadcast {com.google.android.apps.maps/com.google.android.apps.gmm.plugins.serverrecovery.PhenotypeServerRecoveryHandlerImpl}
+10-28 18:09:37.874 I/AndroidRuntime( 6871): VM exiting with result code 0, cleanup skipped.
+10-28 18:09:37.882 I/ActivityManager(  488): Process com.google.android.apps.maps:server_recovery_process (pid 6871) has died: fg  RCVR
+10-28 18:09:41.931 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 6919
+10-28 18:09:41.933 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:09:42.090 D/AndroidRuntime( 6922): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:09:42.112 I/AndroidRuntime( 6922): Using default boot image
+10-28 18:09:42.112 I/AndroidRuntime( 6922): Leaving lock profiling enabled
+10-28 18:09:42.233 D/AndroidRuntime( 6922): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:09:42.234 W/Monkey  ( 6922): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:09:42.234 W/Monkey  ( 6922):  arg: "com.fakhritools.catalogue"
+10-28 18:09:42.235 W/Monkey  ( 6922): data="com.fakhritools.catalogue"
+10-28 18:09:42.251 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.MainActivity} from uid 2000
+10-28 18:09:42.291 D/CoreBackPreview(  488): Window{beb3c98 u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@1fb60d6, mPriority=0}
+10-28 18:09:42.407 W/ActivityManager(  488): Slow operation: 120ms so far, now at startProcess: returned from zygote!
+10-28 18:09:42.407 W/ActivityManager(  488): Slow operation: 120ms so far, now at startProcess: done updating battery stats
+10-28 18:09:42.407 W/ActivityManager(  488): Slow operation: 120ms so far, now at startProcess: building log message
+10-28 18:09:42.407 I/ActivityManager(  488): Start proc 6941:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}
+10-28 18:09:42.407 W/ActivityManager(  488): Slow operation: 120ms so far, now at startProcess: starting to update pids map
+10-28 18:09:42.408 W/ActivityManager(  488): Slow operation: 121ms so far, now at startProcess: done updating pids map
+10-28 18:09:42.447 I/AndroidRuntime( 6922): VM exiting with result code 0.
+10-28 18:09:43.049 W/ziparchive( 6941): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:09:43.049 W/ziparchive( 6941): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:09:43.055 D/nativeloader( 6941): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:09:43.072 V/GraphicsEnvironment( 6941): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:09:43.073 V/GraphicsEnvironment( 6941): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:09:43.172 I/WebViewFactory( 6941): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:09:43.180 D/nativeloader( 6941): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:09:43.184 D/nativeloader( 6941): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:09:43.339 I/cr_VariationsUtils( 6941): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-28 18:09:43.339 I/cr_VariationsUtils( 6941): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed"
+10-28 18:09:43.526 W/ActivityManager(  488): Slow operation: 52ms so far, now at startProcess: returned from zygote!
+10-28 18:09:43.526 W/ActivityManager(  488): Slow operation: 52ms so far, now at startProcess: done updating battery stats
+10-28 18:09:43.527 W/ActivityManager(  488): Slow operation: 53ms so far, now at startProcess: building log message
+10-28 18:09:43.527 I/ActivityManager(  488): Start proc 7019:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:09:43.529 W/ActivityManager(  488): Slow operation: 53ms so far, now at startProcess: starting to update pids map
+10-28 18:09:43.529 W/ActivityManager(  488): Slow operation: 55ms so far, now at startProcess: done updating pids map
+10-28 18:09:43.580 E/adbd    (  374): failed to connect to socket 'localabstract:webview_devtools_remote_6941': could not connect to localabstract address 'localabstract:webview_devtools_remote_6941'
+10-28 18:09:43.719 I/cr_WebViewApkApp( 7019): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:09:43.849 I/ActivityManager(  488): Start proc 7055:com.google.android.webview:webview_apk/u0a123 for service {com.google.android.webview/org.chromium.android_webview.nonembedded.AwComponentUpdateService}
+10-28 18:09:43.890 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/6941 activeRequest: null callbackRequest: 148 [NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:09:43.937 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:09:43.937 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:09:43.938 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:09:43.938 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:09:43.994 I/iew:webview_apk( 7055): Using CollectorTypeCC GC.
+10-28 18:09:43.995 W/iew:webview_apk( 7055): Unexpected CPU variant for x86: x86_64.
+10-28 18:09:43.995 W/iew:webview_apk( 7055): Known variants: atom, sandybridge, silvermont, kabylake, default
+10-28 18:09:44.137 I/AppsFilter(  488): interaction: PackageSetting{8174cd0 com.fakhritools.catalogue/10174} -> PackageSetting{43344c9 com.google.android.googlequicksearchbox/10119} BLOCKED
+10-28 18:09:44.281 W/iew:webview_apk( 7055): Entry not found
+10-28 18:09:44.285 D/nativeloader( 7055): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-28 18:09:44.292 D/nativeloader( 7055): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+10-28 18:09:44.300 V/GraphicsEnvironment( 7055): ANGLE Developer option for 'com.google.android.webview' set to: 'default'
+10-28 18:09:44.300 V/GraphicsEnvironment( 7055): ANGLE GameManagerService for com.google.android.webview: false
+10-28 18:09:44.303 I/cr_WebViewApkApp( 7055): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:webview_apk
+10-28 18:09:44.358 D/CoreBackPreview(  488): Window{c9d08fc u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@f245dda, mPriority=0}
+10-28 18:09:45.035 W/cr_AWNetworkFetcherTask( 7055): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-28 18:09:45.263 W/cr_AWNetworkFetcherTask( 7055): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-28 18:09:45.264 W/cr_AWNetworkFetcherTask( 7055): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-28 18:09:45.348 W/cr_AWNetworkFetcherTask( 7055): 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-541412337:48)
+10-28 18:09:45.487 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:09:45.494 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.MainActivity: +3s233ms
+10-28 18:09:45.555 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:09:47.859 D/CoreBackPreview(  488): Window{beb3c98 u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-28 18:09:47.867 W/InputManager-JNI(  488): Input channel object 'beb3c98 Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:10:02.367 W/system_server(  488): Long monitor contention with owner binder:488_3 (693) at void com.android.server.am.OomAdjuster.updateOomAdjLocked(java.lang.String)(OomAdjuster.java:424) waiters=1 in void com.android.server.am.ActivityManagerService$LocalService.notifyNetworkPolicyRulesUpdated(int, long) for 124ms
+10-28 18:10:03.297 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:10:03.297 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:10:03.303 D/CoreBackPreview(  488): Window{c9d08fc u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback null
+10-28 18:10:03.527 D/CarrierSvcBindHelper(  987): onPackageModified: com.fakhritools.catalogue
+10-28 18:10:03.527 D/ImsResolver(  987): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-28 18:10:03.684 D/ModelWriter( 1021): removing items from db . Reason: [removed because the corresponding package or component is removed. mOp=2 removedPackages=[] removedComponents=[{com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}]]
+10-28 18:10:03.758 W/InputManager-JNI(  488): Input channel object 'c9d08fc com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity (client)' was disposed without first being removed with the input manager!
+10-28 18:10:03.762 W/UsageStatsService(  488): Unexpected activity event reported! (com.fakhritools.catalogue/com.fakhritools.catalogue.CatalogueActivity event : 23 instanceId : 25967282)
+10-28 18:10:04.643 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 7229
+10-28 18:10:04.644 I/ActivityManager(  488): Killing 6941:com.fakhritools.catalogue/u0a174 (adj 905): stop com.fakhritools.catalogue due to from pid 7229
+10-28 18:10:04.644 I/ActivityManager(  488): Killing 7019:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a174i0 (adj 0): isolated not needed
+10-28 18:10:04.648 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:10:04.665 D/ConnectivityService(  488): releasing NetworkRequest [ REQUEST id=149, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ] (release request)
+10-28 18:10:04.671 V/ActivityManager(  488): Got obituary of 6941:com.fakhritools.catalogue
+10-28 18:10:04.671 W/ActivityManager(  488): setHasOverlayUi called on unknown pid: 6941
+10-28 18:10:04.716 D/AndroidRuntime( 7232): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:10:04.719 I/AndroidRuntime( 7232): Using default boot image
+10-28 18:10:04.719 I/AndroidRuntime( 7232): Leaving lock profiling enabled
+10-28 18:10:04.792 D/AndroidRuntime( 7232): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:10:04.792 W/Monkey  ( 7232): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:10:04.793 W/Monkey  ( 7232):  arg: "com.fakhritools.catalogue"
+10-28 18:10:04.793 W/Monkey  ( 7232): data="com.fakhritools.catalogue"
+10-28 18:10:04.804 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.BrandBam} from uid 2000
+10-28 18:10:04.856 I/ActivityManager(  488): Start proc 7245:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.BrandBam}
+10-28 18:10:04.862 D/CoreBackPreview(  488): Window{7959e2b u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@fcdf207, mPriority=0}
+10-28 18:10:04.874 I/AndroidRuntime( 7232): VM exiting with result code 0.
+10-28 18:10:05.178 W/ziparchive( 7245): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:10:05.179 W/ziparchive( 7245): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:10:05.181 D/nativeloader( 7245): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:10:05.196 V/GraphicsEnvironment( 7245): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:10:05.199 V/GraphicsEnvironment( 7245): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:10:05.245 I/WebViewFactory( 7245): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:10:05.258 D/nativeloader( 7245): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:10:05.281 D/nativeloader( 7245): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:10:05.652 W/ActivityManager(  488): Slow operation: 68ms so far, now at startProcess: returned from zygote!
+10-28 18:10:05.652 W/ActivityManager(  488): Slow operation: 68ms so far, now at startProcess: done updating battery stats
+10-28 18:10:05.652 W/ActivityManager(  488): Slow operation: 68ms so far, now at startProcess: building log message
+10-28 18:10:05.652 I/ActivityManager(  488): Start proc 7277:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i1 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:10:05.652 W/ActivityManager(  488): Slow operation: 68ms so far, now at startProcess: starting to update pids map
+10-28 18:10:05.652 W/ActivityManager(  488): Slow operation: 68ms so far, now at startProcess: done updating pids map
+10-28 18:10:05.740 I/cr_WebViewApkApp( 7277): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:10:05.932 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/7245 activeRequest: null callbackRequest: 151 [NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:10:05.934 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:10:05.934 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:10:05.934 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:10:05.934 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:10:06.190 D/CoreBackPreview(  488): Window{58b6c66 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandBam}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@dcce854, mPriority=0}
+10-28 18:10:07.408 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:10:07.409 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.BrandBam: +2s603ms
+10-28 18:10:07.491 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:10:08.348 D/CoreBackPreview(  488): Window{7959e2b u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-28 18:10:08.350 W/InputManager-JNI(  488): Input channel object '7959e2b Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:11:16.247 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.VIEW dat=content://com.fakhritools.catalogue.photos/... typ=application/pdf flg=0x1 cmp=com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity clip={text/uri-list hasLabel(31) {U(content)}}} from uid 10174
+10-28 18:11:17.584 W/ActivityManager(  488): Slow operation: 70ms so far, now at startProcess: returned from zygote!
+10-28 18:11:17.595 W/ActivityManager(  488): Slow operation: 81ms so far, now at startProcess: done updating battery stats
+10-28 18:11:17.596 W/ActivityManager(  488): Slow operation: 82ms so far, now at startProcess: building log message
+10-28 18:11:17.606 I/ActivityManager(  488): Start proc 7672:com.google.android.apps.docs:com.google.android.apps.viewer.pdflib.PdfDocumentService/u0i2 for service {com.google.android.apps.docs/com.google.android.apps.viewer.pdflib.PdfDocumentService}
+10-28 18:11:17.638 W/ActivityManager(  488): Slow operation: 124ms so far, now at startProcess: starting to update pids map
+10-28 18:11:17.723 W/ActivityManager(  488): Slow operation: 209ms so far, now at startProcess: done updating pids map
+10-28 18:11:22.813 I/ActivityManager(  488): Killing 7672:com.google.android.apps.docs:com.google.android.apps.viewer.pdflib.PdfDocumentService/u0a127i2 (adj 0): isolated not needed
+10-28 18:11:23.100 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:11:24.526 I/ActivityManager(  488): Start proc 7730:android:ui/1000 for next-top-activity {android/com.android.internal.app.ChooserActivity}
+10-28 18:11:30.101 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:11:34.090 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.VIEW dat=content://com.fakhritools.catalogue.photos/... typ=application/pdf flg=0x1 cmp=com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity clip={text/uri-list hasLabel(20) {U(content)}}} from uid 10174
+10-28 18:11:34.493 W/ActivityManager(  488): Slow operation: 60ms so far, now at startProcess: returned from zygote!
+10-28 18:11:34.493 W/ActivityManager(  488): Slow operation: 60ms so far, now at startProcess: done updating battery stats
+10-28 18:11:34.493 W/ActivityManager(  488): Slow operation: 60ms so far, now at startProcess: building log message
+10-28 18:11:34.493 I/ActivityManager(  488): Start proc 7799:com.google.android.apps.docs:com.google.android.apps.viewer.pdflib.PdfDocumentService/u0i3 for service {com.google.android.apps.docs/com.google.android.apps.viewer.pdflib.PdfDocumentService}
+10-28 18:11:34.493 W/ActivityManager(  488): Slow operation: 60ms so far, now at startProcess: starting to update pids map
+10-28 18:11:34.494 W/ActivityManager(  488): Slow operation: 61ms so far, now at startProcess: done updating pids map
+10-28 18:11:39.974 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:11:40.420 I/ActivityManager(  488): Killing 7799:com.google.android.apps.docs:com.google.android.apps.viewer.pdflib.PdfDocumentService/u0a127i3 (adj 0): isolated not needed
+10-28 18:12:13.726 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:12:13.726 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:12:13.774 D/CoreBackPreview(  488): Window{58b6c66 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandBam}: Setting back callback null
+10-28 18:12:13.822 W/InputManager-JNI(  488): Input channel object '58b6c66 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandBam (client)' was disposed without first being removed with the input manager!
+10-28 18:12:13.898 W/UsageStatsService(  488): Unexpected activity event reported! (com.fakhritools.catalogue/com.fakhritools.catalogue.CatalogueActivity event : 23 instanceId : 83759119)
+10-28 18:12:13.914 D/CarrierSvcBindHelper(  987): onPackageModified: com.fakhritools.catalogue
+10-28 18:12:13.919 D/ImsResolver(  987): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-28 18:12:14.163 D/ModelWriter( 1021): removing items from db . Reason: [removed because the corresponding package or component is removed. mOp=2 removedPackages=[] removedComponents=[{com.fakhritools.catalogue/com.fakhritools.catalogue.BrandBam}]]
+10-28 18:12:14.709 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 7985
+10-28 18:12:14.710 I/ActivityManager(  488): Killing 7245:com.fakhritools.catalogue/u0a174 (adj 905): stop com.fakhritools.catalogue due to from pid 7985
+10-28 18:12:14.715 I/ActivityManager(  488): Killing 7277:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a174i1 (adj 0): isolated not needed
+10-28 18:12:14.726 D/ConnectivityService(  488): releasing NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ] (release request)
+10-28 18:12:14.734 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:12:14.735 V/ActivityManager(  488): Got obituary of 7245:com.fakhritools.catalogue
+10-28 18:12:14.735 W/ActivityManager(  488): setHasOverlayUi called on unknown pid: 7245
+10-28 18:12:14.850 D/AndroidRuntime( 7988): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:12:14.854 I/AndroidRuntime( 7988): Using default boot image
+10-28 18:12:14.854 I/AndroidRuntime( 7988): Leaving lock profiling enabled
+10-28 18:12:14.929 D/AndroidRuntime( 7988): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:12:14.930 W/Monkey  ( 7988): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:12:14.931 W/Monkey  ( 7988):  arg: "com.fakhritools.catalogue"
+10-28 18:12:14.933 W/Monkey  ( 7988): data="com.fakhritools.catalogue"
+10-28 18:12:14.944 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.MainActivity} from uid 2000
+10-28 18:12:15.054 W/ActivityManager(  488): Slow operation: 89ms so far, now at startProcess: returned from zygote!
+10-28 18:12:15.054 W/ActivityManager(  488): Slow operation: 89ms so far, now at startProcess: done updating battery stats
+10-28 18:12:15.054 W/ActivityManager(  488): Slow operation: 89ms so far, now at startProcess: building log message
+10-28 18:12:15.054 I/ActivityManager(  488): Start proc 8001:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}
+10-28 18:12:15.054 W/ActivityManager(  488): Slow operation: 89ms so far, now at startProcess: starting to update pids map
+10-28 18:12:15.057 W/ActivityManager(  488): Slow operation: 92ms so far, now at startProcess: done updating pids map
+10-28 18:12:15.062 D/CoreBackPreview(  488): Window{1edfdea u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b4bff78, mPriority=0}
+10-28 18:12:15.078 I/AndroidRuntime( 7988): VM exiting with result code 0.
+10-28 18:12:15.312 W/ziparchive( 8001): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:12:15.312 W/ziparchive( 8001): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:12:15.313 D/nativeloader( 8001): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:12:15.377 V/GraphicsEnvironment( 8001): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:12:15.377 V/GraphicsEnvironment( 8001): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:12:15.437 I/WebViewFactory( 8001): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:12:15.442 D/nativeloader( 8001): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:12:15.444 D/nativeloader( 8001): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:12:15.493 I/cr_VariationsUtils( 8001): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-28 18:12:15.587 I/ActivityManager(  488): Start proc 8047:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i4 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:12:15.622 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/8001 activeRequest: null callbackRequest: 159 [NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:12:15.631 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:12:15.631 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:12:15.634 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:12:15.634 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:12:15.641 E/chromium( 8001): [ERROR:simple_file_enumerator.cc(21)] opendir /data/user/0/com.fakhritools.catalogue/cache/WebView/Default/HTTP Cache/Code Cache/js: No such file or directory (2)
+10-28 18:12:15.641 E/chromium( 8001): [ERROR:simple_index_file.cc(614)] Could not reconstruct index from disk
+10-28 18:12:15.642 E/chromium( 8001): [ERROR:simple_file_enumerator.cc(21)] opendir /data/user/0/com.fakhritools.catalogue/cache/WebView/Default/HTTP Cache/Code Cache/wasm: No such file or directory (2)
+10-28 18:12:15.642 E/chromium( 8001): [ERROR:simple_index_file.cc(614)] Could not reconstruct index from disk
+10-28 18:12:15.745 I/cr_WebViewApkApp( 8047): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:12:15.810 D/CoreBackPreview(  488): Window{eae1403 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@13219b9, mPriority=0}
+10-28 18:12:16.961 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:12:16.962 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.MainActivity: +2s17ms
+10-28 18:12:17.049 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:12:18.012 D/CoreBackPreview(  488): Window{1edfdea u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-28 18:12:18.012 W/InputManager-JNI(  488): Input channel object '1edfdea Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:12:52.279 I/ActivityTaskManager(  488): moveTaskToBack: Task{9be0460 #13 type=standard A=10174:com.fakhritools.catalogue}
+10-28 18:12:58.959 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 8282
+10-28 18:12:58.961 I/ActivityManager(  488): Killing 8001:com.fakhritools.catalogue/u0a174 (adj 700): stop com.fakhritools.catalogue due to from pid 8282
+10-28 18:12:58.961 I/ActivityManager(  488): Killing 8047:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a174i4 (adj 0): isolated not needed
+10-28 18:12:58.961 W/ActivityTaskManager(  488): Force removing ActivityRecord{62da1de u0 com.fakhritools.catalogue/.MainActivity} t13 f}}: app died, no saved state
+10-28 18:12:58.969 W/InputManager-JNI(  488): Input channel object 'eae1403 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity (client)' was disposed without first being removed with the input manager!
+10-28 18:12:58.969 W/UsageStatsService(  488): Unexpected activity event reported! (com.fakhritools.catalogue/com.fakhritools.catalogue.CatalogueActivity event : 23 instanceId : 226315545)
+10-28 18:12:58.977 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:12:58.981 V/ActivityManager(  488): Got obituary of 8001:com.fakhritools.catalogue
+10-28 18:12:58.982 W/ActivityManager(  488): setHasOverlayUi called on unknown pid: 8001
+10-28 18:12:58.982 D/ConnectivityService(  488): releasing NetworkRequest [ REQUEST id=160, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ] (release request)
+10-28 18:12:59.136 D/AndroidRuntime( 8285): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:12:59.139 I/AndroidRuntime( 8285): Using default boot image
+10-28 18:12:59.139 I/AndroidRuntime( 8285): Leaving lock profiling enabled
+10-28 18:12:59.218 D/AndroidRuntime( 8285): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:12:59.218 W/Monkey  ( 8285): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:12:59.219 W/Monkey  ( 8285):  arg: "com.fakhritools.catalogue"
+10-28 18:12:59.219 W/Monkey  ( 8285): data="com.fakhritools.catalogue"
+10-28 18:12:59.230 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.MainActivity} from uid 2000
+10-28 18:12:59.286 I/ActivityManager(  488): Start proc 8298:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}
+10-28 18:12:59.304 D/CoreBackPreview(  488): Window{4438e91 u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@116c9f7, mPriority=0}
+10-28 18:12:59.562 I/AndroidRuntime( 8285): VM exiting with result code 0.
+10-28 18:12:59.903 W/ziparchive( 8298): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:12:59.903 W/ziparchive( 8298): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:12:59.905 D/nativeloader( 8298): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:12:59.911 V/GraphicsEnvironment( 8298): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:12:59.912 V/GraphicsEnvironment( 8298): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:13:00.012 I/WebViewFactory( 8298): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:13:00.069 D/nativeloader( 8298): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:00.070 D/nativeloader( 8298): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:00.300 I/cr_VariationsUtils( 8298): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-28 18:13:00.408 W/ActivityManager(  488): Slow operation: 52ms so far, now at startProcess: done updating battery stats
+10-28 18:13:00.408 W/ActivityManager(  488): Slow operation: 52ms so far, now at startProcess: building log message
+10-28 18:13:00.408 I/ActivityManager(  488): Start proc 8338:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i5 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:13:00.408 W/ActivityManager(  488): Slow operation: 52ms so far, now at startProcess: starting to update pids map
+10-28 18:13:00.412 W/ActivityManager(  488): Slow operation: 56ms so far, now at startProcess: done updating pids map
+10-28 18:13:00.419 W/chromium( 8298): [WARNING:dns_config_service_android.cc(115)] Failed to read DnsConfig.
+10-28 18:13:00.505 I/cr_WebViewApkApp( 8338): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:13:00.518 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/8298 activeRequest: null callbackRequest: 163 [NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:13:00.519 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:00.519 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:00.519 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:00.519 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:00.666 D/CoreBackPreview(  488): Window{9a398c0 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b593d3e, mPriority=0}
+10-28 18:13:01.417 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:01.419 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.MainActivity: +2s179ms
+10-28 18:13:01.546 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:13:02.215 W/InputManager-JNI(  488): Input channel object '4438e91 Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:13:02.220 D/CoreBackPreview(  488): Window{4438e91 u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-28 18:13:13.325 I/lowmemorykiller(  126): lmkd data connection established
+10-28 18:13:13.359 I/lowmemorykiller(  126): Using psi monitors for memory pressure detection
+10-28 18:13:13.359 I/lowmemorykiller(  126): Properties reinitilized
+10-28 18:13:13.375 I/lowmemorykiller( 8427): lmkd updated properties successfully
+10-28 18:13:13.375 I/lowmemorykiller(  126): lmkd data connection dropped
+10-28 18:13:13.375 I/lowmemorykiller(  126): closing lmkd data connection
+10-28 18:13:37.831 I/ActivityManager(  488): PendingStartActivityUids startActivity to updateOomAdj delay:1618ms, uid:10152
+10-28 18:13:38.804 D/CoreBackPreview(  488): Window{9a398c0 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}: Setting back callback null
+10-28 18:13:38.924 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:13:38.924 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:13:38.929 W/InputManager-JNI(  488): Input channel object '9a398c0 com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity (client)' was disposed without first being removed with the input manager!
+10-28 18:13:38.938 D/CarrierSvcBindHelper(  987): onPackageModified: com.fakhritools.catalogue
+10-28 18:13:38.941 D/ImsResolver(  987): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-28 18:13:38.993 W/UsageStatsService(  488): Unexpected activity event reported! (com.fakhritools.catalogue/com.fakhritools.catalogue.CatalogueActivity event : 23 instanceId : 150837759)
+10-28 18:13:39.390 D/ModelWriter( 1021): removing items from db . Reason: [removed because the corresponding package or component is removed. mOp=2 removedPackages=[] removedComponents=[{com.fakhritools.catalogue/com.fakhritools.catalogue.MainActivity}]]
+10-28 18:13:40.178 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 8532
+10-28 18:13:40.182 I/ActivityManager(  488): Killing 8298:com.fakhritools.catalogue/u0a174 (adj 905): stop com.fakhritools.catalogue due to from pid 8532
+10-28 18:13:40.187 I/ActivityManager(  488): Killing 8338:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a174i5 (adj 0): isolated not needed
+10-28 18:13:40.227 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:13:40.249 V/ActivityManager(  488): Got obituary of 8298:com.fakhritools.catalogue
+10-28 18:13:40.249 D/ConnectivityService(  488): releasing NetworkRequest [ REQUEST id=164, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ] (release request)
+10-28 18:13:40.250 W/ActivityManager(  488): setHasOverlayUi called on unknown pid: 8298
+10-28 18:13:40.294 D/AndroidRuntime( 8535): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:13:40.297 I/AndroidRuntime( 8535): Using default boot image
+10-28 18:13:40.297 I/AndroidRuntime( 8535): Leaving lock profiling enabled
+10-28 18:13:40.376 D/AndroidRuntime( 8535): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:13:40.376 W/Monkey  ( 8535): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:13:40.377 W/Monkey  ( 8535):  arg: "com.fakhritools.catalogue"
+10-28 18:13:40.378 W/Monkey  ( 8535): data="com.fakhritools.catalogue"
+10-28 18:13:40.388 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.BrandModern} from uid 2000
+10-28 18:13:40.399 D/CoreBackPreview(  488): Window{f727746 u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@bdb1e34, mPriority=0}
+10-28 18:13:40.421 I/ActivityManager(  488): Start proc 8548:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.BrandModern}
+10-28 18:13:40.541 I/AndroidRuntime( 8535): VM exiting with result code 0.
+10-28 18:13:40.559 W/ziparchive( 8548): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:40.559 W/ziparchive( 8548): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:40.560 D/nativeloader( 8548): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:13:40.604 V/GraphicsEnvironment( 8548): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:13:40.604 V/GraphicsEnvironment( 8548): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:13:40.656 I/WebViewFactory( 8548): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:13:40.659 D/nativeloader( 8548): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:40.662 D/nativeloader( 8548): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:40.979 I/cr_VariationsUtils( 8548): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-28 18:13:41.179 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/8548 activeRequest: null callbackRequest: 166 [NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:13:41.182 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:41.182 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:41.182 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:41.182 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:41.185 W/chromium( 8548): [WARNING:dns_config_service_android.cc(115)] Failed to read DnsConfig.
+10-28 18:13:41.185 I/ActivityManager(  488): Start proc 8600:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i6 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:13:41.381 I/cr_WebViewApkApp( 8600): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:13:41.426 D/CoreBackPreview(  488): Window{91ead29 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandModern}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b8dc64f, mPriority=0}
+10-28 18:13:42.358 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:42.366 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.BrandModern: +1s969ms
+10-28 18:13:42.476 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:13:43.550 W/InputManager-JNI(  488): Input channel object 'f727746 Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:13:43.551 D/CoreBackPreview(  488): Window{f727746 u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
+10-28 18:13:56.627 D/CoreBackPreview(  488): Window{91ead29 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandModern}: Setting back callback null
+10-28 18:13:56.657 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:13:56.659 D/MediaPlayerList(  956): Name of package changed: com.fakhritools.catalogue
+10-28 18:13:56.666 W/InputManager-JNI(  488): Input channel object '91ead29 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandModern (client)' was disposed without first being removed with the input manager!
+10-28 18:13:56.745 D/CarrierSvcBindHelper(  987): onPackageModified: com.fakhritools.catalogue
+10-28 18:13:56.745 D/ImsResolver(  987): maybeAddedImsService, packageName: com.fakhritools.catalogue
+10-28 18:13:57.010 W/UsageStatsService(  488): Unexpected activity event reported! (com.fakhritools.catalogue/com.fakhritools.catalogue.CatalogueActivity event : 23 instanceId : 173145466)
+10-28 18:13:57.208 D/ModelWriter( 1021): removing items from db . Reason: [removed because the corresponding package or component is removed. mOp=2 removedPackages=[] removedComponents=[{com.fakhritools.catalogue/com.fakhritools.catalogue.BrandModern}]]
+10-28 18:13:58.155 I/ActivityManager(  488): Force stopping com.fakhritools.catalogue appid=10174 user=0: from pid 8702
+10-28 18:13:58.156 I/ActivityManager(  488): Killing 8548:com.fakhritools.catalogue/u0a174 (adj 905): stop com.fakhritools.catalogue due to from pid 8702
+10-28 18:13:58.156 I/ActivityManager(  488): Killing 8600:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a174i6 (adj 0): isolated not needed
+10-28 18:13:58.161 D/CarrierSvcBindHelper(  987): onHandleForceStop: [com.fakhritools.catalogue]
+10-28 18:13:58.183 V/ActivityManager(  488): Got obituary of 8548:com.fakhritools.catalogue
+10-28 18:13:58.184 W/ActivityManager(  488): setHasOverlayUi called on unknown pid: 8548
+10-28 18:13:58.184 D/ConnectivityService(  488): releasing NetworkRequest [ REQUEST id=167, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ] (release request)
+10-28 18:13:58.238 D/AndroidRuntime( 8705): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-28 18:13:58.241 I/AndroidRuntime( 8705): Using default boot image
+10-28 18:13:58.241 I/AndroidRuntime( 8705): Leaving lock profiling enabled
+10-28 18:13:58.321 D/AndroidRuntime( 8705): Calling main entry com.android.commands.monkey.Monkey
+10-28 18:13:58.322 W/Monkey  ( 8705): args: [-p, com.fakhritools.catalogue, -c, android.intent.category.LAUNCHER, 1]
+10-28 18:13:58.323 W/Monkey  ( 8705):  arg: "com.fakhritools.catalogue"
+10-28 18:13:58.324 W/Monkey  ( 8705): data="com.fakhritools.catalogue"
+10-28 18:13:58.333 I/ActivityTaskManager(  488): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.fakhritools.catalogue/.BrandMabrook} from uid 2000
+10-28 18:13:58.386 D/CoreBackPreview(  488): Window{8f595c5 u0 Splash Screen com.fakhritools.catalogue}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@7d4b828, mPriority=0}
+10-28 18:13:58.386 I/ActivityManager(  488): Start proc 8718:com.fakhritools.catalogue/u0a174 for next-top-activity {com.fakhritools.catalogue/com.fakhritools.catalogue.BrandMabrook}
+10-28 18:13:58.516 I/AndroidRuntime( 8705): VM exiting with result code 0.
+10-28 18:13:58.627 W/ActivityManager(  488): Slow operation: 112ms so far, now at attachApplicationLocked: immediately before bindApplication
+10-28 18:13:58.627 W/ActivityManager(  488): Slow operation: 112ms so far, now at attachApplicationLocked: immediately after bindApplication
+10-28 18:13:58.627 W/ActivityManager(  488): Slow operation: 112ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+10-28 18:13:58.629 W/ActivityManager(  488): Slow operation: 114ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+10-28 18:13:58.806 W/ziparchive( 8718): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:58.806 W/ziparchive( 8718): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:13:58.810 D/nativeloader( 8718): Configuring classloader-namespace for other apk /data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.fakhritools.catalogue
+10-28 18:13:58.827 V/GraphicsEnvironment( 8718): ANGLE Developer option for 'com.fakhritools.catalogue' set to: 'default'
+10-28 18:13:58.828 V/GraphicsEnvironment( 8718): ANGLE GameManagerService for com.fakhritools.catalogue: false
+10-28 18:13:58.932 I/WebViewFactory( 8718): Loading com.google.android.webview version 109.0.5414.123 (code 541412337)
+10-28 18:13:58.940 D/nativeloader( 8718): Configuring classloader-namespace for other apk /data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk. target_sdk_version=33, uses_libraries=ALL, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:58.944 D/nativeloader( 8718): Configuring classloader-namespace for other apk /data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk. target_sdk_version=33, uses_libraries=, library_path=/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/lib/x86_64:/data/app/~~-8kQiDCzSJpfti55qz4obw==/com.google.android.webview-aCHseVqFim6d8ecaMQjqag==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~HdkwpqSX9uN_jSrKvYqSyw==/com.google.android.trichromelibrary_541412337-gZtxfYNjFUT-uIBhQygHhg==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+10-28 18:13:58.982 I/cr_VariationsUtils( 8718): Failed reading seed file "/data/user/0/com.fakhritools.catalogue/app_webview/variations_seed_new"
+10-28 18:13:59.215 I/ActivityManager(  488): Start proc 8751:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i7 for  {com.fakhritools.catalogue/org.chromium.content.app.SandboxedProcessService0:0}
+10-28 18:13:59.322 W/chromium( 8718): [WARNING:dns_config_service_android.cc(115)] Failed to read DnsConfig.
+10-28 18:13:59.438 I/cr_WebViewApkApp( 8751): Launched version=109.0.5414.123 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+10-28 18:13:59.488 D/ConnectivityService(  488): requestNetwork for uid/pid:10174/8718 activeRequest: null callbackRequest: 169 [NetworkRequest [ REQUEST id=170, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-28 18:13:59.491 D/WifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=170, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:59.491 D/UntrustedWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=170, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:59.491 D/OemPaidWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=170, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:59.491 D/MultiInternetWifiNetworkFactory(  488): got request NetworkRequest [ REQUEST id=170, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10174 RequestorUid: 10174 RequestorPkg: com.fakhritools.catalogue UnderlyingNetworks: Null] ]
+10-28 18:13:59.698 D/CoreBackPreview(  488): Window{d6a56a9 u0 com.fakhritools.catalogue/com.fakhritools.catalogue.BrandMabrook}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b5c895c, mPriority=0}
+10-28 18:14:00.523 W/ziparchive(  488): Unable to open '/data/app/~~RdM6Pv9EqZQliARZxX8mQQ==/com.fakhritools.catalogue-3tCOG8BLUNa6zWbaoEOKmA==/base.dm': No such file or directory
+10-28 18:14:00.525 I/ActivityTaskManager(  488): Displayed com.fakhritools.catalogue/.BrandMabrook: +2s185ms
+10-28 18:14:00.595 I/GoogleInputMethodService( 1494): GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.fakhritools.catalogue fieldId=-1 fieldName=null extras=null}, false)
+10-28 18:14:01.538 W/InputManager-JNI(  488): Input channel object '8f595c5 Splash Screen com.fakhritools.catalogue (client)' was disposed without first being removed with the input manager!
+10-28 18:14:01.547 D/CoreBackPreview(  488): Window{8f595c5 u0 Splash Screen com.fakhritools.catalogue EXITING}: Setting back callback null
