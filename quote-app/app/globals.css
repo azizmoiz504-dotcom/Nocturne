@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #b91a20;
+  --color-navy: #084767;
+  --color-ink: #16181d;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { background: #f4f5f7; color: var(--color-ink); }
+input, select, textarea, button { font: inherit; }
+@layer components {
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:.75rem; padding:.8rem 1.1rem; font-weight:600; min-height:3rem; transition: filter .15s, background .15s; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-primary { background: var(--color-brand); color:#fff; }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-navy { background: var(--color-navy); color:#fff; }
+.btn-ghost { background:#fff; border:1px solid #d6d8de; color: var(--color-ink); }
+.btn-ghost:hover:not(:disabled) { background:#f0f1f4; }
+.btn-sm { min-height:2.25rem; padding:.4rem .75rem; font-size:.9rem; border-radius:.6rem; }
+.field { width:100%; border:1px solid #cfd2d9; border-radius:.7rem; padding:.7rem .85rem; background:#fff; }
+.field:focus { outline: 2px solid var(--color-navy); outline-offset: 0; border-color: transparent; }
+.card { background:#fff; border-radius:1rem; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 0 0 1px rgba(0,0,0,.04); }
+.tab { padding:.6rem 1rem; border-radius:.7rem; font-weight:600; color:#4a4f5a; }
+.tab-on { background: var(--color-navy); color:#fff; }
+}
+.num { font-variant-numeric: tabular-nums; }
