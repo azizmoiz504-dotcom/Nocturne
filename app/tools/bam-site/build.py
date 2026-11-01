@@ -348,13 +348,14 @@ class Site:
             pool = [p for p in clean if p['square']] or clean
             r['feature'] = sorted(pool, key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())[:8]
             r['tag'] = (r['feature'] or [p for p in r['items'] if p['img']] or [None])[0]
-        # "Every fixing": each part of the 3D assembly names the group that stocks it (only groups they have)
+        # "Every tool": each 3D hand tool names the group that stocks it (only groups they have)
         def grp(rid, name):
             rng = next((x for x in self.ranges if x['id'] == rid), None)
             g = rng and next((g for g in rng['groups'] if g['name']['en'].lower() == name.lower()), None)
             return {'range': rid, 'g': g['slug'], 'name': g['name'], 'count': len(g['items']), 'rname': rng['name']} if g else None
-        parts = [('bolt', 'nails-fasteners', 'Threaded Rod & Bolts'), ('washer', 'nails-fasteners', 'Nuts & Washers'), ('nut', 'nails-fasteners', 'Nuts & Washers'),
-                 ('plug', 'nails-fasteners', 'Anchors & Wall Plugs'), ('nail', 'nails-fasteners', 'Nails'), ('spanner', 'kapusi', 'Spanners & Wrenches')]
+        parts = [('hammer', 'hammers', 'Claw Hammers'), ('spanner', 'kapusi', 'Spanners & Wrenches'), ('driver', 'kapusi', 'Screwdrivers, Bits & Keys'),
+                 ('pliers', 'kapusi', 'Pliers, Cutters & Crimpers'), ('tape', 'sgs', 'Measuring & Marking'), ('level', 'kapusi', 'Measuring & Levelling'),
+                 ('trowel', 'sgs', 'Plastering, Trowels & Scrapers')]
         fixings = []
         for pid, rid, gname in parts:
             g = grp(rid, gname)
@@ -450,7 +451,7 @@ class Site:
                        'wall': (root + 'data/wall.json?v=' + v['wall']) if 'wall' in v else '',
                        't': {k: t(lang, k) for k in JS_KEYS}, 'contact': {k: CONTACT[k] for k in ('email', 'phone', 'tel', 'whatsapp')},
                        'page': kind, 'range': r['id'] if r else '', 'icons': {k: ICONS[k] for k in JS_ICONS}}
-                ctx = dict(lang=lang, T=T, icon=icon, split=split_words, root=root, home=home or './', other_url=other or './', page=kind, site_url=self.url,
+                ctx = dict(lang=lang, T=T, T_en=lambda key: t('en', key), T_ar=lambda key: t('ar', key), icon=icon, split=split_words, root=root, home=home or './', other_url=other or './', page=kind, site_url=self.url,
                            page_url=self.url + full[:-len('index.html')],
                            ranges=self.ranges, stats=self.stats, contact=CONTACT, year=year, v=v, pdfs=books, arches=arches,
                            config=Markup(self.js(cfg)), **extra)
@@ -493,7 +494,7 @@ class Site:
     def assets(self):
         st = os.path.join(self.dir, 'static')
         self.versions = {}
-        for name in ('site.css', 'site.js', 'motion.js', 'hw3d.js'):
+        for name in ('site.css', 'site.js', 'motion.js', 'hw3d.js', 'wh3d.js'):
             src = os.path.join(st, name)
             if not os.path.isfile(src): continue
             shutil.copyfile(src, self.path('assets/' + name))

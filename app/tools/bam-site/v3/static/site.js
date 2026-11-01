@@ -1019,7 +1019,7 @@
   addEventListener('storage', e => { if (e.key === LIST) { list = clean(get(LIST)); syncCounts(); if (drawerOpen()) renderDrawer(); } });
   addEventListener('pageshow', e => { if (e.persisted) { list = clean(get(LIST)); syncCounts(); if (drawerOpen()) renderDrawer(); } });
 
-  window.BAM = { scrollToY: scrollToY, showBar: showBar, loadIndex: () => loadIndex() };
+  window.BAM = { scrollToY: scrollToY, showBar: showBar, holdBar: ms => { holdBar = Date.now() + ms; }, loadIndex: () => loadIndex() };
 
   /* ---------- start ---------- */
   syncCounts();

@@ -1,6 +1,6 @@
 /* Bait Al Maqdis website (hardware-store look): the moving parts.
-   The spanner turning the nut in the hero, the fixings coming apart, the hazard tapes, the pegboard,
-   the tape-measure counters and the showroom shutter. Everything here is extra: without it (or with
+   The hand tools in the hero (the tape pulls out), the tools going onto the wall, the hazard tapes,
+   the pegboard, the tape-measure counters and the showroom shutter. Everything here is extra: without it (or with
    "reduce motion" on) the pages still show and do everything, just without movement. */
 (() => {
   'use strict';
@@ -58,12 +58,12 @@
     try { history.replaceState(history.state, '', '#' + id); } catch (err) {}
   });
 
-  /* ---------- the 3D: the hero, and "Every fixing" ---------- */
+  /* ---------- the 3D: the hero, and "Every tool" ---------- */
   function three() {
     const hero = $('#top'), fix = $('#fixings');
     const b = B3();
     if (!b || !hero) return;
-    // the canvas only draws while the hero or "Every fixing" is on screen
+    // the canvas only draws while the hero or "Every tool" is on screen
     const vis = new Map();
     const io = new IntersectionObserver(es => {
       es.forEach(e => vis.set(e.target, e.isIntersecting));
@@ -98,13 +98,13 @@
     ST.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: phone ? true : 0.6, onUpdate: s => b.hero(s.progress, s.end - s.start) });
     if (fix) {
       const small = innerWidth < 900;
-      // while the section scrolls up, the assembly moves from the hero's place to this one
+      // while the section scrolls up, the tools move from the hero's place to this one
       ST.create({ trigger: fix, start: 'top bottom', end: 'top top', scrub: 0.7, onUpdate: s => b.approach && b.approach(s.progress) });
       ST.create({
         trigger: fix, start: 'top top', end: () => '+=' + Math.round(innerHeight * (small ? 1.3 : 1.7)), pin: '.fix__pin', pinSpacing: true, scrub: 0.7,
         onUpdate: s => setAna(clamp(s.progress * 1.18, 0, 1))
       });
-      // once it lets go, the parts scroll away with the section
+      // once it lets go, the tools scroll away with the section
       ST.create({ trigger: fix, start: 'bottom bottom', end: 'bottom top', onUpdate: s => b.exit && b.exit(s.progress) });
     }
   }
@@ -181,10 +181,18 @@
     ST.create({ trigger: r, start: 'center 55%', once: true, onEnter: () => r.classList.add('is-sent') });
   }
 
-  /* ---------- the showroom shutter rolls up ---------- */
+  /* ---------- the showroom: its shutter rolls up (in 3D when the browser can draw it) ---------- */
   function shutter() {
     const sh = $('#shutter'), unit = $('.unit');
     if (!sh || !unit) return;
+    const wh = window.BAMWH && window.BAMWH.ready ? window.BAMWH : null;
+    if (wh) {      // the 3D showroom: it holds still in the middle of the screen while the shutter goes up
+      if (!motion) { wh.skip(); wh.progress(1); return; }
+      const stage = $('.visit__stage'), phone = innerWidth < 900;
+      const pinEl = !phone && stage && stage.offsetHeight <= innerHeight * 0.98 ? stage : unit;
+      ST.create({ trigger: pinEl, start: 'center center', end: () => '+=' + Math.round(innerHeight * (phone ? 1.1 : 1.3)), pin: pinEl, pinSpacing: true, scrub: 0.6, onUpdate: s => wh.progress(s.progress) });
+      return;
+    }
     if (!motion) { unit.classList.add('is-open'); return; }
     G.fromTo(sh, { yPercent: 0 }, { yPercent: -92, ease: 'none', scrollTrigger: { trigger: unit, start: 'top 80%', end: 'center 45%', scrub: 0.5, onLeave: () => unit.classList.add('is-open'), onEnterBack: () => unit.classList.remove('is-open') } });
   }
@@ -216,6 +224,16 @@
     if (motion) {
       fontsReady.then(() => ST.refresh());
       addEventListener('load', () => ST.refresh());
+      // the catalogue fills in (and grows with "Show more") after the page has loaded: measure again so the showroom holds still in the right place
+      if (CFG.page === 'home' && 'ResizeObserver' in window) {
+        let lastH = 0, tm = 0;
+        const again = () => { if (window.BAM && window.BAM.holdBar) window.BAM.holdBar(500); ST.refresh(); };   // the top bar stays as it is while measuring
+        new ResizeObserver(es => {
+          const h = Math.round(es[0].contentRect.height);
+          if (Math.abs(h - lastH) < 2) return;
+          lastH = h; clearTimeout(tm); tm = setTimeout(again, 160);
+        }).observe(d.querySelector('main') || d.body);
+      }
       // arriving on a part of the home page (…/#visit): go there once everything has its height
       const h = decodeURIComponent(location.hash.slice(1));
       const el = h && h.indexOf('=') < 0 && d.getElementById(h);
