@@ -157,7 +157,7 @@ html[lang=ar] .menu__in > a { font: 700 32px/1.3 var(--f-body); text-transform: 
 .menu__foot a { text-decoration: none; }
 @keyframes fadeIn { from { opacity: 0; } }
 
-/* ---------- the 3D canvas: behind the hero and "Every fixing" ---------- */
+/* ---------- the 3D canvas: behind the hero and "Every tool" ---------- */
 .gl { position: fixed; top: 0; left: 0; width: 100%; height: 100%; height: 100lvh; z-index: 1; pointer-events: none; }
 main > section, main > div, .foot { position: relative; z-index: 2; }
 main > .hero, main > .fix, main > .gl { z-index: auto; }
@@ -200,9 +200,12 @@ html[lang=ar] .hud__c small { font-size: 12px; letter-spacing: 0; }
 .hud__c--mail a { text-transform: none; }
 .hud__c a:hover { color: var(--o); }
 .hud__cue { justify-self: end; display: flex; align-items: center; gap: 12px; color: var(--chalk-2); }
-.nut { width: 26px; height: 26px; background: var(--o); clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%); position: relative; animation: nut 3s var(--io) infinite; }
-.nut::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: var(--steel); }
-@keyframes nut { 50% { transform: rotate(180deg) translateY(4px); } }
+/* a little tape measure whose blade pulls out and back */
+.tapeico { position: relative; width: 24px; height: 23px; border-radius: 7px; background: var(--o); flex: none; }
+.tapeico::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: var(--steel); box-shadow: 0 0 0 2px #1a1c20; }
+.tapeico i { position: absolute; top: 17px; left: 21px; height: 5px; width: 22px; background: repeating-linear-gradient(90deg, #16171a 0 1px, transparent 1px 4px) top / 100% 2px no-repeat, #f2c21b; border-radius: 1px; transform-origin: 0 50%; animation: tapeico 3s var(--io) infinite; }
+[dir=rtl] .tapeico i { left: auto; right: 21px; transform-origin: 100% 50%; }
+@keyframes tapeico { 0%, 100% { transform: scaleX(.12); } 55% { transform: scaleX(1); } }
 
 /* ---------- the hazard tapes ---------- */
 .tapes { --sk: 0; height: 190px; overflow: hidden; display: grid; place-items: center; background: var(--steel); }
@@ -362,6 +365,11 @@ html.no-gl .fix__labels { display: none; }
 .flabel b { font-size: 13.5px; font-weight: 650; }
 .flabel small { font-size: 10.5px; color: var(--mute); }
 .flabel:hover span, .flabel.is-hot span { border-color: var(--o); background: rgba(40, 24, 10, .92); }
+/* a name above its tool, or on the left of it (Arabic) */
+.flabel--up i::after { top: auto; bottom: 12px; left: 6px; width: 1.5px; height: 20px; }
+.flabel--up span { left: 0; top: auto; bottom: 32px; transform: translateX(-50%); }
+.flabel--left i::after { left: auto; right: 14px; }
+.flabel--left span { left: auto; right: 44px; }
 
 /* ---------- the catalogue: light, like a shop counter ---------- */
 .cat { background: var(--paper); color: var(--ink); }
@@ -545,6 +553,12 @@ html[lang=ar] .visit__dl dt { font: 600 13.5px var(--f-body); letter-spacing: 0;
 .unit__handle { position: absolute; bottom: 26px; left: 50%; width: 90px; height: 10px; margin-left: -45px; border-radius: 5px; background: linear-gradient(#3b3f46, #1a1c20); }
 .unit__floor { height: 26px; background: linear-gradient(#2b2f35, #1a1c20); border-radius: 0 0 8px 8px; overflow: hidden; display: flex; align-items: flex-end; }
 .unit__floor .hazard { width: 100%; height: 10px; }
+/* the showroom in 3D (when the browser can draw it): the night scene fades into the page at its edges */
+.unit__gl { display: none; position: relative; aspect-ratio: 1 / 1.02; -webkit-mask: radial-gradient(ellipse 74% 72% at 50% 48%, #000 58%, transparent 100%); mask: radial-gradient(ellipse 74% 72% at 50% 48%, #000 58%, transparent 100%); }
+.unit__gl canvas { display: block; width: 100%; height: 100%; }
+html.has-wh .unit__gl { display: block; }
+html.has-wh .unit__sign, html.has-wh .unit__bay, html.has-wh .unit__floor { display: none; }
+html.has-wh .unit__hint { margin-top: 4px; }
 .unit__hint { margin-top: 14px; text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
 html[lang=ar] .unit__hint { font: 500 13px var(--f-body); letter-spacing: 0; }
 
@@ -925,6 +939,9 @@ html[lang=ar] body * { letter-spacing: 0 !important; }
   .fix__meter { margin-top: 16px; }
   .flabel span { left: 30px; top: -16px; padding: 5px 9px; }
   .flabel i::after { width: 18px; }
+  .flabel--up span { left: 0; top: auto; bottom: 24px; }
+  .flabel--up i::after { width: 1.5px; height: 13px; }
+  .flabel--left span { left: auto; right: 30px; }
   .flabel b { font-size: 12px; }
   .flabel small { display: none; }
   html.no-gl .fix__poster, html:not(.js) .fix__poster { position: relative; transform: none; top: auto; width: 100%; margin-top: 20px; }
@@ -1020,6 +1037,7 @@ html[lang=ar] body * { letter-spacing: 0 !important; }
 
 /* ---------- less motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  .unit__hint { visibility: hidden; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   html.js .reveal, html.js .hero .tl__in, html.js .rh .tl__in, html.js .hero__sub, html.js .hero__ctas, html.js .hero__kicker { opacity: 1; transform: none; }
   .meter__blade { transform: none; }
