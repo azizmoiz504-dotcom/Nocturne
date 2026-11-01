@@ -1,4 +1,5 @@
-/* Bait Al Maqdis website: light or dark, the moving arches, search, the product window and your list.
+/* Bait Al Maqdis website (hardware-store look): search, the catalogue on the home page, the product window and your list.
+   The moving parts (3D, scrolling) are in motion.js and hw3d.js; this file works without them.
    The pages only know part numbers and sizes. There are no prices anywhere on this website. */
 (() => {
   'use strict';
@@ -15,6 +16,8 @@
   const reduce = mq('(prefers-reduced-motion: reduce)');
   const finePointer = mq('(hover: hover) and (pointer: fine)');
   const smooth = () => (reduce ? 'auto' : 'smooth');
+  /* scrolling goes through the smooth scroller when motion.js has started one */
+  const scrollToY = y => { const L = window.__lenis; if (L && !reduce) L.scrollTo(y, { duration: 1.1 }); else window.scrollTo({ top: y, behavior: smooth() }); };
   const nm = n => (n && (AR ? n.ar || n.en : n.en)) || '';
   const altName = n => { const a = n && (AR ? n.en : n.ar); return a && a !== nm(n) ? a : ''; };
   const count = (n, one, many) => (n === 1 ? T[one] : fill(T[many], { n: n }));
@@ -37,14 +40,6 @@
     toastTimer = setTimeout(hideToast, label ? 5200 : 2600);
   }
   function hideToast() { toastEl.classList.remove('on'); }
-
-  /* ---------- light or dark ---------- */
-  function setTheme(dark) {
-    html.setAttribute('data-theme', dark ? 'dark' : 'light');
-    const m = $('#themeColor');
-    if (m) m.content = dark ? '#1c1812' : '#f3ede1';
-    try { localStorage.setItem('bam-site-theme', dark ? 'dark' : 'light'); } catch (e) {}
-  }
 
   /* ---------- top bar: solid once you scroll, out of the way while you read down ---------- */
   const bar = $('#bar');
@@ -82,7 +77,7 @@
     const base = a.getAttribute('href').split('#')[0];
     if (location.hash) a.setAttribute('href', base + location.hash);
   }));
-  $$('[data-top]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: smooth() }); }));
+  $$('[data-top]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); scrollToY(0); }));
 
   /* ---------- things that rise into view, numbers that count up ---------- */
   const reveals = $$('.reveal'), counters = $$('[data-count]');
@@ -109,42 +104,14 @@
     requestAnimationFrame(step);
   }
 
-  /* ---------- the arcade: each arch shows their products in turn ---------- */
-  const arcade = $('#arcade');
-  if (arcade && !reduce) {
-    let visible = true;
-    if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(arcade);
-    $$('.arch', arcade).forEach((a, i) => {
-      let photos;
-      try { photos = JSON.parse(a.getAttribute('data-photos')); } catch (e) { return; }
-      if (!photos || photos.length < 2) return;
-      const imgs = a.querySelectorAll('img');
-      let k = 0, cur = 0;
-      const next = () => {
-        if (!visible || d.hidden) { setTimeout(next, 1500); return; }
-        k = (k + 1) % photos.length;
-        const nx = imgs[1 - cur], url = ROOT + photos[k];
-        nx.onload = () => { nx.onload = null; nx.classList.add('on'); imgs[cur].classList.remove('on'); cur = 1 - cur; setTimeout(next, 4600); };
-        nx.onerror = () => { nx.onerror = null; setTimeout(next, 4600); };
-        if (nx.getAttribute('src') === url && nx.complete) nx.onload(); else nx.src = url;
-      };
-      setTimeout(next, 3400 + i * 950);
-    });
-  }
-
-  /* ---------- the index: a little arch follows the pointer with the group's photo ---------- */
-  const peek = $('#peek');
-  if (peek && finePointer) {
-    const pimg = peek.querySelector('img');
-    let px = 0, py = 0, raf = 0;
-    const place = () => { raf = 0; peek.style.left = px + 'px'; peek.style.top = py + 'px'; };
-    $$('[data-peek]').forEach(a => {
-      a.addEventListener('mouseenter', e => { pimg.src = a.getAttribute('data-peek'); px = e.clientX; py = e.clientY; place(); peek.classList.add('on'); });
-      a.addEventListener('mousemove', e => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(place); });
-      a.addEventListener('mouseleave', () => peek.classList.remove('on'));
-    });
-    addEventListener('scroll', () => peek.classList.remove('on'), { passive: true });
-  }
+  /* ---------- the products this page knows ----------
+     a range page knows its own range; the home page learns every range from the search list */
+  const STORE = {};
+  const keyOf = (r, s) => r + '/' + s;
+  const prodOf = (r, s) => (STORE[r] && STORE[r].items[s]) || null;
+  const here = r => !!(RD && RD.id === r);
+  const hashFor = (r, s) => '#p=' + (here(r) ? s : keyOf(r, s));
+  const parseKey = (k, fallbackR) => { const i = String(k).indexOf('/'); return i < 0 ? [fallbackR || (RD && RD.id) || '', k] : [k.slice(0, i), k.slice(i + 1)]; };
 
   /* ---------- your list: kept in this browser only ---------- */
   const LIST = 'bam-site-list', CUST = 'bam-site-cust';
@@ -176,8 +143,8 @@
   function setQty(id, q) { const l = findLine(id); if (l) { l.q = q; saveList(); updateDrawerMeta(); } }
   /* the round list button shows while the top bar, with its own list button, is out of view */
   function syncFab() {
-    const fab = $('.fab');
-    if (fab) fab.classList.toggle('is-on', list.length > 0 && !drawerOpen() && bar.classList.contains('is-hidden'));
+    const fab = $('.fab--list');
+    if (fab) fab.classList.toggle('is-on', list.length > 0 && !drawerOpen());
   }
   function bump() {
     $$('[data-list-count]').forEach(b => {
@@ -189,11 +156,9 @@
     const n = list.length;
     $$('[data-list-count]').forEach(b => { b.textContent = n; if (b.classList.contains('badge')) b.hidden = !n; });
     syncFab();
-    if (RD) {
-      const inl = {};
-      list.forEach(l => { if (l.r === RD.id) inl[l.s] = 1; });
-      $$('.card[data-p]').forEach(c => c.classList.toggle('in-list', !!inl[c.getAttribute('data-p')]));
-    }
+    const inl = {};
+    list.forEach(l => { inl[keyOf(l.r, l.s)] = 1; });
+    $$('.card[data-p]').forEach(c => c.classList.toggle('in-list', !!inl[keyOf(c.getAttribute('data-r'), c.getAttribute('data-p'))]));
     if (sheetSlug) syncSheetRows();
   }
   const stepper = q => '<span class="stepper"><button type="button" data-step="-1" aria-label="−1">−</button>' +
@@ -218,7 +183,7 @@
   function renderDrawer() {
     updateDrawerMeta();
     if (!list.length) {
-      dBody.innerHTML = '<div class="drawer__empty"><div class="empty__arch">' + ico('list') + '</div><h3>' + esc(T.list_empty) + '</h3><p>' +
+      dBody.innerHTML = '<div class="drawer__empty"><div class="empty__icon">' + ico('list') + '</div><h3>' + esc(T.list_empty) + '</h3><p>' +
         esc(T.list_empty_sub) + '</p><a class="btn btn--primary" href="' + esc(HOME) + '#ranges">' + esc(T.browse) + ico('arrow') + '</a></div>';
       return;
     }
@@ -369,6 +334,7 @@
   /* ---------- a range page ---------- */
   const rdEl = $('#range-data');
   const RD = rdEl ? JSON.parse(rdEl.textContent) : null;
+  if (RD) STORE[RD.id] = RD;
   const rfind = $('#rfind');
   let filterOn = false, shown = {};
 
@@ -429,7 +395,7 @@
       grps.forEach(g => {
         const any = !!g.querySelector('.card:not(.is-off)');
         g.classList.toggle('is-off', !any);
-        const chip = $('.chip[data-g="' + g.getAttribute('data-g') + '"]', chipsEl);
+        const chip = $('.rchip[data-g="' + g.getAttribute('data-g') + '"]', chipsEl);
         if (chip) chip.classList.toggle('is-empty', !any);
       });
       $('#rcount').textContent = filterOn ? fill(T.shown, { n: n }) : '';
@@ -467,12 +433,19 @@
       }
       if (cur === curG) return;
       curG = cur;
-      $$('.chip.is-on', chipsEl).forEach(c => c.classList.remove('is-on'));
-      const chip = cur && $('.chip[data-g="' + cur + '"]', chipsEl);
+      $$('.rchip.is-on', chipsEl).forEach(c => c.classList.remove('is-on'));
+      const chip = cur && $('.rchip[data-g="' + cur + '"]', chipsEl);
       if (chip) { chip.classList.add('is-on'); centerChip(chip); }
+      moveChipBar(chip);
+    };
+    const chipBar = $('#chipsBar');
+    const moveChipBar = chip => {
+      if (!chipBar) return;
+      chipBar.classList.toggle('on', !!chip);
+      if (chip) { chipBar.style.width = chip.offsetWidth + 'px'; chipBar.style.transform = 'translateX(' + chip.offsetLeft + 'px)'; }
     };
     chipsEl.addEventListener('click', e => {
-      const c = e.target.closest('.chip');
+      const c = e.target.closest('.rchip');
       if (!c) return;
       e.preventDefault();
       goGroup(c.getAttribute('data-g'));
@@ -484,32 +457,40 @@
     if (g.classList.contains('is-off') && rfind) { rfind.value = ''; rfind.dispatchEvent(new Event('input')); }
     holdBar = Date.now() + 2500;
     showBar();
-    g.scrollIntoView({ behavior: smooth(), block: 'start' });
+    const rb = $('#rbar');
+    scrollToY(Math.max(0, g.getBoundingClientRect().top + window.scrollY - (rb ? rb.offsetHeight : 0) - bar.offsetHeight + 2));
     history.replaceState(null, '', '#g-' + s);
   }
 
   /* ---------- the product window ---------- */
   const sheet = $('#sheet');
-  let sheetSlug = '', sheetPushed = false, sheetLast = null, afterClose = null, backPending = false;
+  let sheetSlug = '', sheetR = '', sheetPushed = false, sheetLast = null, afterClose = null, backPending = false;
+  /* previous and next: the products shown around it (this range, or the home page's catalogue as filtered) */
   const sheetOrder = () => {
-    const vis = filterOn ? RD.order.filter(s => shown[s]) : RD.order;
-    return vis.indexOf(sheetSlug) >= 0 ? vis : RD.order;
+    const cur = keyOf(sheetR, sheetSlug);
+    if (here(sheetR)) {
+      const vis = (filterOn ? RD.order.filter(s => shown[s]) : RD.order).map(s => keyOf(RD.id, s));
+      return vis.indexOf(cur) >= 0 ? vis : RD.order.map(s => keyOf(RD.id, s));
+    }
+    if (CAT && CAT.keys().indexOf(cur) >= 0) return CAT.keys();
+    return STORE[sheetR].order.map(s => keyOf(sheetR, s));
   };
-  function renderSheet(slug) {
-    const p = RD.items[slug], g = RD.groups[p.g] || { s: '', n: { en: '', ar: '' } };
-    sheetSlug = slug;
-    const order = sheetOrder(), at = order.indexOf(slug);
+  function renderSheet(r, slug) {
+    const R = STORE[r], p = R.items[slug], g = R.groups[p.g] || { s: '', n: { en: '', ar: '' } };
+    sheetSlug = slug; sheetR = r;
+    const order = sheetOrder(), at = order.indexOf(keyOf(r, slug));
     const prev = at > 0 ? order[at - 1] : '', next = at >= 0 && at < order.length - 1 ? order[at + 1] : '';
     const alt = altName(p.n), name = nm(p.n);
     const rows = p.z.map((z, i) => {
-      const l = findLine(lineId(RD.id, slug, i)), size = AR ? z[2] || z[1] : z[1];
+      const l = findLine(lineId(r, slug, i)), size = AR ? z[2] || z[1] : z[1];
       return '<tr data-row="' + i + '"' + (l ? ' class="is-in"' : '') + '>' +
         '<td class="sz">' + (size ? '<bdi>' + esc(size) + '</bdi>' : '<span aria-hidden="true">—</span>') + (z[0] ? '<small dir="ltr">' + esc(z[0]) + '</small>' : '') + '</td>' +
         '<td class="pn" dir="ltr">' + esc(z[0] || '—') + '</td>' +
         '<td class="ctl">' + stepper(l ? l.q : 1) + '<button class="addrow" type="button" data-add title="' + esc(l ? T.remove : T.add_to_list) + '">' + ico('plus') + ico('check') +
         '<span>' + esc(l ? T.added : T.add) + '</span></button></td></tr>';
     }).join('');
-    const more = g.s ? RD.order.filter(s => s !== slug && RD.items[s].g === p.g).slice(0, 16) : [];
+    const more = g.s ? R.order.filter(s => s !== slug && R.items[s].g === p.g).slice(0, 16) : [];
+    const rangeUrl = HOME + 'range/' + r + '/';
     const subj = fill(T.mail_subject, { n: name });
     const body = [T.mail_hello, '', T.mail_ask, '', name + (AR && p.n.en && p.n.en !== name ? ' (' + p.n.en + ')' : '')]
       .concat(p.z.slice(0, 40).map(z => '- ' + [z[1], z[0]].filter(Boolean).join(' — '))).concat(['', T.mail_thanks]).join('\n');
@@ -523,12 +504,13 @@
           '<button class="iconbtn" type="button" data-close-sheet aria-label="' + esc(T.close) + '">' + ico('x') + '</button>' +
         '</div>' +
         '<div class="sheet__media">' +
-          (p.i ? '<button class="sheet__plate" type="button" data-zoom="' + esc(ROOT + p.i) + '" aria-label="' + esc(T.zoom) + '"><img src="' + esc(ROOT + p.i) + '" alt="' + esc(name) + '" width="' + p.w + '" height="' + p.h + '"></button>'
-               : '<div class="sheet__plate"><span class="card__nophoto">' + ico('dome') + '<small>' + esc(T.no_photo) + '</small></span></div>') +
+          (p.i ? '<button class="sheet__plate" type="button" data-zoom="' + esc(ROOT + p.i) + '" aria-label="' + esc(T.zoom) + '"><img src="' + esc(ROOT + p.i) + '" alt="' + esc(name) + '" width="' + p.w + '" height="' + p.h + '"><i class="cm cm--tl"></i><i class="cm cm--tr"></i><i class="cm cm--bl"></i><i class="cm cm--br"></i></button>'
+               : '<div class="sheet__plate"><span class="card__nophoto">' + ico('box') + '<small>' + esc(T.no_photo) + '</small></span></div>') +
           (p.sp && p.sp.length ? '<div class="sheet__specs"><h3>' + esc(T.specs) + '</h3>' + p.sp.map(s => '<button type="button" data-zoom="' + esc(ROOT + s) + '" aria-label="' + esc(T.specs) + '"><img src="' + esc(ROOT + s) + '" alt="" loading="lazy"></button>').join('') + '</div>' : '') +
         '</div>' +
         '<div class="sheet__info">' +
-          '<nav class="sheet__where"><a href="#" data-to-top>' + esc(nm(RD.name)) + '</a>' + (g.s ? '<span aria-hidden="true">/</span><a href="#g-' + esc(g.s) + '" data-to-group="' + esc(g.s) + '">' + esc(nm(g.n)) + '</a>' : '') + '</nav>' +
+          (here(r) ? '<nav class="sheet__where"><a href="#" data-to-top>' + esc(nm(R.name)) + '</a>' + (g.s ? '<span aria-hidden="true">/</span><a href="#g-' + esc(g.s) + '" data-to-group="' + esc(g.s) + '">' + esc(nm(g.n)) + '</a>' : '') + '</nav>'
+                   : '<nav class="sheet__where"><a href="' + esc(rangeUrl) + '">' + esc(nm(R.name)) + '</a>' + (g.s ? '<span aria-hidden="true">/</span><a href="' + esc(rangeUrl + '#g-' + g.s) + '">' + esc(nm(g.n)) + '</a>' : '') + '</nav>') +
           '<h2 class="sheet__name" id="sheetName"><bdi>' + esc(name) + '</bdi></h2>' +
           (alt ? '<p class="sheet__alt" lang="' + (AR ? 'en' : 'ar') + '"><bdi>' + esc(alt) + '</bdi></p>' : '') +
           '<p class="sheet__count">' + esc(count(p.z.length, 'one_size', 'n_sizes')) + '</p>' +
@@ -541,25 +523,25 @@
           '</div>' +
         '</div>' +
         (more.length ? '<div class="sheet__more"><h3>' + esc(fill(T.more_in, { g: nm(g.n) })) + '</h3><div class="more">' + more.map(s => {
-          const m = RD.items[s];
-          return '<a href="#p=' + esc(s) + '"><span class="more__win">' + (m.i ? '<img src="' + esc(ROOT + m.i) + '" alt="" loading="lazy">' : '') + '</span><span><bdi>' + esc(nm(m.n)) + '</bdi></span></a>';
+          const m = R.items[s];
+          return '<a href="' + esc(hashFor(r, s)) + '" data-key="' + esc(keyOf(r, s)) + '"><span class="more__win">' + (m.i ? '<img src="' + esc(ROOT + m.i) + '" alt="" loading="lazy">' : '') + '</span><span><bdi>' + esc(nm(m.n)) + '</bdi></span></a>';
         }).join('') + '</div></div>' : '') +
       '</article>';
   }
   function syncSheetRows() {
     $$('.sizes tr[data-row]', sheet).forEach(tr => {
-      const l = findLine(lineId(RD.id, sheetSlug, +tr.getAttribute('data-row'))), btn = tr.querySelector('[data-add]'), input = tr.querySelector('input');
+      const l = findLine(lineId(sheetR, sheetSlug, +tr.getAttribute('data-row'))), btn = tr.querySelector('[data-add]'), input = tr.querySelector('input');
       tr.classList.toggle('is-in', !!l);
       btn.querySelector('span').textContent = l ? T.added : T.add;
       btn.title = l ? T.remove : T.add_to_list;
       if (l && d.activeElement !== input) input.value = l.q;
     });
   }
-  function openSheet(slug, pushed) {
-    if (!RD || !sheet || !RD.items[slug]) return;
+  function openSheet(r, slug, pushed) {
+    if (!sheet || !prodOf(r, slug)) return;
     const was = !!sheetSlug;
     if (!was) sheetLast = d.activeElement;
-    renderSheet(slug);
+    renderSheet(r, slug);
     const box = $('.sheet__box', sheet);
     if (was) box.classList.add('is-swap');
     else {
@@ -586,47 +568,50 @@
     else { history.replaceState(null, '', location.pathname + location.search); runAfter(); }
     sheetPushed = false;
   }
-  function swapTo(s) { if (s && RD.items[s]) { history.replaceState(null, '', '#p=' + s); openSheet(s); } }
+  function swapTo(k) {
+    const rs = parseKey(k, sheetR);
+    if (prodOf(rs[0], rs[1])) { history.replaceState(null, '', hashFor(rs[0], rs[1])); openSheet(rs[0], rs[1]); }
+  }
   function toggleRow(tr) {
-    const p = RD.items[sheetSlug], i = +tr.getAttribute('data-row'), id = lineId(RD.id, sheetSlug, i), s = sheetSlug;
+    const r = sheetR, p = prodOf(r, sheetSlug), i = +tr.getAttribute('data-row'), id = lineId(r, sheetSlug, i), s = sheetSlug;
     if (findLine(id)) {
       const was = findLine(id);
       removeLine(id);
       toast(T.removed, T.undo, () => { if (!findLine(id)) { list.push(was); saveList(true); } });
     } else {
-      addLine(RD.id, s, p, i, readQty(tr.querySelector('input')));
+      addLine(r, s, p, i, readQty(tr.querySelector('input')));
       toast(T.added_toast, T.open_list, openDrawer);
     }
   }
-  if (sheet && RD) {
+  if (sheet) {
     sheet.addEventListener('click', e => {
       const t = e.target;
       if (t.closest('[data-close-sheet]')) { closeSheet(); return; }
       const go = t.closest('[data-go]');
       if (go) { swapTo(go.getAttribute('data-go')); return; }
-      const more = t.closest('a[href^="#p="]');
-      if (more) { e.preventDefault(); swapTo(more.getAttribute('href').slice(3)); return; }
+      const more = t.closest('a[data-key]');
+      if (more) { e.preventDefault(); swapTo(more.getAttribute('data-key')); return; }
       const tg = t.closest('[data-to-group]');
       if (tg) { e.preventDefault(); const s = tg.getAttribute('data-to-group'); afterClose = () => goGroup(s); closeSheet(); return; }
-      if (t.closest('[data-to-top]')) { e.preventDefault(); afterClose = () => window.scrollTo({ top: 0, behavior: smooth() }); closeSheet(); return; }
+      if (t.closest('[data-to-top]')) { e.preventDefault(); afterClose = () => scrollToY(0); closeSheet(); return; }
       const z = t.closest('[data-zoom]');
       if (z) { openLightbox(z.getAttribute('data-zoom')); return; }
       const st = t.closest('[data-step]');
       if (st) {
-        const input = step(st), tr = st.closest('tr'), id = lineId(RD.id, sheetSlug, +tr.getAttribute('data-row'));
+        const input = step(st), tr = st.closest('tr'), id = lineId(sheetR, sheetSlug, +tr.getAttribute('data-row'));
         if (findLine(id)) setQty(id, +input.value);
         return;
       }
       const add = t.closest('[data-add]');
       if (add) { toggleRow(add.closest('tr')); return; }
       if (t.closest('[data-copy-link]')) { copyText(location.href, T.link_copied); return; }
-      if (t.closest('[data-share]')) { navigator.share({ title: nm(RD.items[sheetSlug].n), url: location.href }).catch(() => {}); }
+      if (t.closest('[data-share]')) { navigator.share({ title: nm(prodOf(sheetR, sheetSlug).n), url: location.href }).catch(() => {}); }
     });
     sheet.addEventListener('change', e => {
       const input = e.target.closest('.stepper input'), tr = e.target.closest('tr[data-row]');
       if (!input || !tr) return;
       input.value = readQty(input);
-      const id = lineId(RD.id, sheetSlug, +tr.getAttribute('data-row'));
+      const id = lineId(sheetR, sheetSlug, +tr.getAttribute('data-row'));
       if (findLine(id)) setQty(id, +input.value);
     });
     sheet.addEventListener('keydown', e => {
@@ -647,10 +632,11 @@
       });
     }
   }
+  const hashKey = () => { const m = /^#p=((?:[\w-]+\/)?[\w-]+)$/.exec(location.hash); return m ? parseKey(m[1]) : null; };
   addEventListener('hashchange', () => {
-    const m = /^#p=([\w-]+)$/.exec(location.hash);
-    if (backPending) { backPending = false; if (!m) { runAfter(); return; } }
-    if (m && RD && RD.items[m[1]]) { if (m[1] !== sheetSlug) openSheet(m[1], true); }
+    const k = hashKey();
+    if (backPending) { backPending = false; if (!k) { runAfter(); return; } }
+    if (k && prodOf(k[0], k[1])) { if (k[1] !== sheetSlug || k[0] !== sheetR) openSheet(k[0], k[1], true); }
     else if (sheetSlug) closeSheet(true);
   });
 
@@ -693,6 +679,20 @@
         });
         G.forEach(g => { g.h = norm(g.n.en + ' ' + (g.n.ar || '')); });
         R.forEach(r => { r.h = norm(r.n.en + ' ' + (r.n.ar || '')); });
+        R.forEach(r => {
+          if (STORE[r.id]) return;
+          const gs = G.filter(g => g.r === r);
+          STORE[r.id] = { id: r.id, name: r.n, groups: gs.map(g => ({ s: g.s, n: g.n })), order: [], items: {} };
+          r.gs = gs;
+        });
+        j.p.forEach((p, k) => {
+          const pr = P[k], R0 = STORE[pr.g.r.id];
+          pr.r = pr.g.r.id;
+          if (R0.items[pr.s] || !pr.g.r.gs) return;
+          R0.order.push(pr.s);
+          R0.items[pr.s] = { n: pr.n, i: pr.i, w: (p[6] || [])[0] || 0, h: (p[6] || [])[1] || 0, sp: p[7] || [], g: pr.g.r.gs.indexOf(pr.g), z: pr.z,
+                             hn: pr.hn, hc: pr.hc, hz: pr.hz, hg: pr.hg };
+        });
         IDX = { R: R, G: G, P: P };
         return IDX;
       }).catch(e => { idxLoading = null; throw e; });
@@ -750,7 +750,7 @@
     pq.removeAttribute('aria-activedescendant');
     if (!toks.length) {
       pres.innerHTML = hintHTML + (IDX ? '<p class="pr__h"><span>' + esc(T.res_ranges) + '</span><span>' + IDX.R.length + '</span></p>' + IDX.R.map((r, i) =>
-        '<a class="pr pr--r" role="option" id="pr' + i + '" href="' + esc(rangeHref(r)) + '"><span class="pr__win">' + ico('dome') + '</span><span><span class="pr__n">' + esc(nm(r.n)) +
+        '<a class="pr pr--r" role="option" id="pr' + i + '" href="' + esc(rangeHref(r)) + '"><span class="pr__win">' + ico('box') + '</span><span><span class="pr__n">' + esc(nm(r.n)) +
         '</span><span class="pr__w">' + esc(count(r.c, 'one_product', 'n_products')) + '</span></span><span class="pr__go">' + ico('arrow') + '</span></a>').join('') : '');
       return;
     }
@@ -767,7 +767,7 @@
     if (ps.length) {
       out += '<p class="pr__h"><span>' + esc(T.res_products) + '</span><span>' + (scored.length > ps.length ? ps.length + ' / ' + scored.length : scored.length) + '</span></p>';
       out += ps.map(p => '<a class="pr" role="option" id="pr' + (n++) + '" href="' + esc(rangeHref(p.g.r) + '#p=' + p.s) + '" data-r="' + esc(p.g.r.id) + '" data-p="' + esc(p.s) + '">' +
-        '<span class="pr__win">' + (p.i ? '<img src="' + esc(ROOT + p.i) + '" alt="" loading="lazy">' : ico('dome')) + '</span>' +
+        '<span class="pr__win">' + (p.i ? '<img src="' + esc(ROOT + p.i) + '" alt="" loading="lazy">' : ico('box')) + '</span>' +
         '<span><span class="pr__n"><bdi>' + hl(nm(p.n), toks) + '</bdi></span><span class="pr__w">' + esc(nm(p.g.r.n)) + ' · ' + esc(nm(p.g.n)) + '</span><span class="pr__z">' + sizeLine(p, toks) + '</span></span>' +
         '<span class="pr__go">' + ico('arrow') + '</span></a>').join('');
     }
@@ -779,7 +779,7 @@
     }
     if (rs.length) {
       out += '<p class="pr__h"><span>' + esc(T.res_ranges) + '</span><span>' + rs.length + '</span></p>';
-      out += rs.map(r => '<a class="pr pr--r" role="option" id="pr' + (n++) + '" href="' + esc(rangeHref(r)) + '"><span class="pr__win">' + ico('dome') + '</span>' +
+      out += rs.map(r => '<a class="pr pr--r" role="option" id="pr' + (n++) + '" href="' + esc(rangeHref(r)) + '"><span class="pr__win">' + ico('box') + '</span>' +
         '<span><span class="pr__n">' + hl(nm(r.n), toks) + '</span><span class="pr__w">' + esc(count(r.c, 'one_product', 'n_products')) + '</span></span><span class="pr__go">' + ico('arrow') + '</span></a>').join('');
     }
     pres.innerHTML = out;
@@ -807,37 +807,174 @@
     const a = e.target.closest('.pr');
     if (!a) return;
     /* a product or group on this same page opens here, without loading the page again */
-    const r = a.getAttribute('data-r');
-    if (RD && r === RD.id) {
+    const r = a.getAttribute('data-r'), s = a.getAttribute('data-p'), g = a.getAttribute('data-g');
+    if ((s && prodOf(r, s)) || (g && here(r))) {
       e.preventDefault();
       closePalette();
-      const s = a.getAttribute('data-p'), g = a.getAttribute('data-g');
-      if (s) { if (sheetSlug) swapTo(s); else location.hash = 'p=' + s; }
-      else if (g) goGroup(g);
+      if (s) { if (sheetSlug) swapTo(keyOf(r, s)); else location.hash = hashFor(r, s).slice(1); }
+      else goGroup(g);
       return;
     }
     closePalette();
   });
 
+  /* ---------- the home page's catalogue: every product, filters on the left ---------- */
+  const PER = 24;
+  function cardHTML(p, i) {
+    const r = p.g.r.id, k = keyOf(r, p.s), href = esc(hashFor(r, p.s)), alt = altName(p.n);
+    const sizes = p.z.map(z => (AR ? z[2] || z[1] : z[1])).filter(Boolean), codes = p.z.map(z => z[0]).filter(Boolean);
+    const bdi = x => '<bdi>' + esc(x) + '</bdi>';
+    let meta = '';
+    if (p.z.length === 1) meta = sizes[0] ? bdi(sizes[0]) : '';
+    else {
+      meta = esc(fill(T.n_sizes, { n: p.z.length }));
+      if (new Set(sizes).size > 1) meta += ' · ' + bdi(sizes[0]) + ' – ' + bdi(sizes[sizes.length - 1]);
+      else if (sizes.length === 1) meta += ' · ' + bdi(sizes[0]);
+    }
+    const code = codes.length ? (codes.length === 1 ? codes[0] : codes[0] + ' – ' + codes[codes.length - 1]) : '';
+    return '<article class="card is-new" data-p="' + esc(p.s) + '" data-r="' + esc(r) + '" style="--d:' + (Math.min(i % PER, 12) * 0.035).toFixed(3) + 's">' +
+      '<a class="card__link" href="' + href + '"><span class="card__win">' +
+      (p.i ? '<img src="' + esc(ROOT + p.i) + '" alt="" loading="lazy" decoding="async">' : '<span class="card__nophoto">' + ico('box') + '<small>' + esc(T.no_photo) + '</small></span>') +
+      '</span><span class="card__body"><span class="card__tag mono">' + esc(nm(p.g.r.n)) + ' · ' + esc(nm(p.g.n)) + '</span>' +
+      '<span class="card__name"><bdi>' + esc(nm(p.n)) + '</bdi></span>' + (alt ? '<span class="card__alt" lang="' + (AR ? 'en' : 'ar') + '"><bdi>' + esc(alt) + '</bdi></span>' : '') +
+      (meta ? '<span class="card__meta mono">' + meta + '</span>' : '') + (code ? '<span class="card__code mono" dir="ltr">' + esc(code) + '</span>' : '') + '</span></a>' +
+      '<div class="card__foot"><button class="card__add" type="button" data-quick="' + esc(k) + '">' + ico('plus') + ico('check') +
+      '<span class="card__addt">' + esc(T.add_short) + '</span><span class="card__inl">' + esc(T.in_list) + '</span></button>' +
+      '<a class="card__more" href="' + href + '" aria-label="' + esc(T.open_product + ': ' + nm(p.n)) + '">' + esc(T.open_product) + ico('arrow') + '</a></div></article>';
+  }
+  let CAT = null;
+  const cgrid = $('#cgrid');
+  if (cgrid) {
+    const st = { r: '', gs: [], q: '', sort: 'cat', n: PER, view: [] };
+    const cq = $('#cq'), csort = $('#csort'), cmore = $('#cmore'), ccount = $('#ccount'), cnone = $('#cnone');
+    const side = $('#catGroups'), sideH = $('#catSideH'), chips = $('#catChips'), rail = $('#rail'), help = $('.cat__help');
+    const promo = () => '<div class="card card--promo"><b>' + esc(T.cant_find_h) + '</b><p>' + esc(T.cant_find) + '</p>' +
+      '<a class="btn btn--primary btn--sm" href="tel:' + esc(CFG.contact.tel) + '">' + ico('phone') + '<span dir="ltr">' + esc(CFG.contact.phone) + '</span></a>' +
+      '<a class="btn btn--ghost btn--sm" href="mailto:' + esc(CFG.contact.email) + '">' + ico('mail') + esc(T.email) + '</a></div>';
+    function compute() {
+      const toks = tokens(st.q);
+      let v = IDX.P.filter(p => (!st.r || p.g.r.id === st.r) && (!st.gs.length || st.gs.indexOf(p.g.s) >= 0));
+      if (toks.length) {
+        const sc = [];
+        v.forEach(p => { const x = score(p, toks); if (x) sc.push([x, p]); });
+        sc.sort((a, b) => b[0] - a[0] || a[1].k - b[1].k);
+        v = sc.map(x => x[1]);
+      }
+      if (st.sort === 'az') v = v.slice().sort((a, b) => nm(a.n).localeCompare(nm(b.n), CFG.lang));
+      else if (st.sort === 'sizes') v = v.slice().sort((a, b) => b.z.length - a.z.length || a.k - b.k);
+      st.view = v;
+    }
+    function cards(from, to) {
+      let h = '';
+      st.view.slice(from, to).forEach((p, i) => { h += cardHTML(p, i); if (from + i === 6) h += promo(); });
+      return h;
+    }
+    function counts() {
+      const shownN = Math.min(st.n, st.view.length);
+      ccount.textContent = fill(T.showing, { a: shownN, b: st.view.length });
+      cmore.hidden = st.view.length <= st.n;
+      cnone.hidden = st.view.length > 0;
+    }
+    function render() {
+      st.n = PER;
+      compute();
+      cgrid.innerHTML = cards(0, st.n);
+      counts();
+      syncCounts();
+    }
+    function renderSide() {
+      const R = IDX.R, cur = st.r && R.filter(r => r.id === st.r)[0];
+      if (!cur) {
+        sideH.textContent = T.all_ranges;
+        side.innerHTML = R.map(r => '<button type="button" class="sg" data-range="' + esc(r.id) + '"><span>' + esc(nm(r.n)) + '</span><b class="mono">' + r.c + '</b></button>').join('');
+        chips.hidden = true; chips.innerHTML = '';
+        return;
+      }
+      const gs = IDX.G.filter(g => g.r === cur);
+      const gbtn = cls => g => '<button type="button" class="' + cls + (st.gs.indexOf(g.s) >= 0 ? ' is-on' : '') + '" data-group="' + esc(g.s) + '" aria-pressed="' + (st.gs.indexOf(g.s) >= 0) + '"><i aria-hidden="true"></i><span>' + esc(nm(g.n)) + '</span><b class="mono">' + g.c + '</b></button>';
+      sideH.textContent = nm(cur.n);
+      side.innerHTML = '<button type="button" class="sg sg--back" data-range="">' + ico('arrow', 'ico--back') + '<span>' + esc(T.all_ranges) + '</span></button>' + gs.map(gbtn('sg sg--g')).join('');
+      chips.hidden = gs.length < 2;
+      chips.innerHTML = gs.length < 2 ? '' : gs.map(gbtn('cchip')).join('');
+    }
+    function syncRail() {
+      $$('.rail__b', rail).forEach(b => {
+        const on = b.getAttribute('data-range') === st.r;
+        b.classList.toggle('is-on', on);
+        if (on && rail.scrollWidth > rail.clientWidth + 4) {
+          const br = b.getBoundingClientRect(), rr = rail.getBoundingClientRect();
+          rail.scrollBy({ left: (br.left + br.width / 2) - (rr.left + rr.width / 2), behavior: smooth() });
+        }
+      });
+    }
+    function toTop() {
+      const lay = $('.cat__layout'), stick = bar.classList.contains('is-hidden') ? 0 : bar.offsetHeight;
+      const top = lay.getBoundingClientRect().top + window.scrollY - stick - 16;
+      if (window.scrollY > top + 8) scrollToY(top);
+    }
+    function setRange(id) {
+      if (!IDX) return;
+      st.r = id; st.gs = [];
+      renderSide(); syncRail(); render(); toTop();
+    }
+    function toggleGroup(g) {
+      const at = st.gs.indexOf(g);
+      if (at >= 0) st.gs.splice(at, 1); else st.gs.push(g);
+      renderSide(); render(); toTop();
+    }
+    const onPick = e => {
+      const b = e.target.closest('[data-range],[data-group]');
+      if (!b || !IDX) return;
+      if (b.hasAttribute('data-range')) setRange(b.getAttribute('data-range'));
+      else toggleGroup(b.getAttribute('data-group'));
+    };
+    [rail, side, chips].forEach(el => el.addEventListener('click', onPick));
+    let qt = 0;
+    cq.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { st.q = cq.value; if (IDX) { render(); } }, 140); });
+    cq.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); cq.blur(); toTop(); } if (e.key === 'Escape' && cq.value) { e.stopPropagation(); cq.value = ''; st.q = ''; render(); } });
+    csort.addEventListener('change', () => { st.sort = csort.value; if (IDX) render(); });
+    cmore.addEventListener('click', () => {
+      const from = st.n;
+      st.n += PER;
+      cgrid.insertAdjacentHTML('beforeend', cards(from, st.n));
+      counts(); syncCounts();
+      const first = cgrid.querySelectorAll('.card[data-p]')[from];
+      if (first) focus(first.querySelector('a'));
+    });
+    CAT = {
+      keys: () => st.view.map(p => keyOf(p.g.r.id, p.s)),
+      clear: () => { st.r = ''; st.gs = []; st.q = ''; st.sort = 'cat'; cq.value = ''; csort.value = 'cat'; renderSide(); syncRail(); render(); toTop(); }
+    };
+    if (help) help.hidden = false;
+    const start = () => loadIndex().then(() => { st.q = cq.value; st.sort = csort.value; renderSide(); render(); html.classList.add('cat-ready'); },
+      () => { ccount.textContent = T.offline; });
+    if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 400);
+  }
+
   /* ---------- clicks and keys anywhere ---------- */
   d.addEventListener('click', e => {
     const t = e.target;
     if (!t.closest) return;
-    if (t.closest('[data-theme-toggle]')) { setTheme(html.getAttribute('data-theme') !== 'dark'); return; }
     if (t.closest('[data-open-search]')) { e.preventDefault(); openPalette(t.closest('#rnone') && rfind ? rfind.value : null); return; }
+    const tryq = t.closest('[data-try]');
+    if (tryq) { openPalette(tryq.getAttribute('data-try')); return; }
     if (t.closest('[data-close-search]')) { closePalette(); return; }
     if (t.closest('[data-open-list]')) { openDrawer(); return; }
     if (t.closest('[data-close-list]')) { closeDrawer(); return; }
     const snd = t.closest('[data-send]');
     if (snd) { send(snd.getAttribute('data-send')); return; }
     const quick = t.closest('[data-quick]');
-    if (quick && RD) {
+    if (quick) {
       e.preventDefault();
-      const s = quick.getAttribute('data-quick'), p = RD.items[s];
+      const card = quick.closest('[data-r]'), rs = parseKey(quick.getAttribute('data-quick'), card && card.getAttribute('data-r')), p = prodOf(rs[0], rs[1]);
       if (!p) return;
-      if (p.z.length === 1 && !findLine(lineId(RD.id, s, 0))) { addLine(RD.id, s, p, 0, 1); toast(T.added_toast, T.open_list, openDrawer); }
-      else location.hash = 'p=' + s;
+      if (p.z.length === 1 && !findLine(lineId(rs[0], rs[1], 0))) { addLine(rs[0], rs[1], p, 0, 1); toast(T.added_toast, T.open_list, openDrawer); }
+      else if (p.z.length === 1) openDrawer();
+      else location.hash = hashFor(rs[0], rs[1]).slice(1);
+      return;
     }
+    const clr = t.closest('[data-clear-cat]');
+    if (clr && CAT) { CAT.clear(); return; }
   });
   function topModal() {
     if (!lightbox.hidden) return lightbox;
@@ -882,8 +1019,15 @@
   addEventListener('storage', e => { if (e.key === LIST) { list = clean(get(LIST)); syncCounts(); if (drawerOpen()) renderDrawer(); } });
   addEventListener('pageshow', e => { if (e.persisted) { list = clean(get(LIST)); syncCounts(); if (drawerOpen()) renderDrawer(); } });
 
+  window.BAM = { scrollToY: scrollToY, showBar: showBar, loadIndex: () => loadIndex() };
+
   /* ---------- start ---------- */
   syncCounts();
-  if (RD && /^#p=[\w-]+$/.test(location.hash)) openSheet(location.hash.slice(3), false);
+  (function () {
+    const k = hashKey();
+    if (!k) return;
+    if (prodOf(k[0], k[1])) openSheet(k[0], k[1], false);
+    else if (!RD || k[0] !== RD.id) loadIndex().then(() => { const k2 = hashKey(); if (k2 && prodOf(k2[0], k2[1]) && !sheetSlug) openSheet(k2[0], k2[1], false); }, () => {});
+  })();
   onScroll();
 })();
