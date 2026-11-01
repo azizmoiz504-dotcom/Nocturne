@@ -128,7 +128,7 @@ function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = fal
       '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(CFG.whatsappDisplay) + '">' + WA_SVG + '<span>WhatsApp</span></a>' +
     '</div></header>\n<main>' + body + '</main>\n' +
     '<footer class="foot"><div class="wrap foot__in">' +
-      '<div><b>Fakhri Tools &amp; Workshop Materials Trading LLC</b><span>B2B trade counter · Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai</span><span>Landmark: Ajyad Traditional Kitchen, at the start of our row</span></div>' +
+      '<div><b>Fakhri Tools &amp; Workshop Materials Trading LLC</b><span>B2B trade counter · Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai</span><span>Landmark: next to Ajyad Traditional Kitchen, on its right</span></div>' +
       '<div><span>Monday to Saturday, 7:30am to 6:00pm · Sunday closed</span><a href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a><a href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener">WhatsApp ' + esc(CFG.whatsappDisplay) + '</a></div>' +
     '</div></footer>\n</body>\n</html>\n';
 }
