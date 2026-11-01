@@ -7,9 +7,9 @@
    (tools/apply-edits.js runs it automatically.) */
 const vm = require('vm'), fs = require('fs'), path = require('path'), { spawnSync } = require('child_process');
 
-// Keep "noindex" until the site has its own domain; then set INDEX = true and SITE to the domain.
-const INDEX = false;
-const SITE = 'https://azizmoiz504-dotcom.github.io/Nocturne/';
+// The site lives on its own domain (ftoolsuae.com) and is open to search engines.
+const INDEX = true;
+const SITE = 'https://ftoolsuae.com/';
 
 const ctx = { window: {} };
 vm.runInNewContext(fs.readFileSync('js/config.js', 'utf8'), ctx);
