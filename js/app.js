@@ -4,7 +4,7 @@
    Size, specs & ratings and material choices work the same way as on the main site (js/choices.js and the size rules below). */
 (function () {
   'use strict';
-  const LIVE = 'https://azizmoiz504-dotcom.github.io/Nocturne/';
+  const LIVE = 'https://ftoolsuae.com/';
   const WA = '971522767034';
   const EMAIL = 'dxbsales@ftools.com';
   const OPEN = { days: [1, 2, 3, 4, 5, 6], from: 7.5, to: 18 };   // Monday to Saturday, 7:30am to 6:00pm, Dubai time
