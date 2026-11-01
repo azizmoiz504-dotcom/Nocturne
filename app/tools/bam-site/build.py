@@ -28,10 +28,10 @@ CONTACT = {
     'whatsapp': '', 'whatsapp_show': '',
     'maps': 'https://www.google.com/maps/search/?api=1&query=' + quote('Bait Al Maqdis Building Materials Trading, Jurf Industrial Zone 1, Ajman'),
 }
-URL = 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis/'   # where it is published: only for the picture shown when a link is shared
+URL = 'https://ftoolsuae.com/bait-al-maqdis/'   # where it is published: only for the picture shown when a link is shared
 DESIGNS = {   # where each look keeps its pages and files, where it is built and where it is published
     'v1': {'dir': '.', 'out': 'bait-al-maqdis', 'url': URL},
-    'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis-new/'},
+    'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://ftoolsuae.com/bait-al-maqdis-new/'},
     'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': URL},     # the hardware-store look (Nov 2026), published at bait-al-maqdis/
 }
 WALL_CELL, WALL_COLS = 96, 25   # the home page's wall of every product: one small square per product in one picture

@@ -66,7 +66,8 @@ import java.util.regex.Pattern;
 public class CatalogueActivity extends Activity {
     static final String HOST = "app.fakhri.local";
     static final String BASE = "https://" + HOST + "/";
-    static final String LIVE = "https://azizmoiz504-dotcom.github.io/Nocturne/";
+    // the website: its own domain first, then the old GitHub address (still forwards there) in case the domain is down
+    static final String[] LIVE = {"https://ftoolsuae.com/", "https://azizmoiz504-dotcom.github.io/Nocturne/"};
     static final Pattern IMG = Pattern.compile("'([A-Za-z0-9._-]+/[^'\"\\s]+?\\.(?:jpg|jpeg|png|webp|JPG|JPEG|PNG))'");
 
     WebView web;
@@ -247,7 +248,7 @@ public class CatalogueActivity extends Activity {
                 return resp(mime, h, getAssets().open("www/" + rel));
             } catch (IOException missing) { /* not packed in the app */ }
             if (rel.startsWith("p/")) {
-                byte[] b = download(LIVE + "assets/products/" + rel.substring(2), 8000);
+                byte[] b = live("assets/products/" + rel.substring(2), 8000);
                 if (b != null && b.length > 200) {
                     save(f, b);
                     return resp(mime, h, new ByteArrayInputStream(b));
@@ -303,7 +304,7 @@ public class CatalogueActivity extends Activity {
             public void run() {
                 String result = "same";
                 try {
-                    byte[] b = download(LIVE + "js/data.js?app=" + System.currentTimeMillis(), 15000);
+                    byte[] b = live("js/data.js?app=" + System.currentTimeMillis(), 15000);
                     String fresh = b == null ? null : new String(b, "UTF-8");
                     if (fresh == null || !fresh.contains("window.FT_CATS") || fresh.length() < 5000 || !fresh.trim().endsWith("];")) {
                         result = "failed";
@@ -319,7 +320,7 @@ public class CatalogueActivity extends Activity {
                             int failed = 0;
                             for (String p : need) {
                                 if (bundled.contains(p) || new File(root, "p/" + p).isFile()) continue;
-                                byte[] img = download(LIVE + "assets/products/" + p, 15000);
+                                byte[] img = live("assets/products/" + p, 15000);
                                 if (img != null && img.length > 200) save(new File(root, "p/" + p), img);
                                 else failed++;
                             }
@@ -350,6 +351,14 @@ public class CatalogueActivity extends Activity {
             String txt = new String(readAll(getAssets().open("www/photos.txt")), "UTF-8");
             for (String line : txt.split("\n")) if (line.trim().length() > 0) bundled.add(line.trim());
         } catch (IOException e) { /* every photo will be checked on disk instead */ }
+    }
+
+    static byte[] live(String path, int timeout) {
+        for (String site : LIVE) {
+            byte[] b = download(site + path, timeout);
+            if (b != null) return b;
+        }
+        return null;
     }
 
     static byte[] download(String url, int timeout) {
