@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Builds the Bait Al Maqdis products website, with no prices, from the private catalogue in app/bam/.
 
-    python3 app/tools/bam-site/build.py [--bam DIR] [--out DIR] [--design v1|v2]
+    python3 app/tools/bam-site/build.py [--bam DIR] [--out DIR] [--design v1|v2|v3]
 
-Writes app/build/bait-al-maqdis/ (default): English pages, Arabic pages in ar/, photos, the printed catalogues
-and a search list. --design v2 builds the new look (v2/templates, v2/static) into app/build/bait-al-maqdis-new/. Every link is relative, so the folder works at any address; it is published at
-<website>/bait-al-maqdis/.
+Writes app/build/bait-al-maqdis-v3/ (default, the hardware-store look in v3/): English pages, Arabic pages in ar/,
+photos, the printed catalogues and a search list. Every link is relative, so the folder works at any address; it is
+published at <website>/bait-al-maqdis/. The older looks stay buildable: --design v1 (app/build/bait-al-maqdis/)
+and --design v2 (app/build/bait-al-maqdis-new/).
 Prices never leave this script: a product's lines are read as [part no., size] only (public_rows), and
 check_no_prices() looks through everything written before the build counts as done.
 """
@@ -31,6 +32,7 @@ URL = 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis/'   # where 
 DESIGNS = {   # where each look keeps its pages and files, where it is built and where it is published
     'v1': {'dir': '.', 'out': 'bait-al-maqdis', 'url': URL},
     'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://azizmoiz504-dotcom.github.io/Nocturne/bait-al-maqdis-new/'},
+    'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': URL},     # the hardware-store look (Nov 2026), published at bait-al-maqdis/
 }
 WALL_CELL, WALL_COLS = 96, 25   # the home page's wall of every product: one small square per product in one picture
 BIG = 100            # a range with at least this many products gets a big tile on the home page
@@ -339,6 +341,64 @@ class Site:
             og.paste(ImageChops.multiply(tile, white), (cx, cy))
         og.save(self.path('assets/og.jpg'), quality=86)
 
+    # ---------- the hardware-store look (v3) ----------
+    def v3_extras(self):
+        for r in self.ranges:
+            clean = [p for p in r['items'] if p['img'] and self.is_clean(p['img'])]
+            pool = [p for p in clean if p['square']] or clean
+            r['feature'] = sorted(pool, key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())[:8]
+            r['tag'] = (r['feature'] or [p for p in r['items'] if p['img']] or [None])[0]
+        # "Every fixing": each part of the 3D assembly names the group that stocks it (only groups they have)
+        def grp(rid, name):
+            rng = next((x for x in self.ranges if x['id'] == rid), None)
+            g = rng and next((g for g in rng['groups'] if g['name']['en'].lower() == name.lower()), None)
+            return {'range': rid, 'g': g['slug'], 'name': g['name'], 'count': len(g['items']), 'rname': rng['name']} if g else None
+        parts = [('bolt', 'nails-fasteners', 'Threaded Rod & Bolts'), ('washer', 'nails-fasteners', 'Nuts & Washers'), ('nut', 'nails-fasteners', 'Nuts & Washers'),
+                 ('plug', 'nails-fasteners', 'Anchors & Wall Plugs'), ('nail', 'nails-fasteners', 'Nails'), ('spanner', 'kapusi', 'Spanners & Wrenches')]
+        fixings = []
+        for pid, rid, gname in parts:
+            g = grp(rid, gname)
+            if g: fixings.append(dict(g, id=pid))
+        # three real catalogue lines for the example list (names, sizes and part numbers only)
+        demo = []
+        for rid, want, q in (('kapusi', 'K-0026', 6), ('castor', '', 24), ('sgs', '', 12), ('nails-fasteners', '', 200)):
+            rng = next((x for x in self.ranges if x['id'] == rid), None)
+            for p in (rng['items'] if rng else []):
+                hit = next(((c, z) for c, z in p['rows'] if z and (c == want or not want)), None)
+                if hit:
+                    demo.append({'name': p['name'], 'size': {'en': hit[1], 'ar': self.ar_size(hit[1])}, 'pn': hit[0] or '', 'q': q, 'img': p['img']}); break
+        big = [r for r in self.ranges if r['big']]
+        return {'fixings': fixings, 'demo': demo, 'big': big}
+
+    def og_v3(self, logo):
+        """the picture shown when a link is shared: dark steel, an orange bar, their logo and some of their products"""
+        from PIL import ImageDraw, ImageFont, ImageChops
+        W, H = 1200, 630
+        og = Image.new('RGB', (W, H), (12, 13, 15))
+        dr = ImageDraw.Draw(og)
+        for x in range(-H, W, 44):      # hazard stripes along the foot
+            dr.polygon([(x, H), (x + 22, H), (x + 22 + 26, H - 26), (x + 26, H - 26)], fill=(245, 130, 31))
+        m = logo.copy(); m.thumbnail((260, 150), Image.LANCZOS); og.paste(m, (72, 60), m)
+        f = os.path.join(self.dir, 'static', 'fonts', 'archivo-100-900-latin.woff2')
+        big = ImageFont.truetype(f, 92); big.set_variation_by_axes([900, 62])
+        sm = ImageFont.truetype(f, 24); sm.set_variation_by_axes([500, 100])
+        y = 268
+        for txt, col in (('TOOLS, FIXINGS', (242, 241, 238)), ('& BUILDING', (242, 241, 238)), ('MATERIALS.', (245, 130, 31))):
+            dr.text((72, y), txt, font=big, fill=col); y += 88
+        dr.text((72, 548), '%d products · Jurf Industrial Zone 1, Ajman' % self.stats['products'], font=sm, fill=(154, 158, 166))
+        picks = []
+        for r in self.ranges:
+            pool = sorted((p for p in r['items'] if p['img'] and p['square'] and self.is_clean(p['img'])), key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())
+            picks += pool[:2 if r['big'] else 1]
+        for k, p in enumerate(picks[:9]):
+            cx, cy = 690 + (k % 3) * 160, 60 + (k // 3) * 160
+            tile = Image.new('RGB', (148, 148), (255, 255, 255))
+            with Image.open(os.path.join(self.out, p['img'])) as im:
+                im = im.convert('RGB'); im.thumbnail((124, 124), Image.LANCZOS)
+                tile.paste(im, ((148 - im.width) // 2, (148 - im.height) // 2))
+            og.paste(tile, (cx, cy))
+        og.save(self.path('assets/og.jpg'), quality=86)
+
     # ---------- words ----------
     def summary(self, p, lang):
         rows = p['rows']
@@ -369,7 +429,7 @@ class Site:
         v = self.versions
         v['index'] = hashlib.sha1(index.encode()).hexdigest()[:10]
         self.write('data/index.json', index)
-        extra = self.v2_extras() if self.design == 'v2' else {}
+        extra = self.v2_extras() if self.design == 'v2' else self.v3_extras() if self.design == 'v3' else {}
         for lang in LANGS:
             T = lambda key, **kw: t(lang, key, **kw)
             for r in self.ranges:
@@ -426,17 +486,21 @@ class Site:
             gbase = len(gs)
             for g in r['groups']: gs.append([ri, g['slug'], g['name']['en'], g['name']['ar'], len(g['items'])])
             for p in r['items']:
-                ps.append([p['slug'], gbase + p['g'], p['name']['en'], p['name']['ar'], p['img'], [[c, s, self.ar_size(s) if s else None] for c, s in p['rows']]])
+                ps.append([p['slug'], gbase + p['g'], p['name']['en'], p['name']['ar'], p['img'], [[c, s, self.ar_size(s) if s else None] for c, s in p['rows']],
+                           [p['w'], p['h']], p['specs']])
         return self.js({'r': rs, 'g': gs, 'p': ps})
 
     def assets(self):
         st = os.path.join(self.dir, 'static')
         self.versions = {}
-        for name in ('site.css', 'site.js', 'motion.js'):
+        for name in ('site.css', 'site.js', 'motion.js', 'hw3d.js'):
             src = os.path.join(st, name)
             if not os.path.isfile(src): continue
             shutil.copyfile(src, self.path('assets/' + name))
-            self.versions[name.replace('.', '_') if name == 'motion.js' else name.split('.')[1]] = hashlib.sha1(open(src, 'rb').read()).hexdigest()[:10]
+            self.versions[{'site.css': 'css', 'site.js': 'js'}.get(name, name.replace('.', '_'))] = hashlib.sha1(open(src, 'rb').read()).hexdigest()[:10]
+        if os.path.isdir(os.path.join(st, 'img')):
+            for f in sorted(os.listdir(os.path.join(st, 'img'))):
+                shutil.copyfile(os.path.join(st, 'img', f), self.path('assets/img/' + f))
         if os.path.isdir(os.path.join(st, 'vendor')):
             vh = hashlib.sha1()
             for f in sorted(os.listdir(os.path.join(st, 'vendor'))):
@@ -455,11 +519,13 @@ class Site:
         white = Image.new('RGBA', dome.size, (255, 255, 255, 0)); white.putalpha(dome.getchannel('A'))
         white.save(self.path('assets/mark.png'), optimize=True)
         full = Image.new('RGBA', logo.size, (255, 255, 255, 0)); full.putalpha(a); full.save(self.path('assets/logo.png'), optimize=True)
-        ink = (15, 110, 92) if self.design == 'v1' else (18, 19, 22)
+        ink = (15, 110, 92) if self.design == 'v1' else (245, 130, 31) if self.design == 'v3' else (18, 19, 22)
         for size, bg, rel in ((192, ink, 'assets/icon-192.png'), (512, ink, 'assets/icon-512.png')):
             ic = Image.new('RGB', (size, size), bg); m = white.copy(); m.thumbnail((int(size * .68), int(size * .62)), Image.LANCZOS)
             ic.paste(m, ((size - m.width) // 2, (size - m.height) // 2 + int(size * .02)), m); ic.save(self.path(rel), optimize=True)
-        if self.design == 'v1':
+        if self.design == 'v3':
+            self.og_v3(full)
+        elif self.design == 'v1':
             og = Image.new('RGB', (1200, 630), (42, 36, 27)); m = full.copy(); m.thumbnail((640, 400), Image.LANCZOS)
             og.paste(m, ((1200 - m.width) // 2, (630 - m.height) // 2), m); og.save(self.path('assets/og.jpg'), quality=86)
         else:
@@ -500,8 +566,8 @@ def check_no_prices(out, data):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--bam', default=os.path.join(APP, 'bam'))
-    ap.add_argument('--design', default='v1', choices=sorted(DESIGNS))
-    ap.add_argument('--out', help='default: app/build/bait-al-maqdis/ (v1) or app/build/bait-al-maqdis-new/ (v2)')
+    ap.add_argument('--design', default='v3', choices=sorted(DESIGNS))
+    ap.add_argument('--out', help='default: app/build/bait-al-maqdis-v3/ (v3), bait-al-maqdis/ (v1) or bait-al-maqdis-new/ (v2)')
     ap.add_argument('--url', help='the address it is published at, ending in /')
     a = ap.parse_args()
     out = a.out or os.path.join(APP, 'build', DESIGNS[a.design]['out'])

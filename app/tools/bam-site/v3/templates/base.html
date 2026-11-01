@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<meta name="theme-color" content="#0b0c0e">
+<meta name="color-scheme" content="dark light">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ page_url }}">
+<meta property="og:image" content="{{ site_url }}assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="{{ root }}assets/icon-192.png">
+<link rel="apple-touch-icon" href="{{ root }}assets/icon-192.png">
+<link rel="alternate" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" href="{{ other_url }}">
+<link rel="preload" href="{{ root }}assets/fonts/{{ 'plex-arabic-700-arabic' if lang == 'ar' else 'archivo-100-900-latin' }}.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ root }}assets/fonts/fonts.css?v={{ v.fonts }}">
+<link rel="stylesheet" href="{{ root }}assets/site.css?v={{ v.css }}">
+<script>document.documentElement.className += ' js';</script>
+</head>
+<body class="page-{{ page }}">
+<a class="skip" href="#main">{{ T('skip') }}</a>
+
+<div class="topline mono" aria-hidden="true">
+  <div class="wrap topline__in">
+    <span>{{ T('address1') }} · {{ T('where_short') }}</span>
+    <span class="topline__r"><span dir="ltr">{{ contact.phone }}</span><span>{{ contact.email }}</span><span class="topline__note"><i class="dot"></i>{{ T('footer_note') }}</span></span>
+  </div>
+</div>
+
+<header class="hdr" id="bar">
+  <div class="hdr__pill">
+    <a class="brand" href="{{ home }}" aria-label="{{ T('brand') }}">
+      <span class="brand__logo" aria-hidden="true"></span>
+      <span class="brand__word"><b>{{ T('brand') }}</b><small>{{ T('tagline') }}</small></span>
+    </a>
+    <nav class="nav" aria-label="{{ T('menu') }}">
+      <a href="{{ home }}#ranges">{{ T('nav_ranges') }}</a>
+      <a href="{{ home }}#catalogue">{{ T('sec_cat') }}</a>
+      <a href="{{ home }}#fixings">{{ T('sec_fix') }}</a>
+      <a href="{{ home }}#prices">{{ T('nav_prices') }}</a>
+      <a href="{{ home }}#catalogues">{{ T('nav_catalogues') }}</a>
+      <a href="{{ home }}#visit">{{ T('nav_visit') }}</a>
+    </nav>
+    <div class="tools">
+      <button class="tool tool--search" type="button" data-open-search aria-label="{{ T('search') }}">{{ icon('search') }}<kbd>/</kbd></button>
+      <a class="tool tool--lang" href="{{ other_url }}" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" lang="{{ 'en' if lang == 'ar' else 'ar' }}" data-lang-link title="{{ T('lang_other_name') }}">{{ T('lang_other') }}</a>
+      <a class="tool tool--call" href="tel:{{ contact.tel }}" aria-label="{{ T('call') }} {{ contact.phone }}">{{ icon('phone') }}</a>
+      <button class="tool tool--list" type="button" data-open-list aria-label="{{ T('your_list') }}">{{ icon('list') }}<span class="tool__lbl">{{ T('your_list') }}</span><span class="badge" data-list-count>0</span></button>
+      <button class="tool tool--menu" type="button" data-menu aria-label="{{ T('menu') }}" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="menu" id="menu" hidden>
+  <nav class="menu__in" aria-label="{{ T('menu') }}">
+    <a href="{{ home }}#ranges"><i>01</i><span>{{ T('nav_ranges') }}</span></a>
+    <a href="{{ home }}#catalogue"><i>02</i><span>{{ T('sec_cat') }}</span></a>
+    <a href="{{ home }}#fixings"><i>03</i><span>{{ T('sec_fix') }}</span></a>
+    <a href="{{ home }}#prices"><i>04</i><span>{{ T('nav_prices') }}</span></a>
+    <a href="{{ home }}#catalogues"><i>05</i><span>{{ T('nav_catalogues') }}</span></a>
+    <a href="{{ home }}#visit"><i>06</i><span>{{ T('nav_visit') }}</span></a>
+    <div class="menu__row">
+      <a class="pill" href="{{ other_url }}" data-lang-link lang="{{ 'en' if lang == 'ar' else 'ar' }}">{{ T('lang_other') }}</a>
+      <button class="pill" type="button" data-open-search>{{ icon('search') }}<span>{{ T('search') }}</span></button>
+    </div>
+    <p class="menu__foot"><a href="tel:{{ contact.tel }}" dir="ltr">{{ contact.phone }}</a><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+  </nav>
+</div>
+
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+
+<footer class="foot">
+  <div class="hazard hazard--thin" aria-hidden="true"></div>
+  <div class="wrap foot__top">
+    <div class="foot__about">
+      <span class="foot__logo"><img src="{{ root }}assets/logo.png" alt="{{ T('brand') }}" width="160" height="87" loading="lazy"></span>
+      <p class="foot__trades">{{ T('trades') }}</p>
+      <p class="foot__note mono"><i class="dot"></i>{{ T('footer_note') }}</p>
+    </div>
+    <div class="foot__col foot__col--ranges">
+      <h3 class="mono">{{ T('footer_ranges') }}</h3>
+      <ul>{% for r in ranges %}<li><a href="{{ home }}range/{{ r.id }}/">{{ r.name[lang] }}</a></li>{% endfor %}</ul>
+    </div>
+    <div class="foot__col">
+      <h3 class="mono">{{ T('footer_contact') }}</h3>
+      <address>{{ T('legal') }}<br>{{ T('address1') }}<br>{{ T('address2') }}<br>{{ T('uae') }}</address>
+      <p class="foot__links2"><a href="tel:{{ contact.tel }}" dir="ltr">{{ contact.phone }}</a><a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% if contact.whatsapp %}<a href="https://wa.me/{{ contact.whatsapp }}" dir="ltr">{{ T('whatsapp') }} {{ contact.whatsapp_show }}</a>{% endif %}<a href="{{ contact.maps }}" target="_blank" rel="noopener">{{ T('maps') }} ↗</a></p>
+    </div>
+  </div>
+  <div class="foot__word" aria-hidden="true"><span>{{ T('brand') }}</span></div>
+  <div class="wrap foot__base mono">
+    <span>{{ T('rights', y=year) }}</span>
+    <span class="foot__links"><a href="{{ other_url }}" data-lang-link lang="{{ 'en' if lang == 'ar' else 'ar' }}">{{ T('lang_other') }}</a><a href="#top" data-top>{{ T('top') }} ↑</a></span>
+  </div>
+</footer>
+
+<div class="fabs">
+  <a class="fab fab--call" href="tel:{{ contact.tel }}" aria-label="{{ T('call') }} {{ contact.phone }}">{{ icon('phone') }}</a>
+  <button class="fab fab--list" type="button" data-open-list aria-label="{{ T('your_list') }}">{{ icon('list') }}<b data-list-count>0</b></button>
+</div>
+
+<div class="palette" id="palette" hidden>
+  <div class="palette__scrim" data-close-search></div>
+  <div class="palette__box" role="dialog" aria-modal="true" aria-label="{{ T('search') }}">
+    <div class="palette__field">
+      {{ icon('search') }}
+      <input id="pq" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="{{ T('search_ph', n=stats.products) }}" aria-label="{{ T('search') }}" aria-controls="pres">
+      <button class="palette__esc" type="button" data-close-search aria-label="{{ T('close') }}"><kbd>{{ T('esc') }}</kbd>{{ icon('x') }}</button>
+    </div>
+    <div class="palette__body" id="pres" role="listbox">
+      <p class="palette__hint">{{ T('search_hint') }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer__scrim" data-close-list></div>
+  <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawerH">
+    <header class="drawer__head">
+      <div><p class="mono drawer__kicker">{{ T('req_eyebrow') }}</p><h2 id="drawerH">{{ T('list_h') }}</h2><p class="drawer__meta" id="drawerMeta"></p></div>
+      <button class="iconbtn" type="button" data-close-list aria-label="{{ T('close') }}">{{ icon('x') }}</button>
+    </header>
+    <div class="drawer__body" id="drawerBody"></div>
+    <div class="drawer__more" id="drawerMore">
+      <details class="drawer__details" id="drawerDetails">
+        <summary>{{ T('details') }} <small>({{ T('optional') }})</small></summary>
+        <div class="fields">
+          <label><span>{{ T('f_name') }}</span><input class="in" data-cust="name" autocomplete="name"></label>
+          <label><span>{{ T('f_company') }}</span><input class="in" data-cust="company" autocomplete="organization"></label>
+          <label><span>{{ T('f_phone') }}</span><input class="in" data-cust="phone" type="tel" autocomplete="tel" dir="ltr"></label>
+          <label class="wide"><span>{{ T('f_note') }}</span><textarea class="in" data-cust="note" rows="2" placeholder="{{ T('f_note_ph') }}"></textarea></label>
+        </div>
+      </details>
+      <p class="drawer__note">{{ icon('info') }}{{ T('list_note') }}</p>
+      <div class="drawer__acts">
+        {% if contact.whatsapp %}<button class="btn btn--wa" type="button" data-send="wa">{{ icon('wa') }}{{ T('send_wa') }}</button>{% endif %}
+        <button class="btn btn--primary" type="button" data-send="email">{{ icon('mail') }}{{ T('send_email') }}</button>
+        <button class="btn btn--ghost" type="button" data-send="print">{{ icon('print') }}{{ T('print') }}</button>
+        <button class="btn btn--ghost" type="button" data-send="copy">{{ icon('copy') }}{{ T('copy_text') }}</button>
+        <button class="btn btn--text" type="button" data-send="clear">{{ T('clear') }}</button>
+      </div>
+      <p class="drawer__warn" id="drawerWarn" hidden>{{ T('long_mail') }}</p>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden></div>
+<div class="lightbox" id="lightbox" hidden><button class="iconbtn lightbox__x" type="button" data-close-lightbox aria-label="{{ T('close') }}">{{ icon('x') }}</button><div class="lightbox__in" id="lightboxIn"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="printout" id="printout" aria-hidden="true"></div>
+
+<script type="application/json" id="site-config">{{ config | safe }}</script>
+{% block data %}{% endblock %}
+<script src="{{ root }}assets/vendor/gsap.min.js?v={{ v.vendor }}" defer></script>
+<script src="{{ root }}assets/vendor/ScrollTrigger.min.js?v={{ v.vendor }}" defer></script>
+<script src="{{ root }}assets/vendor/lenis.min.js?v={{ v.vendor }}" defer></script>
+{% block three %}{% endblock %}
+<script src="{{ root }}assets/site.js?v={{ v.js }}" defer></script>
+<script src="{{ root }}assets/motion.js?v={{ v.motion_js }}" defer></script>
+</body>
+</html>
