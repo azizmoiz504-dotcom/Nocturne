@@ -146,7 +146,13 @@ const STORE = { '@type': 'HardwareStore', '@id': SITE + '#store',
   address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
   openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: CFG.openDays.map(d => DAYS[d]), opens: hhmm(CFG.openFrom), closes: hhmm(CFG.openTo) }],
   areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
-  paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque' };
+  paymentAccepted: 'Cash, Credit Card, Bank Transfer, Cheque',
+  // the shop's Google Maps profile, and its other official pages once they exist (CFG.sameAs in js/config.js)
+  hasMap: CFG.mapsUrl || undefined,
+  sameAs: (CFG.sameAs || []).filter(Boolean).length ? CFG.sameAs.filter(Boolean) : undefined,
+  // what we sell, by category (names and pages only; no prices)
+  hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves',
+    itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name, url: SITE + 'products/' + PG(c) + '.html' })) } };
 
 function catPage(c, idx) {
   const s = SEO[c.slug] || {};
@@ -274,8 +280,13 @@ fs.writeFileSync('404.html', shell({ title: 'Page not found | Fakhri Tools', des
 
 // Sitemap and robots: only real pages. Helper pages (edit, photo pickers) and 404 stay out.
 const urls = ['', 'products/index.html', ...CATS.map(c => 'products/' + PG(c) + '.html'), ...PAGES.map(pg => pg.path), ...(AR_READY ? AR.pages.map(pg => pg.path) : [])];
-fs.writeFileSync('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  urls.map(u => '  <url><loc>' + SITE + u + '</loc></url>').join('\n') + '\n</urlset>\n');
+// Category pages also list their product photos, so the photos can show in Google Images with the product name.
+const xml = s => esc(s).replace(/'/g, '&apos;');
+const photos = Object.fromEntries(CATS.map(c => ['products/' + PG(c) + '.html',
+  [...new Map(c.items.filter(it => it[3] && fs.existsSync(IMG + it[3])).map(it => [it[3], it[0]])).entries()]]));
+fs.writeFileSync('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
+  urls.map(u => '  <url><loc>' + SITE + u + '</loc>' + (photos[u] || []).map(([img]) =>
+    '<image:image><image:loc>' + xml(SITE + IMG + img.split('/').map(encodeURIComponent).join('/')) + '</image:loc></image:image>').join('') + '</url>').join('\n') + '\n</urlset>\n');
 fs.writeFileSync('robots.txt', 'User-agent: *\nAllow: /\n\nSitemap: ' + SITE + 'sitemap.xml\n');
 
 // index.html: refresh the store details for Google and the footer category links (also there without JavaScript).
