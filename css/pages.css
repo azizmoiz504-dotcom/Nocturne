@@ -145,3 +145,6 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(40p
 /* product photos: every photo box is the same square, whatever the photo's own size (boxes were 246, 276 and 391px tall in one row) */
 .p__img{position:relative;min-height:0;overflow:hidden}
 .p__img img{position:absolute;left:9%;top:9%;width:82%;height:82%}
+.shopfront{margin:0 0 32px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.shopfront img{display:block;width:100%;height:auto}
+.shopfront figcaption{padding:12px 18px;font-size:16px;color:var(--mute)}

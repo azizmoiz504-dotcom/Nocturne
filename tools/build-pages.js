@@ -117,7 +117,7 @@ function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = fal
     '<title>' + esc(title) + '</title>\n<meta name="description" content="' + esc(desc) + '">\n' +
     (canon !== null ? '<link rel="canonical" href="' + SITE + canon + '">\n<meta property="og:url" content="' + SITE + canon + '">\n' : '') + alts + GA_TAG +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="Fakhri Tools">\n' +
-    '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:image" content="' + SITE + 'assets/share.jpg">\n<meta name="twitter:card" content="summary_large_image">\n' +
+    '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n<meta property="og:image" content="' + SITE + 'assets/shop/share-shop.jpg">\n<meta property="og:image:alt" content="Fakhri Tools shop front, Al Quoz, Dubai">\n<meta name="twitter:card" content="summary_large_image">\n' +
     '<meta name="theme-color" content="#040c13">\n<link rel="icon" href="' + up + 'favicon.ico" sizes="48x48">\n<link rel="icon" type="image/png" sizes="192x192" href="' + up + 'assets/favicon-192.png">\n<link rel="icon" type="image/png" sizes="96x96" href="' + up + 'assets/favicon-96.png">\n<link rel="icon" type="image/png" sizes="64x64" href="' + up + 'assets/favicon-64.png">\n<link rel="apple-touch-icon" href="' + up + 'assets/apple-touch-icon.png">\n' +
     '<link rel="stylesheet" href="' + up + 'fonts/fonts.css">\n<link rel="stylesheet" href="' + up + 'css/pages.css?v=' + ver + '" media="(max-width:899.98px)">\n<link rel="stylesheet" href="' + up + 'css/pages-75.css?v=' + ver + '" media="(min-width:900px)">\n' +
     (ld ? '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>\n' : '') + '</head>\n<body>\n' +
@@ -140,7 +140,7 @@ const hhmm = h => String(Math.floor(h)).padStart(2, '0') + ':' + String(Math.rou
 const STORE = { '@type': 'HardwareStore', '@id': SITE + '#store',
   name: 'Fakhri Tools & Workshop Materials Trading LLC', alternateName: 'Fakhri Tools',
   description: 'B2B trade counter for pipes, pipe fittings, flanges, valves, camlocks and couplings, industrial hoses, gaskets and gauges in Al Quoz Industrial Area 3, Dubai.',
-  url: SITE, image: SITE + 'assets/share.jpg', logo: SITE + 'assets/logo-stacked.png',
+  url: SITE, image: ['16x9', '4x3', '1x1'].map(r => SITE + 'assets/shop/shop-front-' + r + '.jpg'), logo: SITE + 'assets/logo-stacked.png',
   telephone: CFG.phoneLink.replace('tel:', ''),
   contactPoint: [{ '@type': 'ContactPoint', contactType: 'sales', telephone: '+' + CFG.whatsappDigits, availableLanguage: ['English', 'Arabic', 'Hindi', 'Urdu'] }],
   address: { '@type': 'PostalAddress', streetAddress: 'Warehouse 8, 8th Street, Al Quoz Industrial Area 3', addressLocality: 'Dubai', addressRegion: 'Dubai', addressCountry: 'AE' },
@@ -236,6 +236,7 @@ function extraPage(pg, lang = 'en') {
     '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + (lang === 'ar' ? '' : up) + 'index.html">' + T.home + '</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
     '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + fmt(pg.h1, lang) + '</h1>' +
       (pg.lead ? '<p class="lead">' + fmt(pg.lead, lang, true) + '</p>' : '') + '</header>' +
+    (pg.photo ? '<figure class="shopfront"><img src="' + up + pg.photo.src + '" srcset="' + up + pg.photo.src.replace('.jpg', '-960.jpg') + ' 960w, ' + up + pg.photo.src + ' 1665w" sizes="(min-width:1100px) 1040px, 100vw" alt="' + esc(pg.photo.alt) + '" width="1665" height="945" fetchpriority="high"><figcaption>' + esc(pg.photo.caption || pg.photo.alt) + '</figcaption></figure>' : '') +
     (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + fmt(s.h2, lang) + '</h2>' : '') +
       (s.p || []).map(x => '<p>' + fmt(x, lang, true) + '</p>').join('') +
       (s.list && s.list.length ? '<ul>' + s.list.map(x => '<li>' + fmt(x, lang, true) + '</li>').join('') + '</ul>' : '') +
