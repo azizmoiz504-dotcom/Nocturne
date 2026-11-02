@@ -928,7 +928,12 @@
         ]
       ],
       "wa": "Hello Fakhri Tools, I would like to visit the counter. My list: ",
-      "crumb": "Find our shop"
+      "crumb": "Find our shop",
+      "photo": {
+        "src": "assets/shop/fakhri-tools-al-quoz-shop-front.jpg",
+        "alt": "Fakhri Tools shop front at Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai",
+        "caption": "Our shop front: look for the blue FAKHRI sign, right next to Ajyad Traditional Kitchen, on its right."
+      }
     },
     {
       "path": "services/pipe-threading.html",

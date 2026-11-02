@@ -1581,3 +1581,7 @@ body.fabs-off .fabs{opacity:0;pointer-events:none;transform:translateY(18px)}
 /* the quote bar steps aside over the contact form (it covered the form's send button; the form lists the items itself) */
 body.at-form .qbar.is-on{transform:translate(-50%,160%)}
 @media (max-width:450px){body.at-form .qbar.is-on{transform:translate(0,160%)}}
+/* Shop front photo in the Visit section */
+.shopfront{margin:24px 0 0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#0b1620}
+.shopfront img{display:block;width:100%;height:auto}
+.shopfront figcaption{padding:7.5px 10.5px;font-size:9.75px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
