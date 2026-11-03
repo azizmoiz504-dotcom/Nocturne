@@ -565,6 +565,13 @@ public class CatalogueActivity extends Activity {
             ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(CatalogueActivity.this, path), title, mime(path), title, ""); } });
         }
 
+        /** The same, straight into WhatsApp (the salesman picks the chat there). */
+        @JavascriptInterface
+        public void shareAssetWa(final String path, final String title) {
+            if (!okAsset(path)) return;
+            ui.post(new Runnable() { public void run() { sendUri(PhotoProvider.uriFor(CatalogueActivity.this, path), title, mime(path), "", "wa"); } });
+        }
+
         /** The branch the salesman picked ("fakhri", "bam", "mabrook" or "me"): icon, name and colours follow it. */
         @JavascriptInterface
         public void setBrand(final String b) {

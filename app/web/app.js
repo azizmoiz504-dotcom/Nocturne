@@ -105,6 +105,7 @@
       logo: 'bam/logo.png', pdfLogo: 'bam/logo-pdf.jpg', pdfAccent: [245, 130, 31], pdfDark: [20, 20, 22],
       address: 'Exhibition Showroom No.06, Jurf Industrial Zone 1, Emirate-Ajman', city: 'Jurf, Ajman',
       phone: '+971 6 529 4533', email: 'baitalmaqdisuae@gmail.com', wa: '', waShow: '', order: { pre: 'BAM-', date: 'ymd', pad: 3 },
+      first: ['sgs', 'kapusi'], pdfs: 'BAM_PDFS', tag: 'TOOLS & MORE', head: '#17181c',
       prices: true, keys: { list: 'bam-list', orders: 'bam-orders', cust: 'bam-cust', saved: 'bam-saved', searches: 'bam-searches', seq: 'bam-seq' }
     },
     mabrook: {
@@ -119,7 +120,7 @@
       name: 'Modern Electric', full: 'Modern Electric House Trading L.L.C.', where: 'Jurf, Ajman',
       logo: 'shops/me-logo.png', pdfLogo: 'shops/me-pdf.jpg', pdfAccent: [10, 63, 166], pdfDark: [243, 144, 25],
       address: 'Jurf Industrial Area, Zone 2, Ajman, UAE', city: 'Jurf, Ajman',
-      phone: '+971 6 747 0540', mobile: '+971 55 882 6217', email: 'vduelec@gmail.com', wa: '', waShow: '', order: { pre: 'ME-', date: 'ymd', pad: 3 },
+      phone: '+971 6 747 0540', mobile: '+971 55 882 6217', email: 'vduelec@gmail.com', wa: '', waShow: '', order: { pre: 'ME-', date: 'ymd', pad: 3 }, head: '#ffffff',
       prices: true, keys: { list: 'me-list', orders: 'me-orders', cust: 'me-cust', saved: 'me-saved', searches: 'me-searches', seq: 'me-seq' }
     }
   };
@@ -197,7 +198,17 @@
     'Pinch or double-tap to zoom': 'كبّر بإصبعين أو اضغط مرتين', 'Order copied': 'تم نسخ الطلب', 'quoted separately': 'تُسعّر بشكل منفصل',
     '{n} on request, quoted separately': '{n} عند الطلب، تُسعّر بشكل منفصل', 'Continue': 'متابعة', 'Full name': 'الاسم الكامل',
     'The order could not be saved: the phone is full. Delete some old orders, then try again.': 'تعذّر حفظ الطلب: ذاكرة الهاتف ممتلئة. احذف بعض الطلبات القديمة ثم حاول مرة أخرى.',
-    'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.'
+    'Prices on request. The shop quotes them separately.': 'الأسعار عند الطلب. يُسعّرها المحل بشكل منفصل.',
+    'Top range': 'فئة مميزة', 'Top ranges': 'الفئات المميزة', 'More ranges': 'فئات أخرى', 'All categories': 'كل الفئات', 'Ranges': 'الفئات',
+    'Part numbers': 'أرقام القطع', '{n} sections': '{n} أقسام', '1 section': 'قسم واحد', 'PDF catalogues': 'كتالوجات PDF',
+    '{n} catalogues to open or send on WhatsApp': '{n} كتالوج للفتح أو الإرسال عبر واتساب', 'Select': 'تحديد', 'Catalogue': 'الكتالوج',
+    'Choose': 'اختيار', 'Chosen': 'تم الاختيار', 'Catalogues': 'الكتالوجات', '{n} PDF catalogues. Tap a cover to open it.': '{n} كتالوج PDF. اضغط على الغلاف لفتحه.',
+    'Other apps': 'تطبيقات أخرى', 'PDF catalogue': 'كتالوج PDF', 'Chosen products': 'المنتجات المختارة', 'Send': 'إرسال', '{n} chosen': 'تم اختيار {n}',
+    'Choose products': 'اختر المنتجات', 'Tap Send for a picture, PDF or text': 'اضغط إرسال لصورة أو PDF أو نص', 'Tap the products to send': 'اضغط على المنتجات لإرسالها',
+    'Part no.': 'رقم القطعة', 'Price': 'السعر', 'Product details': 'تفاصيل المنتجات', '{n} pages': '{n} صفحات', 'Send this product': 'إرسال هذا المنتج',
+    'Send {n}': 'إرسال {n}', 'Picture': 'صورة', 'Text': 'نص', 'A picture holds up to {n} products. Send more as a PDF.': 'الصورة تتسع حتى {n} منتجات. أرسل أكثر كملف PDF.',
+    'Show prices': 'إظهار الأسعار', 'The price of each size is shown': 'يظهر سعر كل مقاس', 'Sizes and part numbers only, no prices': 'المقاسات وأرقام القطع فقط، بدون أسعار', 'Clear the chosen products': 'إلغاء اختيار المنتجات',
+    'Could not make it. Try again.': 'تعذر الإعداد. حاول مرة أخرى.'
   };
   const RAR = ROWS && window[BR.ar] || {};   // the shop's own Arabic word list (Bait Al Maqdis, Modern Electric)
   const BAR_ = RAR.dict || {}, SPECW = RAR.spec || {};
@@ -207,6 +218,8 @@
   // Bait Al Maqdis names and sizes in Arabic from their own word list (only used on their products; Fakhri Tools names stay as written)
   const tn = s => lang === 'ar' && s ? (BAR_[s] || BLOW[String(s).toLowerCase().replace(/\s+/g, ' ').trim()] || s) : s;
   const ts = s => lang === 'ar' && s ? String(s).replace(/[A-Za-z]+/g, w => SPECW[w.toUpperCase()] || w) : (s || '');
+  const RTL_CH = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+  const bd = s => { s = s == null ? '' : String(s); return lang === 'ar' && s && !RTL_CH.test(s) ? '<bdi dir="ltr">' + esc(s) + '</bdi>' : esc(s); };
   const cnt = (n, w) => n === 1 ? t('1 ' + w) : t('{n} ' + w + 's', { n: nfmt(n) });
   const pcs = n => t('{n} pcs', { n: nfmt(n) });
 
@@ -234,6 +247,9 @@
     box: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 7.5 12 3l9 7.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>',
     cartBig: '<svg viewBox="0 0 24 24" class="ico"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>',
     doc: '<svg viewBox="0 0 24 24" class="ico"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg>',
+    select: '<svg viewBox="0 0 24 24" class="ico"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M8 12.2l2.8 2.8L16.2 9.5"/></svg>',
+    image: '<svg viewBox="0 0 24 24" class="ico"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
+    text: '<svg viewBox="0 0 24 24" class="ico"><path d="M4 6h16M4 11h16M4 16h10"/></svg>',
     dots: '<svg viewBox="0 0 24 24" class="dots"><circle cx="4" cy="4" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="4" cy="20" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="20" cy="20" r="2"/></svg>'
   };
 
@@ -296,8 +312,13 @@
         });
       });
       if (!c.tile) c.tile = (c.items.find(o => o.img) || {}).img || '';
+      c.lede = c0.lede || '';
       BCATS.push(c);
     });
+    // the ranges a shop wants on top of its home screen (Bait Al Maqdis: SGS, then Kapusi), the rest as listed
+    const FIRST = (BR.first || []).map(x => BR.cid + x), rank = c => { const i = FIRST.indexOf(c.id); return i < 0 ? FIRST.length + BCATS.indexOf(c) : i; };
+    const at = new Map(BCATS.map(c => [c, rank(c)]));
+    BCATS.sort((a, b) => at.get(a) - at.get(b));
   }
 
   /* ---- Fakhri Tools and Mabrook: the website's list; sizes, specs and material are chosen on the product ---- */
@@ -441,7 +462,7 @@
   const groupOfLine = (l, o) => o ? o.c.name : ((catBy(l.k) || {}).name || '');
   // one line as a short description under its name, for the cart, orders and messages
   function lineSub(l, o, html) {
-    if (lb(l)) { const x = [l.c, ts(l.s)].filter(Boolean).join(' · '); return html ? esc(x) : x; }
+    if (lb(l)) { const x = [l.c, ts(l.s)].filter(Boolean).join(' · '); return html ? bd(x) : x; }
     const d = describe(l, o);
     if (!html) return [d.size && 'Size: ' + d.size, d.spec && 'Specs: ' + d.spec, d.mat && 'Material: ' + d.mat].filter(Boolean).join(' · ');
     const part = (k, v) => v ? '<span class="lp"><i>' + esc(t(k)) + '</i> ' + (/^to confirm/.test(v) ? '<u>' + esc(v) + '</u>' : esc(v)) + '</span>' : '';
@@ -613,7 +634,7 @@
   const sizesLine = o => o.r.length > 1 ? cnt(o.r.length, 'size') : (ts(o.r[0][1]) || o.r[0][0] || '');
   function rowHTML(o, j) {
     const r = o.r[j], q = qtyOf(o, j);
-    return '<div class="row' + (q ? ' is-in' : '') + '" data-row="' + o.id + '|' + j + '"><div class="row__l"><b>' + esc(ts(r[1]) || r[0]) + '</b>' + (r[1] && r[0] ? '<small>' + esc(r[0]) + '</small>' : '') + '</div>' +
+    return '<div class="row' + (q ? ' is-in' : '') + '" data-row="' + o.id + '|' + j + '"><div class="row__l"><b>' + bd(ts(r[1]) || r[0]) + '</b>' + (r[1] && r[0] ? '<small>' + bd(r[0]) + '</small>' : '') + '</div>' +
       '<div class="row__r"><span class="row__p">' + (r[2] != null ? money(r[2]) : '<em>' + esc(t('On request')) + '</em>') + '</span>' +
       (q ? stepper(q) : '<button class="radd" data-radd>+ ' + esc(t('Add')) + '</button>') + '</div></div>';
   }
@@ -623,10 +644,10 @@
     const name = esc(tn(o.n));
     return '<div class="flip tile" style="animation-delay:' + d + 'ms" data-item="' + o.id + '">' +
       '<div class="flip__in">' +
-        '<div class="face face--front" data-flip role="button" tabindex="0">' + photo(o.img, o.n) + qtyTag(o) +
-          '<div class="face__t"><b>' + name + '</b><span class="face__s">' + esc(sizesLine(o)) + '</span>' + priceLine(o) + '</div>' +
+        '<div class="face face--front" data-flip role="button" tabindex="0">' + photo(o.img, o.n) + qtyTag(o) + '<i class="selbox" aria-hidden="true">' + I.check + '</i>' +
+          '<div class="face__t"><b>' + name + '</b><span class="face__s">' + bd(sizesLine(o)) + '</span>' + priceLine(o) + '</div>' +
           '<i class="flipi" aria-hidden="true">' + I.flip + '</i></div>' +
-        '<div class="face face--back"><div class="back__h" data-flip><b>' + name + '</b><i class="flipi flipi--back">' + I.flip + '</i></div>' +
+        '<div class="face face--back"><div class="back__h" data-flip><b>' + name + '</b><button class="flipi flipi--share" data-share1="' + o.id + '" aria-label="' + esc(t('Share')) + '">' + I.share + '</button><i class="flipi flipi--back">' + I.flip + '</i></div>' +
           '<div class="rows">' + o.r.map((r, j) => rowHTML(o, j)).join('') + '</div>' +
           (o.spec.length ? '<button class="specbtn" data-spec="' + o.id + '">' + I.zoom + esc(t('Spec sheet')) + '</button>' : '') +
         '</div>' +
@@ -637,7 +658,10 @@
     const body = h('<div data-item="' + o.id + '" class="isheet"><div class="shead">' + photo(o.img, o.n, 'ph--zoom') + '<div><small>' + esc(tn(o.c.name)) + ' · ' + esc(tn(o.sec)) + '</small><b>' + esc(tn(o.n)) + '</b>' + qtyTag(o) + '</div></div>' +
       '<div class="rows rows--sheet">' + o.r.map((r, j) => rowHTML(o, j)).join('') + '</div>' +
       (o.spec.length ? '<button class="specbtn" data-spec="' + o.id + '">' + I.zoom + esc(t('Spec sheet')) + '</button>' : '') +
-      '<button class="btn btn--ghost btn--full" style="margin-top:14px" data-go="c/' + o.c.id + '">' + esc(tn(o.c.name)) + ' ' + I.chev + '</button></div>');
+      '<div class="prow2 sacts"><button class="btn btn--ghost" data-selone="' + o.id + '">' + I.select + '<span>' + esc(t(SEL.has(o.id) ? 'Chosen' : 'Choose')) + '</span></button>' +
+        '<button class="btn btn--main" data-share1="' + o.id + '">' + I.share + esc(t('Share')) + '</button></div>' +
+      '<button class="btn btn--ghost btn--full" data-go="c/' + o.c.id + '">' + esc(tn(o.c.name)) + ' ' + I.chev + '</button></div>');
+    if (SEL.has(o.id)) $('[data-selone]', body).classList.add('is-on');
     const ph = $('.ph', body); ph.addEventListener('click', () => o.img && zoom(o.img));
     openSheet(body);
   }
@@ -687,11 +711,15 @@
   const catLabel = c => c.src === 'bam' ? tn(c.name) : shortCat(c.name);   // short name, for tiles and lists
   const prodRow = (o, mark) => '<button class="prow" ' + openAttr(o) + '>' + photo(o.img, o.n) +
     '<div class="prow__t"><small>' + esc(catLabel(o.c)) + '</small><b>' + (mark ? mark(pName(o)) : esc(pName(o))) + '</b>' +
-    (isB(o) ? '<span>' + esc(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
+    (isB(o) ? '<span>' + bd(sizesLine(o)) + ' · ' + priceLine(o) + '</span>' : (o.size ? '<span>' + esc(o.size.split(' · ')[0]) + '</span>' : '')) + '</div>' + I.chev + '</button>';
 
   /* ================= views and tabs ================= */
   const stage = $('#stage');
-  const PDFS = ROWS && window[BR.data].pdfs || [];   // printed catalogues packed in the app (Bait Al Maqdis)
+  // the PDF catalogues packed in the app (Bait Al Maqdis): one per group (app/tools/bam_pdfs.cjs), or the list's own printed ones
+  const PDFS = (ROWS && ((BR.pdfs && window[BR.pdfs]) || window[BR.data].pdfs) || []).map(p => ({
+    id: p.id || '', file: p.file, cover: p.cover ? DIR + p.cover : '', title: p.title, n: p.n || 0, pages: p.pages || 0, mb: p.mb, sub: p.sub || ''
+  }));
+  const pdfOf = c => PDFS.find(p => p.id && BR.cid + p.id === c.id);
   const TABS = PDFS.length ? ['home', 'orders', 'pdfs', 'cart'] : ['home', 'orders', 'cart'];
   const TAB_ICON = {
     home: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -819,6 +847,7 @@
     if (!$('#sheet').hidden) { closeSheet(); return true; }
     if (busy) return true;
     const fl = $('.flip.is-flipped', top() && top().el); if (fl) { flipTo(fl, false); return true; }
+    if (selecting || SEL.size) { endSelect(); return true; }
     if (pop()) return true;
     if (tab !== 'home') { switchTab('home'); return true; }
     return false;
@@ -827,6 +856,16 @@
   // one tap handler for everything
   document.addEventListener('click', e => {
     const tg = e.target;
+    // choosing and sending products, and a group's catalogue
+    if (tg.closest('[data-selmode]')) { setSelecting(!selecting); buzz(); return; }
+    if (tg.closest('[data-selx]')) { endSelect(); return; }
+    if (tg.closest('[data-selshare]')) { const its = [...SEL].map(id => byId.get(id)).filter(Boolean); if (its.length) shareSheet(its, true); return; }
+    const s1 = tg.closest('[data-share1]');
+    if (s1) { e.stopPropagation(); const o = byId.get(s1.dataset.share1); if (o) shareSheet([o], false); return; }
+    const so = tg.closest('[data-selone]');
+    if (so) { const o = byId.get(so.dataset.selone); if (o) { toggleSel(o); const on = SEL.has(o.id); so.classList.toggle('is-on', on); $('span', so).textContent = t(on ? 'Chosen' : 'Choose'); buzz(); } return; }
+    const ps = tg.closest('[data-pdfsheet]');
+    if (ps) { const p = PDFS.find(x => x.id === ps.dataset.pdfsheet); if (p) pdfSheet(p); return; }
     const add = tg.closest('[data-add]');
     if (add) { e.stopPropagation(); quickAdd(byId.get(add.dataset.add), add); return; }
     const sh = tg.closest('[data-sheet]');
@@ -855,7 +894,7 @@
   // a category tile: a product photo on white with the name under it, for both companies
   function catTile(c, i) {
     const d = Math.min(i, 14) * 28;
-    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(catLabel(c)) + '</b></button>';
+    return '<button class="ctile ctile--fk tile" style="animation-delay:' + d + 'ms" data-cat data-go="c/' + c.id + '">' + photo(c.tile, c.name) + '<b>' + esc(catLabel(c)) + '</b></button>';
   }
   // the branch's logo at the top of Home: Bait Al Maqdis with its tag line, the others as they are
   function heroLogo() {
@@ -863,7 +902,32 @@
     if (brandId === 'fakhri') return '<img class="hero__logo hero__logo--fk" src="' + fkLogo() + '" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">';
     return '<span class="hero__plate hero__plate--' + brandId + '"><img class="hero__logo hero__logo--' + brandId + '" src="' + esc(BR.logo) + '" alt="' + esc(BR.full) + '"></span>';
   }
+  /* Bait Al Maqdis home: the logo with the shop's numbers, search, its top ranges big, the PDF catalogues, then every group */
+  function viewHomeRows() {
+    const top = (BR.first || []).map(x => catBy(BR.cid + x)).filter(Boolean), rest = CATS.filter(c => top.indexOf(c) < 0);
+    const parts = P.reduce((a, o) => a + o.r.length, 0);
+    const feat = (c, i) => '<button class="fcard tile" style="animation-delay:' + (60 + i * 70) + 'ms" data-cat data-go="c/' + c.id + '">' +
+      '<span class="fcard__t"><small>' + esc(t('Top range')) + '</small><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + ' · ' + esc(cnt(c.secs.length, 'section')) + '</span>' +
+      '<em>' + esc(t('Open')) + I.chev + '</em></span>' + photo(c.tile, c.name) + '</button>';
+    const tile = (c, i) => '<button class="btile tile" style="animation-delay:' + (Math.min(i, 12) * 30 + 120) + 'ms" data-cat data-go="c/' + c.id + '">' + photo(c.tile, c.name) +
+      '<span class="btile__t"><b>' + esc(catLabel(c)) + '</b><span>' + esc(cnt(c.items.length, 'product')) + '</span></span></button>';
+    const covers = PDFS.filter(p => p.cover).slice(0, 3);
+    const el = h('<section class="home home--rows">' +
+      '<div class="home__top"><button class="ib ib--soft" data-go="settings" aria-label="' + esc(t('Settings')) + '">' + I.gear + '</button>' + langPill() + '</div>' +
+      '<div class="bhero tile">' + heroLogo() +
+        '<div class="bstats"><div><b>' + nfmt(P.length) + '</b><span>' + esc(t('Products')) + '</span></div><div><b>' + nfmt(CATS.length) + '</b><span>' + esc(t('Ranges')) + '</span></div><div><b>' + nfmt(parts) + '</b><span>' + esc(t('Part numbers')) + '</span></div></div></div>' +
+      '<button class="searchbox searchbox--big" data-go="search">' + I.search + '<span>' + esc(t('Search {n} products', { n: nfmt(P.length) })) + '</span></button>' +
+      (top.length ? '<h2 class="bh">' + esc(t('Top ranges')) + '</h2><div class="feat">' + top.map(feat).join('') + '</div>' : '') +
+      (PDFS.length ? '<button class="pdfpromo tile" data-tab="pdfs"><span class="pdfpromo__covers">' + (covers.length ? covers.map(p => '<img src="' + esc(p.cover) + '" alt="">').join('') : I.pdf) + '</span>' +
+        '<span class="pdfpromo__t"><b>' + esc(t('PDF catalogues')) + '</b><span>' + esc(t('{n} catalogues to open or send on WhatsApp', { n: nfmt(PDFS.length) })) + '</span></span>' + I.chev + '</button>' : '') +
+      '<h2 class="bh">' + esc(t(top.length ? 'More ranges' : 'All categories')) + '<span>' + nfmt(rest.length) + '</span></h2>' +
+      '<div class="bgrid">' + rest.map(tile).join('') + '</div>' +
+      '<p class="foot">' + esc(BR.full) + (N && N.version ? '<br>' + esc(t('App version')) + ' ' + esc(N.version()) : '') + '</p>' +
+      '</section>');
+    return { el };
+  }
   function viewHome() {
+    if (BAM) return viewHomeRows();
     const el = h('<section class="home">' +
       '<div class="home__top"><button class="ib ib--soft" data-go="settings" aria-label="' + esc(t('Settings')) + '">' + I.gear + '</button>' + langPill() + '</div>' +
       '<div class="hero">' + heroLogo() + '</div>' +
@@ -884,9 +948,13 @@
     const gOf = o => CB ? o.sec : o.group;
     const gName = g => CB ? tn(g) : g;
     let cur = '';
-    const el = h('<section>' + bar(cName(c), '<button class="ib" data-go="search" aria-label="' + esc(t('Search')) + '">' + I.search + '</button>') +
+    const pdf = CB ? pdfOf(c) : null;
+    const el = h('<section class="' + (CB ? 'catv' : '') + '">' + bar(cName(c), '<button class="ib" data-go="search" aria-label="' + esc(t('Search')) + '">' + I.search + '</button>' +
+        (CB ? '<button class="ib ib--sel" data-selmode aria-label="' + esc(t('Select')) + '">' + I.select + '</button>' : '')) +
+      (CB ? '<div class="chead">' + photo(c.tile, c.name) + '<div class="chead__t"><b>' + esc(cnt(c.items.length, 'product')) + '</b><span>' + esc(t('Tap a card to see the prices')) + '</span></div>' +
+        (pdf ? '<button class="chead__pdf" data-pdfsheet="' + esc(pdf.id) + '">' + I.pdf + '<span>' + esc(t('Catalogue')) + '</span></button>' : '') + '</div>' : '') +
       (groups.length > 1 ? '<div class="chips">' + [''].concat(groups).map(g => '<button class="chip' + (g === cur ? ' is-on' : '') + '" data-g="' + esc(g) + '">' + esc(g ? gName(g) : t('All')) + ' <b>' + (g ? c.items.filter(o => gOf(o) === g).length : c.items.length) + '</b></button>').join('') + '</div>' : '') +
-      '<div class="view__pad"><p class="hint">' + esc(cnt(c.items.length, 'product')) + (CB ? ' · ' + esc(t('Tap a card to see the prices')) : '') + '</p><div id="grid"></div></div></section>');
+      '<div class="view__pad">' + (CB ? '' : '<p class="hint">' + esc(cnt(c.items.length, 'product')) + '</p>') + '<div id="grid"></div></div></section>');
     const v = { el };
     function fill() {
       const g = $('#grid', el), list = c.items.filter(o => !cur || gOf(o) === cur);
@@ -899,15 +967,36 @@
       });
       g.innerHTML = html + '</div>';
       wirePhotos(g);
+      if (CB) paintSel(g);
     }
     fill();
     el.addEventListener('click', e => {
       const ch = e.target.closest('.chip[data-g]');
       if (ch) { cur = ch.dataset.g; $$('.chip', el).forEach(x => x.classList.toggle('is-on', x === ch)); fill(); el.scrollTo({ top: 0 }); ch.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); return; }
+      if (e.target.closest('[data-share1]')) return;   // the share button on the back of a card (the tap handler below)
+      // choosing products to send: a tap picks or drops the card instead of turning it over
+      if (CB && (selecting || held)) {
+        const card = e.target.closest('.flip');
+        if (card && !held) { const o = byId.get(card.dataset.item); if (o) { toggleSel(o); buzz(); } }
+        held = false; return;
+      }
       const f = e.target.closest('[data-flip]');
       if (f && !e.target.closest('[data-row]')) { const card = f.closest('.flip'); flipTo(card, !card.classList.contains('is-flipped')); buzz(); }
     });
-    v.refresh = () => { c.items.forEach(paintItemQuiet); v.dirty = false; };
+    // a long press on a card starts choosing products to send, with that one chosen
+    let held = false, hold = null, hx = 0, hy = 0;
+    if (CB) {
+      el.addEventListener('touchstart', e => {
+        const card = e.target.closest('.flip'); if (!card || card.classList.contains('is-flipped') || e.touches.length > 1) return;
+        hx = e.touches[0].clientX; hy = e.touches[0].clientY; clearTimeout(hold);
+        hold = setTimeout(() => { hold = null; const o = byId.get(card.dataset.item); if (!o) return; held = true; if (!selecting) setSelecting(true); if (!SEL.has(o.id)) toggleSel(o); buzz(); }, 480);
+      }, { passive: true });
+      el.addEventListener('touchmove', e => { if (hold && (Math.abs(e.touches[0].clientX - hx) > 10 || Math.abs(e.touches[0].clientY - hy) > 10)) { clearTimeout(hold); hold = null; } }, { passive: true });
+      el.addEventListener('touchend', () => { if (hold) { clearTimeout(hold); hold = null; } if (held) setTimeout(() => { held = false; }, 400); }, { passive: true });
+      el.addEventListener('contextmenu', e => { if (e.target.closest('.flip')) e.preventDefault(); });
+    }
+    v.refresh = () => { c.items.forEach(paintItemQuiet); paintSel(el); v.dirty = false; };
+    v.onShow = () => paintSel(el);
     return v;
   }
   function paintItemQuiet(o) { if ($('[data-item="' + o.id + '"]')) paintItem(o); }
@@ -949,7 +1038,7 @@
     const el = h('<div class="pk"></div>');
     let s = sp.t === 'one' ? sp.v : '', a = '', b = '', sps = new Set(specs.length === 1 ? specs : []), mt = '';
     const hdr = (x, y) => '<div class="pk__h"><b>' + esc(t(x)) + '</b>' + (y ? '<span>' + esc(t(y)) + '</span>' : '') + '</div>';
-    const chip = (row, val, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-row2="' + row + '" data-v="' + esc(val) + '">' + esc(val === '?' ? t('Not sure') : val) + '</button>';
+    const chip = (row, val, on, extra) => '<button class="sz' + (on ? ' is-on' : '') + (extra || '') + '" data-row2="' + row + '" data-v="' + esc(val) + '">' + (val === '?' ? esc(t('Not sure')) : bd(val)) + '</button>';
     function draw() {
       let x = '';
       if (sp.t === 'one') x = '<div class="pkg">' + hdr('Size') + '<div class="sizes">' + chip('one', sp.v, true) + '</div></div>';
@@ -1425,7 +1514,7 @@
         '<div class="sum__r sum__r--total"><span>' + esc(t('Total')) + '</span><b>' + (tt.priced ? money(tt.sum) : esc(cnt(tt.items, 'item') + ' · ' + pcs(tt.q))) + '</b></div>' +
         (tt.priced && tt.ask ? '<p class="sum__n">' + esc(t('{n} on request, quoted separately', { n: cnt(tt.ask, 'item') })) + '</p>' : '') + '</div>' +
       '<div class="lines lines--ro">' + x.lines.map(l => { const o = lineProduct(l);
-        return '<div class="line">' + photo(lineImg(l, o), l.n) + '<div class="line__t"' + (o ? ' ' + openAttr(o) : '') + '><b>' + esc(lineName(l)) + '</b><span class="line__s">' + (lb(l) ? esc([l.c, ts(l.s), 'qty ' + nfmt(l.q)].filter(Boolean).join(' · ')) : lineSub(l, o, true)) + '</span>' +
+        return '<div class="line">' + photo(lineImg(l, o), l.n) + '<div class="line__t"' + (o ? ' ' + openAttr(o) : '') + '><b>' + esc(lineName(l)) + '</b><span class="line__s">' + (lb(l) ? bd([l.c, ts(l.s), 'qty ' + nfmt(l.q)].filter(Boolean).join(' · ')) : lineSub(l, o, true)) + '</span>' +
           (lb(l) ? '<span class="line__p">' + (l.p != null ? money(round2(l.p * l.q)) : '<em>' + esc(t('On request')) + '</em>') + '</span>' : '<span class="line__q">× ' + nfmt(l.q) + '</span>') + '</div></div>'; }).join('') + '</div>' +
       '<button class="btn btn--main btn--full btn--big" data-k="pdf">' + I.pdf + esc(t('Order form (PDF)')) + '</button>' +
       '<button class="btn btn--wa btn--full" data-k="wa">' + I.wa + esc(t(BR.wa ? 'Send to the shop on WhatsApp' : 'Send on WhatsApp')) + '</button>' +
@@ -1455,23 +1544,327 @@
     return { el };
   }
 
-  /* ================= PDFs (Bait Al Maqdis's printed catalogues) ================= */
+  /* ================= PDFs: the catalogues packed in the app (Bait Al Maqdis: one per group) ================= */
+  const pdfTitle = p => tn(t(p.title));
+  const pdfMeta = p => p.n ? cnt(p.n, 'product') + ' · ' + t('{n} pages', { n: p.pages }) + ' · ' + p.mb + ' MB' : t(p.sub) + ' · ' + p.mb + ' MB';
+  // open it, send it straight to WhatsApp, or hand it to any app
+  function pdfDo(p, how) {
+    const path = DIR + p.file;
+    if (N && how === 'open' && N.viewAsset) return N.viewAsset(path);
+    if (N && how === 'wa' && N.shareAssetWa) return N.shareAssetWa(path, pdfTitle(p));
+    if (N && N.shareAsset) return N.shareAsset(path, pdfTitle(p));
+    if (window.FT_PDF_VIEW) return fetch(path).then(r => r.arrayBuffer()).then(buf => window.FT_PDF_VIEW(new Uint8Array(buf), p.title));
+    if (how === 'open') return window.open(path, '_blank');
+    shareWebFile(path, p.title);
+  }
   function viewPdfs() {
     const list = PDFS;
-    const el = h('<section>' + pageHead(t('PDFs')) + '<div class="view__pad"><p class="hint">' + esc(t('Catalogues to open or send')) + '</p>' + list.map((p, i) =>
-      '<div class="card pdfc tile" style="animation-delay:' + i * 60 + 'ms"><div class="pdfc__h">' + I.pdf + '<div><b>' + esc(t(p.title)) + '</b><span>' + esc(t(p.sub)) + ' · ' + p.mb + ' MB</span></div></div>' +
-      '<div class="pdfc__b"><button class="btn btn--ghost" data-pdf="' + i + '" data-how="open">' + esc(t('Open')) + '</button><button class="btn btn--main" data-pdf="' + i + '" data-how="share">' + I.share + esc(t('Share')) + '</button></div></div>').join('') + '</div></section>');
-    el.addEventListener('click', e => {
-      const b = e.target.closest('[data-pdf]'); if (!b) return;
-      const p = list[+b.dataset.pdf], path = DIR + p.file;
-      if (N && N.viewAsset && b.dataset.how === 'open') N.viewAsset(path);
-      else if (N && N.shareAsset) N.shareAsset(path, p.title);
-      else if (window.FT_PDF_VIEW) fetch(path).then(r => r.arrayBuffer()).then(buf => window.FT_PDF_VIEW(new Uint8Array(buf), p.title));
-      else if (b.dataset.how === 'open') window.open(path, '_blank');
-      else shareWebFile(path, p.title);
-    });
+    const el = h('<section class="pdfv">' + pageHead(t('Catalogues')) + '<div class="view__pad"><p class="hint">' + esc(t('{n} PDF catalogues. Tap a cover to open it.', { n: nfmt(list.length) })) + '</p>' +
+      '<div class="pdfgrid">' + list.map((p, i) =>
+        '<div class="pdfk tile" style="animation-delay:' + Math.min(i, 10) * 40 + 'ms">' +
+          '<button class="pdfk__cv" data-pdf="' + i + '" data-how="open" aria-label="' + esc(t('Open')) + '">' + (p.cover ? '<img src="' + esc(p.cover) + '" alt="" loading="lazy">' : '<span class="pdfk__ph">' + I.pdf + '</span>') + '<i>PDF</i></button>' +
+          '<b>' + esc(pdfTitle(p)) + '</b><span>' + esc(p.n ? cnt(p.n, 'product') + ' · ' + t('{n} pages', { n: p.pages }) : pdfMeta(p)) + '</span>' +
+          '<span class="pdfk__b"><button class="btn btn--wa" data-pdf="' + i + '" data-how="wa">' + I.wa + '<span>WhatsApp</span></button>' +
+          '<button class="btn btn--ghost" data-pdf="' + i + '" data-how="share" aria-label="' + esc(t('Other apps')) + '">' + I.share + '</button></span>' +
+        '</div>').join('') + '</div></div></section>');
+    el.addEventListener('click', e => { const b = e.target.closest('[data-pdf]'); if (!b) return; buzz(); pdfDo(list[+b.dataset.pdf], b.dataset.how); });
     return { el };
   }
+  // one group's catalogue, from that group's screen
+  function pdfSheet(p) {
+    const b = h('<div class="psheet"><div class="psheet__h">' + (p.cover ? '<img src="' + esc(p.cover) + '" alt="">' : '') + '<div><small>' + esc(t('PDF catalogue')) + '</small><b>' + esc(pdfTitle(p)) + '</b><span>' + esc(pdfMeta(p)) + '</span></div></div>' +
+      '<button class="btn btn--wa btn--full btn--big" data-how="wa">' + I.wa + esc(t('Send on WhatsApp')) + '</button>' +
+      '<div class="prow2"><button class="btn btn--ghost" data-how="open">' + I.pdf + esc(t('Open')) + '</button><button class="btn btn--ghost" data-how="share">' + I.share + esc(t('Other apps')) + '</button></div></div>');
+    b.addEventListener('click', e => { const x = e.target.closest('[data-how]'); if (x) { buzz(); closeSheet(); pdfDo(p, x.dataset.how); } });
+    openSheet(b);
+  }
+
+  /* ================= choosing products to send a customer (Bait Al Maqdis, Modern Electric) =================
+     Select (or a long press on a card) starts it; taps choose cards in any group or from search; Send makes a picture, a PDF
+     or a text of just those products, with or without prices, for WhatsApp or any app. */
+  const SEL = new Set();
+  let selecting = false;
+  const selbar = ROWS ? h('<div id="selbar" role="region" aria-label="' + esc(t('Chosen products')) + '"><button class="selbar__x" data-selx aria-label="' + esc(t('Cancel')) + '">' + I.x + '</button>' +
+    '<div class="selbar__t"><b></b><span></span></div><button class="selbar__go" data-selshare>' + I.share + '<span>' + esc(t('Send')) + '</span></button></div>') : null;
+  if (selbar) document.body.appendChild(selbar);
+  function paintSel(r) {
+    if (!ROWS) return;
+    $$('.flip[data-item]', r || document).forEach(c => c.classList.toggle('is-sel', SEL.has(c.dataset.item)));
+    document.body.classList.toggle('is-selecting', selecting);
+    const on = selecting || SEL.size > 0;
+    selbar.classList.toggle('is-on', on);
+    $('b', selbar).textContent = SEL.size ? t('{n} chosen', { n: nfmt(SEL.size) }) : t('Choose products');
+    $('span', selbar).textContent = t(SEL.size ? 'Tap Send for a picture, PDF or text' : 'Tap the products to send');
+    $('[data-selshare]', selbar).disabled = !SEL.size;
+  }
+  function setSelecting(on) {
+    selecting = on;
+    if (on) $$('.flip.is-flipped').forEach(c => flipTo(c, false));
+    if (!on) SEL.clear();
+    paintSel();
+  }
+  function toggleSel(o) {
+    if (SEL.has(o.id)) SEL.delete(o.id); else SEL.add(o.id);
+    selecting = true;
+    paintSel();
+  }
+  function endSelect() { setSelecting(false); }
+
+  /* ---- what is sent: a picture (one long image), PDF pages (A4) or text ---- */
+  const SW = 1080, SP = 40, BW = SW - 2 * SP, PAGE_H = Math.round(SW * 297 / 210);
+  const FONT = '"Poppins","Segoe UI",Tahoma,sans-serif';
+  const imgs = {};
+  const loadImg = src => imgs[src] || (imgs[src] = new Promise(res => {
+    if (!src) return res(null);
+    const i = new Image(); i.onload = () => res(i.naturalWidth ? i : null); i.onerror = () => res(null); i.src = src;
+  }));
+  const rgb = a => 'rgb(' + a.join(',') + ')';
+  const darkHead = () => { const c = (BR.head || '#ffffff').replace('#', ''); return parseInt(c.slice(0, 2), 16) + parseInt(c.slice(2, 4), 16) + parseInt(c.slice(4, 6), 16) < 300; };
+  function canvas(w, hh) { const c = document.createElement('canvas'); c.width = w; c.height = Math.max(1, Math.ceil(hh)); return c; }
+  // drawing in reading order: x from the left in English, from the right in Arabic
+  function pen(c) {
+    const g = c.getContext('2d'), W = c.width, r = lang === 'ar';
+    g.direction = r ? 'rtl' : 'ltr'; g.textBaseline = 'alphabetic';
+    return {
+      g, r,
+      x: (x, w) => r ? W - x - (w || 0) : x,
+      text(s, x, y, end) { s = String(s); g.direction = r && RTL_CH.test(s) ? 'rtl' : 'ltr'; g.textAlign = (!!end) !== r ? 'right' : 'left'; g.fillText(s, r ? W - x : x, y); },
+      font(w, px) { g.font = w + ' ' + px + 'px ' + FONT; }
+    };
+  }
+  function rr(g, x, y, w, hh, r) {
+    g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + hh - r);
+    g.quadraticCurveTo(x + w, y + hh, x + w - r, y + hh); g.lineTo(x + r, y + hh); g.quadraticCurveTo(x, y + hh, x, y + hh - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath();
+  }
+  function fitText(g, s, max) { s = String(s); if (g.measureText(s).width <= max) return s; while (s.length > 1 && g.measureText(s + '…').width > max) s = s.slice(0, -1); return s + '…'; }
+  function wrapText(g, s, max, lines) {
+    const out = []; let cur = '';
+    String(s).split(/\s+/).filter(Boolean).forEach(w => {
+      const tryS = cur ? cur + ' ' + w : w;
+      if (!cur || g.measureText(tryS).width <= max) cur = tryS; else { out.push(cur); cur = w; }
+    });
+    if (cur) out.push(cur);
+    const fixed = out.map(l => fitText(g, l, max));
+    if (fixed.length > lines) { fixed.length = lines; fixed[lines - 1] = fitText(g, fixed[lines - 1] + ' …', max); }
+    return fixed;
+  }
+  function contain(g, img, x, y, w, hh) {
+    const k = Math.min(w / img.naturalWidth, hh / img.naturalHeight), iw = img.naturalWidth * k, ih = img.naturalHeight * k;
+    g.drawImage(img, x + (w - iw) / 2, y + (hh - ih) / 2, iw, ih);
+  }
+  const ACC = () => rgb(BR.pdfAccent || [238, 122, 20]);
+  // one product: photo, group, name, and a table of its sizes, part numbers and (if asked) prices
+  async function productCard(o, prices) {
+    const PAD = 30, PH = 220, TX = PAD + PH + 30, TW = BW - TX - PAD, img = await loadImg(o.img);
+    const meas = pen(canvas(10, 10)), g0 = meas.g;
+    meas.font('700', 34); const name = wrapText(g0, tn(o.n), TW, 3);
+    const label = (lang === 'ar' ? tn(o.c.name) + ' · ' + tn(o.sec) : (o.c.name + ' · ' + o.sec).toUpperCase());
+    const hasSize = o.r.some(r => r[1]), hasCode = o.r.some(r => r[0]);
+    meas.font('600', 23); const codeW = hasCode ? Math.max.apply(null, o.r.map(r => g0.measureText(r[0] || '').width)) : 0;
+    const stacked = hasSize && hasCode && codeW > 330;   // long codes (Modern Electric's Tally names): under the size
+    const RH = stacked ? 76 : 46, HH = 42, BL = stacked ? 34 : 31;
+    // a long list of sizes goes in two columns side by side
+    const NC = !stacked && o.r.length > 4 && codeW < (prices ? 190 : 250) ? 2 : 1, PER = Math.ceil(o.r.length / NC), CG = 26;
+    const topH = Math.max(PH, 34 + name.length * 44 + 46);
+    const H = PAD + topH + 20 + HH + PER * RH + PAD;
+    const c = canvas(BW, H), p = pen(c), g = p.g;
+    g.fillStyle = '#ffffff'; rr(g, 1, 1, BW - 2, H - 2, 26); g.fill(); g.strokeStyle = '#e4e0d9'; g.lineWidth = 2; g.stroke();
+    // photo
+    g.save(); rr(g, p.x(PAD, PH), PAD, PH, PH, 18); g.clip(); g.fillStyle = '#ffffff'; g.fillRect(p.x(PAD, PH), PAD, PH, PH);
+    if (img) contain(g, img, p.x(PAD, PH) + 14, PAD + 14, PH - 28, PH - 28);
+    else { g.fillStyle = '#f2f0ec'; g.fillRect(p.x(PAD, PH), PAD, PH, PH); }
+    g.restore(); g.strokeStyle = '#ece9e4'; rr(g, p.x(PAD, PH), PAD, PH, PH, 18); g.stroke();
+    // words
+    g.fillStyle = ACC(); p.font('600', 19); p.text(fitText(g, label, TW), TX, PAD + 26);
+    g.fillStyle = '#17181c'; p.font('700', 34); name.forEach((l, i) => p.text(l, TX, PAD + 34 + 40 + i * 44));
+    g.fillStyle = '#6d7079'; p.font('400', 22);
+    const meta = o.r.length > 1 ? cnt(o.r.length, 'size') : [ts(o.r[0][1]), o.r[0][0]].filter(Boolean).join(' · ');
+    p.text(fitText(g, meta, TW), TX, PAD + 34 + 40 + name.length * 44 + 10);
+    // the table: size, part no. and price, in one or two columns
+    const y0 = PAD + topH + 20, CW = (BW - 2 * PAD - (NC - 1) * CG) / NC, two = NC > 1;
+    const PW = prices ? (two ? 150 : 210) : 0, fs = two ? 22 : 24;
+    for (let k = 0; k < NC; k++) {
+      const x0 = PAD + k * (CW + CG), rows = o.r.slice(k * PER, k * PER + PER), xEnd = x0 + CW, codeEnd = xEnd - (prices ? PW + 20 : 0);
+      if (!rows.length) continue;
+      let y = y0;
+      g.fillStyle = '#6d7079'; p.font('600', 17);
+      p.text((hasSize ? t('Size') : t(BR.codeLabel || 'Part no.')).toUpperCase(), x0 + 12, y + 28);
+      if (hasSize && hasCode && !stacked) p.text(t(BR.codeLabel || 'Part no.').toUpperCase(), codeEnd - 12, y + 28, true);
+      if (prices) p.text(t('Price').toUpperCase(), xEnd - 12, y + 28, true);
+      g.fillStyle = '#17181c'; g.fillRect(p.x(x0, CW), y + HH - 3, CW, 3);
+      y += HH;
+      rows.forEach((r, i) => {
+        if (i % 2) { g.fillStyle = '#f8f6f2'; g.fillRect(p.x(x0, CW), y, CW, RH); }
+        g.fillStyle = '#eeebe6'; g.fillRect(p.x(x0, CW), y + RH - 1, CW, 1);
+        p.font('600', fs - 1); const cw = hasCode && !stacked && r[0] ? g.measureText(r[0]).width : 0;
+        const sizeMax = (prices ? xEnd - PW - 20 : xEnd) - x0 - 24 - (hasSize && hasCode && !stacked ? cw + 24 : 0);
+        if (hasSize) {
+          g.fillStyle = '#17181c'; p.font('500', fs); p.text(fitText(g, ts(r[1]) || '–', sizeMax), x0 + 12, y + BL);
+          if (hasCode && stacked) { g.fillStyle = '#6d7079'; p.font('400', 19); p.text(fitText(g, r[0] || '', (prices ? xEnd - PW - 20 : xEnd) - x0 - 24), x0 + 12, y + 64); }
+          else if (hasCode) { g.fillStyle = '#17181c'; p.font('600', fs - 1); p.text(r[0] || '–', codeEnd - 12, y + BL, true); }
+        } else { g.fillStyle = '#17181c'; p.font('600', fs - 1); p.text(fitText(g, r[0] || '–', sizeMax), x0 + 12, y + BL); }
+        if (prices) {
+          const has = r[2] != null; g.fillStyle = has ? ACC() : '#8b8e95'; p.font(has ? '700' : '400', has ? fs : 18);
+          p.text(has ? money(r[2]) : t('On request'), xEnd - 12, y + (stacked ? 40 : BL), true);
+        }
+        y += RH;
+      });
+    }
+    return c;
+  }
+  // the shop's band at the top: its logo, and how to reach it
+  async function headBand(w, hh, small) {
+    const c = canvas(w, hh), p = pen(c), g = p.g, dark = darkHead(), logo = await loadImg(BR.logo);
+    g.fillStyle = BR.head || '#ffffff'; g.fillRect(0, 0, w, hh);
+    g.fillStyle = ACC(); g.fillRect(0, hh - 8, w, 8);
+    if (logo) { const lh = small ? 58 : 104, lw = Math.min(small ? 260 : 380, logo.naturalWidth * lh / logo.naturalHeight); contain(g, logo, p.x(SP, lw), (hh - 8 - lh) / 2, lw, lh); }
+    g.fillStyle = ACC(); p.font('600', small ? 16 : 18); p.text(t('Product details').toUpperCase(), w - SP, small ? 40 : 58, true);
+    g.fillStyle = dark ? '#ffffff' : '#17181c'; p.font('700', small ? 24 : 32); p.text(BR.phone || BR.name, w - SP, small ? 72 : 102, true);
+    if (!small && BR.email) { g.fillStyle = dark ? '#b9bac0' : '#6d7079'; p.font('400', 20); p.text(BR.email, w - SP, 138, true); }
+    return c;
+  }
+  function footBand(w, hh, pageNo) {
+    const c = canvas(w, hh), p = pen(c), g = p.g;
+    g.fillStyle = '#f4f2ee'; g.fillRect(0, 0, w, hh); g.fillStyle = '#d9d5ce'; g.fillRect(SP, 0, w - 2 * SP, 2);
+    g.fillStyle = '#17181c'; p.font('700', 22); p.text(fitText(g, BR.full, w - 2 * SP - 140), SP, 44);
+    g.fillStyle = '#6d7079'; p.font('400', 19); p.text(fitText(g, BR.address, w - 2 * SP - 140), SP, 74);
+    if (hh > 100) { g.fillStyle = ACC(); p.font('600', 19); p.text([BR.phone, BR.mobile, BR.email].filter(Boolean).join('  ·  '), SP, 104); }
+    if (pageNo) { g.fillStyle = '#17181c'; p.font('700', 20); p.text(pageNo, w - SP, 44, true); }
+    return c;
+  }
+  const today = () => { const d = new Date(); try { return d.toLocaleDateString(lang === 'ar' ? 'ar-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return d.toDateString(); } };
+  // asPdf: A4 pages; otherwise one picture with every product
+  async function sendPages(items, prices, asPdf) {
+    try { await Promise.all(['400', '500', '600', '700'].map(w => document.fonts.load(w + ' 30px Poppins'))); } catch (e) {}
+    const cards = [];
+    for (const o of items) cards.push(await productCard(o, prices));
+    const BG = '#f4f2ee', GAP = 18, SUB = 60;
+    const subLine = (p, y) => { p.g.fillStyle = '#6d7079'; p.font('400', 22); p.text(today() + '  ·  ' + cnt(items.length, 'product'), SP, y); };
+    if (!asPdf) {
+      const HB = 176, FB = 140, H = HB + SUB + cards.reduce((a, c) => a + c.height + GAP, 0) + 10 + FB;
+      const c = canvas(SW, H), p = pen(c), g = p.g;
+      g.fillStyle = BG; g.fillRect(0, 0, SW, H);
+      g.drawImage(await headBand(SW, HB), 0, 0); subLine(p, HB + 40);
+      let y = HB + SUB; cards.forEach(cd => { g.drawImage(cd, SP, y); y += cd.height + GAP; });
+      g.drawImage(footBand(SW, FB), 0, H - FB);
+      return [c];
+    }
+    // pages: the full band on the first, a small one after; cards never split (a very tall one is made smaller)
+    const pages = [], FB = 96;
+    let c = null, p = null, y = 0, bottom = 0, held = 0;
+    const newPage = async () => {
+      c = canvas(SW, PAGE_H); p = pen(c); p.g.fillStyle = BG; p.g.fillRect(0, 0, SW, PAGE_H);
+      const first = !pages.length, hh = first ? 176 : 100;
+      p.g.drawImage(await headBand(SW, hh, !first), 0, 0);
+      y = hh + (first ? SUB : 30); if (first) subLine(p, hh + 40);
+      bottom = PAGE_H - FB - 20; pages.push(c); held = 0;
+    };
+    await newPage();
+    for (const cd of cards) {
+      let w = cd.width, hh = cd.height;
+      const room = bottom - (pages.length === 1 ? 176 + SUB : 130);
+      if (hh > room) { const k = room / hh; w *= k; hh = room; }
+      if (y + hh > bottom && held) await newPage();
+      p.g.drawImage(cd, SP + (BW - w) / 2, y, w, hh); y += hh + GAP; held++;
+    }
+    pages.forEach((pg, i) => pg.getContext('2d').drawImage(footBand(SW, FB, pages.length > 1 ? (i + 1) + ' / ' + pages.length : ''), 0, PAGE_H - FB));
+    return pages;
+  }
+  async function pagesPdf(pages) {
+    await window.FT_LOAD_PDF();
+    const J = window.jspdf && window.jspdf.jsPDF; if (!J) throw new Error('PDF maker missing');
+    const doc = new J({ unit: 'mm', format: 'a4', compress: true });
+    pages.forEach((c, i) => { if (i) doc.addPage(); doc.addImage(c.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297); });
+    return doc.output('datauristring').split(',')[1];
+  }
+  function shareText(items, prices) {
+    const L = ['*' + BR.full + '*', t('Product details'), ''];
+    items.forEach((o, i) => {
+      L.push((i + 1) + '. *' + tn(o.n) + '* (' + tn(o.c.name) + ')');
+      o.r.forEach(r => {
+        const bits = [ts(r[1]), r[0]].filter(Boolean);
+        if (prices) bits.push(r[2] != null ? money(r[2]) : t('Price on request'));
+        L.push('    • ' + bits.join('  ·  '));
+      });
+      L.push('');
+    });
+    L.push([BR.phone, BR.mobile, BR.email].filter(Boolean).join(' · '));
+    L.push(BR.address);
+    return L.join('\n');
+  }
+  // browser: the share menu, or a download
+  function webFile(b64, name, mime, cap) {
+    const bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    let file = null; try { file = new File([u8], name, { type: mime }); } catch (e) {}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: cap }).catch(() => {});
+    const url = URL.createObjectURL(new Blob([u8], { type: mime })), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  async function sendMade(m, how, items) {
+    const d = new Date(), z = n => (n < 10 ? '0' : '') + n;
+    const name = (BR.order.pre || '') + 'products-' + d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes());
+    const cap = BR.name + ' · ' + cnt(items.length, 'product');
+    if (m.kind === 'txt') {
+      window.__lastSend = { kind: 'txt', how, size: m.text.length };
+      if (how === 'wa') return open(waLink('', m.text));
+      if (N && N.share) return N.share(cap, m.text);
+      if (navigator.share) return navigator.share({ text: m.text }).catch(() => {});
+      return copy(m.text, t('Copied'));
+    }
+    const pic = m.kind === 'pic';
+    const b64 = pic ? m.pages[0].toDataURL('image/jpeg', 0.9).split(',')[1] : await pagesPdf(m.pages);
+    const file = name + (pic ? '.jpg' : '.pdf'), mime = pic ? 'image/jpeg' : 'application/pdf';
+    window.__lastSend = { kind: m.kind, how, size: b64.length, name: file };
+    if (N && N.shareFile) return N.shareFile(b64, file, mime, how === 'wa' ? '' : cap, how === 'wa' ? 'wa' : '');
+    webFile(b64, file, mime, cap);
+  }
+  let shareFmt = 'pic';
+  const PIC_MAX = 10;
+  function shareSheet(items, fromSel) {
+    const many = items.length > PIC_MAX;
+    let fmt = many && shareFmt === 'pic' ? 'pdf' : shareFmt, prices = !!store.get(BR.id + '-share-prices', false), job = 0, made = null;
+    const b = h('<div class="ssheet"><h3>' + esc(items.length === 1 ? t('Send this product') : t('Send {n}', { n: cnt(items.length, 'product') })) + '</h3>' +
+      '<div class="segs segs--3">' + [['pic', 'Picture', I.image], ['pdf', 'PDF', I.pdf], ['txt', 'Text', I.text]].map(f => '<button class="seg seg--ic' + (f[0] === fmt ? ' is-on' : '') + '" data-fmt="' + f[0] + '"' + (f[0] === 'pic' && many ? ' disabled' : '') + '>' + f[2] + '<span>' + esc(t(f[1])) + '</span></button>').join('') + '</div>' +
+      (many ? '<p class="snote">' + esc(t('A picture holds up to {n} products. Send more as a PDF.', { n: PIC_MAX })) + '</p>' : '') +
+      '<label class="tgl"><span><b>' + esc(t('Show prices')) + '</b><small data-psub></small></span><input type="checkbox" data-prices' + (prices ? ' checked' : '') + '><i aria-hidden="true"></i></label>' +
+      '<div class="sprev" data-prev></div>' +
+      '<div class="prow2"><button class="btn btn--wa" data-send="wa">' + I.wa + '<span>WhatsApp</span></button><button class="btn btn--ghost" data-send="any">' + I.share + '<span>' + esc(t('Other apps')) + '</span></button></div>' +
+      (fromSel ? '<button class="btn btn--link btn--full" data-selclr>' + esc(t('Clear the chosen products')) + '</button>' : '') + '</div>');
+    const prev = $('[data-prev]', b), psub = $('[data-psub]', b);
+    async function draw() {
+      const my = ++job; made = null;
+      psub.textContent = t(prices ? 'The price of each size is shown' : 'Sizes and part numbers only, no prices');
+      b.classList.add('is-making');
+      prev.innerHTML = '<div class="sprev__wait"><span class="spin"></span></div>';
+      try {
+        if (fmt === 'txt') { const tx = shareText(items, prices); made = { kind: 'txt', text: tx }; prev.innerHTML = '<pre class="sprev__txt"></pre>'; $('pre', prev).textContent = tx; }
+        else {
+          const pages = await sendPages(items, prices, fmt === 'pdf');
+          if (my !== job) return;
+          made = { kind: fmt, pages };
+          prev.innerHTML = '';
+          const im = new Image(); im.className = 'sprev__img'; im.alt = ''; im.src = pages[0].toDataURL('image/jpeg', 0.8); prev.appendChild(im);
+          if (pages.length > 1) prev.insertAdjacentHTML('beforeend', '<p class="sprev__n">' + esc(t('{n} pages', { n: pages.length })) + '</p>');
+        }
+      } catch (e) { if (my === job) prev.innerHTML = '<p class="snote">' + esc(t('Could not make it. Try again.')) + '</p>'; }
+      if (my === job) b.classList.remove('is-making');
+    }
+    b.addEventListener('click', async e => {
+      const f = e.target.closest('[data-fmt]');
+      if (f) { if (f.disabled || f.dataset.fmt === fmt) return; fmt = shareFmt = f.dataset.fmt; $$('[data-fmt]', b).forEach(x => x.classList.toggle('is-on', x === f)); buzz(); draw(); return; }
+      if (e.target.closest('[data-selclr]')) { endSelect(); closeSheet(); return; }
+      const s = e.target.closest('[data-send]'); if (!s || !made) return;
+      buzz(); s.classList.add('is-busy');
+      try { await sendMade(made, s.dataset.send, items); } catch (err) { toast(t('Could not make it. Try again.')); s.classList.remove('is-busy'); return; }
+      s.classList.remove('is-busy');
+      closeSheet(); if (fromSel) endSelect();
+    });
+    $('[data-prices]', b).addEventListener('change', e => { prices = e.target.checked; store.set(BR.id + '-share-prices', prices); buzz(); draw(); });
+    openSheet(b); draw();
+  }
+
   async function shareWebFile(path, title) {
     try {
       const blob = await (await fetch(path)).blob(), name = path.split('/').pop();

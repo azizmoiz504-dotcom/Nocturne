@@ -40,6 +40,14 @@ cp web/img/*.png "$W/img/"   # logo-lockup-dark.png: the logo with a light grey 
 cp -r web/shops "$W/shops"   # the Mabrook and Modern Electric logos and the plug sign
 if [ -z "$SHOP" ]; then
   cp -r bam "$W/bam"; rm -rf "$W/bam/tiles"   # their category pictures on black: the app shows them on white (bam/covers, tools/bam_covers.py)
+  # the PDF catalogues: one per group (tools/bam_pdfs.cjs) in place of the three printed ones. A list changed after its
+  # catalogues were made is refused, so a salesman never sends an old catalogue.
+  if [ -f bam/pdfs.js ]; then
+    if [ bam/data.js -nt bam/pdfs.js ]; then echo "app/bam/data.js changed after the catalogues were made: run node app/tools/bam_pdfs.cjs" >&2; exit 1; fi
+    rm -rf "$W/bam/pdf"
+  else
+    echo 'window.BAM_PDFS = null;' > "$W/bam/pdfs.js"
+  fi
   cp -r me "$W/me"
 else
   # one shop: fixed in the page, and the other shops' lists left out

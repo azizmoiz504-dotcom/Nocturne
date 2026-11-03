@@ -114,10 +114,10 @@ await tap('#first .bcard--bam', 3500);
 pg = await attach(); await wait(1500);
 check(await pg.evaluate(() => FTNative.brand() === 'bam' && document.documentElement.dataset.brand === 'bam' && document.documentElement.dataset.theme === 'light'), 'Bait Al Maqdis picked: the app turns orange, light look');
 await shot('02-bam-home');
-check(await pg.evaluate(() => { const t = [...document.querySelectorAll('#stage .ctile')].map(x => x.getAttribute('data-go')); return t.length === window.BAM_DATA.cats.length && t.every(g => /^c\/b-/.test(g)); }), 'home shows only the Bait Al Maqdis categories');
+check(await pg.evaluate(() => { const t = [...document.querySelectorAll('#stage [data-cat]')].map(x => x.getAttribute('data-go')); return t.length === window.BAM_DATA.cats.length && t.every(g => /^c\/b-/.test(g)); }), 'home shows only the Bait Al Maqdis categories');
 await scroll(99999); await wait(900); await shot('03-bam-home-end');
 await scroll(0); await wait(500);
-const imgsOk = await pg.evaluate(() => [...document.querySelectorAll('.ctile img')].filter(i => i.complete && i.naturalWidth > 0).length);
+const imgsOk = await pg.evaluate(() => [...document.querySelectorAll('#stage [data-cat] img')].filter(i => i.complete && i.naturalWidth > 0).length);
 check(imgsOk > 4, 'category pictures load from inside the app (' + imgsOk + ')');
 
 // leave the app: the home-screen icon becomes Bait Al Maqdis
@@ -151,6 +151,31 @@ check((await rowQ()).join() === '1,1', '− twice goes back to 1 (' + (await row
 await shot('07b-flip-stepper');
 await key(4);
 check(await pg.evaluate(() => !document.querySelector('.flip.is-flipped')), 'phone Back turns the card back first');
+
+/* ---------- Select: choose 2 products and send them as a PDF; one product as a picture ---------- */
+await tap(L + '[data-selmode]', 800);
+await tap(L + '.flip >> nth=0', 400); await tap(L + '.flip >> nth=2', 700);
+await shot('07c-chosen');
+check(await pg.evaluate(() => document.querySelectorAll('#stage > .view:not(.is-under) .flip.is-sel').length === 2 && document.getElementById('selbar').classList.contains('is-on')), 'Select: two products chosen and the send bar shows');
+await tap('#selbar [data-selshare]', 4000);
+check(await pg.evaluate(() => !!document.querySelector('#sheet .sprev__img')), 'the send sheet draws the picture of the 2 products');
+await shot('07d-send-picture');
+await tap('#sheet [data-fmt="pdf"]', 5000); await shot('07e-send-pdf');
+await tap('#sheet [data-send="any"]', 5000); await shot('07f-send-menu');
+const sent1 = await pg.evaluate(() => window.__lastSend || null);
+check(!!sent1 && sent1.kind === 'pdf' && sent1.size > 20000, 'the 2 products go out as a PDF (' + JSON.stringify(sent1) + ')');
+await key(4); await wait(1500);
+pg = await attach();
+check(await pg.evaluate(() => !document.body.classList.contains('is-selecting') && !document.querySelector('.flip.is-sel')), 'after sending, choosing ends');
+await tap(L + '.flip [data-flip]', 1000);
+await tap(L + '.flip.is-flipped [data-share1]', 4000);
+await tap('#sheet [data-fmt="pic"]', 4000);
+await tap('#sheet [data-send="any"]', 4000); await shot('07g-send-one');
+const sent2 = await pg.evaluate(() => window.__lastSend || null);
+check(!!sent2 && sent2.kind === 'pic' && sent2.size > 20000, 'the share button on a card sends one product as a picture (' + JSON.stringify(sent2) + ')');
+await key(4); await wait(1500);
+pg = await attach();
+if (await pg.evaluate(() => !!document.querySelector('.flip.is-flipped'))) await key(4);
 await key(4);
 
 /* ---------- only Bait Al Maqdis products here ---------- */
@@ -191,7 +216,7 @@ pg = await attach();
 /* ---------- PDFs ---------- */
 await tap('#tabs [data-tab="pdfs"]', 1200); await shot('19-pdfs');
 check(await pg.evaluate(() => document.querySelectorAll('#stage > .view:not(.is-under) [data-pdf]').length >= 6), 'PDFs tab lists the catalogues');
-const bamPdf = await pg.evaluate(() => 'bam/' + window.BAM_DATA.pdfs[2].file);
+const bamPdf = await pg.evaluate(() => 'bam/' + (window.BAM_PDFS || window.BAM_DATA.pdfs)[2].file);
 await tap(L + '[data-pdf="2"][data-how="open"]', 5000); await shot('20-catalogue-open');
 log('after catalogue:', resumed());
 await key(4); await wait(1500);

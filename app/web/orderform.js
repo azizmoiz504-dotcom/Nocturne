@@ -75,6 +75,7 @@
     document.head.appendChild(s);
   }));
 
+  window.FT_LOAD_PDF = loadLib;   // the app's product pictures and PDFs use it too
   window.FT_ORDER_PDF = async function (x) {
     await loadLib();
     const J = window.jspdf && window.jspdf.jsPDF; if (!J) throw new Error('PDF maker missing');
