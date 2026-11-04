@@ -353,9 +353,9 @@ class Site:
             rng = next((x for x in self.ranges if x['id'] == rid), None)
             g = rng and next((g for g in rng['groups'] if g['name']['en'].lower() == name.lower()), None)
             return {'range': rid, 'g': g['slug'], 'name': g['name'], 'count': len(g['items']), 'rname': rng['name']} if g else None
-        parts = [('hammer', 'hammers', 'Claw Hammers'), ('spanner', 'kapusi', 'Spanners & Wrenches'), ('driver', 'kapusi', 'Screwdrivers, Bits & Keys'),
-                 ('pliers', 'kapusi', 'Pliers, Cutters & Crimpers'), ('tape', 'sgs', 'Measuring & Marking'), ('level', 'kapusi', 'Measuring & Levelling'),
-                 ('trowel', 'sgs', 'Plastering, Trowels & Scrapers')]
+        parts = [('cone', 'safety', 'Site Safety'), ('light', 'safety', 'Site Safety'), ('gloves', 'safety', 'Hand Protection'),
+                 ('shovel', 'shovels', 'Shovels'), ('tape', 'safety', 'Site Safety'), ('hessian', 'formwork', 'Hessian Cloth'),
+                 ('goggles', 'safety', 'Body & Eye Protection')]
         fixings = []
         for pid, rid, gname in parts:
             g = grp(rid, gname)
@@ -514,9 +514,9 @@ class Site:
         # their logo: the dome on its own (a mask the page colours), the icon and the picture for shared links
         logo = Image.open(os.path.join(self.bam, 'logo.png')).convert('LA')
         a = logo.getchannel('A')
-        rows = [a.crop((0, y, logo.width, y + 1)).getbbox() is not None for y in range(logo.height)]
-        cut = next((y for y in range(int(logo.height * 0.5), logo.height) if not rows[y]), int(logo.height * 0.74))
-        dome = logo.crop((0, 0, logo.width, cut)); dome = dome.crop(dome.getchannel('A').getbbox())
+        # the mark on its own: the tower that stands in the I of BAIT (a mask the page colours)
+        tw = a.crop((int(logo.width * .318), 0, int(logo.width * .41), int(logo.height * .432)))
+        dome = Image.new('LA', tw.size, 255); dome.putalpha(tw); dome = dome.crop(tw.getbbox())
         white = Image.new('RGBA', dome.size, (255, 255, 255, 0)); white.putalpha(dome.getchannel('A'))
         white.save(self.path('assets/mark.png'), optimize=True)
         full = Image.new('RGBA', logo.size, (255, 255, 255, 0)); full.putalpha(a); full.save(self.path('assets/logo.png'), optimize=True)
