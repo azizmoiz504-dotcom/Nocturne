@@ -45,7 +45,7 @@ function small(rel, size, q) {
 function pageHTML(c) {
   const fonts = [400, 500, 600, 700, 800].map(w => '@font-face{font-family:P;font-weight:' + w + ';src:url(' + fileUrl(path.join(BAM, 'fonts', 'poppins-' + w + '.woff2')) + ')}').join('');
   const ink = path.join(WORK, 'logo-ink.png');
-  if (newer(path.join(BAM, 'logo.png'), ink)) { fs.mkdirSync(WORK, { recursive: true }); execFileSync('convert', [path.join(BAM, 'logo.png'), '-fill', '#15161a', '-colorize', '100', ink]); }
+  if (newer(path.join(BAM, 'logo.png'), ink)) { fs.mkdirSync(WORK, { recursive: true }); execFileSync('convert', [path.join(BAM, 'logo.png'), '-fill', '#042a5d', '-colorize', '100', ink]); }
   const secs = c.secs.map(s => ({
     n: s.n,
     items: s.items.map(it => ({ n: it.n, img: it.img ? fileUrl(small(it.img, 420, 80)) : '', r: it.r.map(r => [r[0] || '', r[1] || '']) }))

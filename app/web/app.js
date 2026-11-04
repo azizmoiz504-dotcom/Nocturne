@@ -898,7 +898,7 @@
   }
   // the branch's logo at the top of Home: Bait Al Maqdis with its tag line, the others as they are
   function heroLogo() {
-    if (BAM) return '<img class="hero__logo hero__logo--bam" src="bam/logo.png" alt="Bait Al Maqdis"><p class="hero__tag"><i></i><span>' + esc(t('TOOLS & MORE')) + '</span><i></i></p>';
+    if (BAM) return '<img class="hero__logo hero__logo--bam" src="bam/logo.png" alt="Bait Al Maqdis">';
     if (brandId === 'fakhri') return '<img class="hero__logo hero__logo--fk" src="' + fkLogo() + '" alt="Fakhri Tools &amp; Workshop Materials Trading LLC">';
     return '<span class="hero__plate hero__plate--' + brandId + '"><img class="hero__logo hero__logo--' + brandId + '" src="' + esc(BR.logo) + '" alt="' + esc(BR.full) + '"></span>';
   }

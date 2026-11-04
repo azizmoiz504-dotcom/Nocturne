@@ -161,7 +161,7 @@ html[data-brand=me] .ph--none::after{border:0;border-radius:0;top:28%;right:28%;
 .hero__logo{width:min(250px,64vw);height:auto}
 .hero__logo--fk{width:min(270px,72vw);margin-top:4px}
 /* the Bait Al Maqdis logo is white: black on the light look */
-html:not([data-theme=dark]) .hero__logo--bam,html:not([data-theme=dark])[data-brand=bam] .sp__logo{filter:brightness(0)}
+html:not([data-theme=dark]) .hero__logo--bam,html:not([data-theme=dark])[data-brand=bam] .sp__logo{content:url(bam/logo-navy.png)}
 /* Mabrook and Modern Electric logos are made for white: on the dark look they sit on a white plate */
 .hero__plate{display:block;margin-top:6px}
 .hero__logo--mabrook{width:min(280px,74vw)}
