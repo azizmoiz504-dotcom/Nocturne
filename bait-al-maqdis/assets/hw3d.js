@@ -1,8 +1,8 @@
-/* Bait Al Maqdis website: the 3D safety and site items, drawn in the browser (no picture files).
-   A traffic cone, a solar warning light, a roll of warning tape, a pan shovel, a roll of hessian cloth,
-   a work glove and safety goggles float together in the hero; scrolling pulls the warning tape off its roll.
-   In "Every tool" they fly onto the wall, each with its name. Without 3D (old phone, graphics off)
-   the page shows the flat picture instead. */
+/* Bait Al Maqdis website: the 3D hand tools, drawn in the browser (no picture files).
+   They are the orange-and-black tools from their own Kapusi range: claw hammer, combination spanner,
+   screwdriver, combination pliers and tape measure float together in the hero, and scrolling pulls the
+   tape out and opens the pliers. In "Every tool" they fly onto the wall with the spirit level and the
+   trowel, each with its name. Without 3D (old phone, graphics off) the page shows the flat picture instead. */
 (function () {
   'use strict';
   var canvas = document.getElementById('gl');
@@ -59,6 +59,37 @@
   scene.add(new T.AmbientLight(0x30343c, 0.55));
 
   var srgb = function (hex) { return new T.Color(hex).convertSRGBToLinear(); };
+  /* the blade of the tape: yellow steel with centimetre marks (drawn once) */
+  var TEX_LEN = 4.4;                  // how long 100 cm of blade is, in the model
+  function tapeTexture() {
+    var c = document.createElement('canvas'); c.width = 2048; c.height = 128;
+    var x = c.getContext('2d');
+    x.fillStyle = '#f2c21b'; x.fillRect(0, 0, c.width, c.height);
+    var px = c.width / 100;
+    x.fillStyle = '#16171a';
+    for (var mm = 0; mm <= 1000; mm += 5) {
+      var X = mm / 10 * px, cm = mm % 10 === 0, ten = mm % 100 === 0;
+      var h = ten ? 52 : cm ? 34 : 16;
+      x.fillRect(X - (ten ? 1.5 : 1), 0, ten ? 3 : 2, h);
+      x.fillRect(X - (ten ? 1.5 : 1), c.height - h, ten ? 3 : 2, h);
+    }
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    for (var n = 1; n < 100; n++) {
+      var X2 = n * px;
+      if (n % 10 === 0) {
+        x.fillStyle = '#d4201c'; x.fillRect(X2 - 17, 44, 34, 40);
+        x.fillStyle = '#fff'; x.font = '700 30px Arial, sans-serif'; x.fillText(String(n), X2, 65);
+      } else {
+        x.fillStyle = '#16171a'; x.font = '600 19px Arial, sans-serif'; x.fillText(String(n % 10), X2 + 0.5, 65);
+      }
+    }
+    var t = new T.CanvasTexture(c);
+    t.encoding = T.sRGBEncoding;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    t.wrapS = T.ClampToEdgeWrapping;
+    return t;
+  }
+  var tapeTex = tapeTexture();
 
   var M = {
     chrome: new T.MeshStandardMaterial({ color: 0xe9ecf1, metalness: 1, roughness: 0.1 }),
@@ -70,6 +101,7 @@
     paint: new T.MeshPhysicalMaterial({ color: srgb(0xf27a14), metalness: 0, roughness: 0.46, clearcoat: 0.35, clearcoatRoughness: 0.4 }),
     black: new T.MeshStandardMaterial({ color: srgb(0x1b1c1f), metalness: 0, roughness: 0.74 }),
     gloss: new T.MeshPhysicalMaterial({ color: srgb(0x151619), metalness: 0, roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2 }),
+    blade: new T.MeshStandardMaterial({ color: 0xffffff, map: tapeTex, metalness: 0.3, roughness: 0.38, side: T.DoubleSide }),
     vial: new T.MeshPhysicalMaterial({ color: srgb(0xb9ef4c), emissive: srgb(0x3d6b00), emissiveIntensity: 0.55, roughness: 0.08, clearcoat: 1, transparent: true, opacity: 0.86 }),
     bubble: new T.MeshStandardMaterial({ color: 0xf4ffe6, emissive: srgb(0x50642a), roughness: 0.15 })
   };
@@ -151,215 +183,237 @@
     return inner;
   }
 
-  /* ---------- textures drawn once in the browser ---------- */
-  function canvasTex(w, h, draw, rep) {
-    var c = document.createElement('canvas'); c.width = w; c.height = h;
-    draw(c.getContext('2d'), w, h);
-    var t = new T.CanvasTexture(c);
-    t.encoding = T.sRGBEncoding;
-    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; }
-    return t;
-  }
-  // warning tape: black and yellow bands with WARNING on them
-  var RIB_LEN = 3.2;                       // how long one picture of the tape is, in the model
-  var cautionTex = canvasTex(1024, 128, function (x, w, h) {
-    x.fillStyle = '#f7c815'; x.fillRect(0, 0, w, h);
-    x.fillStyle = '#141416';
-    for (var k = -2; k < 18; k++) { x.beginPath(); x.moveTo(k * 64, h); x.lineTo(k * 64 + 32, h); x.lineTo(k * 64 + 32 + 60, 0); x.lineTo(k * 64 + 60, 0); x.closePath(); x.fill(); }
-    x.fillStyle = '#f7c815'; x.fillRect(150, 26, 300, 76); x.fillRect(600, 26, 300, 76);
-    x.fillStyle = '#141416'; x.font = '900 58px Arial Black, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.fillText('WARNING', 300, 66); x.fillText('WARNING', 750, 66);
-  }, true);
-  // hessian: open brown weave
-  var hessianTex = canvasTex(256, 256, function (x, w, h) {
-    x.fillStyle = '#6e5232'; x.fillRect(0, 0, w, h);
-    for (var i = 0; i < w; i += 8) {
-      for (var j = 0; j < h; j += 8) {
-        var a = ((i + j) / 8) % 2 === 0, n = Math.random() * 18;
-        x.fillStyle = 'rgb(' + (176 + n) + ',' + (138 + n) + ',' + (88 + n) + ')';
-        if (a) x.fillRect(i, j + 1, 8, 5); else x.fillRect(i + 1, j, 5, 8);
-      }
+  /* ---------- claw hammer: polished head, orange handle, black grip ---------- */
+  var hammer = tool('hammer');
+  (function (h) {
+    h.position.y = 1.85;
+    var head = new T.Group(); h.add(head);
+    var face = lathe([[0, 1.168], [0.13, 1.162], [0.238, 1.15], [0.272, 1.124], [0.284, 1.08], [0.284, 0.93], [0.262, 0.875], [0.214, 0.78], [0.196, 0.66], [0.21, 0.58], [0.25, 0.5], [0, 0.5]], 64, M.polish);
+    face.rotation.z = Math.PI / 2; head.add(face);
+    head.add(ext(rrect(0.8, 0.6, 0.12, -0.22, 0), 0.36, 0.05, M.polish, 3, 12));
+    // the claw: two prongs curving down, with the slot between them
+    var claw = new T.Shape(), top = [], bot = [];
+    for (var k = 0; k <= 26; k++) {
+      var t = k / 26, u = 1 - t;
+      var cx = u * u * 0.1 + 2 * u * t * 0.86 + t * t * 1.24, cy = u * u * 0.03 + 2 * u * t * 0.13 + t * t * -0.52;
+      var dx = 2 * u * (0.86 - 0.1) + 2 * t * (1.24 - 0.86), dy = 2 * u * (0.13 - 0.03) + 2 * t * (-0.52 - 0.13);
+      var l = Math.sqrt(dx * dx + dy * dy), nx = -dy / l, ny = dx / l;
+      var hh = (0.5 * Math.pow(1 - t, 0.75) + 0.05 * t) / 2;
+      top.push([cx + nx * hh, cy + ny * hh]); bot.push([cx - nx * hh, cy - ny * hh]);
     }
-  }, true);
-  hessianTex.repeat.set(6, 3);
-  // knitted glove with blue dots on the palm
-  var knitTex = canvasTex(256, 256, function (x, w, h) {
-    x.fillStyle = '#e9e8e2'; x.fillRect(0, 0, w, h);
-    x.strokeStyle = 'rgba(0,0,0,.07)'; x.lineWidth = 2;
-    for (var j = 0; j < h; j += 6) { x.beginPath(); x.moveTo(0, j); x.lineTo(w, j); x.stroke(); }
-    x.fillStyle = '#1f5fd6';
-    for (var a = 0; a < w; a += 22) for (var b = 0; b < h; b += 22) { x.beginPath(); x.arc(a + ((b / 22) % 2) * 11 + 6, b + 6, 4.6, 0, Math.PI * 2); x.fill(); }
-  }, true);
-  knitTex.repeat.set(2, 2);
-  // the solar panel on top of the warning light
-  var solarTex = canvasTex(256, 256, function (x, w, h) {
-    x.fillStyle = '#0d1a33'; x.fillRect(0, 0, w, h);
-    x.strokeStyle = '#7f93b8'; x.lineWidth = 3;
-    for (var i = 0; i <= 4; i++) { x.beginPath(); x.moveTo(i * w / 4, 0); x.lineTo(i * w / 4, h); x.stroke(); x.beginPath(); x.moveTo(0, i * h / 4); x.lineTo(w, i * h / 4); x.stroke(); }
-    x.strokeStyle = 'rgba(127,147,184,.35)'; x.lineWidth = 1;
-    for (i = 0; i < w; i += 8) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
-  });
-
-  var K = {
-    cone: new T.MeshPhysicalMaterial({ color: srgb(0xff5a10), roughness: 0.42, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
-    reflect: new T.MeshStandardMaterial({ color: 0xf4f6f8, metalness: 0.6, roughness: 0.18, emissive: srgb(0x3a3d42) }),
-    rubber: new T.MeshStandardMaterial({ color: srgb(0x18191c), roughness: 0.85 }),
-    amber: new T.MeshPhysicalMaterial({ color: srgb(0xffa21a), emissive: srgb(0xff7a00), emissiveIntensity: 1.2, roughness: 0.15, clearcoat: 1, side: T.DoubleSide }),
-    bulb: new T.MeshBasicMaterial({ color: srgb(0xfff1c2) }),
-    solar: new T.MeshStandardMaterial({ map: solarTex, metalness: 0.4, roughness: 0.22 }),
-    ribbon: new T.MeshStandardMaterial({ map: cautionTex, roughness: 0.5, side: T.DoubleSide }),
-    hessian: new T.MeshStandardMaterial({ map: hessianTex, roughness: 0.95, side: T.DoubleSide }),
-    wood: new T.MeshStandardMaterial({ color: srgb(0xb9824a), roughness: 0.55 }),
-    blade: new T.MeshPhysicalMaterial({ color: srgb(0x8a9099), metalness: 0.85, roughness: 0.3, clearcoat: 0.4 }),
-    knit: new T.MeshStandardMaterial({ map: knitTex, roughness: 0.9 }),
-    cuff: new T.MeshStandardMaterial({ color: srgb(0x1f5fd6), roughness: 0.8 }),
-    lens: new T.MeshPhysicalMaterial({ color: srgb(0xd8f0ff), metalness: 0, roughness: 0.05, transmission: 0, transparent: true, opacity: 0.35, clearcoat: 1 }),
-    frame: new T.MeshPhysicalMaterial({ color: srgb(0x1e2a3a), roughness: 0.35, clearcoat: 0.6, transparent: true, opacity: 0.85 }),
-    strap: new T.MeshStandardMaterial({ color: srgb(0xf06c12), roughness: 0.7 })
-  };
-
-  /* ---------- traffic cone: orange body, two white reflective bands, black base ---------- */
-  var cone = tool('cone');
-  (function (s) {
-    var base = ext(rrect(2.0, 2.0, 0.28), 0.16, 0.04, K.rubber, 2, 12); base.rotation.x = Math.PI / 2; base.position.y = -1.32; s.add(base);
-    var H = 2.55, r0 = 0.74, r1 = 0.12, y0 = -1.24;
-    var R = function (y) { return r0 + (r1 - r0) * (y - y0) / H; };
-    s.add(lathe([[0, y0], [r0, y0], [r1, y0 + H], [0.09, y0 + H + 0.03], [0, y0 + H + 0.03]], 64, K.cone));
-    [[0.95, 1.38], [1.62, 1.96]].forEach(function (b) {
-      var a = y0 + b[0], c = y0 + b[1];
-      s.add(lathe([[R(a) + 0.012, a], [R(c) + 0.012, c]], 64, K.reflect));
+    claw.moveTo(top[0][0], top[0][1]);
+    top.forEach(function (p) { claw.lineTo(p[0], p[1]); });
+    bot.reverse().forEach(function (p) { claw.lineTo(p[0], p[1]); });
+    [-1, 1].forEach(function (s) { var m = ext(claw, 0.135, 0.028, M.polish, 3, 12); m.position.z = s * 0.088; head.add(m); });
+    // handle: orange core, black rubber grip with two orange bands, oval in section
+    var hd = new T.Group(); hd.scale.z = 0.74; h.add(hd);
+    hd.add(lathe([[0, 0.26], [0.152, 0.26], [0.152, -0.3], [0.158, -0.7], [0.168, -1.1], [0.176, -1.5], [0, -1.5]], 48, M.orange));
+    var grip = [[0, -1.32], [0.172, -1.32], [0.202, -1.42], [0.207, -1.62], [0.199, -2.1], [0.205, -2.6], [0.225, -3.1], [0.242, -3.5], [0.252, -3.74], [0.238, -3.92], [0.18, -3.995], [0, -4.0]];
+    hd.add(lathe(grip, 48, M.black));
+    [-1.66, -3.58].forEach(function (y) {
+      var r = y > -2 ? 0.207 : 0.246;
+      hd.add(lathe([[r - 0.004, y + 0.05], [r + 0.012, y + 0.035], [r + 0.012, y - 0.035], [r - 0.004, y - 0.05]], 48, M.orange));
     });
-  })(cone);
+  })(hammer);
 
-  /* ---------- solar warning light: black case, amber lens that flashes, solar panel on top ---------- */
-  var light = tool('light');
-  var lens, glow;
+  /* ---------- combination spanner (chrome): ring end and open end ---------- */
+  var spanner = tool('spanner');
   (function (s) {
-    s.add(ext(rrect(1.3, 1.5, 0.22), 0.62, 0.06, K.rubber, 3, 12));
-    lens = lathe([[0, 0], [0.53, 0], [0.5, 0.1], [0.42, 0.16], [0, 0.17]], 48, K.amber);
-    lens.rotation.x = Math.PI / 2; lens.position.set(0, -0.12, 0.3); s.add(lens);
-    var ring = new T.Mesh(new T.TorusGeometry(0.53, 0.05, 12, 48), K.rubber); ring.position.set(0, -0.12, 0.31); s.add(ring);
-    glow = new T.PointLight(0xff8a1a, 0, 5); glow.position.set(0, -0.12, 0.9); s.add(glow);
-    var panel = new T.Mesh(new T.BoxGeometry(1.2, 0.05, 0.7), K.solar); panel.position.set(0, 0.84, 0.02); panel.rotation.x = 0.35; s.add(panel);
-    var clamp = ext(rrect(0.42, 0.62, 0.08), 0.18, 0.03, M.satin, 2, 8); clamp.position.set(0, 0.1, -0.38); s.add(clamp);
-  })(light);
+    var L = 3.35, Ro = 0.6, hw0 = 0.2, hw1 = 0.165, Rj = 0.6, jaw = 0.37, phi = 15 * Math.PI / 180, HX = 0.41;
+    var sh = new T.Shape();
+    var a0 = Math.asin(hw0 / Ro);
+    sh.moveTo(Math.cos(a0) * Ro, hw0);
+    sh.absarc(0, 0, Ro, a0, Math.PI * 2 - a0, false);
+    var bx = L - Math.sqrt(Rj * Rj - hw1 * hw1);
+    sh.bezierCurveTo(1.2, -hw0 * 0.86, bx - 0.6, -hw1 * 0.86, bx, -hw1);
+    var b0 = Math.PI + Math.asin(hw1 / Rj);
+    var rot = function (u, v) { return [L + u * Math.cos(phi) - v * Math.sin(phi), u * Math.sin(phi) + v * Math.cos(phi)]; };
+    var ue = Math.sqrt(Rj * Rj - jaw * jaw);
+    var p1 = rot(ue, -jaw), aJ1 = Math.atan2(p1[1], p1[0] - L);
+    sh.absarc(L, 0, Rj, b0, aJ1 + Math.PI * 2, false);
+    var q1 = rot(0, -jaw); sh.lineTo(q1[0], q1[1]);
+    sh.absarc(L, 0, jaw, phi - Math.PI / 2, phi - Math.PI * 1.5, true);
+    var p2 = rot(ue, jaw); sh.lineTo(p2[0], p2[1]);
+    var aJ2 = Math.atan2(p2[1], p2[0] - L), b1 = Math.PI - Math.asin(hw1 / Rj);
+    sh.absarc(L, 0, Rj, aJ2, b1, false);
+    sh.bezierCurveTo(bx - 0.6, hw1 * 0.86, 1.2, hw0 * 0.86, Math.cos(a0) * Ro, hw0);
+    var hole = new T.Path(), ap = HX * Math.cos(Math.PI / 6);
+    for (var k = 0; k < 24; k++) {
+      var ang = k / 24 * Math.PI * 2 + Math.PI / 6, r = k % 2 ? ap / Math.cos(Math.PI / 12) : HX;
+      if (k) hole.lineTo(Math.cos(ang) * r, Math.sin(ang) * r); else hole.moveTo(Math.cos(ang) * r, Math.sin(ang) * r);
+    }
+    hole.closePath(); sh.holes.push(hole);
+    var body = new T.Group(); body.rotation.z = -Math.PI / 2; body.position.y = L / 2; s.add(body);
+    body.add(ext(sh, 0.19, 0.05, M.chrome, 4, 48));
+    var rib = new T.Shape(); rib.moveTo(0.95, 0.1); rib.bezierCurveTo(1.5, 0.085, 2.0, 0.08, 2.45, 0.085); rib.lineTo(2.45, -0.085); rib.bezierCurveTo(2.0, -0.08, 1.5, -0.085, 0.95, -0.1); rib.closePath();
+    [-1, 1].forEach(function (z) { var m = ext(rib, 0.04, 0.012, M.satin, 2, 16); m.position.z = z * 0.095; body.add(m); });
+  })(spanner);
 
-  /* ---------- warning tape: a roll seen from the front, and the tape hangs off it and pulls out as you scroll ---------- */
-  var cautionTexV = canvasTex(128, 1024, function (x, w, h) {   // the same tape, standing up
-    x.translate(w, 0); x.rotate(Math.PI / 2); x.drawImage(cautionTex.image, 0, 0);
-  }, true);
+  /* ---------- screwdriver: fluted orange handle with black grips, chrome shaft, cross tip ---------- */
+  var driver = tool('driver');
+  (function (s) {
+    var prof = [[0.55, 0.15], [0.62, 0.2], [0.76, 0.238], [1.0, 0.268], [1.5, 0.284], [1.8, 0.274], [1.95, 0.238], [2.02, 0.16], [2.05, 0.0]];
+    s.add(fluted(prof, 6, 0.09, 3, M.orange));
+    var grip = prof.map(function (p) { return [p[0], p[1] * 1.015]; });
+    s.add(fluted(grip, 6, 0.09, 3, M.black, 0.86, 1.3));
+    s.add(fluted(grip, 6, 0.09, 3, M.black, 1.58, 1.86));
+    s.add(lathe([[0, 0.56], [0.152, 0.56], [0.152, 0.52], [0.118, 0.46], [0.075, 0.4], [0, 0.4]], 48, M.chrome));
+    s.add(lathe([[0, 0.42], [0.068, 0.42], [0.068, -1.72], [0, -1.72]], 32, M.chrome));
+    s.add(fluted([[-2.05, 0.0], [-2.03, 0.014], [-1.96, 0.04], [-1.84, 0.066], [-1.72, 0.068]], 4, 0.55, 10, M.chrome));
+  })(driver);
+
+  /* ---------- combination pliers: chrome head, orange and black grips; they open and close ---------- */
+  var pliers = tool('pliers');
+  var halves = [];
+  (function (s) {
+    s.position.y = 0.72;
+    function half(sg) {
+      var X = function (x) { return x * sg; };
+      var sh = new T.Shape();
+      sh.moveTo(X(-0.035), 1.58);
+      sh.lineTo(X(-0.17), 1.53);
+      sh.quadraticCurveTo(X(-0.33), 1.06, X(-0.385), 0.46);
+      sh.quadraticCurveTo(X(-0.5), 0.05, X(-0.36), -0.3);
+      sh.quadraticCurveTo(X(0.16), -0.95, X(0.42), -2.95);
+      sh.lineTo(X(0.54), -2.95);
+      sh.quadraticCurveTo(X(0.46), -1.3, X(0.44), -0.24);
+      sh.quadraticCurveTo(X(0.36), 0.22, X(0.02), 0.42);
+      sh.lineTo(X(-0.035), 1.58);
+      var g = new T.Group();
+      var m = ext(sh, 0.21, 0.035, M.chrome, 3, 24); m.position.z = sg * 0.06; g.add(m);
+      // the grip over the handle
+      var gp = tube([[X(0.2), -0.95, sg * 0.06], [X(0.33), -1.6, sg * 0.06], [X(0.44), -2.3, sg * 0.06], [X(0.49), -2.98, sg * 0.06]], 0.17, M.orange, 48);
+      g.add(gp);
+      var c = gp.userData.curve;
+      g.add(cap(c, 1, 0.17, M.orange));
+      var lower = new T.CatmullRomCurve3([0.5, 0.62, 0.74, 0.86, 1].map(function (t) { return c.getPoint(t); }));
+      g.add(new T.Mesh(new T.TubeGeometry(lower, 32, 0.18, 18, false), M.black));
+      g.add(cap(c, 1, 0.18, M.black));
+      g.add(cap(c, 0, 0.17, M.orange));
+      // the stop at the top of the grip
+      var stop = lathe([[0, 0.03], [0.2, 0.03], [0.22, 0], [0.2, -0.03], [0, -0.03]], 32, M.orange);
+      stop.position.copy(c.getPoint(0.02));
+      stop.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), c.getTangent(0.02).negate());
+      g.add(stop);
+      s.add(g);
+      return g;
+    }
+    halves.push(half(1), half(-1));
+    var rivet = new T.Mesh(new T.CylinderGeometry(0.13, 0.13, 0.3, 32), M.satin);
+    rivet.rotation.x = Math.PI / 2; s.add(rivet);
+  })(pliers);
+
+  /* ---------- tape measure: orange case, black sides, the yellow blade pulls out ---------- */
   var tape = tool('tape');
-  var ribbon, ribL = 0.6;
+  var blade, hook, tapeL = 0.5;
   (function (s) {
-    var rm = K.ribbon.clone(); rm.map = cautionTex.clone(); rm.map.needsUpdate = true; rm.map.repeat.set(1.2, 1); rm.side = T.FrontSide;
-    var roll = new T.Mesh(new T.CylinderGeometry(0.62, 0.62, 0.5, 64, 1, true), rm); roll.rotation.z = Math.PI / 2; s.add(roll);
-    var sideM = new T.MeshStandardMaterial({ color: srgb(0xd9a90c), roughness: 0.55, side: T.DoubleSide });
-    [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.26, 0.62, 64), sideM); r.rotation.y = Math.PI / 2; r.position.x = x * 0.25; s.add(r); });
-    var core = new T.Mesh(new T.CylinderGeometry(0.26, 0.26, 0.52, 40, 1, true), new T.MeshStandardMaterial({ color: srgb(0xc9a77a), roughness: 0.9, side: T.DoubleSide }));
-    core.rotation.z = Math.PI / 2; s.add(core);
-    // the loose end hangs from the front of the roll: a strip from y = 0 down to -1, stretched to its length every frame
-    var g = new T.PlaneGeometry(0.48, 1, 1, 8); g.translate(0, -0.5, 0);
-    var bm = K.ribbon.clone(); bm.map = cautionTexV;
-    ribbon = new T.Mesh(g, bm); ribbon.position.set(0, 0, 0.625); s.add(ribbon);
+    s.add(ext(rrect(1.56, 1.5, 0.46), 0.62, 0.07, M.orange, 4, 16));
+    [-1, 1].forEach(function (z) {
+      var side = ext(rrect(1.34, 1.28, 0.38), 0.06, 0.02, M.black, 2, 16); side.position.z = z * 0.315; s.add(side);
+      var badge = new T.Mesh(new T.CylinderGeometry(0.3, 0.3, 0.04, 48), M.chrome); badge.rotation.x = Math.PI / 2; badge.position.z = z * 0.35; s.add(badge);
+      var dot = new T.Mesh(new T.CylinderGeometry(0.07, 0.07, 0.05, 24), M.gloss); dot.rotation.x = Math.PI / 2; dot.position.z = z * 0.36; s.add(dot);
+    });
+    var lock = ext(rrect(0.42, 0.16, 0.06), 0.3, 0.03, M.gloss); lock.position.set(0.34, 0.76, 0); s.add(lock);
+    var mouth = ext(rrect(0.34, 0.24, 0.05), 0.5, 0.03, M.gloss); mouth.position.set(0.64, -0.64, 0); s.add(mouth);
+    // the blade: a strip from x = 0 to 1, curved across its width; it is stretched to its length every frame
+    var W = 0.44, sag = 0.035, seg = 10, pos = [], uv = [], idx = [];
+    for (var i = 0; i <= 1; i++) for (var j = 0; j <= seg; j++) {
+      var z = -W / 2 + W * j / seg, zz = z / (W / 2);
+      pos.push(i, -sag * (1 - zz * zz), z); uv.push(1 - i, j / seg);
+    }
+    for (j = 0; j < seg; j++) idx.push(j, j + 1, seg + 1 + j, j + 1, seg + 2 + j, seg + 1 + j);
+    var g = new T.BufferGeometry();
+    g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx); g.computeVertexNormals();
+    blade = new T.Mesh(g, M.blade); blade.position.set(0.78, -0.64, 0); s.add(blade);
+    hook = new T.Group(); s.add(hook);
+    var plate = new T.Mesh(new T.BoxGeometry(0.035, 0.24, 0.48), M.satin); plate.position.set(0.018, -0.1, 0); hook.add(plate);
+    var tab = new T.Mesh(new T.BoxGeometry(0.16, 0.02, 0.46), M.satin); tab.position.set(-0.07, 0.008, 0); hook.add(tab);
   })(tape);
 
-  /* ---------- pan shovel: dark steel blade, wooden handle with a D grip ---------- */
-  var shovel = tool('shovel');
+  /* ---------- spirit level: orange body, milled edges, black end caps, three vials ---------- */
+  var level = tool('level');
+  var bubbles = [];
   (function (s) {
-    var b = new T.Shape();
-    b.moveTo(-0.62, 0.5); b.lineTo(0.62, 0.5); b.quadraticCurveTo(0.7, -0.6, 0.0, -1.15); b.quadraticCurveTo(-0.7, -0.6, -0.62, 0.5);
-    var bl = ext(b, 0.06, 0.02, K.blade, 2, 24); bl.position.y = -1.9; bl.rotation.x = 0.18; s.add(bl);
-    var sock = lathe([[0, -1.25], [0.2, -1.25], [0.11, -0.7], [0, -0.7]], 32, K.blade); sock.position.y = -0.1; s.add(sock);
-    var shaft = new T.Mesh(new T.CylinderGeometry(0.075, 0.085, 3.0, 24), K.wood); shaft.position.y = 0.6; s.add(shaft);
-    var d = tube([[-0.06, 2.0, 0], [-0.3, 2.25, 0], [-0.3, 2.65, 0], [0, 2.78, 0], [0.3, 2.65, 0], [0.3, 2.25, 0], [0.06, 2.0, 0]], 0.06, K.blade, 60); s.add(d);
-    var grip = new T.Mesh(new T.CylinderGeometry(0.075, 0.075, 0.56, 20), K.wood); grip.rotation.z = Math.PI / 2; grip.position.y = 2.68; s.add(grip);
-    s.position.y = -0.3;
-  })(shovel);
-
-  /* ---------- hessian cloth: a roll with a length hanging off it ---------- */
-  var hessian = tool('hessian');
-  var flap;
-  (function (s) {
-    var roll = new T.Mesh(new T.CylinderGeometry(0.55, 0.55, 2.3, 48), K.hessian); roll.rotation.z = Math.PI / 2; s.add(roll);
-    var ends = new T.MeshStandardMaterial({ color: srgb(0x9a7748), roughness: 0.95 });
-    [-1, 1].forEach(function (x) { var e = new T.Mesh(new T.CircleGeometry(0.55, 40), ends); e.rotation.y = x * Math.PI / 2; e.position.x = x * 1.151; s.add(e); });
-    var fg = new T.PlaneGeometry(2.3, 1.4, 12, 10); fg.translate(0, -0.7, 0);
-    var fm = K.hessian.clone(); fm.map = hessianTex.clone(); fm.map.needsUpdate = true; fm.map.repeat.set(6, 2);
-    flap = new T.Mesh(fg, fm); flap.position.set(0, -0.0, 0.55); s.add(flap);
-    flap.userData.base = fg.attributes.position.array.slice();
-  })(hessian);
-
-  /* ---------- work glove: knitted, blue dots, blue cuff ---------- */
-  var glove = tool('gloves');
-  (function (s) {
-    var palm = ext(rrect(1.05, 1.15, 0.38), 0.36, 0.14, K.knit, 4, 16); palm.position.y = -0.1; s.add(palm);
-    var finger = function (x, y0, len, r, tilt) {
-      var tp = [x + Math.sin(tilt) * len, y0 + Math.cos(tilt) * len, 0];
-      var m = tube([[x, y0, 0], [(x + tp[0]) / 2, (y0 + tp[1]) / 2, 0.02], tp], r, K.knit, 16);
-      s.add(m); s.add(cap(m.userData.curve, 1, r, K.knit));
+    var LEN = 4.7;
+    s.add(ext(rrect(LEN - 0.3, 0.56, 0.04), 0.24, 0.025, M.paint, 2, 8));
+    [-1, 1].forEach(function (y) { var e = new T.Mesh(new T.BoxGeometry(LEN - 0.32, 0.04, 0.25), M.satin); e.position.y = y * 0.28; s.add(e); });
+    [-1, 1].forEach(function (x) { var c = ext(rrect(0.24, 0.66, 0.07), 0.32, 0.04, M.black, 2, 8); c.position.x = x * (LEN / 2 - 0.1); s.add(c); });
+    var vial = function (len, r) {
+      var p = [[0, -len / 2 - r]], k;
+      for (k = 1; k <= 6; k++) { var a = -Math.PI / 2 + k / 6 * Math.PI / 2; p.push([Math.cos(a) * r, -len / 2 + Math.sin(a) * r]); }
+      for (k = 0; k <= 6; k++) { var b = k / 6 * Math.PI / 2; p.push([Math.cos(b) * r, len / 2 + Math.sin(b) * r]); }
+      return lathe(p, 32, M.vial);
     };
-    finger(-0.36, 0.3, 0.72, 0.13, -0.08); finger(-0.12, 0.35, 0.86, 0.135, -0.02); finger(0.13, 0.35, 0.8, 0.135, 0.03); finger(0.37, 0.3, 0.62, 0.12, 0.1);
-    var th = tube([[-0.42, -0.25, 0], [-0.72, 0.0, 0.05], [-0.86, 0.32, 0.05]], 0.14, K.knit, 16); s.add(th); s.add(cap(th.userData.curve, 1, 0.14, K.knit));
-    var cuff = ext(rrect(1.12, 0.42, 0.16), 0.42, 0.12, K.cuff, 3, 12); cuff.position.y = -0.86; s.add(cuff);
-    s.position.y = 0.1;
-  })(glove);
+    [-1, 1].forEach(function (z) {
+      var w = ext(rrect(1.0, 0.38, 0.12), 0.03, 0.01, M.gloss); w.position.set(0, 0, z * 0.12); s.add(w);
+      var v = vial(0.5, 0.085); v.rotation.z = Math.PI / 2; v.position.set(0, 0, z * 0.14); s.add(v);
+      var b = new T.Mesh(new T.SphereGeometry(0.06, 16, 10), M.bubble); b.scale.set(1.6, 0.55, 0.8); b.position.set(0, 0.05, z * 0.15); s.add(b); bubbles.push(b);
+      [-1, 1].forEach(function (x) {
+        var d = new T.Mesh(new T.CylinderGeometry(0.2, 0.2, 0.03, 40), M.gloss); d.rotation.x = Math.PI / 2; d.position.set(x * 1.62, 0, z * 0.12); s.add(d);
+        var pv = vial(0.18, 0.07); pv.position.set(x * 1.62, 0, z * 0.14); s.add(pv);
+      });
+      var slot = ext(rrect(0.9, 0.2, 0.1), 0.03, 0.01, M.gloss); slot.position.set(0.95, 0, z * 0.12); s.add(slot);
+    });
+  })(level);
 
-  /* ---------- safety goggles: clear wrap-round lens, dark frame, orange strap ---------- */
-  var goggles = tool('goggles');
+  /* ---------- trowel: steel blade, orange closed handle with a black grip ---------- */
+  var trowel = tool('trowel');
   (function (s) {
-    var shp = rrect(2.0, 0.78, 0.36);
-    var fr = ext(shp, 0.36, 0.08, K.frame, 3, 24); s.add(fr);
-    var ln = ext(rrect(1.8, 0.6, 0.28), 0.4, 0.04, K.lens, 2, 24); s.add(ln);
-    var nose = ext(rrect(0.3, 0.3, 0.14, 0, -0.32), 0.42, 0.02, K.rubber, 2, 12); s.add(nose);
-    var st = tube([[-1.0, 0, 0], [-1.15, 0, -0.5], [-0.9, 0, -1.2], [0, 0, -1.45], [0.9, 0, -1.2], [1.15, 0, -0.5], [1.0, 0, 0]], 0.09, K.strap, 80);
-    st.scale.y = 2.2; s.add(st);
-    [-1, 1].forEach(function (x) { var v = new T.Mesh(new T.CylinderGeometry(0.08, 0.08, 0.06, 16), M.satin); v.rotation.x = Math.PI / 2; v.position.set(x * 0.55, 0.3, 0.2); s.add(v); });
-  })(goggles);
+    s.add(ext(rrect(2.7, 1.12, 0.14), 0.035, 0.012, M.steel, 2, 12));
+    var bar = new T.Mesh(new T.BoxGeometry(2.0, 0.14, 0.07), M.satin); bar.position.z = 0.05; s.add(bar);
+    var hd = tube([[-0.95, 0, 0.06], [-0.82, 0, 0.42], [-0.45, 0, 0.64], [0.4, 0, 0.66], [0.82, 0, 0.46], [0.95, 0, 0.06]], 0.1, M.orange, 80);
+    s.add(hd);
+    var c = hd.userData.curve;
+    var mid = new T.CatmullRomCurve3([0.3, 0.4, 0.5, 0.6, 0.7].map(function (t) { return c.getPoint(t); }));
+    s.add(new T.Mesh(new T.TubeGeometry(mid, 40, 0.122, 18, false), M.black));
+    s.add(cap(mid, 0, 0.122, M.black)); s.add(cap(mid, 1, 0.122, M.black));
+  })(trowel);
 
-  /* where each name sits on the wall: a point beside the item (in wall units, from its middle), and which side of it the name goes */
+  /* where each name sits on the wall: a point beside the tool (in wall units, from its middle), and which side of it the name goes */
   var anchors = [
-    { id: 'cone', d: [0.0, 1.85], at: 'up' },
-    { id: 'light', d: [0.0, 1.55], at: 'up' },
-    { id: 'gloves', d: [0.0, 1.55], pd: [0.0, 1.3], at: 'up' },
-    { id: 'shovel', d: [0.0, 3.0], at: 'up' },
-    { id: 'tape', d: [0.0, 0.95], at: 'up' },
-    { id: 'hessian', d: [0.0, 0.95], at: 'up' },
-    { id: 'goggles', d: [0.0, 0.85], at: 'up' }
+    { id: 'level', d: [2.62, 0.0], at: 'side', pd: [1.55, 0.36] },
+    { id: 'hammer', d: [0.0, 2.32], at: 'up' },
+    { id: 'driver', d: [0.0, 2.08], at: 'up' },
+    { id: 'pliers', d: [0.0, 2.36], at: 'up' },
+    { id: 'spanner', d: [0.0, 2.36], at: 'up' },
+    { id: 'tape', d: [-0.98, 0.1], at: 'out', pd: [0.05, 0.86] },
+    { id: 'trowel', d: [1.5, 0.0], at: 'side', pd: [0.0, 0.7] }
   ];
 
-  /* ---------- where each item sits ---------- */
+  /* ---------- where each tool sits ---------- */
   var D = Math.PI / 180;
-  var FAN = {}, PIV = [0, 0], RAD = 0;
-  // the hero: the site kit grouped together, the cone in the middle, the tape unrolling in front
+  // the hero: a fan of tools held at the handles, like a hand of cards, with the tape measure in front
+  var FAN = {
+    pliers: { a: 40, z: -0.55, ry: -0.3, s: 0.95 },
+    driver: { a: 14, z: -0.2, ry: 0.25, s: 0.98, flip: true },
+    hammer: { a: -13, z: 0.35, ry: -0.35, s: 1.0 },
+    spanner: { a: -39, z: 0.0, ry: 0.3, s: 0.98 }
+  };
+  var PIV = [0.15, -2.0], RAD = 2.2;
   var HERO = {
-    shovel: { p: [1.55, 0.35, -1.4], r: [0.1, -0.3, -0.42], s: 0.9 },
-    cone: { p: [-0.1, -0.05, 0.2], r: [0.18, 0.4, 0.04], s: 1.05 },
-    light: { p: [-1.75, 1.55, -0.6], r: [0.12, 0.45, 0.1], s: 0.82 },
-    hessian: { p: [-1.6, -1.45, -1.0], r: [0.35, 0.35, -0.08], s: 0.72 },
-    gloves: { p: [1.55, -1.45, 0.9], r: [0.2, -0.45, -0.35], s: 0.82 },
-    goggles: { p: [0.5, 1.95, 0.6], r: [0.3, -0.35, 0.12], s: 0.62 },
-    tape: { p: [-0.4, -1.95, 1.6], r: [0.3, -0.25, 0.0], s: 0.78 }
+    tape: { p: [0.55, -2.05, 1.6], r: [0.36, Math.PI + 0.22, 0.03], s: 0.9 },
+    level: { p: [0.2, -7, -2], r: [0.3, -0.4, 0.4], s: 0.6 },
+    trowel: { p: [-1.5, -7.5, -2], r: [0.8, 0.4, -0.3], s: 0.6 }
   };
-  // "Every tool": on the wall in two rows, the shovel standing at the end
+  // "Every tool": hung on the wall in their places, the level along the top
   var WALL = {
-    cone: { p: [-2.75, 1.45, 0], r: [0.12, 0.3, 0], s: 0.82 },
-    light: { p: [-0.85, 1.75, 0], r: [0.08, 0.2, 0], s: 0.85 },
-    gloves: { p: [1.0, 1.7, 0], r: [0.08, -0.25, 0], s: 0.85 },
-    tape: { p: [-2.7, -2.15, 0], r: [0.2, -0.35, 0], s: 0.95 },
-    hessian: { p: [-0.75, -2.05, 0], r: [0.35, 0.2, 0], s: 0.68 },
-    goggles: { p: [1.05, -2.0, 0], r: [0.25, -0.3, 0], s: 0.7 },
-    shovel: { p: [2.85, -0.15, 0], r: [0.08, -0.35, 0.0], s: 0.9 }
+    level: { p: [-0.35, 3.55, 0], r: [0.08, 0, 0], s: 1.0 },
+    hammer: { p: [-2.75, 0.05, 0], r: [0.08, 0.18, 0], s: 0.95 },
+    driver: { p: [-0.95, 0.15, 0], r: [0.08, 0, 0], s: 0.92 },
+    pliers: { p: [0.75, -0.05, 0], r: [0.08, 0, 0], s: 0.92 },
+    spanner: { p: [2.45, 0.0, 0], r: [0.08, 0, 0], s: 0.95 },
+    tape: { p: [-1.7, -3.3, 0], r: [0.75, Math.PI + 0.35, 0], s: 0.95 },
+    trowel: { p: [1.2, -3.3, 0], r: [-0.4, 0.42, 0.08], s: 0.88 }
   };
-  // on a phone the wall is narrow and tall: three rows, every name above its item
+  // on a phone the wall is narrow and tall: more room between the rows, every name above its tool
   var WALL_PHONE = {
-    cone: { p: [-1.75, 3.6, 0], s: 0.72 }, light: { p: [0.45, 3.7, 0], s: 0.76 },
-    gloves: { p: [-1.75, -0.05, 0], s: 0.8 }, goggles: { p: [0.45, -0.25, 0], s: 0.66 },
-    tape: { p: [-1.75, -3.15, 0], s: 0.9 }, hessian: { p: [0.45, -3.1, 0], s: 0.6 },
-    shovel: { p: [2.35, -0.1, 0], s: 0.82 }
+    level: { p: [-0.35, 4.7, 0], s: 1.0 }, hammer: { p: [-2.75, 1.25, 0] }, driver: { p: [-0.95, 1.35, 0] }, pliers: { p: [0.75, 1.15, 0] },
+    spanner: { p: [2.45, 1.2, 0] }, tape: { p: [-1.6, -2.75, 0] }, trowel: { p: [1.25, -2.75, 0] }
   };
   var START = {      // where they fly in from when the page opens
-    cone: [0, -8, 1], light: [-6, 6, -1], shovel: [7, 5, -2], hessian: [-7, -5, -1], gloves: [6, -6, 2], goggles: [2, 8, 1], tape: [-3, -9, 3]
+    hammer: [5, 6, 2], spanner: [-6, 5, -1], driver: [7, -4, -2], pliers: [-7, -5, 1], tape: [3, -8, 3], level: [0, -9, 0], trowel: [0, -9, 0]
   };
 
   var st = { hero: 0, heroPx: 0, ana: 0, appr: 0, exit: 0, intro: 0, mx: 0, my: 0, tx: 0, ty: 0, t: 0 };
@@ -392,10 +446,10 @@
     var sc = Math.min(1.02, 0.6 + w * 0.26), heroX = side * visW * 0.22, heroY = 0.1;
     if (phone) {   // the fan fits the space the page leaves above the title, under the header
       var top = 78, room = Math.min(innerWidth * 0.92, 470);
-      sc = Math.min(0.6, (room - top + 24) / cH * visH / 5.9, visW / 5.6);
+      sc = Math.min(0.6, (room - top + 24) / cH * visH / 5.3, visW / 5.4);
       heroX = 0; heroY = visH / 2 - (top + room) / 2 / cH * visH + 0.2 * sc;
     }
-    var anaX = phone ? 0 : side * visW * 0.2, anaY = phone ? -1.7 : -0.3;
+    var anaX = phone ? 0 : side * visW * 0.2, anaY = phone ? -1.45 : -0.3;
     var asc = phone ? Math.min(0.5, visW / 7.4) : Math.min(0.84, 0.58 + w * 0.16);
     var rise = phone && st.heroPx ? st.heroPx / (canvas.clientHeight || innerHeight) * visW / w : 3.2;
     rig.position.set(lerp(heroX, anaX, ar), lerp(heroY + h * rise, anaY, ar), 0);
@@ -423,30 +477,34 @@
       var S = START[name];
       var hp = [lerp(S[0], hx, ik), lerp(S[1], hy, ik) + bob, lerp(S[2], hz, ik)];
       var hrz = H.r[2] * (rtl ? -1 : 1) + sway + (1 - ik) * 1.5;
-      var hry = H.r[1] * side;
+      var hry = (rtl && name === 'tape') ? Math.PI - H.r[1] : H.r[1] * side;   // the tape is turned, not mirrored, so its blade still points at the words
       // on the wall: the order they arrive in, and the gentle swing of a tool on a hook
       var ak = ease((a - k * 0.045) / 0.73);
       var wx = Wl.p[0] * side, wy = Wl.p[1] + Math.sin(t * 0.8 + k) * 0.02 * ak, wz = Wl.p[2];
       g.position.set(lerp(hp[0], wx, ak), lerp(hp[1], wy, ak) + Math.sin(ak * Math.PI) * 0.6, lerp(hp[2], wz, ak) + Math.sin(ak * Math.PI) * 1.4);
-      var wry = Wl.r[1] * side;
+      var wry = (rtl && name === 'tape') ? Math.PI - Wl.r[1] : Wl.r[1] * side;
       qa.setFromEuler(ea.set(H.r[0] + (1 - ik) * 1.2, hry, hrz));
       qb.setFromEuler(ea.set(Wl.r[0], wry, Wl.r[2] + Math.sin(t * 0.8 + k * 1.3) * 0.025));
       g.quaternion.copy(qa).slerp(qb, ak);
-      g.scale.setScalar(Math.max(0.001, lerp(H.s, Wl.s, ak)));
+      var vis = name === 'level' || name === 'trowel' ? out(ak * 1.6) : 1;
+      g.scale.setScalar(Math.max(0.001, lerp(H.s, Wl.s, ak) * vis));
+      g.visible = vis > 0.002;
     });
-    // the warning tape pulls off its roll as you scroll the hero, and rolls back up on the wall
-    var tl = lerp(lerp(0.7, 3.0, ease(h * 2.2)) + Math.sin(t * 0.6) * 0.04, 0.55, ease(a * 1.4));
-    ribL = Math.max(0.08, tl * (0.35 + 0.65 * out(i0 * 1.4 - 0.35)));
-    ribbon.scale.y = ribL;
-    ribbon.material.map.repeat.y = ribL / RIB_LEN;
-    ribbon.rotation.x = Math.sin(t * 0.9) * 0.08 + 0.1;
-    tools.tape.userData.inner.rotation.x = -ribL * 0.4;   // the roll turns as the tape comes off
-    // the warning light flashes
-    var fl = Math.pow(Math.max(0, Math.sin(t * 4.2)), 6);
-    K.amber.emissiveIntensity = 0.9 + fl * 2.2;
-    glow.intensity = fl * 2.2;
-    // the hessian flap moves a little in the air
-    flap.rotation.x = Math.sin(t * 1.1) * 0.07 - 0.05;
+    // the tape pulls out as you scroll the hero, and goes back in on the wall
+    var tl = lerp(lerp(0.45, 4.1, ease(h * 2.2)) + Math.sin(t * 0.6) * 0.04, 0.42, ease(a * 1.4));
+    tl = tl * (0.35 + 0.65 * out(i0 * 1.4 - 0.35));
+    tapeL = Math.max(0.08, tl);
+    blade.scale.x = tapeL;
+    tapeTex.repeat.x = tapeL / TEX_LEN;
+    hook.position.set(0.78 + tapeL, -0.64, 0);
+    // the pliers open as you scroll, a little bite while they float, closed on the wall
+    var open = lerp(0.1 + h * 0.32 + Math.max(0, Math.sin(t * 1.3)) * 0.05, 0.03, ease(a));
+    halves[0].rotation.z = open / 2; halves[1].rotation.z = -open / 2;
+    // the bubble in the level finds the high side
+    level.parent.updateMatrixWorld(true);
+    v3.set(1, 0, 0).transformDirection(level.matrixWorld);
+    var tilt = Math.atan2(v3.y, v3.x);
+    bubbles.forEach(function (b) { b.position.x += (Math.max(-0.17, Math.min(0.17, tilt * 2.2)) - b.position.x) * Math.min(1, dt * 4); });
   }
 
   /* the names in "Every tool" follow their tools */
