@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Product Editor</title>
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<style>
+  :root { --ink:#0d1b26; --red:#c41e24; --line:#d3d9df; --bg:#eef1f4; --muted:#56636f; --soft:#f5f7f9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:18px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  select, button, input, textarea { font:inherit; color:inherit; }
+  header { position:sticky; top:0; z-index:5; background:var(--ink); color:#fff; padding:14px 22px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:0 6px 20px -10px rgba(0,0,0,.5); }
+  header h1 { font-size:22px; margin:0 10px 0 0; letter-spacing:.01em; }
+  header select { padding:10px 14px; border-radius:12px; border:0; flex:0 1 460px; min-width:220px; max-width:100%; font-size:19px; font-weight:600; color:var(--ink); background:#fff; }
+  .btn { border:0; border-radius:999px; padding:11px 20px; cursor:pointer; background:#fff; color:var(--ink); font-weight:700; font-size:17px; }
+  .btn.red { background:var(--red); color:#fff; }
+  .btn.ghost { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.6); }
+  .btn:hover { filter:brightness(1.08); }
+  .spacer { flex:1; }
+  .count { font-size:16px; opacity:.85; }
+  .notice { margin:14px 22px 0; padding:12px 18px; border-radius:14px; background:#fff; font-size:18px; border:2px solid #b9e4c9; }
+  .notice b { color:#11703a; }
+  .notice.warn { border-color:var(--red); background:#fff5f5; }
+  .notice.warn b { color:var(--red); }
+  .notice button { margin:8px 10px 0 0; border:0; border-radius:999px; padding:9px 18px; font-weight:700; cursor:pointer; background:var(--ink); color:#fff; }
+  .notice button.ghost { background:#fff; color:var(--ink); border:1.5px solid var(--line); }
+  details.help { background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; color:var(--muted); font-size:17px; }
+  details.help summary { cursor:pointer; color:var(--ink); font-weight:700; }
+  details.help b { color:var(--ink); }
+  details.help p { margin:8px 0 0; }
+  .catbox { margin:18px 22px 0; background:#fff; border-radius:18px; padding:18px; display:flex; flex-wrap:wrap; gap:20px; align-items:center; border:2px solid transparent; }
+  .catbox.sel { border-color:var(--red); }
+  .catbox .ph { width:130px; height:130px; flex:none; border-radius:50%; background:var(--soft); border:3px solid var(--red); display:grid; place-items:center; overflow:hidden; position:relative; cursor:pointer; }
+  .catbox .ph img { max-width:86%; max-height:86%; object-fit:contain; }
+  .catbox .ph.drop { outline:4px dashed var(--red); outline-offset:4px; }
+  .catbox .ph span { font-size:14px; color:var(--muted); text-align:center; padding:10px; }
+  .catbox .fields { flex:1; min-width:260px; display:flex; flex-direction:column; gap:8px; }
+  .catbox input { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:22px; font-weight:700; }
+  .catbox .row { margin-top:4px; }
+  .catbox .row button { flex:0 1 auto; padding:10px 16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:18px 22px 110px; }
+  .card { background:#fff; border:2px solid transparent; border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:7px; cursor:grab; position:relative; box-shadow:0 2px 6px rgba(13,27,38,.06); }
+  .card.sel { border-color:var(--red); }
+  .card.dragging { opacity:.4; }
+  .card.over { box-shadow:0 0 0 4px var(--red) inset; }
+  .num, .star { z-index:2; }
+  .num { position:absolute; top:20px; left:22px; font-size:15px; color:var(--muted); font-weight:800; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:99px; }
+  .star { position:absolute; top:18px; right:20px; font-size:14px; font-weight:700; background:var(--red); color:#fff; padding:3px 10px; border-radius:99px; }
+  .img { height:190px; background:var(--soft); border-radius:14px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .img img { max-width:90%; max-height:90%; object-fit:contain; pointer-events:none; }
+  .img.drop { outline:4px dashed var(--red); outline-offset:-8px; }
+  .img.empty { background:repeating-linear-gradient(45deg,#f3f5f7 0 10px,#eceff3 10px 20px); }
+  .img.empty img { display:none; }
+  .img.empty .hint { position:static; background:none; font-size:16px; font-weight:600; text-align:center; padding:8px 12px; }
+  .img .hint { position:absolute; bottom:8px; background:rgba(255,255,255,.9); padding:1px 8px; border-radius:8px; font-size:13px; color:var(--muted); }
+  label { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+  .card input, .card select, .card textarea { width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:18px; background:#fff; cursor:text; }
+  .card textarea { display:block; min-height:96px; resize:vertical; line-height:1.4; font-family:inherit; color:inherit; }
+  .card select { cursor:pointer; }
+  .card input:focus, .card select:focus, .card textarea:focus, .catbox input:focus { outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,27,38,.12); }
+  .card input[data-f="0"] { font-weight:700; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .row button { flex:1 1 auto; white-space:nowrap; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--soft); cursor:pointer; font-size:16px; font-weight:600; }
+  .row button:hover { background:#e6eaee; }
+  .row .del { color:var(--red); }
+  .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 24px; border-radius:999px; font-size:18px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  .toast.on { opacity:1; }
+  .modal { position:fixed; inset:0; z-index:20; background:rgba(13,27,38,.55); display:grid; place-items:center; padding:18px; }
+  .modal[hidden] { display:none; }
+  .modal__box { background:#fff; border-radius:20px; padding:24px 26px; width:100%; max-width:680px; max-height:88vh; overflow:auto; box-shadow:0 20px 60px -20px rgba(0,0,0,.5); }
+  .modal h2 { margin:0 0 10px; font-size:26px; }
+  .modal h3 { margin:16px 0 4px; font-size:19px; }
+  .modal p { margin:8px 0; }
+  .modal ul, .modal ol { margin:6px 0; padding-left:24px; }
+  .modal li { margin:4px 0; }
+  .modal code { background:var(--soft); padding:1px 6px; border-radius:6px; }
+  .modal a { color:var(--red); font-weight:700; }
+  .modal details { margin-top:12px; background:var(--soft); border-radius:12px; padding:10px 14px; }
+  .modal summary { cursor:pointer; font-weight:700; }
+  .modal .ukey { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; margin-top:6px; }
+  .modal .umsg { color:var(--red); font-weight:700; min-height:1.4em; }
+  .modal .umuted { color:var(--muted); font-size:16px; }
+  .modal .kbtn { display:inline-block; text-decoration:none; margin:2px 0; }
+  .modal .ksteps li { margin:10px 0; }
+  .modal__btns { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; margin-top:18px; }
+  .modal__btns .btn { border:1.5px solid var(--line); }
+  .modal__btns .btn.red { border-color:var(--red); }
+  .steps { list-style:none; padding:0 !important; margin:14px 0 !important; }
+  .steps li { display:flex; gap:12px; align-items:center; font-size:19px; padding:6px 0; color:var(--muted); }
+  .steps li.on { color:var(--ink); font-weight:700; }
+  .steps li.ok { color:#11703a; }
+  .steps i { flex:none; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:16px; background:var(--soft); border:2px solid var(--line); }
+  .steps li.ok i { background:#11703a; border-color:#11703a; color:#fff; }
+  .steps li.on i { border-color:var(--red); border-top-color:transparent; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @media (max-width:700px) { body { font-size:17px; } header { padding:12px 14px; } header h1 { width:100%; font-size:20px; } header select { min-width:0; width:100%; flex:1 1 100%; } header { position:static; } .grid { grid-template-columns:1fr; gap:14px; padding:14px 14px 100px; } .catbox { margin:14px 14px 0; } .catbox .ph { width:100px; height:100px; } }
+  /* password box: the editor stays hidden until the password is entered */
+  .lock { display:none; position:fixed; inset:0; z-index:100; background:var(--bg); place-items:center; padding:16px; }
+  html.locked .lock { display:grid; }
+  html.locked body > :not(#lock) { display:none !important; }
+  .lock__box { background:#fff; border-radius:20px; padding:26px; width:100%; max-width:420px; box-shadow:0 20px 60px -20px rgba(0,0,0,.35); }
+  .lock h2 { margin:0 0 6px; font-size:26px; }
+  .lock p { margin:0 0 14px; color:var(--muted); }
+  .lock input { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-size:18px; }
+  .lock .lock__msg { color:var(--red); font-weight:700; min-height:1.4em; margin:8px 0 10px; }
+  .lock .btn { width:100%; }
+</style>
+<script>
+  // the editor opens with a password; the page keeps only a scrambled check value of it, never the password itself
+  window.FT_LOCK = { salt: 'ac90d2e5f7145ca9170835cf7cea34a8', it: 600000, h: '7aac32814a30e56d3892930380d99540bdaba55307e1d68e60d8e498a81ac306' };
+  // asked once per visit: closing the tab locks the editor again
+  (() => { let open = false; try { open = sessionStorage.getItem('ft-editor-open') === FT_LOCK.h; } catch (e) {} if (!open) document.documentElement.classList.add('locked'); })();
+</script>
+</head>
+<body>
+<div class="lock" id="lock">
+  <form class="lock__box" id="lockForm">
+    <h2>Product Editor</h2>
+    <p>Enter the password to open the editor.</p>
+    <input type="text" name="username" value="Product editor" autocomplete="username" hidden>
+    <input id="lockPw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Password" aria-label="Password">
+    <p class="lock__msg" id="lockMsg" role="alert"></p>
+    <button class="btn red" type="submit">Open the editor</button>
+  </form>
+</div>
+<header>
+  <h1>Product Editor</h1>
+  <select id="cat" aria-label="Category"></select>
+  <span class="count" id="count"></span>
+  <span class="spacer"></span>
+  <button class="btn ghost" id="newSec">New group</button>
+  <button class="btn ghost" id="undo">Undo</button>
+  <button class="btn ghost" id="reset">Start over</button>
+  <button class="btn ghost" id="save">Save changes file</button>
+  <button class="btn red" id="upload">Upload to website</button>
+</header>
+<div class="notice" id="notice"></div>
+<div class="notice warn" id="full" hidden><b>This browser's storage is full.</b> Your newest changes are NOT kept if you close or refresh this page. Press <b>Upload to website</b> now (or <b>Save changes file</b> and send it to Claude).</div>
+<details class="help" open>
+  <summary>How to use the editor</summary>
+  <p><b>Drag</b> a card to move it (first = top of the list). <b>Drop a photo</b> from your computer on a picture, press <b>Choose photo</b>, or click a card and press <b>Ctrl+V</b> to paste a copied photo.
+  <b>Copy</b> makes a second card with the same details. <b>Move to another section</b> sends a card to another category.
+  Type straight into the boxes to change names, specs, sizes or the category name. <b>Material</b> decides which Material filter the product shows under on the website; pick "Other" to type your own (for more than one, separate them with commas, e.g. "Brass, Stainless").</p>
+  <p>The category's <b>main photo</b> (the round one at the top) works the same way: drop a photo on it, click it and press Ctrl+V, press Choose photo, or press "Make main photo" on a card.
+  When finished, press <b>Upload to website</b>. It tidies and checks your changes, shows you anything to look at, puts them on the website and tells you when they are live (usually a few minutes). Your work is kept in this browser if you close the page.
+  <b>Save changes file</b> is a backup: it saves your changes in Downloads so you can send them to Claude instead.</p>
+</details>
+<div class="catbox" id="catbox">
+  <div class="ph" id="coverPh" title="Drop, paste or choose the category's main photo"><img id="coverImg" alt=""><span id="coverHint">No main photo yet: drop, paste or choose one</span></div>
+  <div class="fields">
+    <label for="catName">Category name (shown on the website)</label>
+    <input id="catName" maxlength="80">
+    <div class="row"><button id="coverPick" type="button">Choose main photo</button><span class="count" style="align-self:center;color:var(--muted)">or drop a photo on the circle, or click it and press Ctrl+V</span></div>
+    <div class="row"><button id="addProd" type="button">+ Add product</button><button id="delSec" type="button" class="del" hidden>Remove this new group</button></div>
+  </div>
+</div>
+<div class="grid" id="grid"></div>
+<div class="toast" id="toast"></div>
+<div class="modal" id="up" hidden><div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="upTitle"><h2 id="upTitle"></h2><div id="upBody"></div><div class="modal__btns" id="upBtns"></div></div></div>
+
+<script src="js/edit-check.js?v=2"></script>
+<script>
+// always load the newest product list (never a copy the browser kept from an earlier visit)
+// the editor starts once the product list is loaded and the password is entered
+const boot = { data: false, open: !document.documentElement.classList.contains('locked'), on: false };
+const go = () => { if (boot.data && boot.open && !boot.on) { boot.on = true; startEditor(); } };
+(() => {
+  if (boot.open) return;
+  const html = document.documentElement, pw = document.getElementById('lockPw'), msg = document.getElementById('lockMsg');
+  const hex = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
+  let busy = false;
+  pw.focus();
+  document.getElementById('lockForm').onsubmit = async e => {
+    e.preventDefault();
+    if (busy) return;
+    if (!pw.value.trim()) { msg.textContent = 'Type the password.'; return; }
+    if (!window.crypto || !crypto.subtle) { msg.textContent = 'Open the editor from its website link.'; return; }
+    busy = true; msg.textContent = 'Checking…';
+    try {
+      const L = window.FT_LOCK, salt = new Uint8Array(L.salt.match(/../g).map(x => parseInt(x, 16)));
+      const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw.value.trim()), 'PBKDF2', false, ['deriveBits']);
+      const h = hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: L.it }, k, 256));
+      if (h !== L.h) { msg.textContent = 'Wrong password. Try again.'; pw.select(); return; }
+      try { sessionStorage.setItem('ft-editor-open', h); } catch (e) {}
+      msg.textContent = ''; html.classList.remove('locked'); boot.open = true; go();
+    } catch (e) { msg.textContent = 'Could not check the password. Refresh and try again.'; }
+    finally { busy = false; }
+  };
+})();
+(() => { const d = document.createElement('script'); d.src = 'js/data.js?t=' + Date.now(); d.onload = () => { boot.data = true; go(); }; d.onerror = () => alert('Could not load the product list. Check your internet and refresh.'); document.head.appendChild(d); })();
+function startEditor() {
+  const KEY = 'ft-editor-v1';
+  const IMG = window.FT_IMG || '';
+  // a fingerprint of the website's product list, so the editor notices when Claude adds products
+  const fpr = cats => (s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return String(h); })(JSON.stringify(cats));
+  const VER = fpr(window.FT_CATS);
+  const keyOf = (slug, it) => slug + '|' + it[0];
+  const siteKeys = () => window.FT_CATS.flatMap(c => c.items.map(it => keyOf(c.slug, it)));
+  // a product is [name, specs, size, photo] plus an optional material the owner picked
+  const cp = it => { const o = [it[0], it[1].slice(), it[2], it[3]]; if (it[4]) o.push(it[4]); return o; };
+  const fresh = () => ({ ver: VER, base: siteKeys(), dirty: false, cats: window.FT_CATS.map(c => ({ slug: c.slug, name: c.name, cover: c.cover, items: c.items.map(cp) })), images: {} });
+  // materials match the website's Material filter
+  const MATS = [['Bronze', /bronze/i], ['Brass', /brass/i], ['Stainless', /\bS\.S\b|\bSS(?:3\d\d\w*)?\b|[Ss]tainless/], ['Carbon steel', /\bC\.S\b|\bCS\b|[Ff]orged [Ss]teel/], ['Cast iron', /\bC\.I\b|\bCI\b/], ['Galvanised', /\bG\.I\b|\bGI\b/], ['Mild steel', /\bM\.S\b|\bMS\b/], ['Aluminium', /alumin/i], ['Rubber', /rubber|neoprene/i], ['PVC', /\bPVC\b/]];
+  const MAT_LIST = ['Stainless', 'Carbon steel', 'Carbon steel & Stainless', 'Mild steel', 'Cast iron', 'Galvanised', 'Bronze', 'Brass', 'Aluminium', 'Rubber', 'Other'];
+  const autoMat = name => { if (/^C\.S & S\.S/.test(name)) return 'Carbon steel & Stainless'; let best = 'Other', at = 1e9; MATS.forEach(([m, r]) => { const k = name.search(r); if (k > -1 && k < at) { at = k; best = m; } }); return best; };
+  const escH = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const UPEND = 'ft-upload-pending';
+  // older versions of the editor put unsaved work aside here (with a red box); that box is gone
+  try { localStorage.removeItem('ft-editor-older'); } catch (e) {}
+  let state, history = [], sel = -1, clip = null;
+  try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  // Whenever the website's product list has changed (an upload went live), the editor starts from the newest
+  // website list. Older work that was never uploaded is not mixed in (mixing brought back old photos and made double products).
+  if (!state || !state.cats || state.ver !== VER) {
+    state = fresh();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  let ci = 0;
+  const $ = s => document.querySelector(s);
+  const cat = () => state.cats[ci];
+  const src = p => !p ? '' : p.startsWith('new:') ? state.images[p] : IMG + p;
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); };
+  let shown = null;   // which notice is on screen, so it only redraws when that changes
+  const usedPhotos = st => new Set(st.cats.flatMap(c => [c.cover].concat(c.items.map(it => it[3]))));
+  let pT = 0;
+  function writeNow() {
+    clearTimeout(pT); pT = 0;
+    // photos that were replaced are not needed any more (undo keeps its own copy), so they don't fill the browser's storage
+    const used = usedPhotos(state);
+    Object.keys(state.images).forEach(k => { if (!used.has(k)) delete state.images[k]; });
+    let ok = true;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { ok = false; }
+    $('#full').hidden = ok;
+  }
+  // typing is saved after a short pause, not on every key (with many photos one save takes a moment)
+  const persist = () => { clearTimeout(pT); pT = setTimeout(writeNow, 400); if (shown !== null && shown !== noticeKind()) showNotice(); };
+  addEventListener('pagehide', () => { if (pT) writeNow(); });
+  addEventListener('beforeunload', () => { if (pT) writeNow(); });
+  const snap = () => { history.push(JSON.stringify(state)); if (history.length > 50) history.shift(); };
+  const change = fn => { snap(); fn(); state.dirty = true; persist(); render(); };
+
+  const selEl = $('#cat');
+  function fillCats() {
+    if (ci >= state.cats.length) ci = 0;
+    selEl.innerHTML = '';
+    state.cats.forEach((c, i) => selEl.add(new Option(c.name + ' (' + c.items.length + ')', i)));
+    selEl.value = ci;
+  }
+  selEl.onchange = () => { ci = +selEl.value; sel = -1; render(); };
+
+  function render() {
+    const c = cat();
+    $('#count').textContent = c.items.length + ' products';
+    if (selEl.options[ci]) selEl.options[ci].text = c.name + ' (' + c.items.length + ')';
+    $('#delSec').hidden = !isNewCat(c);
+    $('#coverImg').style.display = c.cover ? '' : 'none'; $('#coverHint').style.display = c.cover ? 'none' : ''; if (c.cover) $('#coverImg').src = src(c.cover);
+    if (document.activeElement !== $('#catName')) $('#catName').value = c.name;
+    $('#catbox').classList.toggle('sel', sel === 'cover');
+    const g = $('#grid'); g.innerHTML = '';
+    c.items.forEach((it, i) => {
+      const d = document.createElement('div');
+      const own = !!it[4] && (it[4] === 'Other' || !MAT_LIST.includes(it[4]));
+      d.className = 'card' + (i === sel ? ' sel' : ''); d.draggable = true; d.dataset.i = i;
+      d.innerHTML =
+        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' + (it[3] && it[3] === c.cover ? '<span class="star">Main photo</span>' : '') +
+        '<div class="img"><img alt=""><span class="hint">drop or paste a photo</span></div>' +
+        '<label>Name</label><input data-f="0">' +
+        '<label>Specs (comma between each)</label><textarea data-f="1" rows="3"></textarea>' +
+        '<label>Size range</label><input data-f="2">' +
+        '<label>Material (website filter)</label><select data-mat><option value="">Auto: ' + autoMat(it[0]) + '</option>' + MAT_LIST.map(m => m === 'Other' ? '<option value="Other"' + (own ? ' selected' : '') + '>Other: type your own…</option>' : '<option' + (it[4] === m ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
+        '<input data-matown placeholder="e.g. PVC, or Brass, Stainless" maxlength="40"' + (own ? '' : ' hidden') + '>' +
+        '<div class="row"><button data-a="up">◀ Earlier</button><button data-a="down">Later ▶</button></div>' +
+        '<div class="row"><button data-a="copy">Copy</button><button data-a="cover">Make main photo</button><button data-a="pick">Choose photo</button><button class="del" data-a="del">Delete</button></div>' +
+        '<label>Move to another section</label><select data-move><option value="">Choose a section…</option>' + state.cats.map((x, k) => k === ci ? '' : '<option value="' + k + '">' + escH(x.name) + '</option>').join('') + '</select>';
+      if (it[3]) d.querySelector('img').src = src(it[3]);
+      else { d.querySelector('.img').classList.add('empty'); d.querySelector('.hint').textContent = 'No photo yet: drop, paste or choose one'; }
+      const box = f => d.querySelector('[data-f="' + f + '"]');
+      box(0).value = it[0]; box(1).value = it[1].join(', '); box(2).value = it[2];
+      if (own && it[4] !== 'Other') d.querySelector('[data-matown]').value = it[4];
+      g.appendChild(d);
+    });
+  }
+
+  const grid = $('#grid');
+  grid.addEventListener('focusin', e => { const c = e.target.closest('.card'); if (c) select(+c.dataset.i, false); if (e.target.matches('input, textarea')) snap(); });
+  // a card can't be dragged while you press inside a box or dropdown (dragging stole the click before)
+  grid.addEventListener('pointerdown', e => { const c = e.target.closest('.card'); if (c) c.draggable = !e.target.closest('input, textarea, select, button'); });
+  grid.addEventListener('input', e => {
+    if (e.target.matches('[data-matown]')) { const it = cat().items[+e.target.closest('.card').dataset.i]; it[4] = e.target.value.trim() || 'Other'; state.dirty = true; persist(); return; }
+    const f = e.target.dataset.f; if (f === undefined) return;
+    const it = cat().items[+e.target.closest('.card').dataset.i];
+    // specs: a comma or a new line starts the next one; a comma inside a number (0–15,000 PSI) does not
+    it[+f] = f === '1' ? e.target.value.split(/\n|,(?!\d{3}\b)/).map(s => s.trim()).filter(Boolean) : e.target.value;
+    state.dirty = true; persist();
+  });
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.card'); if (!card) return;
+    const i = +card.dataset.i, items = cat().items, a = e.target.dataset.a;
+    // clicks on boxes and dropdowns must not redraw the cards, or an open dropdown closes straight away
+    if (!a) { select(i, false); return; }
+    if (a === 'up' && i > 0) change(() => { items.splice(i - 1, 0, items.splice(i, 1)[0]); sel = i - 1; });
+    if (a === 'down' && i < items.length - 1) change(() => { items.splice(i + 1, 0, items.splice(i, 1)[0]); sel = i + 1; });
+    if (a === 'copy') { change(() => { items.splice(i + 1, 0, JSON.parse(JSON.stringify(items[i]))); sel = i + 1; }); toast('Copied. Change the new card’s name and photo.'); }
+    if (a === 'cover') { change(() => { cat().cover = items[i][3]; }); toast('Main photo changed'); }
+    if (a === 'pick') pickFile(i);
+    if (a === 'del' && confirm('Delete "' + items[i][0] + '"?')) change(() => { items.splice(i, 1); sel = -1; });
+  });
+  // move a card to another section (it goes to the end of that section's list)
+  grid.addEventListener('change', e => {
+    if (e.target.matches('[data-mat]')) {
+      const card = e.target.closest('.card'), it = cat().items[+card.dataset.i], v = e.target.value, box = card.querySelector('[data-matown]');
+      snap(); if (v) it[4] = v; else it.length = 4; state.dirty = true; persist();
+      box.hidden = v !== 'Other';
+      if (v === 'Other') { box.value = ''; box.focus(); toast('Type the material in the box'); }
+      else toast(v ? 'Material set to ' + v : 'Material back to automatic');
+      return;
+    }
+    if (!e.target.matches('[data-move]') || e.target.value === '') return;
+    const i = +e.target.closest('.card').dataset.i, to = state.cats[+e.target.value], c = cat(), it = c.items[i];
+    change(() => {
+      c.items.splice(i, 1);
+      if (c.cover && c.cover === it[3]) c.cover = (c.items.find(x => x[3]) || [])[3] || '';
+      to.items.push(it); sel = -1;
+      if (!to.cover && it[3]) to.cover = it[3];   // a new group's first photo is its main photo
+    });
+    fillCats();
+    toast('Moved "' + it[0] + '" to ' + to.name);
+  });
+  function select(i, rerender) { sel = i; if (rerender) render(); else { document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i)); $('#catbox').classList.toggle('sel', i === 'cover'); } }
+
+  // Category name and main photo
+  const nameIn = $('#catName');
+  nameIn.addEventListener('focus', snap);
+  nameIn.addEventListener('input', () => { const v = nameIn.value.trim(); if (!v) return; cat().name = v; state.dirty = true; persist(); if (selEl.options[ci]) selEl.options[ci].text = v + ' (' + cat().items.length + ')'; });
+  // no redraw here: it removed the box you had just clicked, so that first click and typing were lost (this section's name isn't shown on its own cards)
+  nameIn.addEventListener('blur', () => { if (!nameIn.value.trim()) nameIn.value = cat().name; });
+  const ph = $('#coverPh');
+  ph.addEventListener('click', () => { select('cover', false); toast('Main photo picked: press Ctrl+V to paste a photo'); });
+  $('#coverPick').onclick = () => { select('cover', false); pickFile('cover'); };
+  ph.addEventListener('dragover', e => { e.preventDefault(); ph.classList.add('drop'); });
+  ph.addEventListener('dragleave', () => ph.classList.remove('drop'));
+  ph.addEventListener('drop', e => {
+    e.preventDefault(); ph.classList.remove('drop');
+    const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+    if (f) setPhoto('cover', f); else if (from >= 0) { const it = cat().items[from]; if (it[3]) { change(() => { cat().cover = it[3]; }); toast('Main photo changed'); } } else toast('That was not a photo');
+  });
+
+  // Drag to reorder
+  let from = -1;
+  grid.addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!c || e.target.matches('input, textarea')) return; from = +c.dataset.i; c.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'card'); });
+  grid.addEventListener('dragend', () => { from = -1; document.querySelectorAll('.dragging,.over,.drop').forEach(x => x.classList.remove('dragging', 'over', 'drop')); });
+  grid.addEventListener('dragover', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    document.querySelectorAll('.over,.drop').forEach(x => x.classList.remove('over', 'drop'));
+    if (from < 0) c.querySelector('.img').classList.add('drop'); else c.classList.add('over');
+  });
+  grid.addEventListener('drop', e => {
+    const c = e.target.closest('.card'); if (!c) return;
+    e.preventDefault();
+    const to = +c.dataset.i;
+    if (from < 0) { const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) setPhoto(to, f); else toast('That was not a photo'); return; }
+    if (from !== to) { const fr = from; change(() => { const items = cat().items; items.splice(to, 0, items.splice(fr, 1)[0]); sel = to; }); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => e.preventDefault());
+
+  // Photos: drop, paste or choose; shrunk to 800px so the changes file stays small
+  function pickFile(i) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = () => inp.files[0] && setPhoto(i, inp.files[0]); inp.click(); }
+  function setPhoto(i, file) {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const s = Math.min(1, 800 / Math.max(im.width, im.height));
+        const cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+        const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height);
+        const id = 'new:' + cat().slug + '-' + Date.now().toString(36);
+        if (i === 'cover') { change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); cat().cover = id; sel = 'cover'; }); toast('Main photo changed'); return; }
+        change(() => { state.images[id] = cv.toDataURL('image/jpeg', 0.88); const it = cat().items[i]; if (!cat().cover || cat().cover === it[3]) cat().cover = id; it[3] = id; sel = i; });
+        toast('Photo changed');
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  }
+  document.addEventListener('paste', e => {
+    const f = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/'));
+    if (f) { e.preventDefault(); if (sel === -1) return toast('Click a card or the main photo first, then paste'); setPhoto(sel, f.getAsFile()); return; }
+    if (!e.target.matches('input, textarea') && clip) { e.preventDefault(); change(() => { const at = typeof sel !== 'number' || sel < 0 ? cat().items.length : sel + 1; cat().items.splice(at, 0, JSON.parse(JSON.stringify(clip))); sel = at; }); toast('Pasted card'); }
+  });
+  document.addEventListener('copy', e => { if (e.target.matches('input, textarea') || typeof sel !== 'number' || sel < 0) return; e.preventDefault(); clip = JSON.parse(JSON.stringify(cat().items[sel])); toast('Card copied. Pick a category and press Ctrl+V'); });
+
+  // New group (a new section of the website): it goes on the website with the first upload that has products in it
+  const isNewCat = c => !window.FT_CATS.some(x => x.slug === c.slug);
+  $('#newSec').onclick = () => {
+    modal('New group', '<p>Type the group name as it should show on the website, and pick where it shows.</p>' +
+      '<p><b>Group name</b><br><input id="secName" class="ukey" maxlength="80" placeholder="e.g. PVC PIPES & FITTINGS"></p>' +
+      '<p><b>Shows under</b><br><select id="secFam" class="ukey">' + window.FT_FAMILIES.map(f => '<option value="' + escH(f.id) + '">' + escH(f.name) + '</option>').join('') + '</select></p><p class="umsg" id="secMsg"></p>',
+      [['Cancel', closeModal], ['Make group', makeSection, true]]);
+    $('#secName').focus();
+    $('#secName').onkeydown = e => { if (e.key === 'Enter') makeSection(); };
+  };
+  function makeSection() {
+    const name = $('#secName').value.replace(/\s+/g, ' ').trim(), fam = $('#secFam').value;
+    if (!name) { $('#secMsg').textContent = 'Type the group name first.'; return; }
+    if (state.cats.some(c => c.name.toLowerCase() === name.toLowerCase())) { $('#secMsg').textContent = 'There is already a group called that. Pick it from the list at the top instead.'; return; }
+    const slug = window.FT_EDIT_CHECK.newSlug(name, window.FT_CATS.map(c => c.slug).concat(state.cats.map(c => c.slug)));
+    change(() => { state.cats.push({ slug, name, fam, desc: '', cover: '', items: [] }); ci = state.cats.length - 1; sel = -1; });
+    fillCats(); closeModal();
+    toast('Group made. Press + Add product, or move cards here with "Move to another section".');
+  }
+  $('#addProd').onclick = () => {
+    change(() => { cat().items.push(['', [], '', '']); sel = cat().items.length - 1; });
+    const card = document.querySelector('.card[data-i="' + (cat().items.length - 1) + '"]');
+    if (card) {   // the top of the new card just under the bar at the top, so its photo box shows too
+      const bar = getComputedStyle($('header')).position === 'sticky' ? $('header').offsetHeight : 0;
+      window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - bar - 12, behavior: 'smooth' });
+      card.querySelector('[data-f="0"]').focus({ preventScroll: true });
+    }
+    toast('New product added at the end: type its name, then add a photo');
+  };
+  $('#delSec').onclick = () => {
+    const c = cat(); if (!isNewCat(c)) return;
+    if (!confirm('Remove the new group "' + c.name + '"' + (c.items.length ? ' and its ' + c.items.length + ' product' + (c.items.length > 1 ? 's' : '') : '') + '?')) return;
+    change(() => { state.cats.splice(ci, 1); ci = 0; sel = -1; });
+    fillCats(); render();
+    toast('Group removed');
+  };
+
+  $('#undo').onclick = () => { if (!history.length) return toast('Nothing to undo'); state = JSON.parse(history.pop()); persist(); fillCats(); render(); };
+  $('#reset').onclick = () => { if (confirm('Throw away all your changes and start from the live website?')) { history = []; state = fresh(); persist(); sel = -1; ci = 0; fillCats(); render(); } };
+  // the changes file: "Save changes file" downloads it, "Upload to website" sends it
+  const changesFile = () => { const used = usedPhotos(state); return { kind: 'fakhri-product-edits', saved: new Date().toISOString(), ver: state.ver, cats: state.cats, images: Object.fromEntries(Object.entries(state.images).filter(([k]) => used.has(k))) }; };
+  $('#save').onclick = () => {
+    const out = changesFile();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+    a.download = 'fakhri-product-changes.json'; a.click();
+    state.dirty = false; state.saved = true; persist(); writeNow();
+    toast('Saved to Downloads as fakhri-product-changes.json');
+  };
+  // what the person is looking at: the newest website list, or their unsaved work on top of it
+  function noticeKind() { return state.dirty ? 'dirty' : state.saved ? 'saved' : 'site'; }
+  function showNotice() {
+    const n = window.FT_CATS.reduce((a, c) => a + c.items.length, 0);
+    shown = noticeKind();
+    $('#notice').innerHTML = shown === 'dirty'
+      ? '<b>Your unsaved changes are here.</b> They started from the newest website list (' + n + ' products). Press <b>Upload to website</b> when you finish.'
+      : shown === 'saved'
+        ? '<b>Your changes are saved</b> in Downloads as fakhri-product-changes.json. Press <b>Upload to website</b> to put them on the website, or send the file to Claude.'
+        : '<b>This is the newest website list:</b> ' + n + ' products in ' + window.FT_CATS.length + ' categories.';
+  }
+
+  /* ===== Upload to website =====
+     The changes file goes to GitHub (edits/inbox/ on the website's source branch). GitHub then tidies and checks it,
+     builds the product pages and publishes the website by itself (.github/workflows/editor-upload.yml runs
+     tools/publish-upload.js) and writes the result to edits/status/, which this page shows. The website key is a
+     GitHub key that can change the website files; it is kept in this browser only. */
+  const GH = 'https://api.github.com/repos/azizmoiz504-dotcom/Nocturne', BR = 'claude/website-changes-9vx8yk';
+  const UKEY = 'ft-upload-key';
+  const keep = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} } };
+  const gh = (url, opt = {}, key = keep.get(UKEY)) => fetch(GH + url, Object.assign({ cache: 'no-store' }, opt, { headers: Object.assign({ Authorization: 'Bearer ' + key, Accept: 'application/vnd.github+json' }, opt.headers || {}) }));
+  const wait = ms => new Promise(ok => setTimeout(ok, ms));
+  const ul = items => '<ul>' + items.map(x => '<li>' + escH(x) + '</li>').join('') + '</ul>';
+  const box = $('#up');
+  function modal(title, html, btns) {
+    $('#upTitle').textContent = title; $('#upBody').innerHTML = html;
+    const b = $('#upBtns'); b.innerHTML = '';
+    (btns || []).forEach(([label, fn, red]) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn' + (red ? ' red' : ''); x.textContent = label; x.onclick = fn; b.appendChild(x); });
+    box.hidden = false;
+  }
+  const closeModal = () => { box.hidden = true; };
+  // the website's list right now, as a fingerprint (to know when an upload is live, or that someone else uploaded first)
+  async function liveVer() { const t = await (await fetch('js/data.js?t=' + Date.now(), { cache: 'no-store' })).text(); const w = {}; new Function('window', t)(w); return fpr(w.FT_CATS); }
+  const toB64 = s => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = no; r.readAsDataURL(new Blob([s], { type: 'application/json' })); });
+  // GitHub's new-key page with the name, owner, a year's expiry and Contents: Read and write already filled in
+  const KEYURL = 'https://github.com/settings/personal-access-tokens/new?name=Fakhri+editor&description=Product+editor+Upload+to+website+button&target_name=azizmoiz504-dotcom&expires_in=366&contents=write';
+  const HOWTO = '<details><summary>If the GitHub page is not filled in</summary><ol>' +
+    '<li>On a computer signed in to GitHub (account <b>azizmoiz504-dotcom</b>), open <a href="' + KEYURL + '" target="_blank" rel="noopener">GitHub\'s new key page</a>.</li>' +
+    '<li>Name: <b>Fakhri editor</b>. Expiration: the longest you can pick.</li>' +
+    '<li>Repository access: <b>Only select repositories</b>, then pick <b>Nocturne</b>.</li>' +
+    '<li>Permissions: add <b>Contents</b> and set it to <b>Read and write</b>. Nothing else is needed.</li>' +
+    '<li>Press <b>Generate token</b>, copy the key (it starts with <code>github_pat_</code>) and paste it here.</li></ol>' +
+    '<p class="umuted">Keep the key private: anyone who has it can change the website. Do not send it in a chat. To use another computer, paste the same key there once.</p></details>';
+
+  function askKey(why) {
+    modal('Website key', (why ? '<p class="umsg">' + escH(why) + '</p>' : '') +
+      '<p>To upload from this computer, the editor needs a <b>website key</b> from GitHub, once. It stays in this browser only.</p>' +
+      '<ol class="ksteps"><li><a class="btn red kbtn" href="' + KEYURL + '" target="_blank" rel="noopener">Make the key on GitHub</a><br><span class="umuted">It opens GitHub with the boxes filled in for you.</span></li>' +
+      '<li>On GitHub, under <b>Repository access</b>, pick <b>Only select repositories</b>, then pick <b>Nocturne</b>.</li>' +
+      '<li>Press <b>Generate token</b> at the bottom, then press the copy button next to the key.</li>' +
+      '<li>Come back here and paste it:</li></ol>' +
+      '<input id="upKey" class="ukey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="Website key"><p class="umsg" id="upMsg"></p>' + HOWTO,
+      [['Cancel', closeModal], ['Save key', saveKey, true]]);
+    $('#upKey').focus();
+    $('#upKey').onkeydown = e => { if (e.key === 'Enter') saveKey(); };
+    $('#upKey').onpaste = () => setTimeout(saveKey, 0);   // pasting the key is enough, no extra press
+  }
+  let checking = false;   // pasting and pressing Save key together check the key once
+  async function saveKey() { if (checking) return; checking = true; try { await checkKey(); } finally { checking = false; } }
+  async function checkKey() {
+    const k = $('#upKey').value.trim(), msg = $('#upMsg');
+    if (!/^(github_pat_|ghp_)\w{20,}$/.test(k)) { msg.textContent = 'That is not a website key. It starts with github_pat_'; return; }
+    msg.textContent = 'Checking the key…';
+    try {
+      const r = await gh('', {}, k);
+      if (r.status === 401) { msg.textContent = 'This key does not work (wrong or expired). Make a new one.'; return; }
+      if (!r.ok) { msg.textContent = 'This key cannot reach the website files. When making it, pick "Only select repositories" and Nocturne.'; return; }
+    } catch (e) { msg.textContent = 'Could not reach GitHub. Check the internet and try again.'; return; }
+    keep.set(UKEY, k);
+    startUpload();
+  }
+
+  $('#upload').onclick = () => { if (pT) writeNow(); if (!keep.get(UKEY)) askKey(); else startUpload(); };
+  function startUpload() {
+    const file = changesFile();
+    if (JSON.stringify(file.cats) === JSON.stringify(fresh().cats)) return modal('Nothing to upload', '<p>This is exactly the website list. Make your changes first, then press <b>Upload to website</b>.</p>', [['OK', closeModal, true]]);
+    const r = window.FT_EDIT_CHECK.run(file, window.FT_CATS);
+    if (r.errors.length) return modal('Please fix this first', ul(r.errors), [['OK, go back', closeModal, true]]);
+    let html = '<p>Your changes go on the website for everyone: the catalogue, the shop page and the app.</p>';
+    if (r.fixes.length) html += '<h3>Tidied for you</h3>' + ul(r.fixes);
+    if (r.warnings.length) html += '<h3>Please check these</h3><p class="umuted">They go up as they are, unless you press Go back and change them.</p>' + ul(r.warnings);
+    modal(r.warnings.length ? 'Check before uploading' : 'Upload your changes?', html, [['Change website key', () => askKey()], ['Go back', closeModal], ['Upload now', () => send(r), true]]);
+  }
+
+  const STEPS = ['Sending your changes', 'Checking them and building the website pages', 'Putting them live'];
+  const progress = n => modal('Uploading to the website', '<ol class="steps">' + STEPS.map((s, i) => '<li class="' + (i < n ? 'ok' : i === n ? 'on' : '') + '"><i>' + (i < n ? '✓' : '') + '</i>' + s + '</li>').join('') + '</ol><p class="umuted">This usually takes a few minutes. Keep this page open; if you close it, it carries on and this page picks it up again next time.</p>');
+  function failed(msg) {
+    keep.set(UPEND, null);
+    modal('Not uploaded', '<p>' + escH(msg) + '</p><p class="umuted">Your changes are still here in the editor.</p>', [['Save changes file', () => { closeModal(); $('#save').click(); }], ['Close', closeModal, true]]);
+  }
+
+  async function send(r) {
+    // what goes up is the tidied list, and the editor shows the tidied list from now on (Undo brings back the old one)
+    snap(); state.cats = JSON.parse(JSON.stringify(r.file.cats)); state.dirty = true; writeNow(); fillCats(); render();
+    progress(0);
+    const id = new Date().toISOString().replace(/[-:]|\.\d+Z$/g, '').replace('T', '-') + '-' + Math.random().toString(36).slice(2, 6);
+    try {
+      if (await liveVer() !== state.ver) return failed('The website list was changed after you opened the editor (someone else uploaded first), so your changes were NOT uploaded: they would undo the other changes. Press "Save changes file" and send the file to Claude.');
+      const content = await toB64(JSON.stringify(changesFile()));
+      const res = await gh('/contents/edits/inbox/' + id + '.json', { method: 'PUT', body: JSON.stringify({ message: 'Product editor upload ' + id, content, branch: BR }) });
+      if (res.status === 401) { keep.set(UKEY, null); return askKey('The website key does not work any more (wrong or expired). Paste a new key, then upload again.'); }
+      if (res.status === 403 || res.status === 404) { keep.set(UKEY, null); return askKey('This key is not allowed to change the website files. Make a new key with Contents set to "Read and write", paste it, then upload again.'); }
+      if (!res.ok) return failed('GitHub did not take the upload (code ' + res.status + '), so nothing changed. Try again in a few minutes.');
+    } catch (e) { return failed('Could not reach GitHub or the website, so nothing was uploaded. Check the internet and try again.'); }
+    keep.set(UPEND, JSON.stringify({ id, at: Date.now() }));
+    watch(id, Date.now());
+  }
+
+  async function watch(id, t0) {
+    progress(1);
+    let st = null;
+    while (!st) {
+      if (Date.now() - t0 > 20 * 60e3) return modal('Still working', '<p>GitHub has not finished checking your upload yet. It finishes by itself: leave this page open, or come back later and this page picks it up again.</p>', [['Close', closeModal], ['Keep waiting', () => watch(id, Date.now()), true]]);
+      await wait(6000);
+      try {
+        const r = await gh('/contents/edits/status/' + id + '.json?ref=' + encodeURIComponent(BR), { headers: { Accept: 'application/vnd.github.raw+json' } });
+        if (r.ok) st = JSON.parse(await r.text());
+      } catch (e) { /* no internet for a moment: keep trying */ }
+    }
+    if (!st.ok) return failed(st.error || 'Your changes could not be put on the website.');
+    // the changes are on the website's list now, so they no longer count as unsaved work
+    state.dirty = false; state.saved = false; writeNow(); showNotice();
+    progress(2);
+    while (true) {
+      if (Date.now() - t0 > 45 * 60e3) { keep.set(UPEND, null); return modal('Published', '<p>Your changes are published (' + st.products + ' products). GitHub is slow to show them today; they appear on the website by themselves.</p>', [['Close', () => location.reload(), true]]); }
+      try { if (await liveVer() === st.ver) break; } catch (e) { /* keep trying */ }
+      await wait(8000);
+    }
+    keep.set(UPEND, null);
+    modal('Live on the website ✓', '<p>Your changes are live: <b>' + st.products + ' products in ' + st.categories + ' sections</b>' + (st.photos ? ', ' + st.photos + ' new photo' + (st.photos > 1 ? 's' : '') : '') + '. The catalogue, the shop page and the app show them now (refresh a page that was already open).</p>' +
+      (st.fixes && st.fixes.length ? '<h3>Tidied for you</h3>' + ul(st.fixes) : ''), [['Continue editing', () => location.reload(), true]]);
+  }
+  // an upload that was still running when this page was closed or refreshed
+  try { const p = JSON.parse(keep.get(UPEND)); if (p && p.id && Date.now() - p.at < 3 * 3600e3) watch(p.id, p.at); else keep.set(UPEND, null); } catch (e) { keep.set(UPEND, null); }
+
+  fillCats();
+  render();
+  showNotice();
+}
+</script>
+</body>
+</html>
