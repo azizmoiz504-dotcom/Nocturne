@@ -118,6 +118,7 @@ html[lang=ar] .topline { font: 500 13px var(--f-body); letter-spacing: 0; }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex: none; }
 .brand__logo { width: 46px; height: 46px; border-radius: 11px; background: var(--o); position: relative; flex: none; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .18); }
 .brand__logo::after { content: ''; position: absolute; inset: 9px 7px 11px; background: var(--o-ink); -webkit-mask: url(mark.png) center / contain no-repeat; mask: url(mark.png) center / contain no-repeat; }
+.brand__img { height: 56px; width: auto; display: block; }
 .brand__word { display: flex; flex-direction: column; line-height: 1; }
 .brand__word b { font-size: 23px; line-height: .92; letter-spacing: .01em; }
 .brand__word small { font: 500 10px/1 var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--o); margin-top: 4px; }
@@ -896,6 +897,7 @@ html[lang=ar] body * { letter-spacing: 0 !important; }
   .hdr { top: 10px; }
   .hdr__pill { height: 58px; gap: 10px; padding: 0 6px 0 8px; border-radius: 14px; }
   .brand__logo { width: 40px; height: 40px; border-radius: 10px; }
+  .brand__img { height: 42px; }
   .brand__logo::after { inset: 8px 6px 10px; }
   .brand__word b { font-size: 20px; }
   .tool { height: 40px; min-width: 40px; padding: 0 10px; border-radius: 10px; }
