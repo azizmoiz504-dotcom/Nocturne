@@ -1491,7 +1491,7 @@
 
     const steps = $$('.anatomy__steps p');
     ScrollTrigger.create({
-      trigger: '#anatomy', start: 'top top', end: '+=240%', pin: true, anticipatePin: 1,
+      trigger: '#anatomy', start: 'top top', end: () => innerWidth < 900 ? '+=150%' : '+=240%', pin: true, anticipatePin: 1, invalidateOnRefresh: true,
       onUpdate: s => {
         const p = s.progress;
         window.FT3D && window.FT3D.setAnatomy(p);

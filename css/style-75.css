@@ -1585,3 +1585,46 @@ body.at-form .qbar.is-on{transform:translate(-50%,160%)}
 .shopfront{margin:24px 0 0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#0b1620}
 .shopfront img{display:block;width:100%;height:auto}
 .shopfront figcaption{padding:7.5px 10.5px;font-size:9.75px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+
+/* ---------- Phone layout pass (2026-11-04): a call / WhatsApp bar along the bottom, a calmer 3D valve section, shorter sections ---------- */
+@media (max-width:674.25px){
+  /* Call and WhatsApp: one bar along the bottom of the screen instead of two big circles over the text */
+  .fabs{left:0;right:0;bottom:0;flex-direction:row;gap:7.5px;padding:6px 9px calc(6px + env(safe-area-inset-bottom));background:rgba(4,12,19,.94);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);border-top:1px solid var(--line)}
+  body.has-quote .fabs,.fabs{right:0;bottom:0}
+  .fab{flex:1;width:auto;height:40.5px;border-radius:10.5px;display:flex;align-items:center;justify-content:center;gap:7.5px;box-shadow:none}
+  .fab svg,.fab--wa svg{width:18px;height:18px}
+  .fab:hover{transform:none}
+  .fab__tip,.fab:hover .fab__tip,.fab:focus-visible .fab__tip{position:static;opacity:1;transform:none;background:none;color:#fff;padding:0;font-family:var(--f-body);font-size:13.5px;font-weight:600;letter-spacing:0;text-transform:none;box-shadow:none}
+  .fab__tip::after,.fab__tip::before{display:none}
+  body.fabs-off .fabs{transform:translateY(110%)}
+  body{padding-bottom:calc(52.5px + env(safe-area-inset-bottom))}
+  .qbar{left:9px;right:9px;max-width:none;bottom:9px}
+  body.has-quote .qbar{bottom:calc(60px + env(safe-area-inset-bottom))}
+  body.has-quote.fabs-off .qbar,body.has-quote.is-anatomy .qbar{bottom:9px}
+
+  /* 3D valve section: the part names sit in a neat list at the bottom (the valve keeps turning above them) */
+  body.ana-list .anatomy__labels{top:auto;bottom:calc(13.5px + env(safe-area-inset-bottom));left:0;right:0;display:flex;gap:6px;overflow-x:auto;padding:3px var(--pad);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  body.ana-list .anatomy__labels::-webkit-scrollbar{display:none}
+  body.ana-list .anatomy__labels.is-on{pointer-events:auto}
+  body.ana-list .vlabel{position:relative;transform:none!important;flex:none;flex-direction:row}
+  body.ana-list .vlabel__line{display:none}
+  body.ana-list .vlabel__dot{display:none}
+  body.ana-list .vlabel__txt{flex:1;text-align:left!important;padding:6.75px 9px;border-radius:9px;background:rgba(4,12,19,.85)}
+  body.ana-list .vlabel__txt b{font-size:11.625px}
+  .anatomy__steps{min-height:72px}
+  .anatomy__steps p{font-size:12.75px}
+
+  /* Industries: less empty space, smaller drawings */
+  .sector,.sector--intro{padding:42px var(--pad) 36px}
+  .sector__art{max-width:255px;margin:18px auto 0;display:block}
+  .sector__num{top:33px;font-size:63px}
+  .sector h3{font-size:33px;margin-top:6px}
+
+  /* Brands: shorter tiles */
+  .btile{min-height:99px}
+  .btile__mark{padding:7.5px 3px}
+  .btile__mark img{max-height:42px}
+
+  /* Footer: the full product list is in the menu and on the products page; keep "All products" here */
+  .footer__cats #footCats a:not(:last-child){display:none}
+}

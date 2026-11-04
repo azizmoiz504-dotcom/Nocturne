@@ -301,11 +301,20 @@
     let tg;
     if (anaVis && !heroVis) {
       const p = st.anaP;
+      if (mobile && (frameN % 20 === 0 || !st.mobS)) {
+        // room on screen between the anatomy text and the list of part names (both in screen pixels while the section is pinned)
+        const ppu = H / (2 * Math.tan(15 * Math.PI / 180) * 14);
+        const top = Math.max(navBottom(), textBottom()) + 8, lt = labelHost ? labelHost.getBoundingClientRect().top : H - 200;
+        const bot = Math.min(H - 16, lt > top + 120 ? lt - 8 : H - 200), room = Math.max(160, bot - top);
+        st.mobS = clamp(Math.min(room * 0.8 / (5.5 * ppu), W * 0.95 / (9 * ppu)), 0.2, 0.36);
+        st.mobY = (H / 2 - (top + bot) / 2) / ppu - 1.25 * st.mobS;
+      }
       const ex = ease(clamp((p - 0.1) / 0.5, 0, 1));
       tg = {
-        x: mobile ? 0 : halfW * 0.36, y: mobile ? -1.75 : -0.35,
+        // phones: the valve sits between the text at the top and the part names at the bottom, and shrinks as it opens up so every part stays on screen
+        x: mobile ? 0 : halfW * 0.36, y: mobile ? st.mobY : -0.35,
         ry: -0.75 + p * 1.1 + st.mx * 0.12, rx: 0.32 + st.my * 0.06,
-        s: mobile ? 0.34 : 0.5 * clamp(camera.aspect / 1.6, 0.8, 1.1), ex, z: 15
+        s: mobile ? st.mobS * (1 - 0.3 * ex) : 0.5 * clamp(camera.aspect / 1.6, 0.8, 1.1), ex, z: 15
       };
       // the handwheel keeps turning as you scroll through the explode
       wheelSpin.rotation.y = -p * Math.PI * 3;
@@ -338,9 +347,13 @@
     // so they are shifted by the section's own position, and they fade out as soon as the section starts to leave
     // (they used to slide off the valve when the section scrolled away)
     const anaY = anaVis ? anaEl.getBoundingClientRect().top : 0;
-    const show = anaVis && !heroVis && cur.ex > 0.82 && anaY > -H * 0.1;
+    const show = anaVis && !heroVis && cur.ex > (mobile ? 0.5 : 0.82) && anaY > -H * 0.1;
+    bc.toggle('ana-list', mobile);
     if (show !== labelsOn) { labelHost.classList.toggle('is-on', show); labelHost.inert = !show; labelsOn = show; bc.toggle('is-anatomy', show); }
-    if (show) {
+    if (show && mobile) {
+      if (!st.listed) { st.listed = true; anchors.forEach(a => { a.el.style.transform = ''; a.el.classList.remove('is-left'); }); }
+    } else if (show) {
+      st.listed = false;
       valve.updateMatrixWorld();
       const sides = { l: [], r: [] };
       anchors.forEach(a => {
