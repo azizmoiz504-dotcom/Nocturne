@@ -30,7 +30,7 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small() ? 1.5 : 1.75));
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.18;
   renderer.setClearColor(0x000000, 0);
 
   var scene = new T.Scene();
@@ -62,9 +62,9 @@
   key.shadow.mapSize.set(small() ? 1024 : 2048, small() ? 1024 : 2048);
   key.shadow.camera.left = key.shadow.camera.bottom = -6; key.shadow.camera.right = key.shadow.camera.top = 6;
   key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0012; key.shadow.normalBias = 0.045; key.shadow.radius = 4;
-  var rim = new T.DirectionalLight(0x3d7bff, 2.2); rim.position.set(-7, -3, -6); scene.add(rim);
-  var fill = new T.DirectionalLight(0xdfe6ff, 0.45); fill.position.set(-6, 2, 8); scene.add(fill);
-  scene.add(new T.AmbientLight(0x30343c, 0.55));
+  var rim = new T.DirectionalLight(0x3d7bff, 1.6); rim.position.set(-7, -3, -6); scene.add(rim);
+  var fill = new T.DirectionalLight(0xdfe6ff, 0.75); fill.position.set(-6, 2, 8); scene.add(fill);
+  scene.add(new T.HemisphereLight(0xdfe8ff, 0x1a2a55, 0.55));
 
   var srgb = function (hex) { return new T.Color(hex).convertSRGBToLinear(); };
 
@@ -237,8 +237,6 @@
       }
     };
   }
-  var hessianMap = canvasTex(512, 512, hessianDraw(false), true);
-  var hessianRelief = reliefTex(512, 512, hessianDraw(true), 3.2);
 
   /* oak: long grain lines that wander a little, with darker flecks */
   function oakDraw(height) {
@@ -260,8 +258,6 @@
       }
     };
   }
-  var oakMap = canvasTex(256, 1024, oakDraw(false), true);
-  var oakRelief = reliefTex(256, 1024, oakDraw(true), 1.4);
 
   /* knitted glove: rows of little V-shaped loops */
   function knitDraw(height, base) {
@@ -280,36 +276,10 @@
       }
     };
   }
-  var knitMap = canvasTex(256, 256, knitDraw(false, '#f4f3ef'), true);
-  var knitRelief = reliefTex(256, 256, knitDraw(true), 2.4);
-  var cuffMap = canvasTex(256, 256, function (x, w, h) {       // ribbed cuff
-    x.fillStyle = '#ecebe6'; x.fillRect(0, 0, w, h);
-    for (var i = 0; i < w; i += 8) { var g = x.createLinearGradient(i, 0, i + 8, 0); g.addColorStop(0, '#cfcdc6'); g.addColorStop(0.5, '#fbfaf7'); g.addColorStop(1, '#cfcdc6'); x.fillStyle = g; x.fillRect(i, 0, 8, h); }
-  }, true);
   // nitrile coating: smooth grey with tiny foam pores
-  var nitrileRelief = reliefTex(256, 256, function (x, w, h) {
-    seed = 41; x.fillStyle = '#808080'; x.fillRect(0, 0, w, h);
-    for (var i = 0; i < 1400; i++) { x.fillStyle = 'rgba(0,0,0,' + (0.2 + rnd() * 0.4) + ')'; x.beginPath(); x.arc(rnd() * w, rnd() * h, 0.6 + rnd() * 1.4, 0, Math.PI * 2); x.fill(); }
-  }, 1.6);
 
   // reflective sleeve on the cone: tiny prisms that sparkle
-  var prismMap = canvasTex(256, 256, function (x, w, h) {
-    x.fillStyle = '#e9ecef'; x.fillRect(0, 0, w, h);
-    var s = 16;
-    for (var j = 0; j < h / s + 1; j++) for (var i = 0; i < w / s + 1; i++) {
-      var cx = i * s + (j % 2) * s / 2, cy = j * s * 0.866;
-      x.fillStyle = (i + j) % 3 === 0 ? '#ffffff' : (i + j) % 3 === 1 ? '#d7dce2' : '#c3c9d1';
-      x.beginPath();
-      for (var k = 0; k < 6; k++) { var a = k * Math.PI / 3 + Math.PI / 6; x.lineTo(cx + Math.cos(a) * s * 0.55, cy + Math.sin(a) * s * 0.55); }
-      x.closePath(); x.fill();
-    }
-  }, true);
-  prismMap.repeat.set(10, 2);
   // moulded plastic: a faint mottling so it isn't plastic-perfect
-  var mottle = canvasTex(256, 256, function (x, w, h) {
-    seed = 5; x.fillStyle = '#7a7a7a'; x.fillRect(0, 0, w, h);
-    for (var i = 0; i < 500; i++) { var v = 100 + rnd() * 60 | 0; x.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',.25)'; x.beginPath(); x.arc(rnd() * w, rnd() * h, 2 + rnd() * 10, 0, Math.PI * 2); x.fill(); }
-  }, true, true);
 
   // barrier tape: red and white bands like BAM's (no words on it)
   var RIB_LEN = 3.2;                       // how long one picture of the tape is, in the model
@@ -332,39 +302,37 @@
     for (i = 0; i < w; i += 8) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
   });
   // fresnel rings on the warning light lens
-  var ringsTex = canvasTex(512, 512, function (x, w, h) {
-    x.fillStyle = '#808080'; x.fillRect(0, 0, w, h);
-    for (var r = 252; r > 8; r -= 10) {
-      var g = x.createRadialGradient(w / 2, h / 2, r - 10, w / 2, h / 2, r);
-      g.addColorStop(0, '#3a3a3a'); g.addColorStop(1, '#d8d8d8');
-      x.fillStyle = g; x.beginPath(); x.arc(w / 2, h / 2, r, 0, Math.PI * 2); x.fill();
-    }
-  }, false, true);
 
   var BLUE = 0x2f6dff;
+  /* glossy toy look: smooth vinyl colours, a strong clear coat, no fabric or grain textures */
+  var toy = function (hex, o) {
+    var m = new T.MeshPhysicalMaterial({ color: srgb(hex), metalness: 0, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 0.5 });
+    if (o) for (var q in o) m[q] = o[q];
+    return m;
+  };
   var K = {
-    cone: new T.MeshPhysicalMaterial({ color: srgb(0xe8341c), roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.3 }),
-    reflect: new T.MeshStandardMaterial({ map: prismMap, metalness: 0.55, roughness: 0.16, emissive: srgb(0x30343a) }),
-    rubber: new T.MeshStandardMaterial({ color: srgb(0x17181b), roughness: 0.82 }),
-    body: new T.MeshPhysicalMaterial({ color: srgb(0xff8a12), roughness: 0.34, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
-    lensA: new T.MeshPhysicalMaterial({ color: srgb(0xffa000), emissive: srgb(0xff5a00), emissiveIntensity: 0.3, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04 }),
+    cone: toy(0xff4a14, { roughness: 0.2 }),
+    reflect: toy(0xf2f5fb, { roughness: 0.14, envMapIntensity: 0.45 }),
+    rubber: toy(0x16203a, { roughness: 0.3 }),
+    body: toy(0xffa800),
+    lensA: toy(0xff5200, { emissive: srgb(0xff4800), emissiveIntensity: 0.45, roughness: 0.08 }),
     bulb: new T.MeshBasicMaterial({ color: srgb(0xfff1c2) }),
-    solar: new T.MeshPhysicalMaterial({ map: solarTex, metalness: 0.3, roughness: 0.18, clearcoat: 1 }),
-    ribbon: new T.MeshStandardMaterial({ map: cautionTexV, roughness: 0.42, side: T.DoubleSide }),
-    hessian: new T.MeshStandardMaterial({ map: hessianMap, normalMap: hessianRelief, normalScale: new T.Vector2(1.1, 1.1), roughness: 0.96, side: T.DoubleSide }),
-    twine: new T.MeshStandardMaterial({ color: srgb(0x9c7a49), roughness: 1, normalMap: hessianRelief, normalScale: new T.Vector2(0.6, 0.6) }),
-    wood: new T.MeshPhysicalMaterial({ map: oakMap, normalMap: oakRelief, normalScale: new T.Vector2(0.6, 0.6), roughness: 0.5, clearcoat: 0.45, clearcoatRoughness: 0.35 }),
-    blade: new T.MeshPhysicalMaterial({ color: srgb(0x7d8794), metalness: 0.75, roughness: 0.34, roughnessMap: mottle, clearcoat: 0.5, clearcoatRoughness: 0.3 }),
-    bright: new T.MeshStandardMaterial({ color: 0xc7ccd4, metalness: 1, roughness: 0.22 }),
-    knit: new T.MeshStandardMaterial({ map: knitMap, normalMap: knitRelief, normalScale: new T.Vector2(1.2, 1.2), roughness: 0.94, side: T.DoubleSide }),
-    dip: new T.MeshPhysicalMaterial({ color: srgb(0x585c63), roughness: 0.5, normalMap: nitrileRelief, normalScale: new T.Vector2(0.35, 0.35), clearcoat: 0.25, clearcoatRoughness: 0.5, side: T.DoubleSide }),
-    cuff: new T.MeshStandardMaterial({ map: cuffMap, roughness: 0.95, side: T.DoubleSide }),
-    hem: new T.MeshStandardMaterial({ color: srgb(BLUE), roughness: 0.8 }),
-    clear: new T.MeshPhysicalMaterial({ color: srgb(0xeaf3ff), metalness: 0, roughness: 0.03, transparent: true, opacity: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, side: T.DoubleSide, depthWrite: false }),
-    coat: new T.MeshPhysicalMaterial({ color: srgb(0x7fb0ff), metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.12, side: T.FrontSide, depthWrite: false }),
-    arm: new T.MeshPhysicalMaterial({ color: srgb(BLUE), roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2 }),
-    armDark: new T.MeshStandardMaterial({ color: srgb(0x23262c), roughness: 0.5 }),
-    core: new T.MeshStandardMaterial({ color: srgb(0xc9a77a), roughness: 0.9, side: T.DoubleSide })
+    solar: new T.MeshPhysicalMaterial({ map: solarTex, metalness: 0.3, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.04 }),
+    ribbon: new T.MeshPhysicalMaterial({ map: cautionTexV, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.06, side: T.DoubleSide }),
+    hessian: toy(0xd99a4e, { roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.2, envMapIntensity: 0.35, side: T.DoubleSide }),
+    twine: toy(BLUE),
+    wood: toy(0xd4893c, { roughness: 0.24 }),
+    blade: toy(0xb9c6da, { metalness: 0.55, roughness: 0.2 }),
+    bright: toy(0xeef2f8, { metalness: 0.6, roughness: 0.14 }),
+    knit: toy(0xf7f8fb, { roughness: 0.3, clearcoat: 0.8, side: T.DoubleSide }),
+    dip: toy(BLUE, { roughness: 0.16, side: T.DoubleSide }),
+    cuff: toy(0xf7f8fb, { roughness: 0.3, clearcoat: 0.8, side: T.DoubleSide }),
+    hem: toy(0x16203a),
+    clear: new T.MeshPhysicalMaterial({ color: srgb(0xdfeaff), metalness: 0, roughness: 0.02, transparent: true, opacity: 0.32, clearcoat: 1, clearcoatRoughness: 0.02, side: T.DoubleSide, depthWrite: false }),
+    coat: new T.MeshPhysicalMaterial({ color: srgb(0x7fb0ff), metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.16, side: T.FrontSide, depthWrite: false }),
+    arm: toy(BLUE),
+    armDark: toy(0x16203a),
+    core: toy(0xe6bf86, { roughness: 0.35, side: T.DoubleSide })
   };
 
   /* ---------- a smooth shape from overlapping rounded pieces (for the glove): the outline is found on a fine grid ---------- */
@@ -461,12 +429,12 @@
     lens.rotation.x = Math.PI / 2; lens.position.set(0, 0.2, 0.15); s.add(lens);
     var led = new T.Mesh(new T.SphereGeometry(0.09, 24, 16), K.bulb); led.position.set(0, 0.2, 0.27); led.scale.z = 0.5; s.add(led);
     for (var k = 0; k < 4; k++) {                     // four screws round the bezel
-      var a = k / 4 * Math.PI * 2 + Math.PI / 4, sc = new T.Mesh(new T.CylinderGeometry(0.035, 0.035, 0.02, 16), M.satin);
+      var a = k / 4 * Math.PI * 2 + Math.PI / 4, sc = new T.Mesh(new T.CylinderGeometry(0.04, 0.04, 0.03, 16), K.reflect);
       sc.rotation.x = Math.PI / 2; sc.position.set(Math.cos(a) * 0.64, 0.2 + Math.sin(a) * 0.64, 0.2); s.add(sc);
     }
     var cellBox = ext(rrect(0.5, 0.32, 0.05), 0.08, 0.02, K.rubber, 2, 8); cellBox.rotation.x = -Math.PI / 2 + 0.25; cellBox.position.set(0, 0.86, 0.02); s.add(cellBox);
     var cell = new T.Mesh(new T.PlaneGeometry(0.42, 0.25), K.solar); cell.rotation.x = -Math.PI / 2 + 0.25; cell.position.set(0, 0.905, 0.03); s.add(cell);
-    var hoop = new T.Mesh(new T.TorusGeometry(0.38, 0.032, 14, 64, Math.PI), M.satin); hoop.position.set(0, 0.95, -0.04); s.add(hoop);
+    var hoop = new T.Mesh(new T.TorusGeometry(0.38, 0.05, 18, 64, Math.PI), K.rubber); hoop.position.set(0, 0.95, -0.04); s.add(hoop);
     [-1, 1].forEach(function (x) { var p = new T.Mesh(new T.CylinderGeometry(0.055, 0.055, 0.12, 20), K.body); p.rotation.z = Math.PI / 2; p.position.set(x * 0.38, 0.95, -0.04); s.add(p); });
     var mount = lathe([[0, -0.18], [0.12, -0.18], [0.15, -0.3], [0.17, -0.33], [0.36, -1.28], [0.43, -1.33], [0.43, -1.345], [0, -1.345]], 64, K.body); s.add(mount);
     var foot = new T.Mesh(new T.CylinderGeometry(0.45, 0.47, 0.06, 64), K.rubber); foot.position.y = -1.39; s.add(foot);
@@ -484,17 +452,17 @@
   var tape = tool('tape');
   var ribbon, ribL = 0.6;
   (function (s) {
-    var rm = new T.MeshStandardMaterial({ map: cautionTex.clone(), roughness: 0.4 }); rm.map.needsUpdate = true; rm.map.repeat.set(1.2, 1);
+    var rm = new T.MeshPhysicalMaterial({ map: cautionTex.clone(), roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.06 }); rm.map.needsUpdate = true; rm.map.repeat.set(1.2, 1);
     var roll = new T.Mesh(new T.CylinderGeometry(0.62, 0.62, 0.5, 96, 1, true), rm); roll.rotation.z = Math.PI / 2; s.add(roll);
     // the sides show the wound layers
     var layers = canvasTex(256, 256, function (x, w, h) {
-      x.fillStyle = '#efece6'; x.fillRect(0, 0, w, h);
-      for (var r = 128; r > 52; r -= 1.6) { x.strokeStyle = (r | 0) % 3 ? 'rgba(200,40,30,.16)' : 'rgba(0,0,0,.08)'; x.lineWidth = 1; x.beginPath(); x.arc(128, 128, r, 0, Math.PI * 2); x.stroke(); }
+      x.fillStyle = '#f4f6fa'; x.fillRect(0, 0, w, h);
+      for (var r = 128; r > 52; r -= 9) { x.strokeStyle = '#e8322a'; x.lineWidth = 4; x.beginPath(); x.arc(128, 128, r - 2, 0, Math.PI * 2); x.stroke(); }
     });
-    var sideM = new T.MeshStandardMaterial({ map: layers, roughness: 0.5, side: T.DoubleSide });
+    var sideM = new T.MeshPhysicalMaterial({ map: layers, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08, side: T.DoubleSide });
     [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.26, 0.62, 96), sideM); r.rotation.y = Math.PI / 2; r.position.x = x * 0.25; s.add(r); });
     var core = new T.Mesh(new T.CylinderGeometry(0.26, 0.26, 0.52, 48, 1, true), K.core); core.rotation.z = Math.PI / 2; s.add(core);
-    var inner = new T.Mesh(new T.CylinderGeometry(0.23, 0.23, 0.53, 48, 1, true), new T.MeshStandardMaterial({ color: srgb(0x8a6d48), roughness: 1, side: T.BackSide })); inner.rotation.z = Math.PI / 2; s.add(inner);
+    var inner = new T.Mesh(new T.CylinderGeometry(0.23, 0.23, 0.53, 48, 1, true), toy(0xc89a62, { roughness: 0.4, side: T.BackSide })); inner.rotation.z = Math.PI / 2; s.add(inner);
     [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.23, 0.26, 48), K.core); r.rotation.y = Math.PI / 2; r.position.x = x * 0.26; s.add(r); });
     // the loose end hangs from the front of the roll: a strip from y = 0 down to -1, stretched to its length every frame
     var g = new T.PlaneGeometry(0.48, 1, 1, 12); g.translate(0, -0.5, 0);
@@ -517,14 +485,14 @@
     for (j = 0; j < bh; j++) for (i = 0; i < bw; i++) { var a = j * (bw + 1) + i, b = a + bw + 1; idx.push(a, a + 1, b, b, a + 1, b + 1); }
     var bgm = new T.BufferGeometry();
     bgm.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); bgm.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); bgm.setIndex(idx); bgm.computeVertexNormals();
-    var blade = new T.Mesh(bgm, new T.MeshPhysicalMaterial({ color: K.blade.color, metalness: 0.55, roughness: 0.38, roughnessMap: mottle, clearcoat: 0.5, clearcoatRoughness: 0.3, side: T.DoubleSide }));
+    var blade = new T.Mesh(bgm, toy(0xb9c6da, { metalness: 0.55, roughness: 0.2, side: T.DoubleSide }));
     blade.position.set(0, -1.9, 0.02); blade.rotation.x = 0.16; s.add(blade);
     var sock = lathe([[0, -1.3], [0.2, -1.3], [0.17, -1.1], [0.11, -0.72], [0.1, -0.68], [0, -0.68]], 48, K.blade); sock.position.y = -0.1; s.add(sock);
     [0.09, -0.09].forEach(function (x) { var rv = new T.Mesh(new T.SphereGeometry(0.03, 12, 8), K.bright); rv.position.set(x * 0.6, -0.95, 0.115); rv.scale.z = 0.5; s.add(rv); });
-    var shaft = new T.Mesh(new T.CylinderGeometry(0.075, 0.085, 3.0, 32, 1), K.wood); shaft.position.y = 0.6; s.add(shaft);
-    var ferrule = new T.Mesh(new T.CylinderGeometry(0.09, 0.09, 0.2, 32), K.bright); ferrule.position.y = 2.0; s.add(ferrule);
-    var d = tube([[-0.07, 2.08, 0], [-0.3, 2.3, 0], [-0.31, 2.62, 0], [0, 2.78, 0], [0.31, 2.62, 0], [0.3, 2.3, 0], [0.07, 2.08, 0]], 0.055, K.bright, 80); s.add(d);
-    var grip = new T.Mesh(new T.CylinderGeometry(0.08, 0.08, 0.56, 32), K.wood); grip.rotation.z = Math.PI / 2; grip.position.y = 2.66; s.add(grip);
+    var shaft = new T.Mesh(new T.CylinderGeometry(0.1, 0.11, 3.0, 32, 1), K.wood); shaft.position.y = 0.6; s.add(shaft);
+    var ferrule = new T.Mesh(new T.CylinderGeometry(0.125, 0.125, 0.22, 32), K.bright); ferrule.position.y = 2.0; s.add(ferrule);
+    var d = tube([[-0.07, 2.08, 0], [-0.3, 2.3, 0], [-0.31, 2.62, 0], [0, 2.78, 0], [0.31, 2.62, 0], [0.3, 2.3, 0], [0.07, 2.08, 0]], 0.06, K.arm, 80); s.add(d);
+    var grip = new T.Mesh(new T.CylinderGeometry(0.1, 0.1, 0.56, 32), K.wood); grip.rotation.z = Math.PI / 2; grip.position.y = 2.66; s.add(grip);
     s.position.y = -0.3;
   })(shovel);
 
@@ -532,29 +500,27 @@
   var hessian = tool('hessian');
   var flap;
   (function (s) {
-    var rmat = K.hessian.clone(); rmat.map = hessianMap.clone(); rmat.map.needsUpdate = true; rmat.map.repeat.set(7, 2.6);
-    rmat.normalMap = hessianRelief.clone(); rmat.normalMap.needsUpdate = true; rmat.normalMap.repeat.set(7, 2.6);
+    var rmat = K.hessian;
     var roll = new T.Mesh(new T.CylinderGeometry(0.55, 0.55, 2.3, 72, 1, true), rmat); roll.rotation.z = Math.PI / 2; s.add(roll);
     // the rolled-up ends: a spiral of layers
     var spiral = canvasTex(256, 256, function (x, w, h) {
-      x.fillStyle = '#7d5f37'; x.fillRect(0, 0, w, h);
-      x.strokeStyle = '#c9a571'; x.lineWidth = 3; x.beginPath();
+      x.fillStyle = '#d89a50'; x.fillRect(0, 0, w, h);
+      x.strokeStyle = '#a8692c'; x.lineWidth = 2.5; x.beginPath();
       for (var a = 0; a < Math.PI * 2 * 12; a += 0.05) { var r = 18 + a * 1.45; x.lineTo(128 + Math.cos(a) * r, 128 + Math.sin(a) * r); }
       x.stroke();
-      x.fillStyle = '#2b2116'; x.beginPath(); x.arc(128, 128, 16, 0, Math.PI * 2); x.fill();
+      x.fillStyle = '#16203a'; x.beginPath(); x.arc(128, 128, 16, 0, Math.PI * 2); x.fill();
     });
-    var ends = new T.MeshStandardMaterial({ map: spiral, roughness: 1 });
+    var ends = new T.MeshPhysicalMaterial({ map: spiral, color: 0x7a7a7a, roughness: 0.55, envMapIntensity: 0.2 });
     [-1, 1].forEach(function (x) { var e = new T.Mesh(new T.CircleGeometry(0.55, 64), ends); e.rotation.y = x * Math.PI / 2; e.position.x = x * 1.151; s.add(e); });
     // two twine ties round the roll
-    [-0.7, 0.7].forEach(function (x) { var t = new T.Mesh(new T.TorusGeometry(0.565, 0.022, 10, 96), K.twine); t.rotation.y = Math.PI / 2; t.position.x = x; s.add(t); });
+    [-0.7, 0.7].forEach(function (x) { var t = new T.Mesh(new T.TorusGeometry(0.57, 0.04, 16, 96), K.twine); t.rotation.y = Math.PI / 2; t.position.x = x; s.add(t); });
     // the hanging length, with a frayed bottom edge
     var fg = new T.PlaneGeometry(2.22, 1.4, 28, 18); fg.translate(0, -0.7, 0);
     var fray = canvasTex(64, 512, function (x, w, h) {
       x.fillStyle = '#fff'; x.fillRect(0, 0, w, h - 26);
-      seed = 3; for (var i = 0; i < w; i += 1) { x.fillRect(i, h - 26, 1, 4 + rnd() * 22); }
+      for (var i = 0; i < w; i += 1) { x.fillRect(i, h - 26, 1, 12 + Math.sin(i / w * Math.PI * 6) * 8); }
     }, false, true);
-    var fm = K.hessian.clone(); fm.map = hessianMap.clone(); fm.map.needsUpdate = true; fm.map.repeat.set(6.6, 4.2);
-    fm.normalMap = hessianRelief.clone(); fm.normalMap.needsUpdate = true; fm.normalMap.repeat.set(6.6, 4.2);
+    var fm = K.hessian.clone();
     fm.alphaMap = fray; fm.alphaTest = 0.5;
     flap = new T.Mesh(fg, fm); flap.position.set(0, 0, 0.55); s.add(flap);
     flap.userData.base = fg.attributes.position.array.slice();
@@ -586,11 +552,11 @@
         [0.42, 0.78].forEach(function (t) {
           var jy = f[0][1] + (f[2][1] - f[0][1]) * t, jx = f[0][0] + (f[2][0] - f[0][0]) * t;
           var dx = x - jx, dy = y - jy;
-          if (Math.abs(dx) < 0.14) cr += 0.012 * Math.exp(-dy * dy / 0.0007) * (1 - Math.abs(dx) / 0.14);
+          if (Math.abs(dx) < 0.14) cr += 0.006 * Math.exp(-dy * dy / 0.0007) * (1 - Math.abs(dx) / 0.14);
         });
       });
-      if (y > -0.5 && y < 0.35) cr += 0.007 * Math.exp(-Math.pow(y - 0.18 + x * 0.25, 2) / 0.0012) + 0.006 * Math.exp(-Math.pow(y + 0.12 - x * 0.35, 2) / 0.0012);
-      if (y < -0.68) cr += 0.006 * Math.pow(Math.sin(x * 70), 8);   // the ribs of the knitted cuff
+      if (y > -0.5 && y < 0.35) cr += 0.003 * Math.exp(-Math.pow(y - 0.18 + x * 0.25, 2) / 0.0012) + 0.003 * Math.exp(-Math.pow(y + 0.12 - x * 0.35, 2) / 0.0012);
+      if (y < -0.68) cr += 0.004 * Math.pow(Math.sin(x * 70), 8);   // the ribs of the knitted cuff
       return d + cr;
     };
     var S = surface(F, [-1.05, -1.4, -0.3], [0.7, 1.55, 0.36], small() ? 0.02 : 0.016);
@@ -624,8 +590,8 @@
     });
     // the stitched blue hem round the opening, and the dark inside
     var hemPts = []; for (i = 0; i <= 48; i++) { var t = i / 48 * Math.PI * 2; hemPts.push([Math.cos(t) * 0.524, -1.225, Math.sin(t) * 0.152]); }
-    var hem = tube(hemPts, 0.03, K.hem, 96); one.add(hem);
-    var hole = new T.Mesh(new T.CircleGeometry(1, 48), new T.MeshStandardMaterial({ color: srgb(0x2a2c30), roughness: 1, side: T.DoubleSide }));
+    var hem = tube(hemPts, 0.045, K.dip, 96); one.add(hem);
+    var hole = new T.Mesh(new T.CircleGeometry(1, 48), toy(0x16203a, { roughness: 0.5, side: T.DoubleSide }));
     hole.scale.set(0.5, 0.135, 1); hole.rotation.x = Math.PI / 2; hole.position.y = -1.222; one.add(hole);
 
     var front = one, back = one.clone();
