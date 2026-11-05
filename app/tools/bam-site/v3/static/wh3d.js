@@ -49,7 +49,7 @@
       m.position.set(x, y, z); m.lookAt(0, 2, 0); s.add(m);
     };
     panel(0x8ea3c4, 0.75, 40, 10, 0, 22, 0);
-    panel(0xf5821f, 1.1, 26, 3, 0, -1, 20);
+    panel(0x2f6dff, 1.1, 26, 3, 0, -1, 20);
     panel(0xfff0dc, 0.55, 10, 4, 0, 7, 18);
     panel(0xfff3e0, 1.6, 8, 3, 0, 3, -20);
     var pm = new T.PMREMGenerator(renderer);
@@ -94,15 +94,15 @@
     var px = w / 9;                                              // 9 m across, 12 m deep (stretched)
     x.strokeStyle = 'rgba(40,40,42,.35)'; x.lineWidth = 3;
     for (var i = 1; i < 3; i++) { x.beginPath(); x.moveTo(i * w / 3, 0); x.lineTo(i * w / 3, h); x.stroke(); x.beginPath(); x.moveTo(0, i * h / 4); x.lineTo(w, i * h / 4); x.stroke(); x.beginPath(); x.moveTo(0, (i + 1.5) * h / 4); x.lineTo(w, (i + 1.5) * h / 4); x.stroke(); }
-    x.fillStyle = '#e1ae17';
+    x.fillStyle = '#2f6dff';
     [-1.75, 1.75].forEach(function (m) { x.fillRect(w / 2 + m * px - 0.05 * px, 0, 0.1 * px, h); });
   }));
   var hazardTex = tex(mk(256, 32, function (x, w, h) {
-    x.fillStyle = '#f2c21b'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
+    x.fillStyle = '#2f6dff'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
     for (var k = -2; k < 12; k++) { x.beginPath(); x.moveTo(k * 32, h); x.lineTo(k * 32 + 16, h); x.lineTo(k * 32 + 16 + h, 0); x.lineTo(k * 32 + h, 0); x.closePath(); x.fill(); }
   }), [6, 1]);
   var bollardTex = tex(mk(64, 256, function (x, w, h) {
-    x.fillStyle = '#f2c21b'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
+    x.fillStyle = '#2f6dff'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
     for (var k = 0; k < 4; k++) x.fillRect(0, k * 64 + 32, w, 32);
   }));
   var glow = function (inner, outer) {
@@ -145,15 +145,15 @@
     wall: new T.MeshStandardMaterial({ color: srgb(0x8b9097), roughness: 0.9 }),
     back: new T.MeshStandardMaterial({ color: srgb(0x2d3238), roughness: 0.8 }),
     ceil: new T.MeshStandardMaterial({ color: srgb(0x2a2d32), roughness: 0.95 }),
-    upright: new T.MeshStandardMaterial({ color: srgb(0x23466e), metalness: 0.45, roughness: 0.45 }),
-    beam: new T.MeshStandardMaterial({ color: srgb(0xf06c12), metalness: 0.3, roughness: 0.42 }),
+    upright: new T.MeshStandardMaterial({ color: srgb(0x3a4150), metalness: 0.45, roughness: 0.45 }),
+    beam: new T.MeshStandardMaterial({ color: srgb(0x2f6dff), metalness: 0.3, roughness: 0.42 }),
     deck: new T.MeshStandardMaterial({ color: srgb(0x5d636b), metalness: 0.6, roughness: 0.55 }),
     carton: new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92 }),
     white: new T.MeshStandardMaterial({ color: srgb(0xf1f0ec), roughness: 0.6 }),
     wood: new T.MeshStandardMaterial({ color: srgb(0x9a7148), roughness: 0.9 }),
     bollard: new T.MeshStandardMaterial({ map: bollardTex, roughness: 0.5 }),
     fixture: new T.MeshBasicMaterial({ color: 0x000000 }),
-    orangeLit: new T.MeshBasicMaterial({ color: srgb(0xf5821f) })
+    orangeLit: new T.MeshBasicMaterial({ color: srgb(0x2f6dff) })
   };
 
   /* ---------- the building ---------- */
@@ -184,7 +184,7 @@
   // the shutter box over the opening
   var box = new T.Mesh(new T.BoxGeometry(OPEN_W + 0.6, 0.66, 0.6), M.housing); box.position.set(0, OPEN_H + 0.33, 0.24); scene.add(box);
   var boxLip = new T.Mesh(new T.BoxGeometry(OPEN_W + 0.64, 0.05, 0.64), M.trim); boxLip.position.set(0, OPEN_H + 0.66, 0.24); scene.add(boxLip);
-  // the sign: lit letters on a black box, an orange line of light underneath
+  // the sign: lit letters on a black box, a blue line of light underneath
   var signC = document.createElement('canvas'); signC.width = 2048; signC.height = 360;
   var signTex = tex(signC);
   var signMat = new T.MeshBasicMaterial({ map: signTex, color: 0x000000 });
@@ -200,10 +200,10 @@
     x.clearRect(0, 0, w, h);
     x.fillStyle = '#0c0d0f'; x.fillRect(0, 0, w, h);
     x.strokeStyle = 'rgba(255,255,255,.07)'; x.lineWidth = 6; x.strokeRect(8, 8, w - 16, h - 16);
-    if (markImg.complete && markImg.naturalWidth) {          // their dome mark, small, in orange
+    if (markImg.complete && markImg.naturalWidth) {          // their dome mark, small, in blue
       var mh = 170, mw = mh * markImg.naturalWidth / markImg.naturalHeight;
-      var t = mk(Math.ceil(mw), mh, function (c) { c.drawImage(markImg, 0, 0, mw, mh); c.globalCompositeOperation = 'source-in'; c.fillStyle = '#f5821f'; c.fillRect(0, 0, mw, mh); });
-      x.save(); x.shadowColor = 'rgba(245,130,31,.9)'; x.shadowBlur = 30; x.drawImage(t, 90, (h - mh) / 2); x.restore();
+      var t = mk(Math.ceil(mw), mh, function (c) { c.drawImage(markImg, 0, 0, mw, mh); c.globalCompositeOperation = 'source-in'; c.fillStyle = '#2f6dff'; c.fillRect(0, 0, mw, mh); });
+      x.save(); x.shadowColor = 'rgba(47,109,255,.9)'; x.shadowBlur = 30; x.drawImage(t, 90, (h - mh) / 2); x.restore();
     }
     x.textAlign = 'center'; x.textBaseline = 'alphabetic';
     var cx = w / 2 - 20;
@@ -213,12 +213,12 @@
     x.fillText(names.en.toUpperCase(), 0, 0); x.restore();
     if (names.ar) {
       x.save(); x.direction = 'rtl'; x.font = '700 92px "IBM Plex Sans Arabic", Arial, sans-serif';
-      x.shadowColor = 'rgba(245,130,31,.8)'; x.shadowBlur = 26; x.fillStyle = '#ffb36b';
+      x.shadowColor = 'rgba(47,109,255,.8)'; x.shadowBlur = 26; x.fillStyle = '#a9c4ff';
       x.fillText(names.ar, cx, 312); x.restore();
     }
-    // the unit number in an orange box
+    // the unit number in a blue box
     var bx = w - 330, by = 60, bs = 240;
-    x.save(); x.shadowColor = 'rgba(245,130,31,.8)'; x.shadowBlur = 36; x.fillStyle = '#f5821f';
+    x.save(); x.shadowColor = 'rgba(47,109,255,.8)'; x.shadowBlur = 36; x.fillStyle = '#2f6dff';
     x.beginPath(); if (x.roundRect) x.roundRect(bx, by, bs, bs, 22); else x.rect(bx, by, bs, bs); x.fill(); x.restore();
     x.save(); x.translate(bx + bs / 2, by + bs * 0.79); x.scale(0.8, 1); x.font = '900 190px Archivo, Arial, sans-serif'; x.fillStyle = '#0c0d0f'; x.fillText('06', 0, 0); x.restore();
     signTex.needsUpdate = true;
@@ -268,7 +268,7 @@
   // the unit number stencilled on the shutter
   function drawDecal(x, w, h) {
     x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, w, h); seed = 11;
-    x.textAlign = 'center'; x.fillStyle = '#f5821f';
+    x.textAlign = 'center'; x.fillStyle = '#2f6dff';
     x.save(); x.translate(w / 2, h * 0.86); x.scale(0.8, 1); x.font = '900 340px Archivo, Arial, sans-serif'; x.fillText('06', 0, 0); x.restore();
     x.globalCompositeOperation = 'destination-out';              // worn paint
     for (var i = 0; i < 2600; i++) { x.fillStyle = 'rgba(0,0,0,' + (rnd() * 0.5).toFixed(2) + ')'; var s = 1 + rnd() * 3; x.fillRect(rnd() * w, rnd() * h, s, s); }
@@ -286,7 +286,7 @@
   var cl = new T.Mesh(new T.PlaneGeometry(IN_W, IN_D), M.ceil); cl.rotation.x = Math.PI / 2; cl.position.set(0, IN_H, -IN_D / 2); scene.add(cl);
   var bk = new T.Mesh(new T.PlaneGeometry(IN_W, IN_H), M.back); bk.position.set(0, IN_H / 2, -IN_D); scene.add(bk);
   [-1, 1].forEach(function (s) { var w = new T.Mesh(new T.PlaneGeometry(IN_D, IN_H), M.wall); w.rotation.y = -s * Math.PI / 2; w.position.set(s * IN_W / 2, IN_H / 2, -IN_D / 2); scene.add(w); });
-  // pallet racking down both sides: blue uprights, orange beams, cartons
+  // pallet racking down both sides: grey uprights, blue beams, cartons
   var BAYS = 4, BAY = 2.45, Z0 = -1.3, LEV = [0.14, 1.5, 2.86, 4.2], RX = 3.55, RD = 1.0;
   var up = new T.InstancedMesh(new T.BoxGeometry(0.08, 4.5, 0.08), M.upright, 2 * 2 * (BAYS + 1));
   var bm = new T.InstancedMesh(new T.BoxGeometry(0.06, 0.13, BAY - 0.08), M.beam, 2 * 2 * BAYS * LEV.length);
@@ -350,7 +350,7 @@
   }
   var cols = 5, bw = 1.05;
   for (var r = 0; r < 2; r++) for (var c = 0; c < cols; c++) board(bw, bw, (c - (cols - 1) / 2) * (bw + 0.22), 1.35 + r * (bw + 0.25), -IN_D + 0.06);
-  var headC = mk(1024, 128, function (x, w, h) { x.fillStyle = '#f5821f'; x.fillRect(0, 0, w, h); });
+  var headC = mk(1024, 128, function (x, w, h) { x.fillStyle = '#2f6dff'; x.fillRect(0, 0, w, h); });
   var head = new T.Mesh(new T.PlaneGeometry(6.6, 0.42), new T.MeshStandardMaterial({ map: tex(headC), roughness: 0.6 })); head.position.set(0, 4.15, -IN_D + 0.05); scene.add(head);
   [-1, 1].forEach(function (s) { for (var l = 0; l < 3; l++) board(0.78, 0.78, s * RX, LEV[l] + 0.78, Z0 + 0.12); });
   var loader = new T.ImageLoader();

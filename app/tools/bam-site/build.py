@@ -32,7 +32,7 @@ URL = 'https://ftoolsuae.com/bait-al-maqdis/'   # where it is published: only fo
 DESIGNS = {   # where each look keeps its pages and files, where it is built and where it is published
     'v1': {'dir': '.', 'out': 'bait-al-maqdis', 'url': URL},
     'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://ftoolsuae.com/bait-al-maqdis-new/'},
-    'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': URL},     # the hardware-store look (Nov 2026), published at bait-al-maqdis/
+    'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': 'https://azizmoiz504-dotcom.github.io/bait-al-maqdis/'},     # the hardware-store look (Nov 2026), on its own GitHub Pages repo bait-al-maqdis (blue since 5 Nov)
 }
 WALL_CELL, WALL_COLS = 96, 25   # the home page's wall of every product: one small square per product in one picture
 BIG = 100            # a range with at least this many products gets a big tile on the home page
@@ -372,19 +372,19 @@ class Site:
         return {'fixings': fixings, 'demo': demo, 'big': big}
 
     def og_v3(self, logo):
-        """the picture shown when a link is shared: dark steel, an orange bar, their logo and some of their products"""
+        """the picture shown when a link is shared: dark steel, a blue bar, their logo and some of their products"""
         from PIL import ImageDraw, ImageFont, ImageChops
         W, H = 1200, 630
-        og = Image.new('RGB', (W, H), (12, 13, 15))
+        og = Image.new("RGB", (W, H), (7, 11, 20))
         dr = ImageDraw.Draw(og)
         for x in range(-H, W, 44):      # hazard stripes along the foot
-            dr.polygon([(x, H), (x + 22, H), (x + 22 + 26, H - 26), (x + 26, H - 26)], fill=(245, 130, 31))
+            dr.polygon([(x, H), (x + 22, H), (x + 22 + 26, H - 26), (x + 26, H - 26)], fill=(47, 109, 255))
         m = logo.copy(); m.thumbnail((260, 150), Image.LANCZOS); og.paste(m, (72, 60), m)
         f = os.path.join(self.dir, 'static', 'fonts', 'archivo-100-900-latin.woff2')
         big = ImageFont.truetype(f, 92); big.set_variation_by_axes([900, 62])
         sm = ImageFont.truetype(f, 24); sm.set_variation_by_axes([500, 100])
         y = 268
-        for txt, col in (('TOOLS, FIXINGS', (242, 241, 238)), ('& BUILDING', (242, 241, 238)), ('MATERIALS.', (245, 130, 31))):
+        for txt, col in (('TOOLS, FIXINGS', (242, 241, 238)), ('& BUILDING', (242, 241, 238)), ('MATERIALS.', (47, 109, 255))):
             dr.text((72, y), txt, font=big, fill=col); y += 88
         dr.text((72, 548), '%d products · Jurf Industrial Zone 1, Ajman' % self.stats['products'], font=sm, fill=(154, 158, 166))
         picks = []
@@ -502,10 +502,6 @@ class Site:
         if os.path.isdir(os.path.join(st, 'img')):
             for f in sorted(os.listdir(os.path.join(st, 'img'))):
                 shutil.copyfile(os.path.join(st, 'img', f), self.path('assets/img/' + f))
-        if os.path.isdir(os.path.join(st, 'models')):     # 3D model and texture files for hw3d.js
-            os.makedirs(self.path('assets/models'), exist_ok=True)
-            for f in sorted(os.listdir(os.path.join(st, 'models'))):
-                shutil.copyfile(os.path.join(st, 'models', f), self.path('assets/models/' + f))
         if os.path.isdir(os.path.join(st, 'vendor')):
             vh = hashlib.sha1()
             for f in sorted(os.listdir(os.path.join(st, 'vendor'))):
@@ -524,7 +520,7 @@ class Site:
         white = Image.new('RGBA', dome.size, (255, 255, 255, 0)); white.putalpha(dome.getchannel('A'))
         white.save(self.path('assets/mark.png'), optimize=True)
         full = Image.new('RGBA', logo.size, (255, 255, 255, 0)); full.putalpha(a); full.save(self.path('assets/logo.png'), optimize=True)
-        ink = (15, 110, 92) if self.design == 'v1' else (245, 130, 31) if self.design == 'v3' else (18, 19, 22)
+        ink = (15, 110, 92) if self.design == 'v1' else (47, 109, 255) if self.design == 'v3' else (18, 19, 22)
         for size, bg, rel in ((192, ink, 'assets/icon-192.png'), (512, ink, 'assets/icon-512.png')):
             ic = Image.new('RGB', (size, size), bg); m = white.copy(); m.thumbnail((int(size * .68), int(size * .62)), Image.LANCZOS)
             ic.paste(m, ((size - m.width) // 2, (size - m.height) // 2 + int(size * .02)), m); ic.save(self.path(rel), optimize=True)
