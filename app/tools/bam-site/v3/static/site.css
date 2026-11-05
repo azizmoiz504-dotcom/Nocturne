@@ -176,6 +176,17 @@ main > .hero, main > .fix, main > .gl { z-index: auto; }
 [dir=rtl] .hero__poster { right: auto; left: 0; transform: translateY(-50%) scaleX(-1); }
 html.no-gl .hero__poster, html:not(.js) .hero__poster { display: block; }
 .hero__content { position: relative; z-index: 3; }
+/* the showcase caption: which item is turning in the light, and a line that fills until the next */
+.showcap { display: none; position: absolute; z-index: 3; inset-inline-end: var(--gut); bottom: 128px; width: 260px; height: 64px; pointer-events: none; }
+html.has-gl .showcap { display: block; }
+.showcap__item { position: absolute; inset-inline-end: 0; bottom: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-decoration: none; color: var(--chalk); opacity: 0; transform: translateY(12px); transition: opacity .5s, transform .7s var(--out); white-space: nowrap; }
+.showcap__item.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.showcap__item small { font: 500 11px var(--f-mono); letter-spacing: .14em; color: var(--o-2); }
+.showcap__item b { font-family: var(--f-display); font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1; }
+.showcap__bar { position: absolute; inset-inline-end: 0; bottom: 0; width: 180px; height: 2px; background: var(--edge-2); overflow: hidden; }
+.showcap__bar i { position: absolute; inset: 0; background: var(--o); transform-origin: 0 50%; transform: scaleX(0); }
+[dir=rtl] .showcap__bar i { transform-origin: 100% 50%; }
+@media (max-width: 899px) { html.has-gl .showcap { display: none; } }
 .hero__kicker { margin-bottom: 26px; }
 .hero__title { font-size: clamp(60px, min(10.4vw, 15.5vh), 186px); line-height: .84; display: flex; flex-direction: column; margin-bottom: 30px; }
 html[lang=ar] .hero__title { font-size: clamp(50px, min(8vw, 12.5vh), 132px); line-height: 1.1; }

@@ -30,7 +30,7 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small() ? 1.5 : 1.75));
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.12;
   renderer.setClearColor(0x000000, 0);
 
   var scene = new T.Scene();
@@ -56,7 +56,12 @@
     scene.environment = pm.fromScene(s, 0.03).texture;
     pm.dispose();
   })();
-  var key = new T.DirectionalLight(0xffffff, 1.3); key.position.set(4, 9, 7); scene.add(key);
+  var key = new T.DirectionalLight(0xffffff, 1.45); key.position.set(4, 9, 7);
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+  key.castShadow = true;
+  key.shadow.mapSize.set(small() ? 1024 : 2048, small() ? 1024 : 2048);
+  key.shadow.camera.left = key.shadow.camera.bottom = -6; key.shadow.camera.right = key.shadow.camera.top = 6;
+  key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0012; key.shadow.normalBias = 0.045; key.shadow.radius = 4;
   var rim = new T.DirectionalLight(0x3d7bff, 2.2); rim.position.set(-7, -3, -6); scene.add(rim);
   var fill = new T.DirectionalLight(0xdfe6ff, 0.45); fill.position.set(-6, 2, 8); scene.add(fill);
   scene.add(new T.AmbientLight(0x30343c, 0.55));
@@ -144,6 +149,7 @@
   }
 
   var rig = new T.Group(); scene.add(rig);
+  rig.add(key); rig.add(key.target);   // the key light and its shadows travel with the group
   var stage = new T.Group(); rig.add(stage);
   var tools = {}, order = [];
   function tool(name) {
@@ -337,11 +343,11 @@
 
   var BLUE = 0x2f6dff;
   var K = {
-    cone: new T.MeshPhysicalMaterial({ color: srgb(0xe8341c), roughness: 0.42, roughnessMap: mottle, clearcoat: 0.6, clearcoatRoughness: 0.3 }),
+    cone: new T.MeshPhysicalMaterial({ color: srgb(0xe8341c), roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.3 }),
     reflect: new T.MeshStandardMaterial({ map: prismMap, metalness: 0.55, roughness: 0.16, emissive: srgb(0x30343a) }),
     rubber: new T.MeshStandardMaterial({ color: srgb(0x17181b), roughness: 0.82 }),
-    body: new T.MeshPhysicalMaterial({ color: srgb(0xff8a12), roughness: 0.34, roughnessMap: mottle, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
-    lensA: new T.MeshPhysicalMaterial({ color: srgb(0xff9800), emissive: srgb(0xff5a00), emissiveIntensity: 0.5, bumpMap: ringsTex, bumpScale: 0.05, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04 }),
+    body: new T.MeshPhysicalMaterial({ color: srgb(0xff8a12), roughness: 0.34, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
+    lensA: new T.MeshPhysicalMaterial({ color: srgb(0xffa000), emissive: srgb(0xff5a00), emissiveIntensity: 0.3, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04 }),
     bulb: new T.MeshBasicMaterial({ color: srgb(0xfff1c2) }),
     solar: new T.MeshPhysicalMaterial({ map: solarTex, metalness: 0.3, roughness: 0.18, clearcoat: 1 }),
     ribbon: new T.MeshStandardMaterial({ map: cautionTexV, roughness: 0.42, side: T.DoubleSide }),
@@ -448,7 +454,10 @@
     var body = lathe([[0, -0.18], [0.6, -0.18], [0.66, -0.14], [0.68, -0.06], [0.68, 0.1], [0.66, 0.15], [0.62, 0.17], [0, 0.17]], 96, K.body);
     body.rotation.x = Math.PI / 2; body.position.y = 0.2; s.add(body);
     var bezel = new T.Mesh(new T.TorusGeometry(0.615, 0.055, 18, 96), K.body); bezel.position.set(0, 0.2, 0.17); s.add(bezel);
-    lens = lathe([[0, 0], [0.59, 0], [0.575, 0.05], [0.5, 0.1], [0.3, 0.13], [0, 0.14]], 96, K.lensA);
+    var lp = [[0, 0], [0.59, 0], [0.585, 0.04]], rr = 0.58, zz = 0.04;
+    while (rr > 0.12) { zz += 0.006; lp.push([rr - 0.004, zz + 0.022]); rr -= 0.046; lp.push([rr + 0.002, zz]); }
+    lp.push([0.1, zz + 0.03], [0, zz + 0.035]);
+    lens = lathe(lp, 128, K.lensA);
     lens.rotation.x = Math.PI / 2; lens.position.set(0, 0.2, 0.15); s.add(lens);
     var led = new T.Mesh(new T.SphereGeometry(0.09, 24, 16), K.bulb); led.position.set(0, 0.2, 0.27); led.scale.z = 0.5; s.add(led);
     for (var k = 0; k < 4; k++) {                     // four screws round the bezel
@@ -459,9 +468,15 @@
     var cell = new T.Mesh(new T.PlaneGeometry(0.42, 0.25), K.solar); cell.rotation.x = -Math.PI / 2 + 0.25; cell.position.set(0, 0.905, 0.03); s.add(cell);
     var hoop = new T.Mesh(new T.TorusGeometry(0.38, 0.032, 14, 64, Math.PI), M.satin); hoop.position.set(0, 0.95, -0.04); s.add(hoop);
     [-1, 1].forEach(function (x) { var p = new T.Mesh(new T.CylinderGeometry(0.055, 0.055, 0.12, 20), K.body); p.rotation.z = Math.PI / 2; p.position.set(x * 0.38, 0.95, -0.04); s.add(p); });
-    var mount = lathe([[0, -0.18], [0.12, -0.18], [0.15, -0.3], [0.17, -0.33], [0.36, -1.28], [0.43, -1.33], [0.43, -1.36], [0, -1.36]], 64, K.body); s.add(mount);
+    var mount = lathe([[0, -0.18], [0.12, -0.18], [0.15, -0.3], [0.17, -0.33], [0.36, -1.28], [0.43, -1.33], [0.43, -1.345], [0, -1.345]], 64, K.body); s.add(mount);
     var foot = new T.Mesh(new T.CylinderGeometry(0.45, 0.47, 0.06, 64), K.rubber); foot.position.y = -1.39; s.add(foot);
     glow = new T.PointLight(0xff8a1a, 0, 5); glow.position.set(0, 0.2, 0.9); s.add(glow);
+    var halo = new T.Sprite(new T.SpriteMaterial({ map: canvasTex(128, 128, function (x, w, h) {
+      var g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+      g.addColorStop(0, 'rgba(255,214,140,1)'); g.addColorStop(0.25, 'rgba(255,150,40,.55)'); g.addColorStop(1, 'rgba(255,120,0,0)');
+      x.fillStyle = g; x.fillRect(0, 0, w, h);
+    }), blending: T.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 }));
+    halo.scale.set(2.6, 2.6, 1); halo.position.set(0, 0.2, 0.35); s.add(halo); light.userData.halo = halo;
     s.position.y = 0.3;
   })(light);
 
@@ -564,9 +579,21 @@
       });
       
       var cuff = Math.max(Math.abs(y + 0.93) - 0.3, Math.sqrt(x * x / Math.pow(0.47 + (-0.66 - y) * 0.08, 2) + z * z / 0.022) - 1) * 0.2;
-      return smin(d, cuff, 0.12);
+      d = smin(d, cuff, 0.12);
+      // creases: shallow grooves across each finger at the joints, and two palm lines
+      var cr = 0;
+      fingers.forEach(function (f) {
+        [0.42, 0.78].forEach(function (t) {
+          var jy = f[0][1] + (f[2][1] - f[0][1]) * t, jx = f[0][0] + (f[2][0] - f[0][0]) * t;
+          var dx = x - jx, dy = y - jy;
+          if (Math.abs(dx) < 0.14) cr += 0.012 * Math.exp(-dy * dy / 0.0007) * (1 - Math.abs(dx) / 0.14);
+        });
+      });
+      if (y > -0.5 && y < 0.35) cr += 0.007 * Math.exp(-Math.pow(y - 0.18 + x * 0.25, 2) / 0.0012) + 0.006 * Math.exp(-Math.pow(y + 0.12 - x * 0.35, 2) / 0.0012);
+      if (y < -0.68) cr += 0.006 * Math.pow(Math.sin(x * 70), 8);   // the ribs of the knitted cuff
+      return d + cr;
     };
-    var S = surface(F, [-1.05, -1.4, -0.3], [0.7, 1.45, 0.36], 0.021);
+    var S = surface(F, [-1.05, -1.4, -0.3], [0.7, 1.55, 0.36], small() ? 0.02 : 0.016);
     // which skin is coated: the palm side, and the finger tips all round
     var tipY = function (x) { return x < -0.25 ? 0.9 : x < 0.0 ? 1.06 : x < 0.24 ? 0.98 : 0.76; };
     var wav = function (x, y) { return Math.sin(x * 23) * 0.012 + Math.sin(x * 7 + y * 5) * 0.015; };
@@ -645,6 +672,18 @@
     });
   })(goggles);
 
+  var floor = new T.Mesh(new T.PlaneGeometry(12, 12), new T.ShadowMaterial({ opacity: 0.45 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -2.25; floor.receiveShadow = true; rig.add(floor);
+  var blobTex = canvasTex(256, 256, function (x, w, h) {
+    var g = x.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(0.5, 'rgba(0,0,0,.22)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+  });
+  var blob = new T.Mesh(new T.PlaneGeometry(4.2, 4.2), new T.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.y = -2.24; rig.add(blob);
+  // every solid part throws and catches shadow; the clear lens only catches it
+  stage.traverse(function (o) { if (o.isMesh) { var tr = o.material && o.material.transparent; o.castShadow = !tr; o.receiveShadow = true; } });
+
   /* where each name sits on the wall: a point beside the item (in wall units, from its middle), and which side of it the name goes */
   var anchors = [
     { id: 'cone', d: [0.0, 1.85], at: 'up' },
@@ -686,6 +725,28 @@
     tape: { p: [-1.75, -3.15, 0], s: 0.9 }, hessian: { p: [0.45, -3.1, 0], s: 0.6 },
     shovel: { p: [2.35, -0.1, 0], s: 0.82 }
   };
+  // the showcase: in the hero one item at a time, big, turning slowly in the studio light; the next one slides in every few seconds
+  var SHOW = true, SHOW_EVERY = 4.6;
+  var SHOW_S = { cone: 1.42, light: 1.55, gloves: 1.5, shovel: 0.98, tape: 2.3, hessian: 1.5, goggles: 1.9 };
+  // tilt towards you, the three-quarter turn it rests at, and its lean
+  var SHOW_R = { cone: [0.2, 0.3, 0], light: [0.12, 0.35, 0], gloves: [0.08, 0.2, 0.1], shovel: [0.15, 0.5, -0.55], tape: [0.22, 0.75, 0.05], hessian: [0.35, 0.55, -0.05], goggles: [0.18, 0.6, 0.05] };
+  var SHOW_Y = { cone: -0.05, light: 0.1, gloves: 0.1, shovel: 0.35, tape: 0.2, hessian: 0.2, goggles: 0.3 };
+  var capEls = {}, capBar = null, capOn = null;
+  (function () {
+    var box = document.querySelector('.showcap');
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll('[data-cap]'), function (el) { capEls[el.getAttribute('data-cap')] = el; });
+    capBar = box.querySelector('.showcap__bar i');
+  })();
+  function caption(id, i, n, f) {
+    if (capOn !== id) {
+      if (capEls[capOn]) capEls[capOn].classList.remove('is-on');
+      var el = capEls[id];
+      if (el) { el.classList.add('is-on'); el.querySelector('small').textContent = ('0' + (i + 1)).slice(-2) + ' / ' + ('0' + n).slice(-2); }
+      capOn = id;
+    }
+    if (capBar) capBar.style.transform = 'scaleX(' + f.toFixed(3) + ')';
+  }
   var START = {      // where they fly in from when the page opens
     cone: [0, -8, 1], light: [-6, 6, -1], shovel: [7, 5, -2], hessian: [-7, -5, -1], gloves: [6, -6, 2], goggles: [2, 8, 1], tape: [-3, -9, 3]
   };
@@ -735,6 +796,8 @@
       lerp(-0.18 * side + h * 0.55 * side + Math.sin(t * 0.3) * 0.05, 0, ar) + st.mx * 0.25 * (1 - a * 0.5),
       0);
     stage.position.y = lerp(-0.1, 0, ar);
+    var fo = SHOW ? (1 - ar) : 0;
+    floor.visible = blob.visible = fo > 0.01; floor.material.opacity = 0.45 * fo; blob.material.opacity = fo;
     var spread = 1 + h * 0.4 + Math.sin(t * 0.5) * 0.03;    // the fan opens as you scroll, and breathes
     order.forEach(function (name, k) {
       var g = tools[name], Wl = WALL[name], F = FAN[name], H = HERO[name];
@@ -742,6 +805,16 @@
       if (F) {      // its place in the fan: out from the handles along its angle
         var an = F.a * D * spread;
         H = { p: [PIV[0] - Math.sin(an) * RAD, PIV[1] + Math.cos(an) * RAD, F.z], r: [0.12, F.ry, an + (F.flip ? Math.PI : 0)], s: F.s };
+      }
+      if (SHOW) {
+        var n = order.length, cyc = st.t / SHOW_EVERY, cur = Math.floor(cyc) % n, prev = (cur + n - 1) % n;
+        var tr = ease(clamp01((cyc - Math.floor(cyc)) / 0.22)), wgt = k === cur ? tr : k === prev && cyc >= 1 ? 1 - tr : 0;
+        if (cyc < 1 && k === cur) wgt = 1;
+        var dir = k === cur ? 1 : -1, R0 = SHOW_R[name];
+        var spin = R0[1] + Math.sin(st.t * 0.55 + k) * 0.55 + (1 - wgt) * dir * 1.2;   // turns gently to and fro, never edge-on
+        H = { p: [lerp(dir * 4.6, 0, wgt), lerp(-0.4, SHOW_Y[name], wgt), lerp(-3, 0.6, wgt)],
+              r: [R0[0], spin, R0[2]], s: Math.max(0.001, SHOW_S[name] * out(wgt)) };
+        if (k === 0) caption(order[cur], cur, n, clamp01(cyc - Math.floor(cyc)));
       }
       var hx = H.p[0] * side, hy = H.p[1], hz = H.p[2];
       // floating, each in its own time
@@ -771,8 +844,9 @@
     tools.tape.userData.inner.rotation.x = -ribL * 0.4;   // the roll turns as the tape comes off
     // the warning light flashes
     var fl = Math.pow(Math.max(0, Math.sin(t * 4.2)), 6);
-    K.lensA.emissiveIntensity = 0.45 + fl * 2.6;
+    K.lensA.emissiveIntensity = 0.25 + fl * 2.8;
     glow.intensity = fl * 2.2;
+    light.userData.halo.material.opacity = fl * 0.9;
     // the hessian flap moves a little in the air
     flap.rotation.x = Math.sin(t * 1.1) * 0.07 - 0.05;
   }
@@ -816,6 +890,7 @@
   api.show = function (on) { visible = on; canvas.style.visibility = on ? 'visible' : 'hidden'; if (on) last = performance.now(); };
   api.pointer = function (x, y) { st.tx = x; st.ty = y; };
   api.skipIntro = function () { st.intro = 1; };
+  api.at = function (sec) { st.t = sec; };   // for tests: jump the clock
   var phoneLabels = null;
   function labelSides() {
     var map = api.labels, ph = camera.aspect < 0.9, rtl = document.documentElement.dir === 'rtl';

@@ -6,6 +6,7 @@
 <section class="hero" id="top">
   <div class="hero__bg" aria-hidden="true"><i class="hero__glow"></i><i class="hero__grid"></i><i class="hero__ring"></i></div>
   <img class="hero__poster" src="{{ root }}assets/img/hero-3d.webp" alt="" width="1100" height="1100" loading="lazy" aria-hidden="true">
+  <div class="showcap" aria-hidden="true">{% for f in fixings %}<a class="showcap__item" data-cap="{{ f.id }}" href="{{ home }}range/{{ f.range }}/#g-{{ f.g }}" tabindex="-1"><small dir="ltr"></small><b>{{ T('part_' ~ f.id) }}</b></a>{% endfor %}<i class="showcap__bar"><i></i></i></div>
   <div class="wrap hero__content">
     <p class="kicker mono hero__kicker"><i class="dot"></i>{{ T('k_showroom') }}</p>
     <h1 class="hero__title">
