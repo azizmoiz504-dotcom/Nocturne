@@ -1,11 +1,15 @@
-/* Bait Al Maqdis website: the 3D safety and site items, drawn in the browser (no picture files).
+/* Bait Al Maqdis website: the 3D safety and site items.
    A traffic cone, a solar warning light, a roll of warning tape, a pan shovel, a roll of hessian cloth,
-   a work glove and safety goggles float together in the hero; scrolling pulls the warning tape off its roll.
+   a pair of work gloves and safety glasses float together in the hero; scrolling pulls the warning tape off its roll.
+   The gloves are a scanned model and the hessian and the shovel handle use photographed textures, all from
+   Poly Haven (polyhaven.com, CC0: free to use, no credit needed), recoloured to match BAM's own products.
+   The rest is drawn in the browser, shaped after BAM's own product photos.
    In "Every tool" they fly onto the wall, each with its name. Without 3D (old phone, graphics off)
    the page shows the flat picture instead. */
 (function () {
   'use strict';
   var canvas = document.getElementById('gl');
+  var BASE = ((document.currentScript && document.currentScript.src) || '').replace(/[^\/]*$/, '') + 'models/';
   var api = { ready: false, hero: function () {}, anatomy: function () {}, labels: [] };
   window.BAM3D = api;
   var fail = function () { document.documentElement.classList.add('no-gl'); if (canvas) canvas.remove(); };
@@ -164,12 +168,10 @@
   // warning tape: black and yellow bands with WARNING on them
   var RIB_LEN = 3.2;                       // how long one picture of the tape is, in the model
   var cautionTex = canvasTex(1024, 128, function (x, w, h) {
-    x.fillStyle = '#f7c815'; x.fillRect(0, 0, w, h);
-    x.fillStyle = '#141416';
+    x.fillStyle = '#f4f2ee'; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#e0261c';
     for (var k = -2; k < 18; k++) { x.beginPath(); x.moveTo(k * 64, h); x.lineTo(k * 64 + 32, h); x.lineTo(k * 64 + 32 + 60, 0); x.lineTo(k * 64 + 60, 0); x.closePath(); x.fill(); }
-    x.fillStyle = '#f7c815'; x.fillRect(150, 26, 300, 76); x.fillRect(600, 26, 300, 76);
-    x.fillStyle = '#141416'; x.font = '900 58px Arial Black, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.fillText('WARNING', 300, 66); x.fillText('WARNING', 750, 66);
+    x.fillStyle = 'rgba(255,255,255,.18)'; x.fillRect(0, 6, w, 3); x.fillRect(0, h - 9, w, 3);
   }, true);
   // hessian: open brown weave
   var hessianTex = canvasTex(256, 256, function (x, w, h) {
@@ -183,6 +185,15 @@
     }
   }, true);
   hessianTex.repeat.set(6, 3);
+  var texLoader = new T.TextureLoader();
+  function photoTex(file, rx, ry, colour, done) {
+    texLoader.load(BASE + file, function (t) {
+      if (colour) t.encoding = T.sRGBEncoding;
+      t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx, ry);
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      done(t);
+    });
+  }
   // knitted glove with blue dots on the palm
   var knitTex = canvasTex(256, 256, function (x, w, h) {
     x.fillStyle = '#e9e8e2'; x.fillRect(0, 0, w, h);
@@ -201,8 +212,22 @@
     for (i = 0; i < w; i += 8) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
   });
 
+  var ringsTex = canvasTex(512, 512, function (x, w, h) {
+    x.fillStyle = '#808080'; x.fillRect(0, 0, w, h);
+    for (var r = 250; r > 8; r -= 9) {
+      var g = x.createRadialGradient(w / 2, h / 2, r - 9, w / 2, h / 2, r);
+      g.addColorStop(0, '#505050'); g.addColorStop(1, '#c8c8c8');
+      x.fillStyle = g; x.beginPath(); x.arc(w / 2, h / 2, r, 0, Math.PI * 2); x.fill();
+    }
+  });
   var K = {
-    cone: new T.MeshPhysicalMaterial({ color: srgb(0xff5a10), roughness: 0.42, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
+    cone: new T.MeshPhysicalMaterial({ color: srgb(0xe8341c), roughness: 0.38, clearcoat: 0.7, clearcoatRoughness: 0.22, sheen: 0 }),
+    body: new T.MeshPhysicalMaterial({ color: srgb(0xff8a12), roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.18 }),
+    lensA: new T.MeshPhysicalMaterial({ color: srgb(0xff9a00), emissive: srgb(0xff5a00), emissiveIntensity: 0.6, bumpMap: ringsTex, bumpScale: 0.05, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.05 }),
+    clear: new T.MeshPhysicalMaterial({ color: srgb(0xf4fbff), metalness: 0, roughness: 0.04, transparent: true, opacity: 0.22, clearcoat: 1, clearcoatRoughness: 0.02, side: T.DoubleSide, depthWrite: false }),
+    clearEdge: new T.MeshPhysicalMaterial({ color: srgb(0xdfeaf5), roughness: 0.1, transparent: true, opacity: 0.65, clearcoat: 1 }),
+    arm: new T.MeshPhysicalMaterial({ color: srgb(0xf26a10), roughness: 0.36, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
+    armDark: new T.MeshStandardMaterial({ color: srgb(0x2a2b2f), roughness: 0.5 }),
     reflect: new T.MeshStandardMaterial({ color: 0xf4f6f8, metalness: 0.6, roughness: 0.18, emissive: srgb(0x3a3d42) }),
     rubber: new T.MeshStandardMaterial({ color: srgb(0x18191c), roughness: 0.85 }),
     amber: new T.MeshPhysicalMaterial({ color: srgb(0xffa21a), emissive: srgb(0xff7a00), emissiveIntensity: 1.2, roughness: 0.15, clearcoat: 1, side: T.DoubleSide }),
@@ -219,30 +244,36 @@
     strap: new T.MeshStandardMaterial({ color: srgb(0xf06c12), roughness: 0.7 })
   };
 
-  /* ---------- traffic cone: orange body, two white reflective bands, black base ---------- */
+  /* ---------- traffic cone: tall red cone, one wide white reflective sleeve, heavy black eight-sided base (like BAM's) ---------- */
   var cone = tool('cone');
   (function (s) {
-    var base = ext(rrect(2.0, 2.0, 0.28), 0.16, 0.04, K.rubber, 2, 12); base.rotation.x = Math.PI / 2; base.position.y = -1.32; s.add(base);
-    var H = 2.55, r0 = 0.74, r1 = 0.12, y0 = -1.24;
+    var base = new T.Mesh(new T.CylinderGeometry(0.98, 1.06, 0.2, 8, 1), K.rubber); base.rotation.y = Math.PI / 8; base.position.y = -1.36; s.add(base);
+    var lip = new T.Mesh(new T.CylinderGeometry(0.7, 0.86, 0.12, 8, 1), K.rubber); lip.rotation.y = Math.PI / 8; lip.position.y = -1.21; s.add(lip);
+    var H = 2.95, r0 = 0.6, r1 = 0.1, y0 = -1.18;
     var R = function (y) { return r0 + (r1 - r0) * (y - y0) / H; };
-    s.add(lathe([[0, y0], [r0, y0], [r1, y0 + H], [0.09, y0 + H + 0.03], [0, y0 + H + 0.03]], 64, K.cone));
-    [[0.95, 1.38], [1.62, 1.96]].forEach(function (b) {
-      var a = y0 + b[0], c = y0 + b[1];
-      s.add(lathe([[R(a) + 0.012, a], [R(c) + 0.012, c]], 64, K.reflect));
-    });
+    s.add(lathe([[0, y0], [r0 + 0.03, y0], [r0, y0 + 0.06], [r1, y0 + H], [r1 - 0.012, y0 + H + 0.03], [0.07, y0 + H + 0.035], [0.07, y0 + H - 0.2], [0, y0 + H - 0.2]], 72, K.cone));
+    var a = y0 + 1.0, c = y0 + 1.72;
+    s.add(lathe([[R(a) + 0.006, a - 0.004], [R(a) + 0.014, a], [R(c) + 0.014, c], [R(c) + 0.006, c + 0.004]], 72, K.reflect));
+    s.position.y = 0.05;
   })(cone);
 
-  /* ---------- solar warning light: black case, amber lens that flashes, solar panel on top ---------- */
+  /* ---------- solar warning light: round amber lens that flashes, orange body, carry hoop and solar cell on top, on its cone mount ---------- */
   var light = tool('light');
   var lens, glow;
   (function (s) {
-    s.add(ext(rrect(1.3, 1.5, 0.22), 0.62, 0.06, K.rubber, 3, 12));
-    lens = lathe([[0, 0], [0.53, 0], [0.5, 0.1], [0.42, 0.16], [0, 0.17]], 48, K.amber);
-    lens.rotation.x = Math.PI / 2; lens.position.set(0, -0.12, 0.3); s.add(lens);
-    var ring = new T.Mesh(new T.TorusGeometry(0.53, 0.05, 12, 48), K.rubber); ring.position.set(0, -0.12, 0.31); s.add(ring);
-    glow = new T.PointLight(0xff8a1a, 0, 5); glow.position.set(0, -0.12, 0.9); s.add(glow);
-    var panel = new T.Mesh(new T.BoxGeometry(1.2, 0.05, 0.7), K.solar); panel.position.set(0, 0.84, 0.02); panel.rotation.x = 0.35; s.add(panel);
-    var clamp = ext(rrect(0.42, 0.62, 0.08), 0.18, 0.03, M.satin, 2, 8); clamp.position.set(0, 0.1, -0.38); s.add(clamp);
+    var body = new T.Mesh(new T.CylinderGeometry(0.66, 0.66, 0.34, 72), K.body); body.rotation.x = Math.PI / 2; body.position.y = 0.2; s.add(body);
+    var bezel = new T.Mesh(new T.TorusGeometry(0.62, 0.055, 16, 72), K.body); bezel.position.set(0, 0.2, 0.17); s.add(bezel);
+    lens = lathe([[0, 0], [0.6, 0], [0.57, 0.06], [0.45, 0.11], [0, 0.13]], 72, K.lensA);
+    lens.rotation.x = Math.PI / 2; lens.position.set(0, 0.2, 0.16); s.add(lens);
+    var led = new T.Mesh(new T.SphereGeometry(0.1, 24, 16), K.bulb); led.position.set(0, 0.2, 0.26); led.scale.z = 0.5; s.add(led);
+    var cell = new T.Mesh(new T.BoxGeometry(0.42, 0.04, 0.26), K.solar); cell.position.set(0, 0.88, 0.0); cell.rotation.x = 0.25; s.add(cell);
+    var cellBox = new T.Mesh(new T.BoxGeometry(0.48, 0.1, 0.3), K.rubber); cellBox.position.set(0, 0.84, -0.02); cellBox.rotation.x = 0.25; s.add(cellBox);
+    var hoop = new T.Mesh(new T.TorusGeometry(0.36, 0.035, 12, 48, Math.PI), M.satin); hoop.position.set(0, 0.92, -0.02); s.add(hoop);
+    [-1, 1].forEach(function (x) { var p = new T.Mesh(new T.CylinderGeometry(0.06, 0.06, 0.12, 16), M.satin); p.rotation.z = Math.PI / 2; p.position.set(x * 0.36, 0.92, -0.02); s.add(p); });
+    var mount = lathe([[0, -0.2], [0.13, -0.2], [0.16, -0.32], [0.36, -1.3], [0.42, -1.36], [0, -1.36]], 48, K.body); s.add(mount);
+    var foot = new T.Mesh(new T.CylinderGeometry(0.44, 0.46, 0.06, 48), K.rubber); foot.position.y = -1.38; s.add(foot);
+    glow = new T.PointLight(0xff8a1a, 0, 5); glow.position.set(0, 0.2, 0.9); s.add(glow);
+    s.position.y = 0.3;
   })(light);
 
   /* ---------- warning tape: a roll seen from the front, and the tape hangs off it and pulls out as you scroll ---------- */
@@ -254,7 +285,7 @@
   (function (s) {
     var rm = K.ribbon.clone(); rm.map = cautionTex.clone(); rm.map.needsUpdate = true; rm.map.repeat.set(1.2, 1); rm.side = T.FrontSide;
     var roll = new T.Mesh(new T.CylinderGeometry(0.62, 0.62, 0.5, 64, 1, true), rm); roll.rotation.z = Math.PI / 2; s.add(roll);
-    var sideM = new T.MeshStandardMaterial({ color: srgb(0xd9a90c), roughness: 0.55, side: T.DoubleSide });
+    var sideM = new T.MeshStandardMaterial({ color: srgb(0xe9e6e0), roughness: 0.55, side: T.DoubleSide });
     [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.26, 0.62, 64), sideM); r.rotation.y = Math.PI / 2; r.position.x = x * 0.25; s.add(r); });
     var core = new T.Mesh(new T.CylinderGeometry(0.26, 0.26, 0.52, 40, 1, true), new T.MeshStandardMaterial({ color: srgb(0xc9a77a), roughness: 0.9, side: T.DoubleSide }));
     core.rotation.z = Math.PI / 2; s.add(core);
@@ -264,7 +295,7 @@
     ribbon = new T.Mesh(g, bm); ribbon.position.set(0, 0, 0.625); s.add(ribbon);
   })(tape);
 
-  /* ---------- pan shovel: dark steel blade, wooden handle with a D grip ---------- */
+  /* ---------- pan shovel: dark steel blade, oak handle with a D grip ---------- */
   var shovel = tool('shovel');
   (function (s) {
     var b = new T.Shape();
@@ -275,23 +306,32 @@
     var d = tube([[-0.06, 2.0, 0], [-0.3, 2.25, 0], [-0.3, 2.65, 0], [0, 2.78, 0], [0.3, 2.65, 0], [0.3, 2.25, 0], [0.06, 2.0, 0]], 0.06, K.blade, 60); s.add(d);
     var grip = new T.Mesh(new T.CylinderGeometry(0.075, 0.075, 0.56, 20), K.wood); grip.rotation.z = Math.PI / 2; grip.position.y = 2.68; s.add(grip);
     s.position.y = -0.3;
+    photoTex('oak_diff.jpg', 1, 3, true, function (t) { K.wood.map = t; K.wood.color.set(0xffffff); K.wood.roughness = 0.5; K.wood.needsUpdate = true; });
   })(shovel);
 
   /* ---------- hessian cloth: a roll with a length hanging off it ---------- */
   var hessian = tool('hessian');
   var flap;
   (function (s) {
-    var roll = new T.Mesh(new T.CylinderGeometry(0.55, 0.55, 2.3, 48), K.hessian); roll.rotation.z = Math.PI / 2; s.add(roll);
+    var roll = new T.Mesh(new T.CylinderGeometry(0.55, 0.55, 2.3, 48), K.hessian.clone()); roll.rotation.z = Math.PI / 2; s.add(roll);
     var ends = new T.MeshStandardMaterial({ color: srgb(0x9a7748), roughness: 0.95 });
     [-1, 1].forEach(function (x) { var e = new T.Mesh(new T.CircleGeometry(0.55, 40), ends); e.rotation.y = x * Math.PI / 2; e.position.x = x * 1.151; s.add(e); });
     var fg = new T.PlaneGeometry(2.3, 1.4, 12, 10); fg.translate(0, -0.7, 0);
     var fm = K.hessian.clone(); fm.map = hessianTex.clone(); fm.map.needsUpdate = true; fm.map.repeat.set(6, 2);
     flap = new T.Mesh(fg, fm); flap.position.set(0, -0.0, 0.55); s.add(flap);
     flap.userData.base = fg.attributes.position.array.slice();
+    var mats = [roll.material, fm];
+    photoTex('hessian_diff.jpg', 3, 1.5, true, function (t) {
+      mats.forEach(function (m, k) { var tt = k ? t.clone() : t; if (k) { tt.needsUpdate = true; tt.repeat.set(3, 1.6); } m.map = tt; m.color.set(0xf2e6d2); m.needsUpdate = true; });
+      ends.map = t; ends.color.set(0xc9b493); ends.needsUpdate = true;
+    });
+    photoTex('hessian_nor.jpg', 3, 1.5, false, function (t) { mats.forEach(function (m) { m.normalMap = t; m.normalScale = new T.Vector2(0.9, 0.9); m.needsUpdate = true; }); });
   })(hessian);
 
-  /* ---------- work glove: knitted, blue dots, blue cuff ---------- */
+  /* ---------- work gloves: a scanned pair of knitted gloves with a dipped palm (Poly Haven, CC0), recoloured white and grey like BAM's nitrile gloves.
+     Until the file arrives (or if it can't load) a simple drawn glove stands in. ---------- */
   var glove = tool('gloves');
+  var stand = new T.Group(); glove.add(stand);
   (function (s) {
     var palm = ext(rrect(1.05, 1.15, 0.38), 0.36, 0.14, K.knit, 4, 16); palm.position.y = -0.1; s.add(palm);
     var finger = function (x, y0, len, r, tilt) {
@@ -303,18 +343,53 @@
     var th = tube([[-0.42, -0.25, 0], [-0.72, 0.0, 0.05], [-0.86, 0.32, 0.05]], 0.14, K.knit, 16); s.add(th); s.add(cap(th.userData.curve, 1, 0.14, K.knit));
     var cuff = ext(rrect(1.12, 0.42, 0.16), 0.42, 0.12, K.cuff, 3, 12); cuff.position.y = -0.86; s.add(cuff);
     s.position.y = 0.1;
-  })(glove);
+  })(stand);
+  if (T.GLTFLoader) {
+    new T.GLTFLoader().load(BASE + 'gloves.glb', function (gl) {
+      var m = gl.scene;
+      m.rotation.x = -Math.PI / 2;                // the scan lies flat on a table: stand it up, palms to you
+      var holder = new T.Group(); holder.add(m);
+      var box = new T.Box3().setFromObject(holder), size = box.getSize(new T.Vector3()), mid = box.getCenter(new T.Vector3());
+      m.position.sub(mid);
+      holder.scale.setScalar(2.7 / Math.max(size.x, size.y));
+      m.traverse(function (o) { if (o.isMesh) { o.material.envMapIntensity = 0.85; o.material.side = T.DoubleSide; } });
+      glove.remove(stand); glove.add(holder);
+    });
+  }
 
-  /* ---------- safety goggles: clear wrap-round lens, dark frame, orange strap ---------- */
+  /* ---------- safety glasses: one clear wrap-round lens and orange arms (like BAM's) ---------- */
   var goggles = tool('goggles');
   (function (s) {
-    var shp = rrect(2.0, 0.78, 0.36);
-    var fr = ext(shp, 0.36, 0.08, K.frame, 3, 24); s.add(fr);
-    var ln = ext(rrect(1.8, 0.6, 0.28), 0.4, 0.04, K.lens, 2, 24); s.add(ln);
-    var nose = ext(rrect(0.3, 0.3, 0.14, 0, -0.32), 0.42, 0.02, K.rubber, 2, 12); s.add(nose);
-    var st = tube([[-1.0, 0, 0], [-1.15, 0, -0.5], [-0.9, 0, -1.2], [0, 0, -1.45], [0.9, 0, -1.2], [1.15, 0, -0.5], [1.0, 0, 0]], 0.09, K.strap, 80);
-    st.scale.y = 2.2; s.add(st);
-    [-1, 1].forEach(function (x) { var v = new T.Mesh(new T.CylinderGeometry(0.08, 0.08, 0.06, 16), M.satin); v.rotation.x = Math.PI / 2; v.position.set(x * 0.55, 0.3, 0.2); s.add(v); });
+    // the lens outline: two eyes joined over the nose
+    var L = new T.Shape();
+    L.moveTo(-1.18, 0.22);
+    L.bezierCurveTo(-0.9, 0.36, -0.3, 0.34, 0, 0.3);
+    L.bezierCurveTo(0.3, 0.34, 0.9, 0.36, 1.18, 0.22);
+    L.bezierCurveTo(1.22, -0.05, 1.08, -0.42, 0.62, -0.44);
+    L.bezierCurveTo(0.3, -0.45, 0.2, -0.3, 0.12, -0.12);
+    L.quadraticCurveTo(0, 0.02, -0.12, -0.12);
+    L.bezierCurveTo(-0.2, -0.3, -0.3, -0.45, -0.62, -0.44);
+    L.bezierCurveTo(-1.08, -0.42, -1.22, -0.05, -1.18, 0.22);
+    var wrap = function (geo, k) {          // bend the flat lens round the face
+      var a = geo.attributes.position;
+      for (var i = 0; i < a.count; i++) { var x = a.getX(i); a.setZ(i, a.getZ(i) - k * x * x); }
+      geo.computeVertexNormals(); return geo;
+    };
+    var lg = new T.ExtrudeGeometry(L, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 2, curveSegments: 40 });
+    lg.translate(0, 0, -0.02);
+    s.add(new T.Mesh(wrap(lg, 0.32), K.clear));
+    // a thin orange brow along the top of the lens
+    var bp = []; for (var i = 0; i <= 24; i++) { var x = -1.16 + i * 2.32 / 24; bp.push([x, 0.24 + 0.1 * Math.cos(x * 1.35) - 0.02, -0.32 * x * x + 0.03]); }
+    var brow = tube(bp, 0.035, K.arm, 80); brow.scale.y = 1.6; s.add(brow);
+    // nose pads
+    [-1, 1].forEach(function (x) { var n = new T.Mesh(new T.SphereGeometry(0.07, 16, 12), K.armDark); n.scale.set(0.6, 1.4, 0.8); n.position.set(x * 0.15, -0.16, -0.06); s.add(n); });
+    // the arms: from the lens ends back over the ears
+    [-1, 1].forEach(function (x) {
+      var z0 = -0.32 * 1.18 * 1.18;
+      var arm = tube([[x * 1.17, 0.18, z0], [x * 1.2, 0.17, z0 - 0.5], [x * 1.2, 0.13, z0 - 1.2], [x * 1.18, 0.0, z0 - 1.55], [x * 1.15, -0.2, z0 - 1.72]], 0.05, K.arm, 48);
+      arm.scale.y = 1; s.add(arm);
+      var hinge = new T.Mesh(new T.BoxGeometry(0.1, 0.16, 0.12), K.arm); hinge.position.set(x * 1.17, 0.18, z0 + 0.02); s.add(hinge);
+    });
   })(goggles);
 
   /* where each name sits on the wall: a point beside the item (in wall units, from its middle), and which side of it the name goes */
@@ -443,7 +518,7 @@
     tools.tape.userData.inner.rotation.x = -ribL * 0.4;   // the roll turns as the tape comes off
     // the warning light flashes
     var fl = Math.pow(Math.max(0, Math.sin(t * 4.2)), 6);
-    K.amber.emissiveIntensity = 0.9 + fl * 2.2;
+    K.lensA.emissiveIntensity = 0.45 + fl * 2.6;
     glow.intensity = fl * 2.2;
     // the hessian flap moves a little in the air
     flap.rotation.x = Math.sin(t * 1.1) * 0.07 - 0.05;

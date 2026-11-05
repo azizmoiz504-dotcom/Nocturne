@@ -502,6 +502,10 @@ class Site:
         if os.path.isdir(os.path.join(st, 'img')):
             for f in sorted(os.listdir(os.path.join(st, 'img'))):
                 shutil.copyfile(os.path.join(st, 'img', f), self.path('assets/img/' + f))
+        if os.path.isdir(os.path.join(st, 'models')):     # 3D model and texture files for hw3d.js
+            os.makedirs(self.path('assets/models'), exist_ok=True)
+            for f in sorted(os.listdir(os.path.join(st, 'models'))):
+                shutil.copyfile(os.path.join(st, 'models', f), self.path('assets/models/' + f))
         if os.path.isdir(os.path.join(st, 'vendor')):
             vh = hashlib.sha1()
             for f in sorted(os.listdir(os.path.join(st, 'vendor'))):
