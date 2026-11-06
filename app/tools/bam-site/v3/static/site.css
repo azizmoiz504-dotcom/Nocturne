@@ -163,6 +163,12 @@ html[lang=ar] .menu__in > a { font: 700 32px/1.3 var(--f-body); text-transform: 
 .gl { position: fixed; top: 0; left: 0; width: 100%; height: 100%; height: 100lvh; z-index: 1; pointer-events: none; }
 main > section, main > div, .foot { position: relative; z-index: 2; }
 main > .hero, main > .fix, main > .gl { z-index: auto; }
+.gl { overflow: hidden; contain: strict; }
+/* the 7 safety items: rendered in 3D ahead of time, each a strip of frames that plays as it turns; only transforms move */
+.ph { position: absolute; left: 0; top: 0; will-change: transform; transform: translate3d(-999px,-999px,0); }
+.ph__s { display: block; width: 100%; height: 100%; background-repeat: no-repeat; opacity: 0; transition: opacity .6s; }
+.ph.is-in .ph__s { opacity: 1; }
+.ph__halo { position: absolute; left: 50%; top: 40%; width: 210%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; z-index: -1; background: radial-gradient(circle, rgba(255, 196, 40, .75), rgba(255, 170, 20, .3) 30%, rgba(255, 170, 20, 0) 62%); opacity: 0; pointer-events: none; }
 
 /* ---------- hero ---------- */
 .hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 128px 0 118px; overflow: hidden; margin-top: -34px; }

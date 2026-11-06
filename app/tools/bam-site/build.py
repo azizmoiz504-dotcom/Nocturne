@@ -353,9 +353,9 @@ class Site:
             rng = next((x for x in self.ranges if x['id'] == rid), None)
             g = rng and next((g for g in rng['groups'] if g['name']['en'].lower() == name.lower()), None)
             return {'range': rid, 'g': g['slug'], 'name': g['name'], 'count': len(g['items']), 'rname': rng['name']} if g else None
-        parts = [('ratchet', 'kapusi', 'Sockets & Drive Tools'), ('pliers', 'kapusi', 'Pliers, Cutters & Crimpers'),
-                 ('pumppliers', 'kapusi', 'Spanners & Wrenches'), ('sledge', 'hammers', 'Machinist & Sledge Hammers'),
-                 ('spanner', 'kapusi', 'Spanners & Wrenches'), ('tape', 'kapusi', 'Measuring & Levelling'), ('claw', 'hammers', 'Claw Hammers')]
+        parts = [('cone', 'safety', 'Site Safety'), ('light', 'safety', 'Site Safety'), ('gloves', 'safety', 'Hand Protection'),
+                 ('shovel', 'shovels', 'Shovels'), ('tape', 'safety', 'Site Safety'), ('hessian', 'formwork', 'Hessian Cloth'),
+                 ('goggles', 'safety', 'Body & Eye Protection')]
         fixings = []
         for pid, rid, gname in parts:
             g = grp(rid, gname)
@@ -504,10 +504,6 @@ class Site:
         if os.path.isdir(os.path.join(st, 'img')):
             for f in sorted(os.listdir(os.path.join(st, 'img'))):
                 shutil.copyfile(os.path.join(st, 'img', f), self.path('assets/img/' + f))
-        if os.path.isdir(os.path.join(st, 'models')):     # the 3D products for hw3d.js (Poly Haven, CC0)
-            os.makedirs(self.path('assets/models'), exist_ok=True)
-            for f in sorted(os.listdir(os.path.join(st, 'models'))):
-                shutil.copyfile(os.path.join(st, 'models', f), self.path('assets/models/' + f))
         if os.path.isdir(os.path.join(st, 'vendor')):
             vh = hashlib.sha1()
             for f in sorted(os.listdir(os.path.join(st, 'vendor'))):
