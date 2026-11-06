@@ -1,0 +1,26 @@
+21:39:56 Android 15 (API 35)
+21:40:01 adb install : Success
+21:40:01 PASS the old app (v1.5) installs
+21:40:17 on screen:  topResumedActivity=ActivityRecord{dbc438d u0 com.fakhritools.catalogue/.MainActivity t8} 
+21:40:17 PASS the old app opens (versionName=1.5)
+21:40:21 adb install -r: Success
+21:40:21 PASS the new app installs over the old one
+21:40:21 PASS the phone now has the new version (versionName=2.10)
+21:40:37 on screen:  topResumedActivity=ActivityRecord{fa31de3 u0 com.fakhritools.catalogue/.MainActivity t9} 
+21:40:37 PASS the updated app opens from its icon
+21:40:41 adb install : Success
+21:40:41 PASS the new app installs on a phone without it
+21:40:57 on screen:  topResumedActivity=ActivityRecord{b5656f3 u0 com.fakhritools.catalogue/.MainActivity t10} 
+21:40:57 PASS the new app opens from its icon
+21:40:58 adb install : Success
+21:40:58 PASS the Mabrook app installs next to the main app
+21:40:58 PASS the main app is still on the phone
+21:40:58 home-screen icons: com.fakhritools.catalogue/.MainActivity com.mabrookhardware.catalogue/com.fakhritools.catalogue.BrandMabrook
+21:40:58 PASS the Mabrook app has its own home-screen icon
+21:40:58 PASS the Mabrook app is installed (versionName=2.10)
+21:41:14 on screen:  topResumedActivity=ActivityRecord{dbd47cc u0 com.mabrookhardware.catalogue/com.fakhritools.catalogue.BrandMabrook t11} 
+21:41:14 PASS the Mabrook app opens from its icon
+21:41:29 on screen:  topResumedActivity=ActivityRecord{b5656f3 u0 com.fakhritools.catalogue/.MainActivity t10} 
+21:41:29 PASS the main app still opens
+21:41:30 PASS no crash while installing and opening
+21:41:30 ALL CHECKS PASSED
