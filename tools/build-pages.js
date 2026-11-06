@@ -236,6 +236,8 @@ CATS.forEach(c => c.items.forEach((it, i) => {
   const x = twin ? (prodSpecs(it)[0] || nice(ownMat(it)) || (it[2] || '').split(' · ')[0]) : '';
   LABEL.set(c.slug + '/' + i, nice(it[0]) + (x ? ' (' + nice(x) + ')' : ''));
 }));
+// the guides and services that cover this category (their "cats" in seo-content.json), linked from its product pages
+const HELP = c => (SEO._pages || []).filter(pg => /^(guides|services)\//.test(pg.path) && (pg.cats || []).includes(c.slug));
 const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i); return fit(nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', cut(nm, 46) + ' | Fakhri Tools'); };
 
 function prodPage(c, it, i) {
@@ -259,7 +261,8 @@ function prodPage(c, it, i) {
           '<a class="btn btn--line" href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a></div>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li></ul>' +
       '</div></div>' +
-    (SEO[c.slug] && SEO[c.slug].intro && SEO[c.slug].intro.length ? '<section class="guide"><h2>Choosing the right one</h2><p>Sizes, ratings and how to pick between them are explained on our <a href="../' + PG(c) + '.html#guide">guide to ' + esc(NM(c)) + '</a>. Not sure what you need? Send a photo of the old part, or its nameplate, on WhatsApp.</p></section>' : '') +
+    (SEO[c.slug] && SEO[c.slug].intro && SEO[c.slug].intro.length ? '<section class="guide"><h2>Choosing the right one</h2><p>Sizes, ratings and how to pick between them are explained on our <a href="../' + PG(c) + '.html#guide">guide to ' + esc(NM(c)) + '</a>. Not sure what you need? Send a photo of the old part, or its nameplate, on WhatsApp.</p>' +
+      (HELP(c).length ? '<ul>' + HELP(c).map(pg => '<li><a href="../../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a></li>').join('') + '</ul>' : '') + '</section>' : '') +
     (others.length ? '<section class="fam"><h2>More in ' + esc(NM(c)) + '</h2><div class="cats">' + others.map(([o, k]) =>
       '<a class="cat" href="../../' + PROD.get(c.slug + '/' + k) + '"><span class="cat__img">' + (o[3] ? '<img src="../../' + thumb(o[3]) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(LABEL.get(c.slug + '/' + k)) + '</b><em>' + esc((o[2] || '').split(' · ')[0]) + '</em></a>').join('') + '</div></section>' : '') +
     '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
