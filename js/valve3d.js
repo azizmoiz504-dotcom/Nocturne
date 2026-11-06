@@ -279,7 +279,8 @@
     requestAnimationFrame(frame);
     // while nothing moves (no scrolling, no mouse, intro done) the slow idle turn only needs 30 frames a second
     const busy = now - st.busyT < 900 || (st.introT && now - st.introT < 2600);
-    if (!busy && now - last < 30) return;
+    // (phones: 20 frames a second, which looks the same for a slow turn and halves the drawing work)
+    if (!busy && now - last < (cw < 900 ? 50 : 30)) return;
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
     const t = now / 1000, tm = still ? 0 : t;   // tm: the slow idle turn, which stops when "reduce motion" is on
     // phones held sideways (short screens) use the side-by-side layout, so the valve sits beside the text
