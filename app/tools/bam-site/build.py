@@ -372,21 +372,23 @@ class Site:
         return {'fixings': fixings, 'demo': demo, 'big': big}
 
     def og_v3(self, logo):
-        """the picture shown when a link is shared: dark steel, a blue bar, their logo and some of their products"""
+        """the picture shown when a link is shared: light blue-white, a yellow and navy stripe, their logo and some of their products"""
         from PIL import ImageDraw, ImageFont, ImageChops
         W, H = 1200, 630
-        og = Image.new("RGB", (W, H), (7, 11, 20))
+        og = Image.new("RGB", (W, H), (243, 246, 253))
         dr = ImageDraw.Draw(og)
+        dr.rectangle([0, H - 26, W, H], fill=(11, 31, 85))
         for x in range(-H, W, 44):      # hazard stripes along the foot
-            dr.polygon([(x, H), (x + 22, H), (x + 22 + 26, H - 26), (x + 26, H - 26)], fill=(47, 109, 255))
-        m = logo.copy(); m.thumbnail((260, 150), Image.LANCZOS); og.paste(m, (72, 60), m)
+            dr.polygon([(x, H), (x + 22, H), (x + 22 + 26, H - 26), (x + 26, H - 26)], fill=(255, 194, 26))
+        m = logo.copy(); m.thumbnail((260, 150), Image.LANCZOS)
+        mi = Image.new('RGBA', m.size, (11, 31, 85, 0)); mi.putalpha(m.getchannel('A')); og.paste(mi, (72, 60), mi)
         f = os.path.join(self.dir, 'static', 'fonts', 'archivo-100-900-latin.woff2')
         big = ImageFont.truetype(f, 92); big.set_variation_by_axes([900, 62])
         sm = ImageFont.truetype(f, 24); sm.set_variation_by_axes([500, 100])
         y = 268
-        for txt, col in (('TOOLS, FIXINGS', (242, 241, 238)), ('& BUILDING', (242, 241, 238)), ('MATERIALS.', (47, 109, 255))):
+        for txt, col in (('TOOLS, FIXINGS', (11, 31, 85)), ('& BUILDING', (11, 31, 85)), ('MATERIALS.', (47, 109, 255))):
             dr.text((72, y), txt, font=big, fill=col); y += 88
-        dr.text((72, 548), '%d products · Jurf Industrial Zone 1, Ajman' % self.stats['products'], font=sm, fill=(154, 158, 166))
+        dr.text((72, 548), '%d products · Jurf Industrial Zone 1, Ajman' % self.stats['products'], font=sm, fill=(93, 111, 153))
         picks = []
         for r in self.ranges:
             pool = sorted((p for p in r['items'] if p['img'] and p['square'] and self.is_clean(p['img'])), key=lambda p: hashlib.sha1(('f' + p['slug']).encode()).hexdigest())
@@ -520,6 +522,7 @@ class Site:
         white = Image.new('RGBA', dome.size, (255, 255, 255, 0)); white.putalpha(dome.getchannel('A'))
         white.save(self.path('assets/mark.png'), optimize=True)
         full = Image.new('RGBA', logo.size, (255, 255, 255, 0)); full.putalpha(a); full.save(self.path('assets/logo.png'), optimize=True)
+        ink = Image.new('RGBA', logo.size, (11, 31, 85, 0)); ink.putalpha(a); ink.save(self.path('assets/logo-ink.png'), optimize=True)
         ink = (15, 110, 92) if self.design == 'v1' else (47, 109, 255) if self.design == 'v3' else (18, 19, 22)
         for size, bg, rel in ((192, ink, 'assets/icon-192.png'), (512, ink, 'assets/icon-512.png')):
             ic = Image.new('RGB', (size, size), bg); m = white.copy(); m.thumbnail((int(size * .68), int(size * .62)), Image.LANCZOS)

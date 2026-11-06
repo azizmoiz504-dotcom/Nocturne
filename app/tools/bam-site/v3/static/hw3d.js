@@ -27,10 +27,11 @@
   if (!renderer.getContext()) { fail(); return; }
 
   var small = function () { return innerWidth < 900; };
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small() ? 1.5 : 1.75));
+  var DPR = Math.min(window.devicePixelRatio || 1, small() ? 1.35 : 1.5);
+  renderer.setPixelRatio(DPR);
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
+  renderer.toneMappingExposure = 0.98;
   renderer.setClearColor(0x000000, 0);
 
   var scene = new T.Scene();
@@ -40,9 +41,9 @@
   /* a studio made of glowing panels, so the metal and the plastic have something to reflect */
   (function () {
     var s = new T.Scene();
-    s.add(new T.Mesh(new T.BoxGeometry(40, 40, 40), new T.MeshBasicMaterial({ color: 0x060a14, side: T.BackSide })));
+    s.add(new T.Mesh(new T.BoxGeometry(40, 40, 40), new T.MeshBasicMaterial({ color: 0x8fa8d6, side: T.BackSide })));
     var panel = function (c, k, w, h, x, y, z) {
-      var m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(c).multiplyScalar(k), side: T.DoubleSide }));
+      var m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(c).multiplyScalar(k * 0.55), side: T.DoubleSide }));
       m.position.set(x, y, z); m.lookAt(0, 0, 0); s.add(m);
     };
     panel(0xffffff, 5.2, 14, 3.5, 0, 13, 4);      // long soft box overhead
@@ -56,15 +57,14 @@
     scene.environment = pm.fromScene(s, 0.03).texture;
     pm.dispose();
   })();
-  var key = new T.DirectionalLight(0xffffff, 1.45); key.position.set(4, 9, 7);
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-  key.castShadow = true;
+  var key = new T.DirectionalLight(0xfff8f0, 2.1); key.position.set(4, 9, 7);
+  key.castShadow = false;
   key.shadow.mapSize.set(small() ? 1024 : 2048, small() ? 1024 : 2048);
   key.shadow.camera.left = key.shadow.camera.bottom = -6; key.shadow.camera.right = key.shadow.camera.top = 6;
   key.shadow.camera.near = 1; key.shadow.camera.far = 30; key.shadow.bias = -0.0012; key.shadow.normalBias = 0.045; key.shadow.radius = 4;
-  var rim = new T.DirectionalLight(0x3d7bff, 1.6); rim.position.set(-7, -3, -6); scene.add(rim);
-  var fill = new T.DirectionalLight(0xdfe6ff, 0.75); fill.position.set(-6, 2, 8); scene.add(fill);
-  scene.add(new T.HemisphereLight(0xdfe8ff, 0x1a2a55, 0.55));
+  var rim = new T.DirectionalLight(0x6f9bff, 0.9); rim.position.set(-7, -3, -6); scene.add(rim);
+  var fill = new T.DirectionalLight(0xdfe6ff, 0.45); fill.position.set(-6, 2, 8); scene.add(fill);
+  scene.add(new T.HemisphereLight(0xf2f6ff, 0x5d6f9e, 0.4));
 
   var srgb = function (hex) { return new T.Color(hex).convertSRGBToLinear(); };
 
@@ -101,9 +101,9 @@
     s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
     return s;
   }
-  function tube(pts, r, mat, segs) {
-    var curve = new T.CatmullRomCurve3(pts.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }));
-    var m = new T.Mesh(new T.TubeGeometry(curve, segs || 64, r, 18, false), mat);
+  function tube(pts, r, mat, segs, closed) {
+    var curve = new T.CatmullRomCurve3(pts.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }), !!closed);
+    var m = new T.Mesh(new T.TubeGeometry(curve, segs || 64, r, 18, !!closed), mat);
     m.userData.curve = curve;
     return m;
   }
@@ -306,13 +306,13 @@
   var BLUE = 0x2f6dff;
   /* glossy toy look: smooth vinyl colours, a strong clear coat, no fabric or grain textures */
   var toy = function (hex, o) {
-    var m = new T.MeshPhysicalMaterial({ color: srgb(hex), metalness: 0, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 0.5 });
+    var m = new T.MeshPhysicalMaterial({ color: srgb(hex), metalness: 0, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 0.6 });
     if (o) for (var q in o) m[q] = o[q];
     return m;
   };
   var K = {
     cone: toy(0xff4a14, { roughness: 0.2 }),
-    reflect: toy(0xf2f5fb, { roughness: 0.14, envMapIntensity: 0.45 }),
+    reflect: toy(0xffffff, { roughness: 0.14, envMapIntensity: 0.45, emissive: srgb(0x3a4152) }),
     rubber: toy(0x16203a, { roughness: 0.3 }),
     body: toy(0xffa800),
     lensA: toy(0xff5200, { emissive: srgb(0xff4800), emissiveIntensity: 0.45, roughness: 0.08 }),
@@ -324,11 +324,11 @@
     wood: toy(0xd4893c, { roughness: 0.24 }),
     blade: toy(0xb9c6da, { metalness: 0.55, roughness: 0.2 }),
     bright: toy(0xeef2f8, { metalness: 0.6, roughness: 0.14 }),
-    knit: toy(0xf7f8fb, { roughness: 0.3, clearcoat: 0.8, side: T.DoubleSide }),
+    knit: toy(0xffffff, { roughness: 0.3, clearcoat: 0.8, emissive: srgb(0x2c3242), side: T.DoubleSide }),
     dip: toy(BLUE, { roughness: 0.16, side: T.DoubleSide }),
-    cuff: toy(0xf7f8fb, { roughness: 0.3, clearcoat: 0.8, side: T.DoubleSide }),
+    cuff: toy(0xffffff, { roughness: 0.3, clearcoat: 0.8, emissive: srgb(0x2c3242), side: T.DoubleSide }),
     hem: toy(0x16203a),
-    clear: new T.MeshPhysicalMaterial({ color: srgb(0xdfeaff), metalness: 0, roughness: 0.02, transparent: true, opacity: 0.32, clearcoat: 1, clearcoatRoughness: 0.02, side: T.DoubleSide, depthWrite: false }),
+    clear: new T.MeshPhysicalMaterial({ color: srgb(0x9cc0ff), metalness: 0, roughness: 0.02, transparent: true, opacity: 0.5, clearcoat: 1, clearcoatRoughness: 0.02, side: T.DoubleSide, depthWrite: false }),
     coat: new T.MeshPhysicalMaterial({ color: srgb(0x7fb0ff), metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.16, side: T.FrontSide, depthWrite: false }),
     arm: toy(BLUE),
     armDark: toy(0x16203a),
@@ -400,18 +400,20 @@
     // the base: an octagon with soft edges and a raised collar for the cone to sit in
     var oct = new T.Shape();
     for (var i = 0; i < 8; i++) { var a = i / 8 * Math.PI * 2 + Math.PI / 8, r = 1.04; if (i) oct.lineTo(Math.cos(a) * r, Math.sin(a) * r); else oct.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
-    var bg = new T.ExtrudeGeometry(oct, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 4, curveSegments: 8 });
+    var bg = new T.ExtrudeGeometry(oct, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 8, curveSegments: 8 });
     var base = new T.Mesh(bg, K.rubber); base.rotation.x = -Math.PI / 2; base.position.y = -1.44; s.add(base);
     s.add(lathe([[0.62, -1.24], [0.8, -1.25], [0.82, -1.29], [0.84, -1.32], [0.6, -1.32]], 72, K.rubber));
     // the body with a rolled lip at the bottom and a little open top
-    var H = 2.95, r0 = 0.6, r1 = 0.1, y0 = -1.22;
+    var H = 2.9, r0 = 0.64, r1 = 0.15, y0 = -1.22;
     var R = function (y) { return r0 + (r1 - r0) * (y - y0) / H; };
     s.add(lathe([[0, y0], [r0 + 0.045, y0], [r0 + 0.05, y0 + 0.03], [r0 + 0.01, y0 + 0.07], [r0, y0 + 0.1], [r1, y0 + H], [r1 - 0.004, y0 + H + 0.025], [r1 - 0.025, y0 + H + 0.035], [0.065, y0 + H + 0.02], [0.06, y0 + H - 0.25], [0, y0 + H - 0.25]], 96, K.cone));
     // moulded rings at the top, as on real cones
     [0.25, 0.32].forEach(function (d) { var y = y0 + H - d; s.add(lathe([[R(y) - 0.002, y - 0.012], [R(y) + 0.012, y], [R(y) - 0.002, y + 0.012]], 96, K.cone)); });
     // the sleeve, wrapped on with a sliver of edge showing
-    var a1 = y0 + 0.98, c1 = y0 + 1.74;
-    s.add(lathe([[R(a1) + 0.003, a1 - 0.005], [R(a1) + 0.016, a1], [R(c1) + 0.016, c1], [R(c1) + 0.003, c1 + 0.005]], 96, K.reflect));
+    [[0.72, 1.18], [1.6, 1.98]].forEach(function (b) {
+      var a1 = y0 + b[0], c1 = y0 + b[1];
+      s.add(lathe([[R(a1) - 0.002, a1 - 0.012], [R(a1) + 0.02, a1 + 0.004], [R(c1) + 0.02, c1 - 0.004], [R(c1) - 0.002, c1 + 0.012]], 96, K.reflect));
+    });
     s.position.y = 0.06;
   })(cone);
 
@@ -461,6 +463,7 @@
     });
     var sideM = new T.MeshPhysicalMaterial({ map: layers, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08, side: T.DoubleSide });
     [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.26, 0.62, 96), sideM); r.rotation.y = Math.PI / 2; r.position.x = x * 0.25; s.add(r); });
+    [-1, 1].forEach(function (x) { var rim = new T.Mesh(new T.TorusGeometry(0.62, 0.022, 12, 96), K.reflect); rim.rotation.y = Math.PI / 2; rim.position.x = x * 0.25; s.add(rim); });
     var core = new T.Mesh(new T.CylinderGeometry(0.26, 0.26, 0.52, 48, 1, true), K.core); core.rotation.z = Math.PI / 2; s.add(core);
     var inner = new T.Mesh(new T.CylinderGeometry(0.23, 0.23, 0.53, 48, 1, true), toy(0xc89a62, { roughness: 0.4, side: T.BackSide })); inner.rotation.z = Math.PI / 2; s.add(inner);
     [-1, 1].forEach(function (x) { var r = new T.Mesh(new T.RingGeometry(0.23, 0.26, 48), K.core); r.rotation.y = Math.PI / 2; r.position.x = x * 0.26; s.add(r); });
@@ -485,7 +488,7 @@
     for (j = 0; j < bh; j++) for (i = 0; i < bw; i++) { var a = j * (bw + 1) + i, b = a + bw + 1; idx.push(a, a + 1, b, b, a + 1, b + 1); }
     var bgm = new T.BufferGeometry();
     bgm.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); bgm.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); bgm.setIndex(idx); bgm.computeVertexNormals();
-    var blade = new T.Mesh(bgm, toy(0xb9c6da, { metalness: 0.55, roughness: 0.2, side: T.DoubleSide }));
+    var blade = new T.Mesh(bgm, toy(0x9db4e0, { metalness: 0.45, roughness: 0.18, side: T.DoubleSide }));
     blade.position.set(0, -1.9, 0.02); blade.rotation.x = 0.16; s.add(blade);
     var sock = lathe([[0, -1.3], [0.2, -1.3], [0.17, -1.1], [0.11, -0.72], [0.1, -0.68], [0, -0.68]], 48, K.blade); sock.position.y = -0.1; s.add(sock);
     [0.09, -0.09].forEach(function (x) { var rv = new T.Mesh(new T.SphereGeometry(0.03, 12, 8), K.bright); rv.position.set(x * 0.6, -0.95, 0.115); rv.scale.z = 0.5; s.add(rv); });
@@ -515,15 +518,16 @@
     // two twine ties round the roll
     [-0.7, 0.7].forEach(function (x) { var t = new T.Mesh(new T.TorusGeometry(0.57, 0.04, 16, 96), K.twine); t.rotation.y = Math.PI / 2; t.position.x = x; s.add(t); });
     // the hanging length, with a frayed bottom edge
-    var fg = new T.PlaneGeometry(2.22, 1.4, 28, 18); fg.translate(0, -0.7, 0);
+    var fs = new T.Shape(); fs.moveTo(-1.1, 0); fs.lineTo(1.1, 0); fs.lineTo(1.1, -1.25);
+    for (var q = 0; q <= 24; q++) { var qx = 1.1 - q * 2.2 / 24; fs.lineTo(qx, -1.3 - Math.sin(q / 24 * Math.PI * 3) * 0.05 - (q % 2 ? 0 : 0.0)); }
+    fs.lineTo(-1.1, 0);
+    var fg = new T.ExtrudeGeometry(fs, { depth: 0.02, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 4, curveSegments: 12 });
     var fray = canvasTex(64, 512, function (x, w, h) {
       x.fillStyle = '#fff'; x.fillRect(0, 0, w, h - 26);
       for (var i = 0; i < w; i += 1) { x.fillRect(i, h - 26, 1, 12 + Math.sin(i / w * Math.PI * 6) * 8); }
     }, false, true);
     var fm = K.hessian.clone();
-    fm.alphaMap = fray; fm.alphaTest = 0.5;
     flap = new T.Mesh(fg, fm); flap.position.set(0, 0, 0.55); s.add(flap);
-    flap.userData.base = fg.attributes.position.array.slice();
   })(hessian);
 
   /* ---------- work gloves, a pair: white knitted gloves with a grey nitrile dipped palm (like BAM's),
@@ -531,12 +535,12 @@
   var glove = tool('gloves');
   (function (s) {
     var fingers = [   // knuckle, middle, tip (x, y, z), radius at knuckle and tip
-      [[-0.33, 0.34, 0.0], [-0.38, 0.84, 0.03], [-0.42, 1.24, 0.09], 0.112, 0.098],
-      [[-0.11, 0.4, 0.0], [-0.12, 0.94, 0.03], [-0.13, 1.4, 0.1], 0.116, 0.1],
-      [[0.12, 0.38, 0.0], [0.14, 0.9, 0.03], [0.16, 1.3, 0.09], 0.112, 0.098],
-      [[0.33, 0.3, 0.0], [0.39, 0.7, 0.03], [0.44, 1.02, 0.08], 0.1, 0.088]
+      [[-0.33, 0.34, 0.0], [-0.38, 0.84, 0.03], [-0.42, 1.24, 0.09], 0.124, 0.112],
+      [[-0.11, 0.4, 0.0], [-0.12, 0.94, 0.03], [-0.13, 1.4, 0.1], 0.128, 0.114],
+      [[0.12, 0.38, 0.0], [0.14, 0.9, 0.03], [0.16, 1.3, 0.09], 0.124, 0.112],
+      [[0.34, 0.3, 0.0], [0.4, 0.7, 0.03], [0.45, 1.02, 0.08], 0.112, 0.1]
     ];
-    var thumb = [[-0.34, -0.3, 0.03], [-0.62, -0.04, 0.08], [-0.82, 0.32, 0.11], 0.13, 0.108];
+    var thumb = [[-0.34, -0.3, 0.03], [-0.62, -0.04, 0.08], [-0.82, 0.32, 0.11], 0.142, 0.12];
     var F = function (x, y, z) {
       var d = sdRoundBox(x, y, z, [0, -0.1, 0], [0.38, 0.48, 0.035], 0.1 + 0.02 * Math.max(0, 1 - Math.abs(x) * 2));
       fingers.concat([thumb]).forEach(function (f) {
@@ -559,7 +563,7 @@
       if (y < -0.68) cr += 0.004 * Math.pow(Math.sin(x * 70), 8);   // the ribs of the knitted cuff
       return d + cr;
     };
-    var S = surface(F, [-1.05, -1.4, -0.3], [0.7, 1.55, 0.36], small() ? 0.02 : 0.016);
+    var S = surface(F, [-1.05, -1.4, -0.3], [0.7, 1.55, 0.36], small() ? 0.026 : 0.021);
     // which skin is coated: the palm side, and the finger tips all round
     var tipY = function (x) { return x < -0.25 ? 0.9 : x < 0.0 ? 1.06 : x < 0.24 ? 0.98 : 0.76; };
     var wav = function (x, y) { return Math.sin(x * 23) * 0.012 + Math.sin(x * 7 + y * 5) * 0.015; };
@@ -622,6 +626,8 @@
     var lg = new T.ExtrudeGeometry(L, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.014, bevelSize: 0.014, bevelSegments: 3, curveSegments: 48 });
     lg.translate(0, 0, -0.02);
     s.add(new T.Mesh(wrap(lg, 0.32), K.clear));
+    var rimPts = L.getSpacedPoints(160).map(function (p) { return [p.x, p.y, -0.32 * p.x * p.x + 0.01]; });
+    var frame = tube(rimPts, 0.038, K.arm, 320, true); s.add(frame);
     var cg = wrap(new T.ShapeGeometry(L, 48), 0.32); var coat = new T.Mesh(cg, K.coat); coat.position.z = 0.04; s.add(coat);
     // a thin blue brow along the top of the lens
     var bp = []; for (var i = 0; i <= 32; i++) { var x = -1.16 + i * 2.32 / 32; bp.push([x, 0.24 + 0.1 * Math.cos(x * 1.35) - 0.02, -0.32 * x * x + 0.03]); }
@@ -669,10 +675,10 @@
     shovel: { p: [1.55, 0.35, -1.4], r: [0.1, -0.3, -0.42], s: 0.9 },
     cone: { p: [-0.1, -0.05, 0.2], r: [0.18, 0.4, 0.04], s: 1.05 },
     light: { p: [-1.75, 1.55, -0.6], r: [0.12, 0.45, 0.1], s: 0.82 },
-    hessian: { p: [-1.6, -1.45, -1.0], r: [0.35, 0.35, -0.08], s: 0.72 },
-    gloves: { p: [1.55, -1.45, 0.9], r: [0.2, -0.45, -0.35], s: 0.82 },
+    hessian: { p: [-1.85, -1.35, -1.0], r: [0.35, 0.35, -0.08], s: 0.68 },
+    gloves: { p: [1.85, -1.3, 0.9], r: [0.2, -0.45, -0.35], s: 0.76 },
     goggles: { p: [0.5, 1.95, 0.6], r: [0.3, -0.35, 0.12], s: 0.62 },
-    tape: { p: [-0.4, -1.95, 1.6], r: [0.3, -0.25, 0.0], s: 0.78 }
+    tape: { p: [-0.6, -2.05, 1.6], r: [0.3, -0.25, 0.0], s: 0.74 }
   };
   // "Every tool": on the wall in two rows, the shovel standing at the end
   var WALL = {
@@ -692,7 +698,7 @@
     shovel: { p: [2.35, -0.1, 0], s: 0.82 }
   };
   // the showcase: in the hero one item at a time, big, turning slowly in the studio light; the next one slides in every few seconds
-  var SHOW = true, SHOW_EVERY = 4.6;
+  var SHOW = false, SHOW_EVERY = 4.6;
   var SHOW_S = { cone: 1.42, light: 1.55, gloves: 1.5, shovel: 0.98, tape: 2.3, hessian: 1.5, goggles: 1.9 };
   // tilt towards you, the three-quarter turn it rests at, and its lean
   var SHOW_R = { cone: [0.2, 0.3, 0], light: [0.12, 0.35, 0], gloves: [0.08, 0.2, 0.1], shovel: [0.15, 0.5, -0.55], tape: [0.22, 0.75, 0.05], hessian: [0.35, 0.55, -0.05], goggles: [0.18, 0.6, 0.05] };
@@ -836,7 +842,7 @@
     });
   }
 
-  var last = performance.now(), visible = true, running = true;
+  var last = performance.now(), visible = true, running = true; var slowT = 0, slowN = 0;
   function frame(now) {
     if (!running) return;
     requestAnimationFrame(frame);
@@ -846,6 +852,12 @@
     if (st.intro < 1) st.intro = Math.min(1, st.intro + Math.min(0.2, raw) / 2.4);   // real time, so a slow phone still finishes it
     pose(dt);
     renderer.render(scene, camera);
+    // a slow machine: draw fewer pixels until it keeps up
+    if (raw < 0.25) { slowT += raw; slowN++; }
+    if (slowN >= 90 && !navigator.webdriver) {
+      if (slowT / slowN > 0.026 && DPR > 0.8) { DPR = Math.max(0.75, DPR - 0.25); renderer.setPixelRatio(DPR); layout(); }
+      slowT = 0; slowN = 0;
+    }
     if (st.ana > 0.01) placeLabels();
   }
 

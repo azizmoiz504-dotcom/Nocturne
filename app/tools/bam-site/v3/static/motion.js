@@ -27,7 +27,7 @@
 
   /* ---------- smooth scrolling, for a mouse or trackpad only (phones keep their own) ---------- */
   let lenis = null;
-  if (motion && fine && window.Lenis) {
+  if (motion && fine && window.Lenis && window.BAM_SMOOTH) {   // off: the plain browser scroll is the quickest on every machine
     const own = n => n.classList && (n.classList.contains('sheet') || n.classList.contains('drawer') || n.classList.contains('palette') || n.classList.contains('lightbox') ||
       n.classList.contains('menu') || n.classList.contains('rail') || n.classList.contains('rchips') || n.classList.contains('more') || n.classList.contains('cat__side') || n.hasAttribute('data-lenis-prevent'));
     lenis = new window.Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: false, autoRaf: false, allowNestedScroll: true, prevent: own });

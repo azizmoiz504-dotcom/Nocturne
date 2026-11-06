@@ -20,7 +20,7 @@
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
   renderer.localClippingEnabled = true;
-  renderer.setClearColor(0x0b0c0e, 1);
+  renderer.setClearColor(0xcfe0ff, 1);
 
   var srgb = function (h) { return new T.Color(h).convertSRGBToLinear(); };
   var clamp01 = function (x) { return Math.max(0, Math.min(1, x)); };
@@ -37,13 +37,13 @@
   var noise = function (x, w, h, n, a, b) { for (var i = 0; i < n; i++) { x.fillStyle = 'rgba(' + (rnd() < 0.5 ? a : b) + ',' + (rnd() * 0.07).toFixed(3) + ')'; var s = 1 + rnd() * 3; x.fillRect(rnd() * w, rnd() * h, s, s); } };
 
   var scene = new T.Scene();
-  scene.fog = new T.Fog(0x0b0c0e, 16, 34);
+  scene.fog = new T.Fog(0xcfe0ff, 18, 38);
   var camera = new T.PerspectiveCamera(36, 1, 0.1, 80);
 
   /* reflections: a night sky, a warm street glow, a pale panel in front */
   (function () {
     var s = new T.Scene();
-    s.add(new T.Mesh(new T.BoxGeometry(60, 60, 60), new T.MeshBasicMaterial({ color: 0x0a0c10, side: T.BackSide })));
+    s.add(new T.Mesh(new T.BoxGeometry(60, 60, 60), new T.MeshBasicMaterial({ color: 0x9fb8e8, side: T.BackSide })));
     var panel = function (c, k, w, h, x, y, z) {
       var m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(c).multiplyScalar(k), side: T.DoubleSide }));
       m.position.set(x, y, z); m.lookAt(0, 2, 0); s.add(m);
@@ -58,8 +58,8 @@
   })();
 
   /* ---------- lights ---------- */
-  scene.add(new T.HemisphereLight(srgb(0x7e8fae), srgb(0x17130f), 0.26));
-  var moon = new T.DirectionalLight(srgb(0xaab9d8), 0.32); moon.position.set(-7, 11, 9); scene.add(moon);
+  scene.add(new T.HemisphereLight(srgb(0xe4eeff), srgb(0x8e939c), 0.95));
+  var moon = new T.DirectionalLight(srgb(0xfff6e8), 1.5); moon.position.set(-7, 11, 9); scene.add(moon);
   var lamp = new T.SpotLight(srgb(0xffd6a0), 2.6, 16, 0.62, 0.85, 1.3); lamp.position.set(0, 6.3, 2.4); lamp.target.position.set(0, 0.2, 0.6);
   scene.add(lamp); scene.add(lamp.target);
   var signGlow = new T.PointLight(srgb(0xff8a2a), 0.9, 5.5, 2); signGlow.position.set(0, 4.95, 0.9); scene.add(signGlow);
@@ -75,7 +75,7 @@
 
   /* ---------- textures drawn here ---------- */
   var groundTex = tex(mk(1024, 1024, function (x, w, h) {      // the yard in front: dark concrete, a kerb line and a keep-clear box
-    x.fillStyle = '#3b3c3e'; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#8d9097'; x.fillRect(0, 0, w, h);
     noise(x, w, h, 9000, '255,255,255', '0,0,0');
     var px = w / 12;                                             // 12 m across, 12 m deep; the wall is at the top
     x.fillStyle = '#d9a514'; x.fillRect(0, 0.12 * px, w, 0.1 * px);
@@ -98,11 +98,11 @@
     [-1.75, 1.75].forEach(function (m) { x.fillRect(w / 2 + m * px - 0.05 * px, 0, 0.1 * px, h); });
   }));
   var hazardTex = tex(mk(256, 32, function (x, w, h) {
-    x.fillStyle = '#2f6dff'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
+    x.fillStyle = '#ffc21a'; x.fillRect(0, 0, w, h); x.fillStyle = '#0b1f55';
     for (var k = -2; k < 12; k++) { x.beginPath(); x.moveTo(k * 32, h); x.lineTo(k * 32 + 16, h); x.lineTo(k * 32 + 16 + h, 0); x.lineTo(k * 32 + h, 0); x.closePath(); x.fill(); }
   }), [6, 1]);
   var bollardTex = tex(mk(64, 256, function (x, w, h) {
-    x.fillStyle = '#2f6dff'; x.fillRect(0, 0, w, h); x.fillStyle = '#141518';
+    x.fillStyle = '#ffc21a'; x.fillRect(0, 0, w, h); x.fillStyle = '#0b1f55';
     for (var k = 0; k < 4; k++) x.fillRect(0, k * 64 + 32, w, 32);
   }));
   var glow = function (inner, outer) {
