@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.fakhritools.catalogue">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="false"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".CatalogueActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|smallestScreenSize|uiMode"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- The home-screen icon and name follow the branch the salesman picks in Settings:
+             one of these four is switched on at a time (CatalogueActivity.switchIcon).
+             The Fakhri Tools one is called .MainActivity, the launcher name of v1.5 and earlier,
+             so a Fakhri Tools icon already on a home screen keeps working after the update. -->
+        <activity-alias
+            android:name=".MainActivity"
+            android:targetActivity=".CatalogueActivity"
+            android:label="@string/name_fakhri"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".BrandBam"
+            android:targetActivity=".CatalogueActivity"
+            android:label="@string/name_bam"
+            android:icon="@mipmap/ic_bam"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".BrandMabrook"
+            android:targetActivity=".CatalogueActivity"
+            android:label="@string/name_mabrook"
+            android:icon="@mipmap/ic_mabrook"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".BrandModern"
+            android:targetActivity=".CatalogueActivity"
+            android:label="@string/name_me"
+            android:icon="@mipmap/ic_me"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <provider
+            android:name=".PhotoProvider"
+            android:authorities="com.fakhritools.catalogue.photos"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+    </application>
+</manifest>

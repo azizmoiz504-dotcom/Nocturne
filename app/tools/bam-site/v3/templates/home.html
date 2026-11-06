@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% set other = 'en' if lang == 'ar' else 'ar' %}
+{% block main %}
+<canvas id="gl" class="gl" aria-hidden="true"></canvas>
+
+<section class="hero" id="top">
+  <div class="hero__bg" aria-hidden="true"><i class="hero__glow"></i><i class="hero__grid"></i><i class="hero__ring"></i></div>
+  <img class="hero__poster" src="{{ root }}assets/img/hero-3d.webp" alt="" width="1100" height="1100" loading="lazy" aria-hidden="true">
+  <div class="wrap hero__content">
+    <p class="kicker mono hero__kicker"><i class="dot"></i>{{ T('k_showroom') }}</p>
+    <h1 class="hero__title">
+      <span class="tl"><span class="tl__in">{{ T('h1a') }}</span></span>
+      <span class="tl"><span class="tl__in">{{ T('h1b') }}</span></span>
+      <span class="tl tl--o"><span class="tl__in">{{ T('h1c') }}</span></span>
+    </h1>
+    <p class="hero__sub">{{ T('trades') }}</p>
+    <div class="hero__ctas">
+      <a class="btn btn--primary" href="#catalogue">{{ T('cta_browse', n=stats.products) }}{{ icon('arrow') }}</a>
+      <button class="btn btn--ghost" type="button" data-open-search>{{ icon('search') }}{{ T('find_part') }}</button>
+      <a class="btn btn--ghost btn--icon" href="tel:{{ contact.tel }}">{{ icon('phone') }}<span>{{ T('call') }}</span></a>
+    </div>
+  </div>
+  <div class="hud">
+    <div class="wrap hud__in mono">
+      <div class="hud__c"><small>{{ T('hud_showroom') }}</small><span>{{ T('hud_where') }}</span></div>
+      <div class="hud__c"><small>{{ T('call') }}</small><a href="tel:{{ contact.tel }}" dir="ltr">{{ contact.phone }}</a></div>
+      <div class="hud__c hud__c--mail"><small>{{ T('email') }}</small><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></div>
+      <div class="hud__c"><small>{{ T('hud_catalogue') }}</small><span>{{ T('dim_label', p=stats.products, r=stats.ranges) }}</span></div>
+      <div class="hud__cue"><span class="tapeico" aria-hidden="true"><i></i></span>{{ T('scroll_turn') }}</div>
+    </div>
+  </div>
+</section>
+
+<div class="tapes" aria-hidden="true">
+  <div class="tape tape--a"><div class="tape__track">{% for k in range(2) %}<div class="tape__set">{% for r in ranges %}<span>{{ r.name[lang] }}</span><i>◆</i>{% endfor %}</div>{% endfor %}</div></div>
+  <div class="tape tape--b"><div class="tape__track">{% for k in range(2) %}<div class="tape__set">{% for n in range(3) %}<span>{{ T('k_showroom') }}</span><i>◆</i><span dir="ltr">{{ contact.phone }}</span><i>◆</i><span>{{ T('footer_note') }}</span><i>◆</i>{% endfor %}</div>{% endfor %}</div></div>
+</div>
+
+<section class="sec intro" id="about">
+  <div class="wrap">
+    <p class="secno mono"><b>01</b><i></i>{{ T('sec_about') }}</p>
+    <h2 class="intro__statement" data-words>{{ T('trades') }}</h2>
+    <div class="intro__cols">
+      <div class="intro__text">
+        <p>{{ T('about_p1') }}</p>
+        <p>{{ T('about_p2') }}</p>
+      </div>
+      <div class="intro__stock">
+        <h3 class="mono">{{ T('who_h') }}</h3>
+        <ul class="chips chips--dark">{% for r in ranges %}<li><a href="{{ home }}range/{{ r.id }}/">{{ r.name[lang] }}</a></li>{% endfor %}</ul>
+      </div>
+    </div>
+    <div class="feats">
+      <article class="feat reveal"><span class="feat__ico">{{ icon('box') }}</span><h3>{{ T('f1_h') }}</h3><p>{{ T('f1', l=stats.lines_fmt) }}</p></article>
+      <article class="feat reveal"><span class="feat__ico">{{ icon('list') }}</span><h3>{{ T('f2_h') }}</h3><p>{{ T('f2') }}</p></article>
+      <article class="feat reveal"><span class="feat__ico">{{ icon('book') }}</span><h3>{{ T('f3_h') }}</h3><p>{{ T('f3', n=pdfs|length) }}</p></article>
+      <article class="feat reveal"><span class="feat__ico">{{ icon('pin') }}</span><h3>{{ T('f4_h') }}</h3><p>{{ T('f4') }}</p></article>
+    </div>
+    <div class="meters">
+      {% for n, label in [(stats.products, T('st_products')), (stats.lines, T('st_lines')), (stats.ranges, T('st_ranges')), (stats.groups, T('st_groups'))] %}
+      <div class="meter reveal">
+        <div class="meter__case" aria-hidden="true"><i class="meter__hole"></i></div>
+        <div class="meter__blade" aria-hidden="true"><i class="meter__ticks"></i><i class="meter__hook"></i></div>
+        <b class="meter__n" data-count="{{ n }}">{{ '{:,}'.format(n) }}</b>
+        <span class="meter__l mono">{{ label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="sec aisles" id="ranges">
+  <div class="wrap">
+    <header class="sec__head">
+      <p class="secno mono"><b>02</b><i></i>{{ T('sec_ranges') }}</p>
+      <h2 class="sec__h">{{ T('ranges_h3a', r=stats.ranges) }}<br><span class="o">{{ T('ranges_h3b') }}</span></h2>
+      <p class="sec__sub">{{ T('ranges_sub3') }}</p>
+    </header>
+  </div>
+  <div class="peg">
+    <div class="wrap peg__grid">
+      {% for r in ranges %}
+      <a class="hang{% if r.big %} hang--big{% endif %}" href="{{ home }}range/{{ r.id }}/" style="--i:{{ loop.index0 }}">
+        <i class="hang__hook" aria-hidden="true"></i>
+        <span class="hang__card">
+          <span class="hang__no mono">{{ '%02d' % r.no }}</span>
+          <span class="hang__img">{% if r.cover %}<img src="{{ root }}{{ r.cover }}" alt="" width="{{ r.cover_w }}" height="{{ r.cover_h }}" loading="lazy" decoding="async">{% endif %}</span>
+          <span class="hang__body">
+            <span class="hang__name"><bdi>{{ r.name[lang] }}</bdi></span>
+            {% set alt = r.name[other] %}{% if alt and alt != r.name[lang] %}<span class="hang__alt" lang="{{ other }}"><bdi>{{ alt }}</bdi></span>{% endif %}
+            <span class="hang__meta mono"><b>{{ r.count }}</b> {{ T('st_products') }} · {{ r.groups_txt }}</span>
+            {% if r.big %}<span class="hang__groups">{% for g in r.groups[:6] %}<span>{{ g.name[lang] }}</span>{% endfor %}{% if r.groups|length > 6 %}<span>+{{ r.groups|length - 6 }}</span>{% endif %}</span>{% endif %}
+          </span>
+          <span class="hang__go" aria-hidden="true">{{ icon('arrow') }}</span>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if big %}
+<section class="sec brands" id="brands">
+  <div class="wrap">
+    <header class="sec__head sec__head--row">
+      <div>
+        <p class="secno mono"><b>03</b><i></i>{{ T('sec_big') }}</p>
+        <h2 class="sec__h">{{ T('big_h') }}</h2>
+      </div>
+    </header>
+    <div class="brands__grid">
+      {% for r in big %}
+      <article class="bp reveal" data-bp>
+        <div class="bp__word" aria-hidden="true">{{ r.name['en'] | upper }}</div>
+        <div class="bp__cuts" aria-hidden="true">{% for p in r.feature[:6] %}<span class="bp__cut bp__cut--{{ loop.index }}"><img src="{{ root }}{{ p.img }}" alt="" width="{{ p.w }}" height="{{ p.h }}" loading="lazy" decoding="async"></span>{% endfor %}</div>
+        <div class="bp__info">
+          <p class="mono bp__no">{{ '%02d' % r.no }} / {{ r.count }} {{ T('st_products') }}</p>
+          <h3 class="bp__h">{{ r.name[lang] }}</h3>
+          {% if r.lede[lang] %}<p class="bp__lede">{{ r.lede[lang] }}</p>{% endif %}
+          <ul class="chips chips--dark">{% for g in r.groups[:8] %}<li><a href="{{ home }}range/{{ r.id }}/#g-{{ g.slug }}">{{ g.name[lang] }}</a></li>{% endfor %}{% if r.groups|length > 8 %}<li><a href="{{ home }}range/{{ r.id }}/">+{{ r.groups|length - 8 }}</a></li>{% endif %}</ul>
+          <div class="bp__acts">
+            <a class="btn btn--primary" href="{{ home }}range/{{ r.id }}/">{{ T('open_range', name=r.name[lang]) }}{{ icon('arrow') }}</a>
+            {% if r.pdf %}<a class="btn btn--ghost" href="{{ root }}{{ r.pdf.file }}" target="_blank" rel="noopener">{{ icon('book') }}PDF · {{ r.pdf.mb }} MB</a>{% endif %}
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="fix" id="fixings">
+  <div class="fix__pin">
+    <div class="wrap fix__in">
+      <div class="fix__copy">
+        <p class="secno mono"><b>04</b><i></i>{{ T('sec_fix') }}</p>
+        <h2 class="sec__h fix__h">{{ T('fix_h') }}</h2>
+        <p class="sec__sub">{{ T('fix_sub') }}</p>
+        <ul class="fix__list">
+          {% for f in fixings %}<li><a href="{{ home }}range/{{ f.range }}/#g-{{ f.g }}" data-fix="{{ f.id }}"><b>{{ T('part_' ~ f.id) }}</b><span class="mono">{{ f.name[lang] }} · {{ f.count }}</span>{{ icon('arrow') }}</a></li>{% endfor %}
+        </ul>
+        <div class="fix__meter mono" aria-hidden="true"><span>{{ T('fix_apart') }}</span><i><b id="fixBar"></b></i><span id="fixPct">0%</span></div>
+      </div>
+      <img class="fix__poster" src="{{ root }}assets/img/fixings-3d.webp" alt="" width="1100" height="1100" loading="lazy" aria-hidden="true">
+    </div>
+    <div class="fix__labels" id="fixLabels" aria-hidden="true">
+      {% for f in fixings %}<a class="flabel" data-label="{{ f.id }}" href="{{ home }}range/{{ f.range }}/#g-{{ f.g }}" tabindex="-1"><i></i><span><b>{{ T('part_' ~ f.id) }}</b></span></a>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="sec cat" id="catalogue">
+  <div class="wrap">
+    <header class="sec__head sec__head--row">
+      <div>
+        <p class="secno mono"><b>05</b><i></i>{{ T('sec_cat') }}</p>
+        <h2 class="sec__h">{{ T('cat_h3', n=stats.products) }}</h2>
+      </div>
+      <p class="cat__note"><i class="dot"></i>{{ T('cat_note') }}</p>
+    </header>
+    <nav class="rail" id="rail" aria-label="{{ T('nav_ranges') }}">
+      <button type="button" class="rail__b is-on" data-range=""><span class="rail__ico rail__ico--all mono">{{ stats.products }}</span><span class="rail__n">{{ T('all_products') }}</span></button>
+      {% for r in ranges %}<button type="button" class="rail__b" data-range="{{ r.id }}"><span class="rail__ico">{% if r.tag %}<img src="{{ root }}{{ r.tag.img }}" alt="" loading="lazy" decoding="async">{% endif %}<b class="mono">{{ r.count }}</b></span><span class="rail__n">{{ r.name[lang] }}</span></button>{% endfor %}
+    </nav>
+    <div class="cat__layout">
+      <aside class="cat__side" id="catSide" aria-label="{{ T('groups') }}">
+        <p class="cat__sideh mono" id="catSideH">{{ T('nav_ranges') }}</p>
+        <div class="cat__groups" id="catGroups">
+          {% for r in ranges %}<button type="button" class="sg" data-range="{{ r.id }}"><span>{{ r.name[lang] }}</span><b class="mono">{{ r.count }}</b></button>{% endfor %}
+        </div>
+        <div class="cat__help">
+          <b>{{ T('cant_find_h') }}</b>
+          <p>{{ T('cant_find') }}</p>
+          <a class="btn btn--primary btn--sm" href="tel:{{ contact.tel }}">{{ icon('phone') }}<span dir="ltr">{{ contact.phone }}</span></a>
+          <a class="btn btn--ghost btn--sm" href="mailto:{{ contact.email }}">{{ icon('mail') }}{{ T('email') }}</a>
+        </div>
+      </aside>
+      <div class="cat__main">
+        <div class="cat__bar">
+          <label class="cat__find">{{ icon('search') }}<input id="cq" type="search" autocomplete="off" enterkeyhint="search" placeholder="{{ T('cat_search_ph') }}" aria-label="{{ T('cat_search_ph') }}"></label>
+          <label class="cat__sort"><span class="mono">{{ T('sort') }}</span><select id="csort"><option value="cat">{{ T('sort_cat') }}</option><option value="az">{{ T('sort_az') }}</option><option value="sizes">{{ T('sort_sizes') }}</option></select></label>
+        </div>
+        <div class="cat__chips" id="catChips" hidden></div>
+        <p class="cat__count mono" id="ccount" aria-live="polite">{{ T('showing', a=stats.products, b=stats.products) }}</p>
+        <div class="grid" id="cgrid">
+          <noscript><p>{{ T('ranges_sub', n=stats.ranges) }}</p></noscript>
+        </div>
+        <div class="cat__none" id="cnone" hidden><p>{{ T('cat_none') }}</p><button class="btn btn--ghost" type="button" data-clear-cat>{{ T('clear_filters') }}</button></div>
+        <div class="cat__more"><button class="btn btn--dark" type="button" id="cmore" hidden>{{ T('show_more') }}{{ icon('down') }}</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec prices" id="prices">
+  <div class="wrap prices__in">
+    <div class="prices__copy">
+      <p class="secno mono"><b>06</b><i></i>{{ T('sec_prices') }}</p>
+      <h2 class="sec__h">{{ T('req_h') }}</h2>
+      <p class="sec__sub">{{ T('how_sub') }}</p>
+      <ol class="steps">
+        <li class="reveal"><b class="mono">01</b><div><h3>{{ T('step1_h') }}</h3><p>{{ T('step1') }}</p></div></li>
+        <li class="reveal"><b class="mono">02</b><div><h3>{{ T('step2_h') }}</h3><p>{{ T('step2_wa') if contact.whatsapp else T('step2') }}</p></div></li>
+        <li class="reveal"><b class="mono">03</b><div><h3>{{ T('step3_h') }}</h3><p>{{ T('step3') }}</p></div></li>
+      </ol>
+      <div class="prices__acts"><a class="btn btn--primary" href="#catalogue">{{ T('start_list') }}{{ icon('arrow') }}</a><button class="btn btn--ghost" type="button" data-open-list>{{ icon('list') }}{{ T('your_list') }}</button></div>
+    </div>
+    <div class="receipt" aria-hidden="true">
+      <div class="receipt__paper">
+        <div class="receipt__head"><span class="receipt__logo"></span><div><b>{{ T('list_h') }}</b><small class="mono">{{ T('to') }}: {{ contact.email }}</small></div></div>
+        <table>
+          <thead><tr><th>{{ T('print_product') }}</th><th>{{ T('size') }}</th><th>{{ T('qty') }}</th></tr></thead>
+          <tbody>{% for x in demo %}<tr><td><span class="receipt__img">{% if x.img %}<img src="{{ root }}{{ x.img }}" alt="" loading="lazy">{% endif %}</span><span><bdi>{{ x.name[lang] }}</bdi>{% if x.pn %}<small class="mono" dir="ltr">{{ x.pn }}</small>{% endif %}</span></td><td><bdi>{{ x.size[lang] }}</bdi></td><td class="mono">{{ x.q }}</td></tr>{% endfor %}</tbody>
+        </table>
+        <p class="receipt__foot mono">{{ T('print_foot') }}</p>
+        <span class="receipt__stamp mono">{{ T('sent') }}</span>
+      </div>
+      <span class="receipt__tag mono">{{ T('example') }}</span>
+    </div>
+  </div>
+</section>
+
+{% if pdfs %}
+<section class="sec books" id="catalogues">
+  <div class="wrap">
+    <header class="sec__head">
+      <p class="secno mono"><b>07</b><i></i>{{ T('sec_books') }}</p>
+      <h2 class="sec__h">{{ T('books_h') }}</h2>
+      <p class="sec__sub">{{ T('cat_sub') }}</p>
+    </header>
+    <div class="books__row">
+      {% for b in pdfs %}
+      <a class="book reveal" href="{{ root }}{{ b.file }}" target="_blank" rel="noopener">
+        <span class="book__3d"><span class="book__cover"><img src="{{ root }}{{ b.cover }}" alt="" width="{{ b.cover_w }}" height="{{ b.cover_h }}" loading="lazy" decoding="async"></span><span class="book__pages" aria-hidden="true"></span></span>
+        <span class="book__t">{{ b.title[lang] }}</span>
+        {% if b.sub[lang] %}<span class="book__s">{{ b.sub[lang] }}</span>{% endif %}
+        <span class="book__m mono">{{ T('n_pages', n=b.pages) }} · PDF {{ b.mb }} MB</span>
+        <span class="book__go">{{ T('open_pdf') }}{{ icon('arrow') }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="visit" id="visit">
+  <div class="visit__stage">
+    <div class="wrap visit__in">
+      <div class="visit__copy">
+        <p class="secno mono"><b>08</b><i></i>{{ T('sec_visit') }}</p>
+        <h2 class="sec__h">{{ T('visit_h2') }}</h2>
+        <p class="sec__sub">{{ T('visit_sub') }}</p>
+        <dl class="visit__dl">
+          <div><dt class="mono">{{ T('visit_label') }}</dt><dd>{{ T('legal') }}<br>{{ T('address1') }}<br>{{ T('address2') }}<br>{{ T('uae') }}</dd></div>
+          <div><dt class="mono">{{ T('phone') }}</dt><dd><a href="tel:{{ contact.tel }}" dir="ltr">{{ contact.phone }}</a></dd></div>
+          <div><dt class="mono">{{ T('email') }}</dt><dd><a href="mailto:{{ contact.email }}">{{ contact.email }}</a></dd></div>
+        </dl>
+        <div class="visit__acts">
+          <a class="btn btn--primary" href="{{ contact.maps }}" target="_blank" rel="noopener">{{ icon('pin') }}{{ T('maps') }}</a>
+          <a class="btn btn--ghost" href="tel:{{ contact.tel }}">{{ icon('phone') }}{{ T('call') }}</a>
+          <a class="btn btn--ghost" href="mailto:{{ contact.email }}">{{ icon('mail') }}{{ T('email') }}</a>
+        </div>
+      </div>
+      <div class="unit" aria-hidden="true">
+        <div class="unit__gl"><canvas id="whgl" data-mark="{{ root }}assets/mark.png" data-en="{{ T_en('brand') }}" data-ar="{{ T_ar('brand') }}" data-imgs="{% for r in ranges %}{% if r.tag %}{{ root }}{{ r.tag.img }}|{% endif %}{% endfor %}"></canvas></div>
+        <div class="unit__sign"><span class="unit__mark"></span><b>{{ T('brand') }}</b></div>
+        <div class="unit__bay">
+          <div class="unit__inside">{% for r in ranges %}{% if r.tag %}<span><img src="{{ root }}{{ r.tag.img }}" alt="" loading="lazy" decoding="async"></span>{% endif %}{% endfor %}</div>
+          <div class="unit__shutter" id="shutter"><span class="unit__no">06</span><i class="unit__handle"></i></div>
+        </div>
+        <div class="unit__floor"><i class="hazard"></i></div>
+        <p class="unit__hint mono">{{ T('shutter_hint') }} ↓</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block three %}<script src="{{ root }}assets/vendor/three.min.js?v={{ v.vendor }}" defer></script>
+<script src="{{ root }}assets/vendor/GLTFLoader.js?v={{ v.vendor }}" defer></script>
+<script src="{{ root }}assets/hw3d.js?v={{ v.hw3d_js }}" defer></script>
+<script src="{{ root }}assets/wh3d.js?v={{ v.wh3d_js }}" defer></script>{% endblock %}

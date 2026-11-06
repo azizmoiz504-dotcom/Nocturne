@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<meta name="theme-color" content="#f3ede1" id="themeColor">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ page_url }}">
+<meta property="og:image" content="{{ site_url }}assets/og.jpg">
+<link rel="icon" type="image/png" href="{{ root }}assets/icon-192.png">
+<link rel="apple-touch-icon" href="{{ root }}assets/icon-192.png">
+<link rel="alternate" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" href="{{ other_url }}">
+<link rel="preload" href="{{ root }}assets/fonts/{{ 'amiri-700-arabic' if lang == 'ar' else 'instrument-serif-400-latin' }}.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ root }}assets/fonts/fonts.css?v={{ v.fonts }}">
+<link rel="stylesheet" href="{{ root }}assets/site.css?v={{ v.css }}">
+<script>
+  /* light unless this visitor chose dark before, set before the page paints */
+  (function () { try { if (localStorage.getItem('bam-site-theme') === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('themeColor').content = '#1c1812'; } } catch (e) {} document.documentElement.className += ' js'; })();
+</script>
+</head>
+<body class="page-{{ page }}">
+<a class="skip" href="#main">{{ T('skip') }}</a>
+
+<header class="bar" id="bar">
+  <div class="bar__in">
+    <a class="brand" href="{{ home }}" aria-label="{{ T('brand') }}">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text"><b>{{ T('brand') }}</b><small>{{ T('tagline') }}</small></span>
+    </a>
+    <nav class="nav" aria-label="{{ T('menu') }}">
+      <a href="{{ home }}#ranges">{{ T('nav_ranges') }}</a>
+      <a href="{{ home }}#index">{{ T('nav_index') }}</a>
+      <a href="{{ home }}#prices">{{ T('nav_prices') }}</a>
+      <a href="{{ home }}#catalogues">{{ T('nav_catalogues') }}</a>
+      <a href="{{ home }}#visit">{{ T('nav_visit') }}</a>
+    </nav>
+    <div class="tools">
+      <button class="tool tool--search" type="button" data-open-search aria-label="{{ T('search') }}">{{ icon('search') }}<span class="tool__lbl">{{ T('search') }}</span><kbd>/</kbd></button>
+      <a class="tool tool--lang" href="{{ other_url }}" hreflang="{{ 'en' if lang == 'ar' else 'ar' }}" lang="{{ 'en' if lang == 'ar' else 'ar' }}" data-lang-link title="{{ T('lang_other_name') }}">{{ T('lang_other') }}</a>
+      <button class="tool tool--theme" type="button" data-theme-toggle aria-label="{{ T('theme') }}" title="{{ T('theme') }}">{{ icon('sun') }}{{ icon('moon') }}</button>
+      <button class="tool tool--list" type="button" data-open-list aria-label="{{ T('your_list') }}">{{ icon('list') }}<span class="tool__lbl">{{ T('your_list') }}</span><span class="badge" data-list-count hidden>0</span></button>
+      <button class="tool tool--menu" type="button" data-menu aria-label="{{ T('menu') }}" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="menu" id="menu" hidden>
+  <nav class="menu__in" aria-label="{{ T('menu') }}">
+    <a href="{{ home }}#ranges"><i>01</i>{{ T('nav_ranges') }}</a>
+    <a href="{{ home }}#index"><i>02</i>{{ T('nav_index') }}</a>
+    <a href="{{ home }}#prices"><i>03</i>{{ T('nav_prices') }}</a>
+    <a href="{{ home }}#catalogues"><i>04</i>{{ T('nav_catalogues') }}</a>
+    <a href="{{ home }}#visit"><i>05</i>{{ T('nav_visit') }}</a>
+    <div class="menu__row">
+      <a class="pill" href="{{ other_url }}" data-lang-link lang="{{ 'en' if lang == 'ar' else 'ar' }}">{{ T('lang_other') }}</a>
+      <button class="pill" type="button" data-theme-toggle>{{ icon('sun') }}{{ icon('moon') }}<span>{{ T('theme') }}</span></button>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="foot__brand">
+      <span class="foot__mark" aria-hidden="true"></span>
+      <p class="foot__name">{{ T('brand') }}</p>
+      <p class="foot__legal">{{ T('legal') }}</p>
+      <p class="foot__trades">{{ T('trades') }}</p>
+    </div>
+    <div class="foot__col">
+      <h3>{{ T('footer_ranges') }}</h3>
+      <ul class="foot__ranges">{% for r in ranges %}<li><a href="{{ home }}range/{{ r.id }}/">{{ r.name[lang] }}</a></li>{% endfor %}</ul>
+    </div>
+    <div class="foot__col">
+      <h3>{{ T('footer_contact') }}</h3>
+      <address>{{ T('address1') }}<br>{{ T('address2') }}<br>{{ T('uae') }}</address>
+      <p><a href="tel:{{ contact.tel }}" dir="ltr">{{ contact.phone }}</a><br><a href="mailto:{{ contact.email }}">{{ contact.email }}</a>{% if contact.whatsapp %}<br><a href="https://wa.me/{{ contact.whatsapp }}" dir="ltr">{{ T('whatsapp') }} {{ contact.whatsapp_show }}</a>{% endif %}</p>
+      <p class="foot__note">{{ T('footer_note') }}</p>
+    </div>
+  </div>
+  <div class="wrap foot__base">
+    <span>{{ T('rights', y=year) }}</span>
+    <span class="foot__links"><a href="{{ other_url }}" data-lang-link lang="{{ 'en' if lang == 'ar' else 'ar' }}">{{ T('lang_other') }}</a><a href="#top" data-top>{{ T('top') }} ↑</a></span>
+  </div>
+</footer>
+
+<button class="fab" type="button" data-open-list>{{ icon('list') }}<span>{{ T('your_list') }}</span><b data-list-count>0</b></button>
+
+<div class="palette" id="palette" hidden>
+  <div class="palette__scrim" data-close-search></div>
+  <div class="palette__box" role="dialog" aria-modal="true" aria-label="{{ T('search') }}">
+    <div class="palette__field">
+      {{ icon('search') }}
+      <input id="pq" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="{{ T('search_ph', n=stats.products) }}" aria-label="{{ T('search') }}" aria-controls="pres">
+      <button class="palette__esc" type="button" data-close-search aria-label="{{ T('close') }}"><kbd>{{ T('esc') }}</kbd>{{ icon('x') }}</button>
+    </div>
+    <div class="palette__body" id="pres" role="listbox">
+      <p class="palette__hint">{{ T('search_hint') }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer__scrim" data-close-list></div>
+  <section class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawerH">
+    <header class="drawer__head">
+      <div><h2 id="drawerH">{{ T('list_h') }}</h2><p class="drawer__meta" id="drawerMeta"></p></div>
+      <button class="iconbtn" type="button" data-close-list aria-label="{{ T('close') }}">{{ icon('x') }}</button>
+    </header>
+    <div class="drawer__body" id="drawerBody"></div>
+    <div class="drawer__more" id="drawerMore">
+      <details class="drawer__details" id="drawerDetails">
+        <summary>{{ T('details') }} <small>({{ T('optional') }})</small></summary>
+        <div class="fields">
+          <label><span>{{ T('f_name') }}</span><input class="in" data-cust="name" autocomplete="name"></label>
+          <label><span>{{ T('f_company') }}</span><input class="in" data-cust="company" autocomplete="organization"></label>
+          <label><span>{{ T('f_phone') }}</span><input class="in" data-cust="phone" type="tel" autocomplete="tel" dir="ltr"></label>
+          <label class="wide"><span>{{ T('f_note') }}</span><textarea class="in" data-cust="note" rows="2" placeholder="{{ T('f_note_ph') }}"></textarea></label>
+        </div>
+      </details>
+      <p class="drawer__note">{{ icon('info') }}{{ T('list_note') }}</p>
+      <div class="drawer__acts">
+        {% if contact.whatsapp %}<button class="btn btn--wa" type="button" data-send="wa">{{ icon('wa') }}{{ T('send_wa') }}</button>{% endif %}
+        <button class="btn btn--primary" type="button" data-send="email">{{ icon('mail') }}{{ T('send_email') }}</button>
+        <button class="btn btn--ghost" type="button" data-send="print">{{ icon('print') }}{{ T('print') }}</button>
+        <button class="btn btn--ghost" type="button" data-send="copy">{{ icon('copy') }}{{ T('copy_text') }}</button>
+        <button class="btn btn--text" type="button" data-send="clear">{{ T('clear') }}</button>
+      </div>
+      <p class="drawer__warn" id="drawerWarn" hidden>{{ T('long_mail') }}</p>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden></div>
+<div class="lightbox" id="lightbox" hidden><button class="iconbtn lightbox__x" type="button" data-close-lightbox aria-label="{{ T('close') }}">{{ icon('x') }}</button><div class="lightbox__in" id="lightboxIn"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="printout" id="printout" aria-hidden="true"></div>
+
+<script type="application/json" id="site-config">{{ config | safe }}</script>
+{% block data %}{% endblock %}
+<script src="{{ root }}assets/site.js?v={{ v.js }}" defer></script>
+</body>
+</html>
