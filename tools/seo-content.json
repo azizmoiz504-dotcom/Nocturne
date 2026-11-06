@@ -4,6 +4,7 @@
     "desc": "Browse 200+ lines: valves, pipe fittings, flanges, camlocks, hammer unions, hoses, gaskets and gauges from Al Quoz, Dubai. Send your list on WhatsApp."
   },
   "gate-valves": {
+    "name": "Gate Valves",
     "title": "Gate Valves in Dubai: CS WCB, SS, A105, Brass | Fakhri Tools",
     "desc": "Gate valves ½\" to 16\": CS WCB, forged A105, SS304/SS316, CI, DI, grooved DI, knife edge, brass and bronze, PN10 to CL300. Quote on WhatsApp.",
     "h1": "Gate valve supplier in Dubai: CS, SS, forged and brass",
@@ -34,6 +35,7 @@
     ]
   },
   "globe-valves": {
+    "name": "Globe Valves",
     "title": "Globe Valves in Dubai: CS WCB, SS 316, Forged A105 | Fakhri",
     "desc": "Globe valves for throttling: CS WCB and SS304/SS316 CL150/300, CI PN16, DI PN10/16, forged SS and A105 600-800 WOG, ½\" to 12\". Quote on WhatsApp.",
     "h1": "Globe valve supplier in Dubai for throttling and flow control",
@@ -60,6 +62,7 @@
     ]
   },
   "check-valves": {
+    "name": "Check Valves",
     "title": "Check Valves (Non-Return) in Al Quoz, Dubai | Fakhri Tools",
     "desc": "Swing, spring, piston, wafer, dual-disk and grooved check valves: CS, SS304/316, A105, brass, bronze, CI, DI, ½\" to 12\". Quote on WhatsApp.",
     "h1": "Check valve supplier in Dubai: swing, spring, wafer and dual-disk",
@@ -86,6 +89,7 @@
     ]
   },
   "ball-valves": {
+    "name": "Ball Valves",
     "title": "Ball Valves in Dubai: SS 316 1PC/2PC/3PC, CS, Brass | Fakhri",
     "desc": "SS304/316 1PC, 2PC, 3PC and 3-way ball valves, CS, CI, MS, brass, bronze, 6000 PSI hydraulic and needle valves, ¼\" to 12\". Quote on WhatsApp.",
     "h1": "SS 316 ball valves in Dubai, plus CS, brass and 3-way",
@@ -116,6 +120,7 @@
     ]
   },
   "y-strainers": {
+    "name": "Y-Strainers",
     "title": "Y-Strainers in Dubai: SS, CS, CI, Brass, Bronze | Fakhri",
     "desc": "Threaded and flanged Y strainers: SS304/316, CS, CI PN10/PN16, brass, bronze, forged SS and CS 800 WOG, ½\" to 12\". Quote on WhatsApp.",
     "h1": "Y strainer supplier in Dubai: screwed and flanged",
@@ -141,6 +146,7 @@
     ]
   },
   "safety-valves": {
+    "name": "Safety Valves & Air Vents",
     "title": "Safety Valves & Air Vents in Dubai | Fakhri Tools",
     "desc": "Bronze safety relief valves ½\" to 2\", with or without lever, 10 or 20 bar, plus brass and S.S air vents ½\" to 1\". Al Quoz. Quote on WhatsApp.",
     "h1": "Safety valves in Dubai: bronze pressure relief and air vents",
@@ -167,6 +173,7 @@
     ]
   },
   "butterfly-valves": {
+    "name": "Butterfly Valves",
     "title": "Butterfly Valves in Dubai: Wafer & Lug Type | Fakhri Tools",
     "desc": "Cast iron butterfly valves 1½\" to 12\": wafer with DI or SS disc (PN10/16), SS-disc lug type (PN16/CL150), gear operated from 2\". Quote on WhatsApp.",
     "h1": "Butterfly valve supplier in Dubai: wafer and lug type",
@@ -193,6 +200,7 @@
     ]
   },
   "quick-couplings": {
+    "name": "QRC, Storz, Bauer & Universal Couplings",
     "title": "QRC, Storz, Bauer & Universal Couplings in Dubai | Fakhri",
     "desc": "QRC quick-release couplings, Storz, Bauer and Millar hose couplings, and DI universal couplings and flange adapters 2\" to 24\". Quote on WhatsApp.",
     "h1": "QRC, Storz, Bauer, Millar and universal couplings in Dubai",
@@ -218,11 +226,12 @@
       ],
       [
         "Do you have gaskets for these couplings?",
-        "Yes. Storz, Bauer and Millar gaskets are listed as single parts on this page, and camlock and Chicago coupling washers are on our gaskets page."
+        "Yes. Storz, Bauer and Millar gaskets are listed as single parts on this page, and camlock and Chicago coupling washers are on our [gaskets page](gaskets-sheets.html)."
       ]
     ]
   },
   "union-flexible-connectors": {
+    "name": "Flexible Connectors",
     "title": "G.I Flexible Connectors in Dubai: Union & Flanged | Fakhri",
     "desc": "G.I flexible connectors: union type 1/2\" to 3\" and flanged CL150/PN16 1\" to 16\", for pump, chiller and equipment connections. Quote on WhatsApp.",
     "h1": "Flexible connector supplier in Dubai: union and flanged",
@@ -230,7 +239,7 @@
     "intro": [
       "We list G.I flexible connectors in Dubai in two forms. The union type comes from ½\" to 3\" for screwed pipework. The flanged (F/T) type comes in CL150 and PN16 drilling from 1\" to 16\".",
       "A flexible connector takes up vibration, small movement and minor misalignment, which is why it goes on pump suction and discharge, chillers and other equipment connections. Use the union type on small screwed lines and the flanged type on larger lines, and match the drilling (CL150 or PN16) to your flanges. Support the pipe on both sides; the connector is not meant to carry pipe weight or fix a large misalignment.",
-      "Hammer unions for oilfield lines are on our hammer union page, and universal couplings and flange adapters are on our couplings page.",
+      "Hammer unions for oilfield lines are on our [hammer union page](hammer-union.html), and universal couplings and flange adapters are on our [couplings page](quick-couplings.html).",
       "For a quote, WhatsApp the size, union or flanged, CL150 or PN16, and the quantity."
     ],
     "faq": [
@@ -249,6 +258,7 @@
     ]
   },
   "hammer-union": {
+    "name": "Hammer Unions",
     "title": "Hammer Union Dubai: FIG 206, 602, 1502 & Blanking | Fakhri",
     "desc": "CS hammer unions FIG 50 to FIG 1502, 1000 to 15000 PSI, 1\" to 12\", butt-weld or threaded, plus FIG 207 blanking unions. Quote on WhatsApp.",
     "h1": "Hammer unions in Dubai: FIG 50 to FIG 1502 and blanking unions",
@@ -279,6 +289,7 @@
     ]
   },
   "ms-forged-low-pressure-bw-fittings": {
+    "name": "Carbon Steel Pipes & Butt-Weld Fittings",
     "title": "Carbon Steel (MS) Pipes & Fittings in Dubai | Fakhri Tools",
     "desc": "MS pipe, ERW and seamless, SCH STD to 160, ½\" to 12\", CS butt-weld elbows, tees, reducers and caps to 24\", swage and long nipples. Quote on WhatsApp.",
     "h1": "Carbon steel pipe fittings supplier in Dubai: MS pipe and B/W",
@@ -317,13 +328,14 @@
     "catsTitle": "More carbon steel fittings"
   },
   "ss-forged-low-pressure-bw-fittings": {
-    "title": "Stainless Steel Pipes & Fittings in Dubai | Fakhri Tools",
-    "desc": "SS304/SS316 threaded fittings 2000 to 6000 psi, ¼\" to 2\", threadolets, SS pipe SCH10 to 80 and butt-weld fittings to 12\". Al Quoz. Quote on WhatsApp.",
-    "h1": "Stainless steel pipe fittings in Dubai: SS pipe, threaded and B/W",
-    "guideTitle": "How to choose stainless steel pipe and fittings",
+    "name": "Stainless Steel Threaded Fittings",
+    "title": "Stainless Steel Threaded Fittings in Dubai | Fakhri Tools",
+    "desc": "SS304 and SS316 forged threaded fittings, 2000 to 6000 psi, BSP or NPT, ¼\" to 2\": elbows, tees, sockets, unions, nipples, threadolets. Quote on WhatsApp.",
+    "h1": "Stainless steel threaded fittings in Dubai: SS304 and SS316, 2000 to 6000 psi",
+    "guideTitle": "How to choose stainless steel threaded fittings",
     "intro": [
       "S.S forged threaded fittings in SS304 and SS316 (ASTM A182) are listed in 2000, 3000 and 6000 psi, BSP or NPT, from ¼\" to 2\": sockets, half couplings, 45° and 90° elbows, equal tees, crosses, hex nipples, unions, end caps, end plugs and threadolets, plus reducing sockets, reducing tees and reducing hex nipples from ⅜\" × ¼\" to 2\" × 1½\". S.S king nipples are listed from ¼\" to 4\", and S.S long nipples from ¼\" to 8\" in lengths of 3\" to 12\".",
-      "S.S pipe, ERW and seamless, is stocked at Al Quoz in SCH10, SCH40 and SCH80 from ¼\" to 12\". S.S butt-weld fittings in 304/304L and 316/316L run from ½\" to 12\" in SCH10, SCH40 and SCH80, and S.S flanges in ASTM A182 F304/304L and F316/316L come in SORF, SWRF, WNRF, blind and threaded up to 24\".",
+      "Need the pipe as well? S.S pipe, ERW and seamless, in SCH10, SCH40 and SCH80 from ¼\" to 12\", and S.S butt-weld fittings up to 12\", are on our [stainless steel pipes and butt-weld fittings](stainless-steel-pipes-fittings.html) page. S.S flanges in ASTM A182 F304/304L and F316/316L come in SORF, SWRF, WNRF, blind and threaded up to 24\".",
       "316L resists chlorides better than 304, so it is the usual pick near the sea, in cooling water and in chemical lines. Use threaded fittings where the line must come apart, and butt-weld fittings on larger welded runs.",
       "Send the size, schedule or pressure, end type, grade and quantity on WhatsApp and we will quote."
     ],
@@ -355,6 +367,7 @@
     "catsTitle": "More stainless steel fittings"
   },
   "gaskets-sheets": {
+    "name": "Gaskets & CNAF Sheets",
     "title": "Gaskets & CNAF Sheet in Dubai: Spiral Wound, Rubber | Fakhri",
     "desc": "CNAF and rubber ring gaskets, SS spiral wound CL150-600, CNAF and rubber sheet, PTFE and graphite gland packing. Al Quoz. Quote on WhatsApp.",
     "h1": "Gasket supplier in Dubai: CNAF, rubber and spiral wound",
@@ -385,6 +398,7 @@
     ]
   },
   "ss-ms-flanges-forging-casting": {
+    "name": "Stainless & Carbon Steel Flanges",
     "title": "SS & MS Flanges in Dubai: SORF, WNRF, Blind | Fakhri Tools",
     "desc": "SS A182 F304/F316 and CS A105 flanges: slip-on, weld neck, socket weld, blind and threaded, PN16, CL150-600, 5K-16K, ½\" to 24\". Quote on WhatsApp.",
     "h1": "Flange supplier in Dubai: SS 304/316 and CS A105",
@@ -405,18 +419,19 @@
       ],
       [
         "Do you have gaskets for these flanges?",
-        "Yes. CNAF, rubber and spiral wound gaskets are listed on our gaskets page."
+        "Yes. CNAF, rubber and spiral wound gaskets are listed on our [gaskets page](gaskets-sheets.html)."
       ]
     ]
   },
   "chicago-couplings-fittings": {
+    "name": "Chicago Couplings & Fittings",
     "title": "Chicago Claw Couplings & Air Hose Fittings, Dubai | Fakhri",
     "desc": "Chicago claw couplings for air and water hose: GI 2-lug hose, female and male couplings, a 3-way and a clamp, plus SS 4-lug couplings. Quote on WhatsApp.",
     "h1": "Chicago coupling supplier in Dubai for air and water hose",
     "guideTitle": "How to choose Chicago couplings",
     "intro": [
-      "We list Chicago couplings in Dubai for air and water hose in two size groups. The 2-lug range, ¼\" to 1\", is galvanised iron: hose couplings, female and male couplings, a 1\" 3-way connector and a 1\" coupling clamp. The 4-lug range, 1¼\" to 2\", is stainless steel: hose couplings and female and male couplings. G.I king nipples and hose menders are on our G.I fittings page, and four bolt clamps on our hose clamp page.",
-      "Chicago couplings, also called claw couplings, join with a quarter turn, and two claw heads connect with no male or female half. Match the hose end to the inside diameter of the hose. Rubber washers for Chicago couplings are on our gaskets page.",
+      "We list Chicago couplings in Dubai for air and water hose in two size groups. The 2-lug range, ¼\" to 1\", is galvanised iron: hose couplings, female and male couplings, a 1\" 3-way connector and a 1\" coupling clamp. The 4-lug range, 1¼\" to 2\", is stainless steel: hose couplings and female and male couplings. G.I king nipples and hose menders are on our [G.I pipes and fittings page](gi-pipes-fittings.html), and four bolt clamps on our [hose clamp page](hose-clamps.html).",
+      "Chicago couplings, also called claw couplings, join with a quarter turn, and two claw heads connect with no male or female half. Match the hose end to the inside diameter of the hose. Rubber washers for Chicago couplings are on our [gaskets page](gaskets-sheets.html).",
       "For a quote, WhatsApp the part, size, 2-lug or 4-lug, thread where it applies, and the quantity."
     ],
     "faq": [
@@ -430,18 +445,19 @@
       ],
       [
         "Where are the king nipples and hose menders?",
-        "On our G.I fittings page: G.I king nipples from ¼\" to 6\", and G.I hose menders from ½\" to 6\"."
+        "On our [G.I pipes and fittings page](gi-pipes-fittings.html): G.I king nipples from ¼\" to 6\", and G.I hose menders from ½\" to 6\"."
       ]
     ]
   },
   "instrumentation-fittings-pressure-gas": {
+    "name": "Instrumentation Fittings",
     "title": "SS Compression Fittings in Dubai, 6-12 mm | Fakhri Tools",
     "desc": "SS compression fittings with nut and ferrule for 6 to 12 mm tube, with ¼\" to ½\" connections. Al Quoz, Dubai. Quote on WhatsApp.",
     "h1": "Instrumentation fittings in Dubai: SS compression fittings",
     "guideTitle": "How to choose compression fittings",
     "intro": [
       "We supply S.S compression fittings with nut and ferrule from our Al Quoz counter. They fit 6 to 12 mm tube, with ¼\" to ½\" connections.",
-      "A compression fitting grips the tube with a ferrule as the nut is tightened, so it seals without welding or threading the tube. Match the fitting to the outside diameter of the tube, and use stainless fittings on stainless tube. Pressure gauges are on our gauges page, and the S.S needle valve is on our ball valves page.",
+      "A compression fitting grips the tube with a ferrule as the nut is tightened, so it seals without welding or threading the tube. Match the fitting to the outside diameter of the tube, and use stainless fittings on stainless tube. Pressure gauges are on our [pressure gauges page](pressure-gauges.html), and the S.S needle valve is on our [ball valves page](ball-valves.html).",
       "For a quote, WhatsApp the tube size, the connection size and thread, and the quantity. If you are matching an existing fitting, a photo of it next to a tape measure helps us check the size."
     ],
     "faq": [
@@ -451,11 +467,12 @@
       ],
       [
         "Where are the pressure gauges and needle valves?",
-        "Liquid-filled S.S pressure gauges are on our gauges page, and the S.S needle valve, 1000 to 10000 PSI NPT, is on our ball valves page."
+        "Liquid-filled S.S pressure gauges are on our [pressure gauges page](pressure-gauges.html), and the S.S needle valve, 1000 to 10000 PSI NPT, is on our [ball valves page](ball-valves.html)."
       ]
     ]
   },
   "universal-couplings-flange-adapter": {
+    "name": "Pressure Gauges",
     "title": "Pressure Gauges in Dubai: SS Liquid Filled | Fakhri Tools",
     "desc": "Liquid-filled pressure gauges with a full SS body, 4\" or 2½\" dial, 0 to 15,000 PSI, ½\" or ¼\" bottom connection. Al Quoz, Dubai. Quote on WhatsApp.",
     "h1": "Pressure gauge supplier in Dubai: liquid-filled SS gauges",
@@ -481,13 +498,14 @@
     ]
   },
   "butt-weld-fittings": {
-    "title": "SS Butt-Weld Fittings & SS Pipe in Dubai | Fakhri Tools",
-    "desc": "SS 304/304L and 316/316L butt-weld elbows, tees, reducers, caps, crosses and nipples, SCH10 to SCH80, ½\" to 12\", plus SS pipe. Quote on WhatsApp.",
-    "h1": "SS butt weld fittings and SS pipe supplier in Dubai",
-    "guideTitle": "How to choose butt-weld fittings",
+    "name": "Stainless Steel Pipes & Butt-Weld Fittings",
+    "title": "Stainless Steel Pipes & Fittings in Dubai | Fakhri Tools",
+    "desc": "SS pipe ERW and seamless, SCH10 to SCH80, ¼\" to 12\", with SS 304/304L and 316/316L butt-weld elbows, tees, reducers and caps. Al Quoz. Quote on WhatsApp.",
+    "h1": "Stainless steel pipes and butt-weld fittings in Dubai",
+    "guideTitle": "How to choose stainless steel pipe and butt-weld fittings",
     "intro": [
       "S.S butt-weld fittings in 304/304L and 316/316L are listed in SCH10, SCH40 and SCH80 from ½\" to 12\": 45° and 90° elbows in long and short radius, 180° elbows, equal and reducing tees, concentric and eccentric reducers, end caps, crosses, and concentric and eccentric swage nipples. Reducing tees, reducers and swage nipples run from ¾\" × ½\" to 12\" × 10\".",
-      "S.S pipe, ERW and seamless, comes in SCH10, SCH40 and SCH80 in 304/304L or 316/316L from ¼\" to 12\", with S.S long nipples from ¼\" to 8\" in lengths of 3\" to 12\". For C.S butt-weld fittings and M.S pipe, see our carbon steel page.",
+      "S.S pipe, ERW and seamless, comes in SCH10, SCH40 and SCH80 in 304/304L or 316/316L from ¼\" to 12\", with S.S long nipples from ¼\" to 8\" in lengths of 3\" to 12\". For C.S butt-weld fittings and M.S pipe, see our [carbon steel pipes and fittings page](carbon-steel-pipes-fittings.html).",
       "Long radius (LR) elbows have a centre-to-face of 1.5 times the pipe size and give a smoother flow. Short radius (SR) elbows, at 1 times, save space. Use an eccentric reducer on pump suction, flat side up, so air does not collect. Match the fitting schedule to the pipe wall so the bores line up for welding.",
       "For a quote, WhatsApp the fitting, size, schedule, grade (304 or 316) and the quantity."
     ],
@@ -502,15 +520,16 @@
       ],
       [
         "Do you have the pipe as well?",
-        "Yes. S.S pipe, ERW and seamless, is listed in SCH10, SCH40 and SCH80 from ¼\" to 12\". M.S pipe, ERW and seamless, is listed in SCH STD to SCH160 from ½\" to 12\" on our carbon steel page."
+        "Yes. S.S pipe, ERW and seamless, is listed in SCH10, SCH40 and SCH80 from ¼\" to 12\". M.S pipe, ERW and seamless, is listed in SCH STD to SCH160 from ½\" to 12\" on our [carbon steel pipes and fittings page](carbon-steel-pipes-fittings.html)."
       ],
       [
         "Do you have carbon steel butt-weld fittings?",
-        "Yes. C.S butt-weld elbows, tees, reducers and end caps in SCH STD to SCH160 up to 24\" are on our carbon steel page."
+        "Yes. C.S butt-weld elbows, tees, reducers and end caps in SCH STD to SCH160 up to 24\" are on our [carbon steel pipes and fittings page](carbon-steel-pipes-fittings.html)."
       ]
     ]
   },
   "socket-weld-fittings": {
+    "name": "Socket-Weld Fittings",
     "title": "Socket-Weld Fittings in Dubai, 2000/3000/6000 PSI | Fakhri",
     "desc": "Forged CS A105 socket-weld elbows, tees, couplings, unions, crosses, caps, plugs and king nipples, 2000 to 6000 psi, ½\" to 4\". Quote on WhatsApp.",
     "h1": "Socket weld fittings in Dubai: forged C.S, 2000 to 6000 psi",
@@ -518,7 +537,7 @@
     "intro": [
       "Forged C.S socket weld fittings in ASTM A105 are listed in 2000, 3000 and 6000 psi, for SCH40 and SCH80 pipe, from ½\" to 4\": 45° and 90° elbows, equal and reducing tees, full, half and reducing couplings, unions, crosses, end caps, plugs and king nipples. Reducing tees and reducing couplings run from ⅜\" × ¼\" to 4\" × 3\".",
       "Socket weld fittings suit small-bore lines at higher pressure, where a threaded joint could leak and a butt weld is hard to make. Push the pipe into the socket, then pull it back about 1.6 mm before welding to leave an expansion gap. Pick the rating to match the pipe wall and the line pressure, and tell us the pipe schedule (SCH40 or SCH80) when you order.",
-      "For stainless lines, S.S threaded fittings are on our stainless steel page, and forged C.S threaded fittings are on our threaded forged fittings page.",
+      "For stainless lines, S.S threaded fittings are on our [stainless steel threaded fittings page](stainless-steel-threaded-fittings.html), and forged C.S threaded fittings are on our [forged threaded fittings page](threaded-forged-fittings.html).",
       "For a quote, WhatsApp the fitting, size, pressure rating, pipe schedule and the quantity."
     ],
     "faq": [
@@ -532,18 +551,19 @@
       ],
       [
         "Socket weld or threaded?",
-        "Socket weld gives a stronger joint that is less likely to leak. Threaded fittings are easier to take apart; our threaded forged fittings page lists the C.S threaded range."
+        "Socket weld gives a stronger joint that is less likely to leak. Threaded fittings are easier to take apart; our [forged threaded fittings page](threaded-forged-fittings.html) lists the C.S threaded range."
       ]
     ]
   },
   "threaded-forged-fittings": {
+    "name": "Forged Threaded Fittings",
     "title": "Forged Threaded Fittings 3000#/6000# in Dubai | Fakhri Tools",
     "desc": "Forged CS threaded elbows, tees, couplings, unions, crosses, caps, plugs and bushes, CL1000 to CL6000, ½\" to 4\". Al Quoz, Dubai. Quote on WhatsApp.",
     "h1": "Forged threaded fittings in Dubai: C.S class 1000 to 6000",
     "guideTitle": "How to choose forged threaded fittings",
     "intro": [
       "Forged C.S threaded fittings are listed in CL1000, CL2000, CL3000 and CL6000 from ½\" to 4\". Buyers often ask for these as 3000 psi or 6000 psi fittings. The range covers 45° and 90° elbows, 90° reducing elbows, equal and reducing tees, full and half couplings, reducer sockets, unions, equal crosses, end caps, plugs and reducer bushes. Reducing tees, reducer sockets and reducer bushes run from ⅜\" × ¼\" to 4\" × 3\".",
-      "For stainless lines, S.S forged threaded fittings in 2000, 3000 and 6000 psi from ¼\" to 2\" are on our stainless steel page.",
+      "For stainless lines, S.S forged threaded fittings in 2000, 3000 and 6000 psi from ¼\" to 2\" are on our [stainless steel threaded fittings page](stainless-steel-threaded-fittings.html).",
       "Threaded forged fittings suit small-bore lines that need to come apart for maintenance, such as instrument, drain and vent connections. Pick the class to match the pipe wall, and use a union wherever you will need to break the line. Always confirm the thread form, because NPT and BSPT do not seal reliably together.",
       "For a quote, WhatsApp the fitting, size, class, thread (NPT or BSPT) and the quantity."
     ],
@@ -558,11 +578,12 @@
       ],
       [
         "Do you have stainless threaded fittings?",
-        "Yes. S.S forged threaded elbows, tees, crosses, unions, plugs, caps, sockets, half couplings, hex nipples and threadolets are listed in 2000, 3000 and 6000 psi from ¼\" to 2\" on our stainless steel page, with S.S king nipples and long nipples."
+        "Yes. S.S forged threaded elbows, tees, crosses, unions, plugs, caps, sockets, half couplings, hex nipples and threadolets are listed in 2000, 3000 and 6000 psi from ¼\" to 2\" on our [stainless steel threaded fittings page](stainless-steel-threaded-fittings.html), with S.S king nipples and long nipples."
       ]
     ]
   },
   "gi-pipe-fittings": {
+    "name": "GI Pipes & Fittings",
     "title": "GI Pipes & Fittings in Dubai, ¼\" to 6\" | Fakhri Tools",
     "desc": "GI pipe SCH40, SCH80, class B and C, ½\" to 6\", with galvanised fittings ¼\" to 6\": elbows, tees, sockets, unions, nipples. Quote on WhatsApp.",
     "h1": "GI pipe fittings in Dubai: GI pipe and galvanised fittings",
@@ -600,6 +621,7 @@
     "catsTitle": "More fittings, valves and connectors"
   },
   "camlock-couplings": {
+    "name": "Camlock Couplings",
     "title": "Camlock Couplings in Dubai: Type A to F, DC, DP | Fakhri",
     "desc": "Camlocks in aluminium, SS, brass and PVC: types A to F, DC and DP, plus AA, DD, DA, AR, DR, CR, ER and an API tank truck adaptor. Quote on WhatsApp.",
     "h1": "Camlock coupling supplier in Dubai: types A to F, DC and DP",
@@ -621,7 +643,7 @@
       ],
       [
         "Do you have camlock washers?",
-        "Yes. Rubber washers for camlock couplings are listed on our gaskets page."
+        "Yes. Rubber washers for camlock couplings are listed on our [gaskets page](gaskets-sheets.html)."
       ],
       [
         "Do you deliver outside Dubai?",
@@ -630,6 +652,7 @@
     ]
   },
   "hoses": {
+    "name": "Industrial Hoses",
     "title": "Industrial Hoses in Dubai: Composite, Suction, Air | Fakhri",
     "desc": "Composite hose with camlock or flanged ends, oil and water suction and discharge, air, PU, PVC, steel wire and lay flat hose. Quote on WhatsApp.",
     "h1": "Industrial hoses in Dubai: composite, suction, air and PVC hose",
@@ -660,6 +683,7 @@
     ]
   },
   "brass-fittings-valves": {
+    "name": "Brass Pipe Fittings",
     "title": "Brass Pipe Fittings in Dubai: Threaded | Fakhri Tools",
     "desc": "Threaded brass fittings ⅛\" to 2\": elbows, tees, unions, sockets, nipples, bushes, plugs and caps, tank connectors and solenoid valves. Quote on WhatsApp.",
     "h1": "Brass pipe fittings in Dubai: threaded, ⅛\" to 2\"",
@@ -686,6 +710,7 @@
     ]
   },
   "foot-valves": {
+    "name": "Foot Valves & Float Valves",
     "title": "Foot Valves & Float Valves in Dubai | Fakhri Tools",
     "desc": "Foot valves in brass, SS net type, cast iron (PN16 flanged or NPT) and PVC, ½\" to 8\", plus float valves with copper or PVC ball. Quote on WhatsApp.",
     "h1": "Foot valve and float valve supplier in Dubai",
@@ -711,6 +736,7 @@
     ]
   },
   "cock-valves": {
+    "name": "Hose Clamps",
     "title": "Hose Clamps in Dubai: Single, Double & Four Bolt | Fakhri",
     "desc": "Single bolt hose clamps in zinc plated CS or SS, 17-19 mm to 292-304 mm, GI double bolt clamps, hose clips ½\" to 12\", four bolt clamps. Quote on WhatsApp.",
     "h1": "Hose clamp supplier in Dubai: single, double and four bolt clamps",
@@ -732,6 +758,7 @@
     ]
   },
   "acrylic-tubes": {
+    "name": "Acrylic Tubes & Level Cocks",
     "title": "Acrylic Tubes & Tank Level Cocks in Dubai | Fakhri Tools",
     "desc": "Acrylic tube 12 mm to 50 mm, brass tank level cocks 12 mm × ½\" to 50 mm × 2\" and brass tube connectors for tank level gauges. Quote on WhatsApp.",
     "h1": "Clear acrylic tube and tank level cocks in Dubai",
@@ -947,7 +974,7 @@
           "h2": "Tell us the thread type first",
           "p": [
             "Pipe threads are not all the same. NPT and BSPT look alike but do not seal reliably together, so the thread on your pipe must match the fittings and valves it screws into.",
-            "Check the thread on the fittings you already have, or on the equipment you are connecting to, and tell us which thread you need when you send your list. Our NPT vs BSPT guide shows how to tell them apart."
+            "Check the thread on the fittings you already have, or on the equipment you are connecting to, and tell us which thread you need when you send your list. Our [NPT vs BSPT guide](../guides/npt-vs-bspt.html) shows how to tell them apart."
           ]
         },
         {
@@ -1854,7 +1881,7 @@
         {
           "h2": "Other camlock materials",
           "p": [
-            "Types A to F, DC and DP are listed in aluminium, stainless, brass and PVC from ½\" to 6\". Rubber washers for camlocks are on our gaskets page."
+            "Types A to F, DC and DP are listed in aluminium, stainless, brass and PVC from ½\" to 6\". Rubber washers for camlocks are on our [gaskets page](../products/gaskets-sheets.html)."
           ]
         },
         {
