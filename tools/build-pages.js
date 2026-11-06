@@ -45,6 +45,8 @@ function fmt(s, lang, links) {
     return '\u0000' + (keep.length - 1) + '\u0000';
   });
   if (lang === 'ar') h = h.replace(/[\d⅛¼⅜½¾]+(?:[.,]\d+)?&quot;/g, m => '<bdi dir="ltr">' + m + '</bdi>');
+  // [words](page.html): a link to another page of this site (addresses as seen from the page the text is on)
+  if (links) h = h.replace(/\[([^\]]+)\]\(((?:\.\.\/)?[a-z0-9\-\/]+\.html(?:#[a-z0-9\-]+)?)\)/g, '<a href="$2">$1</a>');
   return h.replace(/\u0000(\d+)\u0000/g, (m, i) => keep[+i]);
 }
 // Material, worked out the same way as on the home page (js/main.js materialOf, matText):
@@ -72,13 +74,20 @@ function priceMessage(c, it) {
 // The old address keeps working: it becomes a small page that forwards to the new one.
 const PAGE_URL = {
   'ms-forged-low-pressure-bw-fittings': 'carbon-steel-pipes-fittings',
-  'ss-forged-low-pressure-bw-fittings': 'stainless-steel-pipes-fittings',
   'gi-pipe-fittings': 'gi-pipes-fittings',
   'ss-ms-flanges-forging-casting': 'flanges',
   'instrumentation-fittings-pressure-gas': 'instrumentation-fittings',
-  'universal-couplings-flange-adapter': 'pressure-gauges'
+  'universal-couplings-flange-adapter': 'pressure-gauges',
+  // 2026-11-06: hose clamps had kept the old "cock valves" address; the S.S pipes moved to the S.S pipes address
+  // and the S.S threaded fittings got their own (the old addresses forward)
+  'cock-valves': 'hose-clamps',
+  'butt-weld-fittings': 'stainless-steel-pipes-fittings',
+  'ss-forged-low-pressure-bw-fittings': 'stainless-steel-threaded-fittings'
 };
 const PG = c => PAGE_URL[c.slug] || c.slug;
+// The group's name as search engines read it (structured data, breadcrumbs, link lists): written in
+// tools/seo-content.json ("name"), without brand names or capitals; the owner's own name is used when there is none.
+const NM = c => (SEO[c.slug] && SEO[c.slug].name) || c.name;
 // a category without a main photo shows its first product's photo (as the catalogue does)
 const COV = c => c.cover || (c.items[0] && c.items[0][3]) || '';
 // Old addresses of extra pages that moved
@@ -111,7 +120,7 @@ const alt = (en, ar) => !AR_READY || !ar ? '' : '<link rel="alternate" hreflang=
 
 function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = false, lang = 'en', alts = '' }) {
   // abs: links from the site root (404.html is served at any depth, so it cannot use relative links)
-  const up = abs ? SITE : depth ? '../' : '';
+  const up = abs ? SITE : '../'.repeat(depth || 0);
   return '<!doctype html>\n<html lang="' + lang + '"' + (lang === 'ar' ? ' dir="rtl"' : '') + '>\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n' +
     '<meta name="robots" content="' + (INDEX && !noindex ? 'index, follow' : 'noindex, nofollow') + '">\n' +
     '<title>' + esc(title) + '</title>\n<meta name="description" content="' + esc(desc) + '">\n' +
@@ -152,7 +161,7 @@ const STORE = { '@type': 'HardwareStore', '@id': SITE + '#store',
   sameAs: (CFG.sameAs || []).filter(Boolean).length ? CFG.sameAs.filter(Boolean) : undefined,
   // what we sell, by category (names and pages only; no prices)
   hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Pipes, fittings, flanges and valves',
-    itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: c.name, url: SITE + 'products/' + PG(c) + '.html' })) } };
+    itemListElement: CATS.map(c => ({ '@type': 'OfferCatalog', name: NM(c), url: SITE + 'products/' + PG(c) + '.html' })) } };
 
 function catPage(c, idx) {
   const s = SEO[c.slug] || {};
@@ -160,8 +169,8 @@ function catPage(c, idx) {
     // like the cards on the home page: the group and the name; size, specs and material are chosen in the product window there
     const [name, , , img] = it;
     return '<article class="p">' +
-      '<div class="p__img">' + (img ? '<img src="../' + thumb(img) + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</div>' +
-      '<div class="p__body"><p class="p__cat">' + esc(c.name) + '</p><h2>' + esc(name) + '</h2></div>' +
+      '<a class="p__img" href="' + PROD.get(c.slug + '/' + i).replace('products/', '') + '" tabindex="-1" aria-hidden="true">' + (img ? '<img src="../' + thumb(img) + '" alt="' + esc(name) + '" loading="' + (i < 6 ? 'eager' : 'lazy') + '" decoding="async" width="400" height="400">' : '<span class="p__np">Photo on WhatsApp</span>') + '</a>' +
+      '<div class="p__body"><p class="p__cat">' + esc(c.name) + '</p><h2><a href="' + PROD.get(c.slug + '/' + i).replace('products/', '') + '">' + esc(name) + '</a></h2></div>' +
       '<div class="p__foot"><a class="btn btn--dark" href="../index.html#products/' + c.slug + '/' + i + '"><span><span class="lg">Choose &amp; add</span><span class="sm">Add</span> to quote</span></a>' +
         '<a class="btn btn--wa btn--round" href="' + wa(priceMessage(c, it)) + '" target="_blank" rel="noopener" aria-label="Ask the price of ' + esc(name) + ' on WhatsApp">' + WA_SVG + '</a></div>' +
     '</article>';
@@ -169,18 +178,18 @@ function catPage(c, idx) {
   const others = CATS.filter(o => o.slug !== c.slug);
   const body =
     '<div class="wrap">' +
-      '<nav class="crumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><i>/</i><a href="index.html">Products</a><i>/</i><span>' + esc(c.name) + '</span></nav>' +
+      '<nav class="crumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><i>/</i><a href="index.html">Products</a><i>/</i><span>' + esc(NM(c)) + '</span></nav>' +
       '<header class="hero"><p class="eyebrow">' + esc(famName(c.fam)) + ' · ' + nProducts(c.items.length) + '</p>' +
         '<h1>' + esc(s.h1 || c.name + ' in Al Quoz, Dubai') + '</h1>' +
         '<p class="lead">' + esc(c.desc) + ' Ask Fakhri Tools for a quote on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3.</p>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li><li>Pipe threading, hose cutting and hydraulic hose crimping at the counter</li></ul></header>' +
       '<section class="grid" aria-label="' + esc(c.name) + '">' + items + '</section>' +
-      (s.intro && s.intro.length ? '<section class="guide"><h2>' + esc(s.guideTitle || 'Choosing ' + c.name.toLowerCase()) + '</h2>' + s.intro.map(p => '<p>' + fmt(p, 'en', true) + '</p>').join('') + '</section>' : '') +
+      (s.intro && s.intro.length ? '<section class="guide" id="guide"><h2>' + esc(s.guideTitle || 'Choosing ' + c.name.toLowerCase()) + '</h2>' + s.intro.map(p => '<p>' + fmt(p, 'en', true) + '</p>').join('') + '</section>' : '') +
       (s.faq && s.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + s.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + fmt(a, 'en', true) + '</p></details>').join('') + '</section>' : '') +
       tiles(s.cats, s.catsTitle, '../') +
       '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
         '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I am looking for this part (' + c.name + '): ') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
-      '<section class="more"><h2>More products</h2><div class="more__list">' + others.map(o => '<a href="' + PG(o) + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div>' +
+      '<section class="more"><h2>More products</h2><div class="more__list">' + others.map(o => '<a href="' + PG(o) + '.html">' + esc(NM(o)) + ' <em>' + o.items.length + '</em></a>').join('') + '</div>' +
         (PAGES.length ? '<h2 class="more__h">Services &amp; guides</h2><div class="more__list">' + PAGES.map(pg => '<a href="../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join('') + '</div>' : '') + '</section>' +
     '</div>';
   const title = s.title || fit(c.name + ' in Al Quoz, Dubai | Fakhri Tools', c.name + ' Dubai | Fakhri Tools', c.name + ' | Fakhri Tools');
@@ -189,10 +198,84 @@ function catPage(c, idx) {
     { '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
       { '@type': 'ListItem', position: 2, name: 'Products', item: SITE + 'products/index.html' },
-      { '@type': 'ListItem', position: 3, name: c.name, item: SITE + 'products/' + PG(c) + '.html' }] },
-    { '@type': 'ItemList', name: c.name, numberOfItems: c.items.length, itemListElement: c.items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it[0] })) },
+      { '@type': 'ListItem', position: 3, name: NM(c), item: SITE + 'products/' + PG(c) + '.html' }] },
+    { '@type': 'ItemList', name: NM(c), numberOfItems: c.items.length, itemListElement: c.items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: LABEL.get(c.slug + '/' + i), url: SITE + PROD.get(c.slug + '/' + i) })) },
     STORE] };
   return shell({ title, desc, canon: 'products/' + PG(c) + '.html', body, ld, depth: 1, alts: alt('products/' + PG(c) + '.html', AR_OF['products/' + PG(c) + '.html']) });
+}
+
+
+// ---------- One page per product: products/<category page>/<product>.html ----------
+// So a search for one item ("S.S slip on flange Dubai") lands on a page about that item, not a list of 20.
+// Only the owner's own facts from js/data.js: name, sizes, specs & ratings, material and photo. No prices, no stock claims.
+// Names typed in capitals read as normal words in titles and headings; trade codes (C.S, F/T, ASTM, PN16, WCB…) stay as typed.
+const KEEP = /^(ASTM|CI|CNAF|CR|DC|DP|EPDM|ER|ERW|FIG|NBR|PTFE|PU|PVC|SA|SS|CS|GI|MS|WCB|WPB|Y|QRC|NPT|BSP|BSPT|NBR|LR|SR|ANSI|API|WOG|UV)$/;
+const SMALL = new Set(['and', 'with', 'for', 'of', 'on', 'or', 'to', 'in']);
+const nice = n => /[a-z]/.test(n) ? n : n.split(/(\s+|-)/).map((w, i) => {
+  const core = w.replace(/[^A-Za-z]/g, '');
+  if (!core || /[\d.\/°]/.test(w) || KEEP.test(core)) return w;
+  if (i && SMALL.has(core.toLowerCase())) return w.toLowerCase();
+  return w.replace(/[A-Z]+/, m => m[0] + m.slice(1).toLowerCase());
+}).join('');
+const slugify = t => t.toLowerCase().replace(/\b([a-z])\.([a-z])\b/g, '$1$2').replace(/°/g, '').replace(/[½]/g, '-half')
+  .replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+// brand words the owner has not confirmed stay out of what Google reads (fact sheet: no brand names)
+const NOBRAND = x => !/LUDECKE/i.test(x);
+const prodSpecs = it => CHO.specOpts((it[1] || []).filter(NOBRAND));
+// every product's page address, unique within its category (two products with the same name get their first spec or material added)
+const PROD = new Map();
+CATS.forEach(c => { const used = new Set(); c.items.forEach((it, i) => {
+  const base = slugify(it[0]) || 'product';
+  let sl = base;
+  if (used.has(sl)) { const x = slugify(prodSpecs(it)[0] || ownMat(it) || (it[2] || '').split(' · ')[0].replace(/"/g, 'in')); sl = x && !used.has(base + '-' + x) ? base + '-' + x : base + '-' + (i + 1); }
+  used.add(sl); PROD.set(c.slug + '/' + i, 'products/' + PG(c) + '/' + sl + '.html');
+}); });
+const LABEL = new Map();
+CATS.forEach(c => c.items.forEach((it, i) => {
+  const twin = c.items.some((o, k) => k !== i && o[0] === it[0]);
+  const x = twin ? (prodSpecs(it)[0] || nice(ownMat(it)) || (it[2] || '').split(' · ')[0]) : '';
+  LABEL.set(c.slug + '/' + i, nice(it[0]) + (x ? ' (' + nice(x) + ')' : ''));
+}));
+const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i); return fit(nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', cut(nm, 46) + ' | Fakhri Tools'); };
+
+function prodPage(c, it, i) {
+  const [, , size = '', img] = it, nm = LABEL.get(c.slug + '/' + i), here = PROD.get(c.slug + '/' + i);
+  const specs = prodSpecs(it), mat = nice(matText(it));
+  const sizes = size.split(' · ');
+  const rows = [['Product group', '<a href="../' + PG(c) + '.html">' + esc(NM(c)) + '</a>'],
+    sizes[0] && ['Sizes', esc(sizes[0])], sizes[1] && ['Also', esc(sizes.slice(1).join(' · '))],
+    specs.length && ['Specs &amp; ratings', specs.map(esc).join(', ')], mat && ['Material', esc(mat)]].filter(Boolean);
+  const sum = [sizes[0] && 'sizes ' + sizes[0], specs.length && specs.slice(0, 4).join(', ') + (specs.length > 4 ? ' and more' : ''), mat && mat.toLowerCase().replace(/\b(astm|cnaf|epdm|nbr|ss\d*|ci|cs|gi|ms|wcb|wpb|a\d+\w*|f\d+\w*)\b/g, m => m.toUpperCase())].filter(Boolean).join('; ');
+  const others = c.items.map((o, k) => [o, k]).filter(([, k]) => k !== i);
+  const body = '<div class="wrap">' +
+    '<nav class="crumbs" aria-label="Breadcrumb"><a href="../../index.html">Home</a><i>/</i><a href="../index.html">Products</a><i>/</i><a href="../' + PG(c) + '.html">' + esc(NM(c)) + '</a><i>/</i><span>' + esc(nm) + '</span></nav>' +
+    '<div class="prod">' +
+      '<figure class="prod__img">' + (img ? '<img src="../../' + IMG + esc(img) + '" alt="' + esc(nm) + '" width="800" height="800" fetchpriority="high" decoding="async">' : '<span class="p__np">Photo on WhatsApp</span>') + '</figure>' +
+      '<div class="prod__info"><p class="eyebrow">' + esc(NM(c)) + '</p><h1>' + esc(nm) + '</h1>' +
+        '<p class="lead">' + esc(nm) + (sum ? ': ' + esc(sum) + '.' : '.') + ' Ask Fakhri Tools for a price on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3, Dubai.</p>' +
+        '<dl class="specs">' + rows.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join('') + '</dl>' +
+        '<div class="prod__btns"><a class="btn btn--wa" href="' + wa(priceMessage(c, it)) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Ask the price on WhatsApp</span></a>' +
+          '<a class="btn btn--dark" href="../../index.html#products/' + c.slug + '/' + i + '"><span>Choose size &amp; add to quote</span></a>' +
+          '<a class="btn btn--line" href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a></div>' +
+        '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li></ul>' +
+      '</div></div>' +
+    (SEO[c.slug] && SEO[c.slug].intro && SEO[c.slug].intro.length ? '<section class="guide"><h2>Choosing the right one</h2><p>Sizes, ratings and how to pick between them are explained on our <a href="../' + PG(c) + '.html#guide">guide to ' + esc(NM(c)) + '</a>. Not sure what you need? Send a photo of the old part, or its nameplate, on WhatsApp.</p></section>' : '') +
+    (others.length ? '<section class="fam"><h2>More in ' + esc(NM(c)) + '</h2><div class="cats">' + others.map(([o, k]) =>
+      '<a class="cat" href="../../' + PROD.get(c.slug + '/' + k) + '"><span class="cat__img">' + (o[3] ? '<img src="../../' + thumb(o[3]) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(LABEL.get(c.slug + '/' + k)) + '</b><em>' + esc((o[2] || '').split(' · ')[0]) + '</em></a>').join('') + '</div></section>' : '') +
+    '<section class="ask"><div><h2>Can’t find your size or part?</h2><p>Send a photo of it, or its nameplate, on WhatsApp and we will tell you if we have it.</p></div>' +
+      '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I am looking for this part (' + nm + '): ') + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Send on WhatsApp</span></a></section>' +
+    '<section class="more"><h2>All products</h2><div class="more__list">' + CATS.map(o => '<a href="../' + PG(o) + '.html">' + esc(NM(o)) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
+  '</div>';
+  const tail = ' Ask the price on WhatsApp.', head = nm + ' at Fakhri Tools, Al Quoz, Dubai';
+  const short = sum ? cut(head + ': ' + sum, 154 - tail.length).replace(/[\s;,]*(?:\band)?…$/, '…') : head;
+  const desc = short + (short.endsWith('…') ? '' : '.') + tail;
+  const ld = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Products', item: SITE + 'products/index.html' },
+      { '@type': 'ListItem', position: 3, name: NM(c), item: SITE + 'products/' + PG(c) + '.html' },
+      { '@type': 'ListItem', position: 4, name: nm, item: SITE + here }] }] };
+  return shell({ title: prodTitle(c, it, i), desc, canon: here, body, ld, depth: 2 });
 }
 
 function hubPage() {
@@ -207,7 +290,7 @@ function hubPage() {
     { '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
       { '@type': 'ListItem', position: 2, name: 'Products', item: SITE + 'products/index.html' }] },
-    { '@type': 'ItemList', name: 'Product categories', itemListElement: CATS.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, url: SITE + 'products/' + PG(c) + '.html' })) }, STORE] };
+    { '@type': 'ItemList', name: 'Product categories', itemListElement: CATS.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: NM(c), url: SITE + 'products/' + PG(c) + '.html' })) }, STORE] };
   return shell({ title: (SEO._hub && SEO._hub.title) || 'Pipe Fittings, Flanges & Valves Dubai | Fakhri Tools',
     desc: (SEO._hub && SEO._hub.desc) || 'All ' + total + ' products at our Al Quoz Industrial Area 3 trade counter: valves, flanges, pipe fittings, camlocks, hoses, gaskets and gauges. Quote on WhatsApp.',
     canon: 'products/index.html', body, ld, depth: 1 });
@@ -245,7 +328,7 @@ function extraPage(pg, lang = 'en') {
     (pg.faq && pg.faq.length ? '<section class="faq"><h2>' + T.faq + '</h2>' + pg.faq.map(([q, a]) => '<details><summary>' + fmt(q, lang) + '</summary><p>' + fmt(a, lang, true) + '</p></details>').join('') + '</section>' : '') +
     '<section class="ask"><div><h2>' + esc(pg.askTitle || T.ask) + '</h2><p>' + T.askP + '</p></div>' +
       '<a class="btn btn--wa" href="' + wa(pg.wa || T.hello) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>' + T.send + '</span></a></section>' +
-    '<section class="more"><h2>' + T.products + '</h2><div class="more__list">' + CATS.map(o => '<a href="' + up + 'products/' + PG(o) + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
+    '<section class="more"><h2>' + T.products + '</h2><div class="more__list">' + CATS.map(o => '<a href="' + up + 'products/' + PG(o) + '.html">' + esc(NM(o)) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
     '</div>';
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
@@ -260,6 +343,10 @@ fs.mkdirSync('products', { recursive: true });
 for (const f of fs.readdirSync('products')) if (f.endsWith('.html')) fs.unlinkSync(path.join('products', f));
 CATS.forEach((c, i) => fs.writeFileSync(path.join('products', PG(c) + '.html'), catPage(c, i)));
 fs.writeFileSync(path.join('products', 'index.html'), hubPage());
+// product pages live in one folder per category page; old ones are cleared first
+for (const d of fs.readdirSync('products')) if (fs.statSync(path.join('products', d)).isDirectory())
+  for (const f of fs.readdirSync(path.join('products', d))) if (f.endsWith('.html')) fs.unlinkSync(path.join('products', d, f));
+CATS.forEach(c => c.items.forEach((it, i) => { const f = PROD.get(c.slug + '/' + i); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, prodPage(c, it, i)); }));
 for (const dir of ['services', 'guides']) if (fs.existsSync(dir)) for (const f of fs.readdirSync(dir)) if (f.endsWith('.html')) fs.unlinkSync(path.join(dir, f));
 for (const pg of PAGES) { fs.mkdirSync(path.dirname(pg.path), { recursive: true }); fs.writeFileSync(pg.path, extraPage(pg)); }
 if (fs.existsSync('ar')) for (const f of fs.readdirSync('ar')) if (f.endsWith('.html')) fs.unlinkSync(path.join('ar', f));
@@ -272,19 +359,32 @@ const forward = (from, to) => {
 };
 CATS.forEach(c => { if (PG(c) !== c.slug) forward('products/' + c.slug + '.html', 'products/' + PG(c) + '.html'); });
 Object.entries(MOVED).forEach(([from, to]) => forward(from, to));
+// A product page that no longer exists (product renamed, moved or removed in the editor) forwards to its category page,
+// or to all products, so links Google already knows keep working. tools/product-pages.json remembers every address made.
+const PAGES_FILE = 'tools/product-pages.json';
+const seen = fs.existsSync(PAGES_FILE) ? JSON.parse(fs.readFileSync(PAGES_FILE, 'utf8')) : {};
+const now = new Set(PROD.values());
+for (const [f, cat] of Object.entries(seen)) if (!now.has(f)) {
+  const c = CATS.find(x => x.slug === cat);
+  fs.mkdirSync(path.dirname(f), { recursive: true });
+  forward(f, c ? 'products/' + PG(c) + '.html' : 'products/index.html');
+}
+CATS.forEach(c => c.items.forEach((it, i) => { seen[PROD.get(c.slug + '/' + i)] = c.slug; }));
+fs.writeFileSync(PAGES_FILE, JSON.stringify(Object.fromEntries(Object.entries(seen).sort()), null, 1) + '\n');
 
 // 404 page: GitHub Pages shows it for any missing address, so its links start from the site root.
 fs.writeFileSync('404.html', shell({ title: 'Page not found | Fakhri Tools', desc: 'This page could not be found.', canon: null, ld: null, noindex: true, abs: true,
   body: '<div class="wrap"><header class="hero"><p class="eyebrow">404</p><h1>That page is not here</h1>' +
     '<p class="lead">It may have moved. Pick a category below, or send us the part name or a photo on WhatsApp and we will tell you if we have it.</p></header>' +
-    '<section class="more"><h2>Products</h2><div class="more__list">' + CATS.map(o => '<a href="' + SITE + 'products/' + PG(o) + '.html">' + esc(o.name) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section></div>' }));
+    '<section class="more"><h2>Products</h2><div class="more__list">' + CATS.map(o => '<a href="' + SITE + 'products/' + PG(o) + '.html">' + esc(NM(o)) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section></div>' }));
 
 // Sitemap and robots: only real pages. Helper pages (edit, photo pickers) and 404 stay out.
-const urls = ['', 'products/index.html', ...CATS.map(c => 'products/' + PG(c) + '.html'), ...PAGES.map(pg => pg.path), ...(AR_READY ? AR.pages.map(pg => pg.path) : [])];
+const urls = ['', 'products/index.html', ...CATS.map(c => 'products/' + PG(c) + '.html'), ...PAGES.map(pg => pg.path), ...(AR_READY ? AR.pages.map(pg => pg.path) : []), ...PROD.values()];
 // Category pages also list their product photos, so the photos can show in Google Images with the product name.
 const xml = s => esc(s).replace(/'/g, '&apos;');
 const photos = Object.fromEntries(CATS.map(c => ['products/' + PG(c) + '.html',
   [...new Map(c.items.filter(it => it[3] && fs.existsSync(IMG + it[3])).map(it => [it[3], it[0]])).entries()]]));
+CATS.forEach(c => c.items.forEach((it, i) => { if (it[3] && fs.existsSync(IMG + it[3])) photos[PROD.get(c.slug + '/' + i)] = [[it[3], it[0]]]; }));
 fs.writeFileSync('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc>' + (photos[u] || []).map(([img]) =>
     '<image:image><image:loc>' + xml(SITE + IMG + img.split('/').map(encodeURIComponent).join('/')) + '</image:loc></image:image>').join('') + '</url>').join('\n') + '\n</urlset>\n');
@@ -308,4 +408,4 @@ home = between(home, '<div id="footCats">', '</div>', CATS.map(c => '<a href="pr
 if (home.includes('<div id="footGuides">')) home = between(home, '<div id="footGuides">', '</div>', PAGES.map(pg => '<a href="' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a>').join(''));
 fs.writeFileSync('index.html', home);
 
-console.log('Built', CATS.length, 'category pages + products/index.html (' + total + ' products), 404.html, sitemap.xml (' + urls.length + ' URLs), robots.txt, index.html store details');
+console.log('Built', CATS.length, 'category pages + products/index.html,', PROD.size, 'product pages, 404.html, sitemap.xml (' + urls.length + ' URLs), robots.txt, index.html store details');

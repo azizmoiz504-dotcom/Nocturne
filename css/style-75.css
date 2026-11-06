@@ -1589,7 +1589,7 @@ body.at-form .qbar.is-on{transform:translate(-50%,160%)}
 /* ---------- Phone layout pass (2026-11-04): a call / WhatsApp bar along the bottom, a calmer 3D valve section, shorter sections ---------- */
 @media (max-width:674.25px){
   /* Call and WhatsApp: one bar along the bottom of the screen instead of two big circles over the text */
-  .fabs{left:0;right:0;bottom:0;flex-direction:row;gap:7.5px;padding:6px 9px calc(6px + env(safe-area-inset-bottom));background:rgba(4,12,19,.94);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);border-top:1px solid var(--line)}
+  .fabs{left:0;right:0;bottom:0;flex-direction:row;gap:7.5px;padding:6px 9px calc(6px + env(safe-area-inset-bottom));background:rgba(4,12,19,.97);border-top:1px solid var(--line)}
   body.has-quote .fabs,.fabs{right:0;bottom:0}
   .fab{flex:1;width:auto;height:40.5px;border-radius:10.5px;display:flex;align-items:center;justify-content:center;gap:7.5px;box-shadow:none}
   .fab svg,.fab--wa svg{width:18px;height:18px}
