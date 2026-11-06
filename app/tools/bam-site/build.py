@@ -32,7 +32,7 @@ URL = 'https://ftoolsuae.com/bait-al-maqdis/'   # where it is published: only fo
 DESIGNS = {   # where each look keeps its pages and files, where it is built and where it is published
     'v1': {'dir': '.', 'out': 'bait-al-maqdis', 'url': URL},
     'v2': {'dir': 'v2', 'out': 'bait-al-maqdis-new', 'url': 'https://ftoolsuae.com/bait-al-maqdis-new/'},
-    'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': 'https://azizmoiz504-dotcom.github.io/bait-al-maqdis/'},     # the hardware-store look (Nov 2026), on its own GitHub Pages repo bait-al-maqdis (blue since 5 Nov)
+    'v3': {'dir': 'v3', 'out': 'bait-al-maqdis-v3', 'url': 'https://azizmoiz504-dotcom.github.io/Bait-Al-Maqdis/'},     # the hardware-store look (Nov 2026), on its own GitHub Pages repo bait-al-maqdis (blue since 5 Nov)
 }
 WALL_CELL, WALL_COLS = 96, 25   # the home page's wall of every product: one small square per product in one picture
 BIG = 100            # a range with at least this many products gets a big tile on the home page
