@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% set other = 'en' if lang == 'ar' else 'ar' %}
+{% block main %}
+<section class="rh" id="top">
+  <div class="hero__bg" aria-hidden="true"><i class="hero__glow"></i><i class="hero__grid"></i></div>
+  <div class="wrap rh__in">
+    <div class="rh__copy">
+      <nav class="crumbs mono" aria-label="{{ T('all_ranges') }}"><a href="{{ home }}">{{ T('brand') }}</a><span aria-hidden="true">/</span><a href="{{ home }}#ranges">{{ T('all_ranges') }}</a><span aria-hidden="true">/</span><span>{{ T('range_no', a='%02d' % r.no, b='%02d' % stats.ranges) }}</span></nav>
+      <h1 class="rh__h"><span class="tl"><span class="tl__in">{{ r.name[lang] }}</span></span></h1>
+      {% set alt = r.name[other] %}{% if alt and alt != r.name[lang] %}<p class="rh__alt" lang="{{ other }}"><bdi>{{ alt }}</bdi></p>{% endif %}
+      {% if r.lede[lang] %}<p class="rh__lede">{{ r.lede[lang] }}</p>{% endif %}
+      <dl class="rh__stats mono">
+        <div><dd data-count="{{ r.count }}">{{ r.count }}</dd><dt>{{ T('st_products') }}</dt></div>
+        <div><dd data-count="{{ r.groups|length }}">{{ r.groups|length }}</dd><dt>{{ T('groups') }}</dt></div>
+        <div><dd data-count="{{ r.lines }}">{{ r.lines }}</dd><dt>{{ T('st_lines') }}</dt></div>
+      </dl>
+      <div class="rh__acts">
+        <a class="btn btn--primary" href="#products">{{ T('all_in_range', n=r.count) }}{{ icon('down') }}</a>
+        {% if r.pdf %}<a class="btn btn--ghost" href="{{ root }}{{ r.pdf.file }}" target="_blank" rel="noopener">{{ icon('book') }}{{ T('printed') }} <small class="mono">PDF · {{ r.pdf.mb }} MB</small></a>{% endif %}
+      </div>
+    </div>
+    <figure class="rh__fig" aria-hidden="true">
+      <i class="hang__hook"></i>
+      <span class="rh__tag">
+        <span class="rh__tagno mono">{{ '%02d' % r.no }}</span>
+        {% if r.cover %}<img src="{{ root }}{{ r.cover }}" alt="" width="{{ r.cover_w }}" height="{{ r.cover_h }}" decoding="async">{% endif %}
+        <span class="rh__tagname">{{ r.name[lang] }}</span>
+      </span>
+    </figure>
+  </div>
+  {% if r.feature %}
+  <div class="strip" aria-hidden="true"><div class="strip__track">{% for k in range(2) %}<div class="strip__set">{% for n in range((10 // (r.feature|length)) + 1) %}{% for p in r.feature %}<span class="strip__item"><img src="{{ root }}{{ p.img }}" alt="" loading="lazy" decoding="async"></span>{% endfor %}{% endfor %}</div>{% endfor %}</div></div>
+  {% endif %}
+</section>
+
+<div class="rbar" id="rbar">
+  <div class="wrap rbar__in">
+    <label class="rbar__find">{{ icon('search') }}<input id="rfind" type="search" autocomplete="off" enterkeyhint="search" placeholder="{{ T('filter_ph', name=r.name[lang]) }}" aria-label="{{ T('filter_ph', name=r.name[lang]) }}"><output id="rcount" class="mono" aria-live="polite"></output></label>
+    <nav class="rchips" id="chips" aria-label="{{ T('groups') }}">{% for g in r.groups %}<a class="rchip" href="#g-{{ g.slug }}" data-g="{{ g.slug }}">{{ g.name[lang] }}<span class="mono">{{ g.count }}</span></a>{% endfor %}<i class="rchips__bar" id="chipsBar" aria-hidden="true"></i></nav>
+  </div>
+</div>
+
+<div class="rbody" id="products">
+  <div class="wrap">
+  {% for g in r.groups %}
+  <section class="grp" id="g-{{ g.slug }}" data-g="{{ g.slug }}">
+    <header class="grp__head">
+      <span class="grp__no mono">{{ '%02d' % loop.index }}</span>
+      <h2 class="grp__h"><bdi>{{ g.name[lang] }}</bdi></h2>
+      {% set galt = g.name[other] %}{% if galt and galt != g.name[lang] %}<span class="grp__alt" lang="{{ other }}"><bdi>{{ galt }}</bdi></span>{% endif %}
+      <span class="grp__count mono">{{ g.count_txt }}</span>
+    </header>
+    <div class="grid">
+      {% for p in g['items'] %}
+      <article class="card" data-p="{{ p.slug }}" data-r="{{ r.id }}">
+        <a class="card__link" href="#p={{ p.slug }}">
+          <span class="card__win">{% if p.img %}<img src="{{ root }}{{ p.img }}" alt="" width="{{ p.w }}" height="{{ p.h }}" loading="lazy" decoding="async">{% else %}<span class="card__nophoto">{{ icon('box') }}<small>{{ T('no_photo') }}</small></span>{% endif %}</span>
+          <span class="card__body">
+            <span class="card__tag mono">{{ g.name[lang] }}</span>
+            <span class="card__name"><bdi>{{ p.name[lang] }}</bdi></span>
+            {% set palt = p.name[other] %}{% if palt and palt != p.name[lang] %}<span class="card__alt" lang="{{ other }}"><bdi>{{ palt }}</bdi></span>{% endif %}
+            <span class="card__meta mono">{{ p.summary }}</span>
+            {% if p.codes %}<span class="card__code mono" dir="ltr">{{ p.codes }}</span>{% endif %}
+          </span>
+        </a>
+        <div class="card__foot">
+          <button class="card__add" type="button" data-quick="{{ p.slug }}">{{ icon('plus') }}{{ icon('check') }}<span class="card__addt">{{ T('add_short') }}</span><span class="card__inl">{{ T('in_list') }}</span></button>
+          <a class="card__more" href="#p={{ p.slug }}" aria-label="{{ T('open_product') }}: {{ p.name[lang] }}">{{ T('open_product') }}{{ icon('arrow') }}</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  <div class="rnone" id="rnone" hidden><p></p><button class="btn btn--dark" type="button" data-open-search>{{ icon('search') }}{{ T('search_all') }}</button></div>
+  </div>
+</div>
+
+<section class="rnext">
+  <a class="rnext__a" href="{{ home }}range/{{ nxt.id }}/">
+    <span class="wrap rnext__in">
+      <span class="secno mono"><b>{{ '%02d' % nxt.no }}</b><i></i>{{ T('next_range') }}</span>
+      <span class="rnext__name">{{ nxt.name[lang] }}</span>
+      <span class="rnext__meta mono">{{ nxt.count_txt }} · {{ nxt.groups_txt }}</span>
+      <span class="rnext__img">{% if nxt.cover %}<img src="{{ root }}{{ nxt.cover }}" alt="" width="{{ nxt.cover_w }}" height="{{ nxt.cover_h }}" loading="lazy" decoding="async">{% endif %}</span>
+      <span class="rnext__go" aria-hidden="true">{{ icon('arrow') }}</span>
+    </span>
+  </a>
+  <div class="wrap rmini">{% for x in ranges %}<a class="rmini__a{% if x.id == r.id %} is-on{% endif %}" href="{{ home }}range/{{ x.id }}/">{{ x.name[lang] }}</a>{% endfor %}</div>
+</section>
+{% endblock %}
+{% block data %}<script type="application/json" id="range-data">{{ range_json | safe }}</script>{% endblock %}

@@ -1,0 +1,106 @@
+name: Catalogue app phone test
+# Builds a test copy of the catalogue app, runs it on an Android phone emulator,
+# taps through every screen and saves screenshots to the catalogue-app-test-results branch.
+on:
+  push:
+    branches: [claude/catalogue-app-8uo5lz]
+    paths: ['app/**', 'js/data.js', '.github/workflows/catalogue-app.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  phone-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: a33-swangle, api: 33, gpu: swangle_indirect }
+          - { name: a30-swiftshader, api: 30, gpu: swiftshader_indirect }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the build tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq android-sdk-build-tools android-sdk-platform-23 dalvik-exchange apksigner zipalign imagemagick
+      - name: Make a stand-in Bait Al Maqdis catalogue (the real one is not in this public repository)
+        run: python3 app/ci/fake-bam.py
+      - name: Build a test copy of the app
+        run: |
+          keytool -genkeypair -keystore /tmp/t.jks -storepass testpass -keypass testpass -alias fakhri -keyalg RSA -keysize 2048 -validity 100 -dname CN=test
+          DEBUG=1 app/build.sh /tmp/t.jks testpass
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run on an Android phone
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 30
+        env:
+          RESULTS_BRANCH: catalogue-app-test-results-${{ matrix.name }}
+          PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          emulator-options: -no-window -gpu ${{ matrix.gpu }} -no-snapshot -noaudio -no-boot-anim
+          disable-animations: false
+          script: bash app/ci/phone-test.sh
+      - name: Save the screenshots
+        if: always()
+        run: |
+          mkdir -p app/ci/out && cd app/ci/out && rm -rf .git
+          echo "commit $GITHUB_SHA run $GITHUB_RUN_ID" > run.txt
+          git init -q && git checkout -q -b r && git add -A
+          git -c user.name="catalogue test" -c user.email="test@users.noreply.github.com" commit -qm "Phone test results for $GITHUB_SHA"
+          git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" r:catalogue-app-test-results-${{ matrix.name }}
+
+  # Installs the app the way a salesman does, on newer Android: over the old Fakhri Tools app (v1.5)
+  # and on a phone that never had it, then opens it; then the Mabrook-only app next to it. Built as a normal release (not a test build).
+  install-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { api: 34, gpu: swiftshader_indirect }
+          - { api: 35, gpu: swangle_indirect }   # its emulator stopped answering with swiftshader
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install the build tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq android-sdk-build-tools android-sdk-platform-23 dalvik-exchange apksigner zipalign imagemagick
+      - name: Build the old app (v1.5) and the new one with the same key
+        run: |
+          keytool -genkeypair -keystore /tmp/t.jks -storepass testpass -keypass testpass -alias fakhri -keyalg RSA -keysize 2048 -validity 100 -dname CN=test
+          git worktree add -q /tmp/v15 e1d4014
+          (cd /tmp/v15 && app/build.sh /tmp/t.jks testpass) && cp /tmp/v15/app/build/fakhri-catalogue.apk /tmp/old.apk
+          python3 app/ci/fake-bam.py
+          app/build.sh /tmp/t.jks testpass && cp app/build/fakhri-catalogue.apk /tmp/new.apk
+          SHOP=mabrook app/build.sh /tmp/t.jks testpass && cp app/build/mabrook-catalogue.apk /tmp/mabrook.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and open on an Android phone
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 25
+        env:
+          RESULTS_BRANCH: catalogue-app-test-results-install-${{ matrix.api }}
+          PUSH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          emulator-options: -no-window -gpu ${{ matrix.gpu }} -no-snapshot -noaudio -no-boot-anim
+          script: bash app/ci/install-test.sh /tmp/old.apk /tmp/new.apk /tmp/mabrook.apk
