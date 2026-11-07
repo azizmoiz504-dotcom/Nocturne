@@ -467,7 +467,56 @@ def make_goggles():
         if o.type in ('MESH', 'CURVE') and o.parent is None: o.parent = root
     return dict(axis='Z', sway=55, tilt=16, center=None, base_rot=-28)
 
-cfg = {'cone': make_cone, 'light': make_light, 'tape': make_tape, 'shovel': make_shovel, 'hessian': make_hessian, 'gloves': make_gloves, 'goggles': make_goggles}[item]()
+def make_goggles2():
+    # the earlier design the owner liked: one clear wrap-round lens, a BAM-blue brow, frame and arms, dark tips
+    S = .064   # outline units -> metres
+    def bez(p0, p1, p2, p3, n=24):
+        return [tuple((1-t)**3*p0[i] + 3*(1-t)**2*t*p1[i] + 3*(1-t)*t*t*p2[i] + t**3*p3[i] for i in range(2)) for t in [k / n for k in range(1, n + 1)]]
+    def quad(p0, p1, p2, n=12):
+        return [tuple((1-t)**2*p0[i] + 2*(1-t)*t*p1[i] + t*t*p2[i] for i in range(2)) for t in [k / n for k in range(1, n + 1)]]
+    O = [(-1.18, .22)]
+    O += bez(O[-1], (-.9, .36), (-.3, .34), (0, .3)); O += bez(O[-1], (.3, .34), (.9, .36), (1.18, .22))
+    O += bez(O[-1], (1.22, -.05), (1.08, -.42), (.62, -.44)); O += bez(O[-1], (.3, -.45), (.2, -.3), (.12, -.12))
+    O += quad(O[-1], (0, .02), (-.12, -.12)); O += bez(O[-1], (-.2, -.3), (-.3, -.45), (-.62, -.44))
+    O += bez(O[-1], (-1.08, -.42), (-1.22, -.05), (-1.18, .22))[:-1]
+    K = .32
+    W = lambda x, y, z=0.: (x * S, (K * x * x - z) * S, y * S)     # blender: x across, y depth (back), z up
+    # lens: an n-gon from the outline, cut into small triangles, then bent round the face
+    bm = bmesh.new()
+    vs = [bm.verts.new((x, y, 0)) for x, y in O]
+    f = bm.faces.new(vs)
+    bmesh.ops.triangulate(bm, faces=[f])
+    for _ in range(3): bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=1, use_grid_fill=True)
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    for v in bm.verts: v.co = Vector(W(v.co.x, v.co.y))
+    me = bpy.data.meshes.new('lens'); bm.to_mesh(me); bm.free()
+    for p_ in me.polygons: p_.use_smooth = True
+    lens = obj('lens', me); solid(lens, .0025)
+    lm = mat('clear', (.55, .7, 1.0), .03, **{'Transmission Weight': .78, 'IOR': 1.5, 'Coat Weight': .6, 'Coat Roughness': .02, 'Coat Tint': (.75, .85, 1, 1)})
+    assign(lens, lm)
+    blue = mat('blue', (.012, .085, .78), .25, **{'Coat Weight': 1.0, 'Coat Roughness': .06})
+    dark = mat('dark', (.01, .015, .04), .3, **{'Coat Weight': .6})
+    # rim round the lens and a brow along the top
+    rim = [W(x, y, .01) for x, y in O[::2]] + [W(*O[0], .01)]
+    cu = tube('rim', rim, .036 * S, mat_=blue); cu.data.splines[0].use_cyclic_u = True
+    bp = [W(-1.16 + i * 2.32 / 32, .24 + .1 * math.cos((-1.16 + i * 2.32 / 32) * 1.35) - .02, .03) for i in range(33)]
+    br = tube('brow', bp, .036 * S, mat_=blue)
+    for x in (-1, 1):
+        n_ = lathe('pad', [(0, -.07), (.05, -.05), (.07, 0), (.05, .05), (0, .07)], seg=24)
+        n_.scale = (.6 * S, .8 * S, 1.4 * S); n_.location = W(x * .15, -.16, -.06)
+        assign(n_, dark)
+        z0 = -.32 * 1.18 * 1.18
+        arm = [W(x * 1.17, .18, z0), W(x * 1.2, .17, z0 - .5), W(x * 1.2, .13, z0 - 1.2), W(x * 1.18, 0, z0 - 1.55), W(x * 1.15, -.2, z0 - 1.72)]
+        # z here is depth in outline units; W puts depth on y: rebuild with depth term
+        arm = [(p[0], (-(z) ) * S, p[2]) for p, z in zip(arm, (z0, z0 - .5, z0 - 1.2, z0 - 1.55, z0 - 1.72))]
+        tube('arm', arm, .05 * S, mat_=blue)
+        tip = [(x * 1.18 * S, -(z0 - 1.5) * S, .02 * S), (x * 1.16 * S, -(z0 - 1.65) * S, -.12 * S), (x * 1.15 * S, -(z0 - 1.72) * S, -.2 * S)]
+        tube('tip', tip, .058 * S, mat_=dark)
+    for o in bpy.data.objects:
+        if o.type in ('MESH', 'CURVE') and o.parent is None: o.parent = root
+    return dict(axis='Z', sway=55, tilt=16, center=None, base_rot=-28)
+
+cfg = {'cone': make_cone, 'light': make_light, 'tape': make_tape, 'shovel': make_shovel, 'hessian': make_hessian, 'gloves': make_gloves, 'goggles': make_goggles, 'goggles2': make_goggles2}[item]()
 
 # ---------- framing ----------
 bpy.context.view_layer.update()

@@ -20,7 +20,7 @@
     hessian: { w: 2.6 }, gloves: { w: 2.3 }, goggles: { w: 2.3 }
   };
   // the rendered frames of each item: how many, how they sit in the sheet, and their height to width
-  var SPR = {"cone":{"n":28,"cols":7,"rows":4,"ar":1.614},"gloves":{"n":28,"cols":7,"rows":4,"ar":0.9675},"goggles":{"n":28,"cols":7,"rows":4,"ar":0.5109},"hessian":{"n":28,"cols":7,"rows":4,"ar":0.7025},"light":{"n":28,"cols":7,"rows":4,"ar":2.3834},"shovel":{"n":28,"cols":7,"rows":4,"ar":0.27},"tape":{"n":28,"cols":7,"rows":4,"ar":1.3731}}, SPR_V = '1', FPS = 13;
+  var SPR = {"cone":{"n":28,"cols":7,"rows":4,"ar":1.614},"gloves":{"n":28,"cols":7,"rows":4,"ar":0.9675},"goggles":{"n":28,"cols":7,"rows":4,"ar":0.5},"hessian":{"n":28,"cols":7,"rows":4,"ar":0.7025},"light":{"n":28,"cols":7,"rows":4,"ar":2.3834},"shovel":{"n":28,"cols":7,"rows":4,"ar":0.27},"tape":{"n":28,"cols":7,"rows":4,"ar":1.3731}}, SPR_V = '2', FPS = 13;
   var order = ['cone', 'light', 'tape', 'shovel', 'hessian', 'gloves', 'goggles'];
   // the hero group: p = [x, y, depth], r = turn (radians, anticlockwise), s = size
   var HERO = {
