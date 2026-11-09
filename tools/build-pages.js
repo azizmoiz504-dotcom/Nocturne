@@ -234,7 +234,7 @@ CATS.forEach(c => { const used = new Set(); c.items.forEach((it, i) => {
 // The owner's own name stays on the page too ("Also listed as"), so searches for the shorthand still match.
 const FULL = [[/\bC\.S\b/g, 'Carbon Steel'], [/\bS\.S\b/g, 'Stainless Steel'], [/\bC\.I\b/g, 'Cast Iron'], [/\bD\.I\b/g, 'Ductile Iron'],
   [/\bF\.S\b/g, 'Forged Steel'], [/\bC\.P\b/g, 'Chrome Plated'], [/\bG\.I\b/g, 'GI'], [/\bM\.S\b/g, 'MS'], [/\bSS\b(?!\d)/g, 'Stainless Steel'],
-  [/\s+F\/T\b/g, ', Flanged'], [/\bF\/T\b/g, 'Flanged'], [/\b3PCS\b/g, '3-Piece'], [/\b2PCS\b/g, '2-Piece'], [/\b1PC\b/g, '1-Piece'], [/\b3WAY\b/g, '3-Way'], [/\s+Thread Type\b/g, ', Threaded'], [/^(Stainless|Carbon) Steel Forged\b/, 'Forged $1 Steel']];
+  [/\s+F\/T\b/g, ', Flanged'], [/\bF\/T\b/g, 'Flanged'], [/\b3PCS\b/g, '3-Piece'], [/\b2PCS\b/g, '2-Piece'], [/\b1PCS?\b/g, '1-Piece'], [/\b3WAY\b/g, '3-Way'], [/\s+Thread Type\b/g, ', Threaded'], [/^(Stainless|Carbon) Steel Forged\b/, 'Forged $1 Steel']];
 const full = n => FULL.reduce((t, [r, w]) => t.replace(r, w), n).replace(/\bForged Forged\b/g, 'Forged').replace(/\s{2,}/g, ' ').trim();
 const LABEL = new Map();
 CATS.forEach(c => c.items.forEach((it, i) => {
@@ -249,6 +249,19 @@ const tight = n => n.replace(/(.)\b(Stainless Steel|Ductile Iron|Carbon Steel)\b
   .replace(/High Pressure/g, 'HP').replace(/, Liquid Filled/, '').replace(/ Gear Operated/, '');
 const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i), t = tight(nm); return fit(nm + ' Supplier in Dubai | Fakhri Tools', nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', nm + ' | Fakhri', t + ' in Dubai | Fakhri', t + ' | Fakhri', cut(t, 50) + ' | Fakhri'); };
 
+const COPY = require('./product-copy.js');
+// Size table, plain explanation and buyer questions on each product page (text rules in tools/product-copy.js)
+function prodExtra(c, it, nm, specs, mat) {
+  const list = COPY.sizeList(it[2]), dn = c.fam === 'valves' || c.fam === 'fittings';
+  const tbl = list.length < 2 ? '' : '<section class="guide"><h2>Sizes we supply</h2><p>' + esc(nm) + ' from ' + esc(list[0]) + ' to ' + esc(list[list.length - 1]) +
+    (dn ? ', with the matching DN (nominal size)' : '') + '. Tap a size to ask its price on WhatsApp.</p><div class="tbl tbl--sizes"><table><thead><tr><th scope="col">Size</th>' + (dn ? '<th scope="col">DN</th>' : '') + '<th scope="col">Price</th></tr></thead><tbody>' +
+    list.map(sz => { const one = it.slice(); one[2] = sz; return '<tr><th scope="row">' + esc(sz) + '</th>' + (dn ? '<td>DN' + COPY.DN[sz] + '</td>' : '') +
+      '<td><a href="' + wa(priceMessage(c, one)) + '" target="_blank" rel="noopener" aria-label="Ask the ' + esc(sz) + ' price on WhatsApp">Ask price</a></td></tr>'; }).join('') + '</tbody></table></div></section>';
+  const ab = COPY.about(nm, specs, mat);
+  const about = ab.length ? '<section class="guide"><h2>About this product</h2>' + ab.map(x => '<p>' + esc(x) + '</p>').join('') + '</section>' : '';
+  const q = COPY.faq(nm, (it[2] || '').split(' · ')[0], specs, '../../');
+  return tbl + about + '<section class="faq"><h2>Questions buyers ask</h2>' + q.map(([k, v]) => '<details><summary>' + esc(k) + '</summary><p>' + fmt(v, 'en', true) + '</p></details>').join('') + '</section>';
+}
 function prodPage(c, it, i) {
   const [, , size = '', img] = it, nm = LABEL.get(c.slug + '/' + i), here = PROD.get(c.slug + '/' + i);
   const specs = prodSpecs(it), mat = nice(matText(it));
@@ -271,7 +284,7 @@ function prodPage(c, it, i) {
           '<a class="btn btn--dark" href="../../index.html#products/' + c.slug + '/' + i + '"><span>Choose size &amp; add to quote</span></a>' +
           '<a class="btn btn--line" href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a></div>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li></ul>' +
-      '</div></div>' +
+      '</div></div>' + prodExtra(c, it, nm, specs, matText(it)) +
     (SEO[c.slug] && SEO[c.slug].intro && SEO[c.slug].intro.length ? '<section class="guide"><h2>Choosing the right one</h2><p>Sizes, ratings and how to pick between them are explained on our <a href="../' + PG(c) + '.html#guide">guide to ' + esc(NM(c)) + '</a>. Not sure what you need? Send a photo of the old part, or its nameplate, on WhatsApp.</p>' +
       (HELP(c).length ? '<ul>' + HELP(c).map(pg => '<li><a href="../../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a></li>').join('') + '</ul>' : '') + '</section>' : '') +
     (others.length ? '<section class="fam"><h2>More in ' + esc(NM(c)) + '</h2><div class="cats">' + others.map(([o, k]) =>
