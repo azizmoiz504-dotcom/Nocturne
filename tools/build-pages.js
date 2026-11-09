@@ -230,23 +230,34 @@ CATS.forEach(c => { const used = new Set(); c.items.forEach((it, i) => {
   if (used.has(sl)) { const x = slugify(prodSpecs(it)[0] || ownMat(it) || (it[2] || '').split(' · ')[0].replace(/"/g, 'in')); sl = x && !used.has(base + '-' + x) ? base + '-' + x : base + '-' + (i + 1); }
   used.add(sl); PROD.set(c.slug + '/' + i, 'products/' + PG(c) + '/' + sl + '.html');
 }); });
+// Trade shorthand written out, as buyers type it into Google ("carbon steel gate valve flanged", not "C.S gate valve F/T").
+// The owner's own name stays on the page too ("Also listed as"), so searches for the shorthand still match.
+const FULL = [[/\bC\.S\b/g, 'Carbon Steel'], [/\bS\.S\b/g, 'Stainless Steel'], [/\bC\.I\b/g, 'Cast Iron'], [/\bD\.I\b/g, 'Ductile Iron'],
+  [/\bF\.S\b/g, 'Forged Steel'], [/\bC\.P\b/g, 'Chrome Plated'], [/\bG\.I\b/g, 'GI'], [/\bM\.S\b/g, 'MS'], [/\bSS\b(?!\d)/g, 'Stainless Steel'],
+  [/\s+F\/T\b/g, ', Flanged'], [/\bF\/T\b/g, 'Flanged'], [/\b3PCS\b/g, '3-Piece'], [/\b2PCS\b/g, '2-Piece'], [/\b1PC\b/g, '1-Piece'], [/\b3WAY\b/g, '3-Way'], [/\s+Thread Type\b/g, ', Threaded'], [/^(Stainless|Carbon) Steel Forged\b/, 'Forged $1 Steel']];
+const full = n => FULL.reduce((t, [r, w]) => t.replace(r, w), n).replace(/\bForged Forged\b/g, 'Forged').replace(/\s{2,}/g, ' ').trim();
 const LABEL = new Map();
 CATS.forEach(c => c.items.forEach((it, i) => {
   const twin = c.items.some((o, k) => k !== i && o[0] === it[0]);
   const x = twin ? (prodSpecs(it)[0] || nice(ownMat(it)) || (it[2] || '').split(' · ')[0]) : '';
-  LABEL.set(c.slug + '/' + i, nice(it[0]) + (x ? ' (' + nice(x) + ')' : ''));
+  LABEL.set(c.slug + '/' + i, full(nice(it[0])) + (x ? ' (' + nice(x) + ')' : ''));
 }));
 // the guides and services that cover this category (their "cats" in seo-content.json), linked from its product pages
 const HELP = c => (SEO._pages || []).filter(pg => /^(guides|services)\//.test(pg.path) && (pg.cats || []).includes(c.slug));
-const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i); return fit(nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', cut(nm, 46) + ' | Fakhri Tools'); };
+// shorter wording for a title that would not fit: materials after the first word go back to their short form
+const tight = n => n.replace(/(.)\b(Stainless Steel|Ductile Iron|Carbon Steel)\b/g, (m, a, w) => a + { 'Stainless Steel': 'SS', 'Ductile Iron': 'DI', 'Carbon Steel': 'CS' }[w])
+  .replace(/High Pressure/g, 'HP').replace(/, Liquid Filled/, '').replace(/ Gear Operated/, '');
+const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i), t = tight(nm); return fit(nm + ' Supplier in Dubai | Fakhri Tools', nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', nm + ' | Fakhri', t + ' in Dubai | Fakhri', t + ' | Fakhri', cut(t, 50) + ' | Fakhri'); };
 
 function prodPage(c, it, i) {
   const [, , size = '', img] = it, nm = LABEL.get(c.slug + '/' + i), here = PROD.get(c.slug + '/' + i);
   const specs = prodSpecs(it), mat = nice(matText(it));
   const sizes = size.split(' · ');
+  const trade = nice(it[0]);
   const rows = [['Product group', '<a href="../' + PG(c) + '.html">' + esc(NM(c)) + '</a>'],
     sizes[0] && ['Sizes', esc(sizes[0])], sizes[1] && ['Also', esc(sizes.slice(1).join(' · '))],
-    specs.length && ['Specs &amp; ratings', specs.map(esc).join(', ')], mat && ['Material', esc(mat)]].filter(Boolean);
+    specs.length && ['Specs &amp; ratings', specs.map(esc).join(', ')], mat && ['Material', esc(mat)],
+    full(trade) !== trade && ['Also listed as', esc(trade)]].filter(Boolean);
   const sum = [sizes[0] && 'sizes ' + sizes[0], specs.length && specs.slice(0, 4).join(', ') + (specs.length > 4 ? ' and more' : ''), mat && mat.toLowerCase().replace(/\b(astm|cnaf|epdm|nbr|ss\d*|ci|cs|gi|ms|wcb|wpb|a\d+\w*|f\d+\w*)\b/g, m => m.toUpperCase())].filter(Boolean).join('; ');
   const others = c.items.map((o, k) => [o, k]).filter(([, k]) => k !== i);
   const body = '<div class="wrap">' +
@@ -270,7 +281,7 @@ function prodPage(c, it, i) {
     '<section class="more"><h2>All products</h2><div class="more__list">' + CATS.map(o => '<a href="../' + PG(o) + '.html">' + esc(NM(o)) + ' <em>' + o.items.length + '</em></a>').join('') + '</div></section>' +
   '</div>';
   const tail = ' Ask the price on WhatsApp.', head = nm + ' at Fakhri Tools, Al Quoz, Dubai';
-  const short = sum ? cut(head + ': ' + sum, 154 - tail.length).replace(/[\s;,]*(?:\band)?…$/, '…') : head;
+  const short = sum ? cut(head + ': ' + sum, 152 - tail.length).replace(/[\s;,]*(?:\band)?…$/, '…') : head;
   const desc = short + (short.endsWith('…') ? '' : '.') + tail;
   const ld = { '@context': 'https://schema.org', '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
