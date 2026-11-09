@@ -104,6 +104,7 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30p
 .guide li{margin-top:4.5px}
 .tbl{overflow-x:auto;margin-top:13.5px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .tbl table{border-collapse:collapse;width:100%;font-size:12.75px;min-width:390px}
+.tbl--sizes table{min-width:0}
 .tbl caption{text-align:left;padding:9px 12px;font-weight:600}
 .tbl th,.tbl td{padding:7.5px 10.5px;border-top:1px solid var(--line);text-align:left}
 .tbl th{white-space:nowrap}
