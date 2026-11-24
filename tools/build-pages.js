@@ -130,16 +130,36 @@ function shell({ title, desc, canon, body, ld, depth, noindex = false, abs = fal
     '<meta name="theme-color" content="#040c13">\n<link rel="icon" href="' + up + 'favicon.ico" sizes="48x48">\n<link rel="icon" type="image/png" sizes="192x192" href="' + up + 'assets/favicon-192.png">\n<link rel="icon" type="image/png" sizes="96x96" href="' + up + 'assets/favicon-96.png">\n<link rel="icon" type="image/png" sizes="64x64" href="' + up + 'assets/favicon-64.png">\n<link rel="apple-touch-icon" href="' + up + 'assets/apple-touch-icon.png">\n' +
     '<link rel="stylesheet" href="' + up + 'fonts/fonts.css">\n<link rel="stylesheet" href="' + up + 'css/pages.css?v=' + ver + '" media="(max-width:899.98px)">\n<link rel="stylesheet" href="' + up + 'css/pages-75.css?v=' + ver + '" media="(min-width:900px)">\n' +
     (ld ? '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>\n' : '') + '</head>\n<body>\n' +
-    '<header class="top"><div class="wrap top__in">' +
+    '<div class="util"><div class="wrap util__in"><a href="' + CFG.phoneLink + '">' + esc(CFG.phoneDisplay) + '</a><span class="hide-sm">Wh #8, 8th St, Al Quoz Industrial Area 3, Dubai</span><span class="hide-md">Mon–Sat 7:30am–6:00pm</span></div></div>' +
+    '<header class="top"><div class="top__bar">' +
       '<a class="top__logo" href="' + up + 'index.html"><img src="' + up + 'assets/logo-lockup.png" alt="Fakhri Tools &amp; Workshop Materials Trading LLC" width="320" height="58"></a>' +
-      '<nav class="top__nav"><a href="' + up + 'products/index.html">All products</a><a class="hide-sm" href="' + up + 'index.html#how">How to buy</a><a class="hide-sm" href="' + up + 'index.html#network">Find us</a></nav>' +
-      '<a class="btn btn--call" href="' + CFG.phoneLink + '" aria-label="Call ' + esc(CFG.phoneDisplay) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>' +
-      '<a class="btn btn--wa" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(CFG.whatsappDisplay) + '">' + WA_SVG + '<span>WhatsApp</span></a>' +
-    '</div></header>\n<main>' + body + '</main>\n' +
-    '<footer class="foot"><div class="wrap foot__in">' +
-      '<div><b>Fakhri Tools &amp; Workshop Materials Trading LLC</b><span>B2B trade counter · Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai</span><span>Landmark: next to Ajyad Traditional Kitchen, on its right</span></div>' +
-      '<div><span>Monday to Saturday, 7:30am to 6:00pm · Sunday closed</span><a href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a><a href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener">WhatsApp ' + esc(CFG.whatsappDisplay) + '</a></div>' +
-    '</div></footer>\n</body>\n</html>\n';
+      '<nav class="top__nav" aria-label="Main"><a class="hide-md" href="' + up + 'index.html#about">About</a><a href="' + up + 'products/index.html">Products</a><a class="hide-md" href="' + up + 'index.html#sectors">Industries</a><a class="hide-sm" href="' + up + 'index.html#how">How to buy</a><a class="hide-sm" href="' + up + 'index.html#network">Find us</a><a class="hide-md" href="' + up + 'index.html#contact">Contact</a></nav>' +
+      '<a class="top__call" href="' + CFG.phoneLink + '" aria-label="Call ' + esc(CFG.phoneDisplay) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></a>' +
+      '<a class="top__cta" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener" aria-label="Get a quote on WhatsApp ' + esc(CFG.whatsappDisplay) + '">' + WA_SVG + '<span>Get a quote</span></a>' +
+    '</div></header>\n<main>' + darkHero(body) + '</main>\n' +
+    '<footer class="ft"><div class="wrap">' +
+      '<div class="ft__cols">' +
+        '<div class="ft__about"><a class="ft__logo" href="' + up + 'index.html"><img src="' + up + 'assets/logo-stacked.png" alt="Fakhri Tools" width="200" height="140" loading="lazy"></a><p>A B2B trade counter in Dubai selling pipes, fittings, valves and workshop materials to workshops, contractors and maintenance teams.</p></div>' +
+        '<div><h5>Company</h5><a href="' + up + 'index.html#about">About</a><a href="' + up + 'products/index.html">Products</a><a href="' + up + 'index.html#how">How to buy</a><a href="' + up + 'index.html#network">Find us</a><a href="' + up + 'index.html#contact">Get a quote</a></div>' +
+        '<div class="ft__cats"><h5>Products</h5><div>' + CATS.map(o => '<a href="' + up + 'products/' + PG(o) + '.html">' + esc(NM(o)) + '</a>').join('') + '</div></div>' +
+        '<div><h5>Visit &amp; contact</h5><span>Warehouse 8, 8th Street, Al Quoz Industrial Area 3, Dubai</span><span>Landmark: next to Ajyad Traditional Kitchen, on its right</span><span>Mon–Sat 7:30am–6:00pm · Sunday closed</span>' +
+          '<a href="' + CFG.phoneLink + '">' + esc(CFG.phoneDisplay) + '</a><a href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener">WhatsApp ' + esc(CFG.whatsappDisplay) + '</a></div>' +
+      '</div>' +
+      '<div class="ft__mega" aria-hidden="true">FAKHRI</div>' +
+      '<div class="ft__base"><span>Fakhri Tools &amp; Workshop Materials Trading LLC</span><span>Al Quoz Industrial Area 3, Dubai, UAE</span></div>' +
+    '</div></footer>\n' +
+    '<div class="fabs"><a class="fab fab--call" href="' + CFG.phoneLink + '" aria-label="Call ' + esc(CFG.phoneDisplay) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg><span>Call</span></a>' +
+      '<a class="fab fab--wa" href="' + wa('Hello Fakhri Tools, I would like a quote.') + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(CFG.whatsappDisplay) + '">' + WA_SVG + '<span>WhatsApp</span></a></div>\n' +
+    '</body>\n</html>\n';
+}
+// The top of every page sits on the dark background of the home page (grid lines, red and navy glow);
+// the rest of the page is the light "sheet" with rounded corners, like the home page's catalogue.
+// Page builders mark where the dark part ends with <!--/hero-->.
+function darkHero(body) {
+  const k = body.indexOf('<!--/hero-->'), open = '<div class="wrap">';
+  if (k < 0 || !body.startsWith(open)) return body;
+  return '<section class="dk"><div class="dk__bg" aria-hidden="true"><span class="glow glow--red"></span><span class="glow glow--navy"></span><span class="grid-bg"></span></div>' +
+    body.slice(0, k) + '</div></section><div class="sheet">' + open + body.slice(k + 12) + '</div>';
 }
 
 // The shop, as search engines should read it. Facts from the owner-confirmed fact sheet only.
@@ -182,7 +202,7 @@ function catPage(c, idx) {
       '<header class="hero"><p class="eyebrow">' + esc(famName(c.fam)) + ' · ' + nProducts(c.items.length) + '</p>' +
         '<h1>' + esc(s.h1 || c.name + ' in Al Quoz, Dubai') + '</h1>' +
         '<p class="lead">' + esc(c.desc) + ' Ask Fakhri Tools for a quote on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3.</p>' +
-        '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li><li>Pipe threading, hose cutting and hydraulic hose crimping at the counter</li></ul></header>' +
+        '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li><li>Pipe threading, hose cutting and hydraulic hose crimping at the counter</li></ul></header><!--/hero-->' +
       '<section class="grid" aria-label="' + esc(c.name) + '">' + items + '</section>' +
       (s.intro && s.intro.length ? '<section class="guide" id="guide"><h2>' + esc(s.guideTitle || 'Choosing ' + c.name.toLowerCase()) + '</h2>' + s.intro.map(p => '<p>' + fmt(p, 'en', true) + '</p>').join('') + '</section>' : '') +
       (s.faq && s.faq.length ? '<section class="faq"><h2>Questions buyers ask</h2>' + s.faq.map(([q, a]) => '<details><summary>' + esc(q) + '</summary><p>' + fmt(a, 'en', true) + '</p></details>').join('') + '</section>' : '') +
@@ -314,7 +334,7 @@ function prodPage(c, it, i) {
           '<a class="btn btn--dark" href="../../index.html#products/' + c.slug + '/' + i + '"><span>Choose size &amp; add to quote</span></a>' +
           '<a class="btn btn--line" href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a></div>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li></ul>' +
-      '</div></div>' + prodExtra(c, it, nm, specs, matText(it)) +
+      '</div></div><!--/hero-->' + prodExtra(c, it, nm, specs, matText(it)) +
     (SEO[c.slug] && SEO[c.slug].intro && SEO[c.slug].intro.length ? '<section class="guide"><h2>Choosing the right one</h2><p>Sizes, ratings and how to pick between them are explained on our <a href="../' + PG(c) + '.html#guide">guide to ' + esc(NM(c)) + '</a>. Not sure what you need? Send a photo of the old part, or its nameplate, on WhatsApp.</p>' +
       (HELP(c).length ? '<ul>' + HELP(c).map(pg => '<li><a href="../../' + pg.path + '">' + esc(pg.crumb || pg.h1) + '</a></li>').join('') + '</ul>' : '') + '</section>' : '') +
     (others.length ? '<section class="fam"><h2>More in ' + esc(NM(c)) + '</h2><div class="cats">' + others.map(([o, k]) =>
@@ -339,7 +359,7 @@ function hubPage() {
   const body = '<div class="wrap">' +
     '<nav class="crumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><i>/</i><span>Products</span></nav>' +
     '<header class="hero"><p class="eyebrow">' + total + ' products · ' + CATS.length + ' categories</p><h1>Pipes, fittings, flanges and valves in Al Quoz, Dubai</h1>' +
-      '<p class="lead">Every product we offer at our B2B trade counter in Al Quoz Industrial Area 3. Open a category to see sizes and specs, then ask for a quote on WhatsApp.</p></header>' +
+      '<p class="lead">Every product we offer at our B2B trade counter in Al Quoz Industrial Area 3. Open a category to see sizes and specs, then ask for a quote on WhatsApp.</p></header><!--/hero-->' +
     FAMS.map(f => '<section class="fam"><h2>' + esc(f.name) + '</h2><div class="cats">' +
       CATS.filter(c => c.fam === f.id).map(c => '<a class="cat" href="' + PG(c) + '.html"><span class="cat__img">' + (COV(c) ? '<img src="../' + thumb(COV(c)) + '" alt="" loading="lazy" decoding="async" width="300" height="300">' : '') + '</span><b>' + esc(c.name) + '</b><em>' + nProducts(c.items.length) + '</em></a>').join('') +
     '</div></section>').join('') + '</div>';
@@ -375,7 +395,7 @@ function extraPage(pg, lang = 'en') {
   const body = '<div class="wrap">' +
     '<nav class="crumbs" aria-label="Breadcrumb"><a href="' + (lang === 'ar' ? '' : up) + 'index.html">' + T.home + '</a><i>/</i><span>' + esc(pg.crumb || pg.h1) + '</span></nav>' +
     '<header class="hero">' + (pg.eyebrow ? '<p class="eyebrow">' + esc(pg.eyebrow) + '</p>' : '') + '<h1>' + fmt(pg.h1, lang) + '</h1>' +
-      (pg.lead ? '<p class="lead">' + fmt(pg.lead, lang, true) + '</p>' : '') + '</header>' +
+      (pg.lead ? '<p class="lead">' + fmt(pg.lead, lang, true) + '</p>' : '') + '</header><!--/hero-->' +
     (pg.photo ? '<figure class="shopfront"><img src="' + up + pg.photo.src + '" srcset="' + up + pg.photo.src.replace('.jpg', '-960.jpg') + ' 960w, ' + up + pg.photo.src + ' 1665w" sizes="(min-width:1100px) 1040px, 100vw" alt="' + esc(pg.photo.alt) + '" width="1665" height="945" fetchpriority="high"><figcaption>' + esc(pg.photo.caption || pg.photo.alt) + '</figcaption></figure>' : '') +
     (pg.sections || []).map(s => '<section class="guide">' + (s.h2 ? '<h2>' + fmt(s.h2, lang) + '</h2>' : '') +
       (s.p || []).map(x => '<p>' + fmt(x, lang, true) + '</p>').join('') +
