@@ -175,3 +175,11 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(30p
   .specs div{grid-template-columns:1fr;gap:1.5px;padding:7.5px 10.5px}
   .prod__btns .btn{width:100%;white-space:normal;text-align:center;height:auto;min-height:39px;padding:7.5px 13.5px}
 }
+/* Build your quote (product pages, js/pick.js) */
+.pick{margin-top:16.5px;background:#fff;border:1px solid var(--line);border-radius:13.5px;padding:12px 13.5px 13.5px}
+.pick[hidden]{display:none}
+.pick__h{font-family:'Barlow Semi Condensed',sans-serif;font-size:11.25px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.pick__f{display:grid;grid-template-columns:repeat(auto-fit,minmax(127.5px,1fr));gap:9px;margin-top:7.5px}
+.pick label{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:600}
+.pick select,.pick input{width:100%;height:37.5px;padding:0 9px;border:1.125px solid rgba(6,22,33,.28);border-radius:9px;background:#fff;color:var(--text);font:500 13.5px/1.2 'Barlow',system-ui,sans-serif}
+.pick select:focus,.pick input:focus{outline:1.5px solid #128c4a;outline-offset:1px;border-color:#128c4a}
