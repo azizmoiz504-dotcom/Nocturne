@@ -456,8 +456,8 @@ window.FT_BRANDS = [
   { name: 'Froch', logo: 'assets/brands/froch.png' },
   { name: 'Jazeera Steel', logo: 'https://jazeerasteel.com/images/logo.png' },
   { name: 'TA Chen', logo: 'assets/brands/ta-chen.png' },
-  { name: 'Surya', logo: 'https://suryasteel.net/assets/images/surya-steel/logo/surya-steel-logo.png' },
+  { name: 'Surya', logo: 'assets/brands/surya.png' },
   { name: 'Pegler', logo: 'assets/brands/pegler.png' },
-  { name: 'SPI' },
+  { name: 'SPI', logo: 'assets/brands/spi.png' },
   { name: '100 Tong', logo: 'assets/brands/100-tong.png' }
 ];
