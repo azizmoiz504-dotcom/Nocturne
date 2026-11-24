@@ -149,7 +149,7 @@ const NOTES = [
   [/316/, 'Grade 316 has added molybdenum, which resists chlorides such as seawater and salty air better than 304; 304 is the general-purpose grade.'],
   [/GALVANI[SZ]ED/i, 'It is galvanised (zinc coated) against rust.'],
   [/\bPN\d/, 'PN is the nominal pressure in bar: PN16 means 16 bar.'],
-  [/\bCL(150|300|600)\b/, 'CL150, CL300 and CL600 are ASME pressure classes.'],
+  [/\bCL(150|300|600)\b/, f => { const k = [...new Set(f.match(/\bCL(?:150|300|600)\b/g))]; return k.join(k.length > 2 ? ', ' : ' and ').replace(/, (?=[^,]*$)/, ' and ') + (k.length > 1 ? ' are ASME pressure classes.' : ' is an ASME pressure class.'); }],
   [/\bCL(1000|2000|3000|6000)\b/, 'The class number (CL1000 to CL6000) sets the wall thickness and pressure rating of the fitting.'],
   [/\b\d+K\b/, '5K, 10K and 16K are Japanese (JIS) flange ratings.'],
   [/WOG/, 'WOG is the rated pressure in psi for water, oil and gas.'],
@@ -168,7 +168,7 @@ const SERVICE = [
 function about(name, specs, mat) {
   const t = TYPES.find(([r]) => r.test(name)), e = ENDS.filter(([r]) => r.test(name)).map(x => x[1]);
   const facts = (specs.join(' ') + ' ' + mat).toUpperCase();
-  const n = NOTES.filter(([r]) => r.test(facts)).map(x => x[1]);
+  const n = NOTES.filter(([r]) => r.test(facts)).map(x => typeof x[1] === 'function' ? x[1](facts) : x[1]);
   const p = [];
   if (t || e.length) p.push([t && t[1]].concat(e).filter(Boolean).join(' '));
   if (n.length) p.push(n.join(' '));

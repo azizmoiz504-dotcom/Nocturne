@@ -247,9 +247,10 @@ const HELP = c => (SEO._pages || []).filter(pg => /^(guides|services)\//.test(pg
 // shorter wording for a title that would not fit: materials after the first word go back to their short form
 const tight = n => n.replace(/(.)\b(Stainless Steel|Ductile Iron|Carbon Steel)\b/g, (m, a, w) => a + { 'Stainless Steel': 'SS', 'Ductile Iron': 'DI', 'Carbon Steel': 'CS' }[w])
   .replace(/High Pressure/g, 'HP').replace(/, Liquid Filled/, '').replace(/ Gear Operated/, '');
-const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i), t = tight(nm); return fit(nm + ' Supplier in Dubai | Fakhri Tools', nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', nm + ' | Fakhri', t + ' in Dubai | Fakhri', t + ' | Fakhri', cut(t, 50) + ' | Fakhri'); };
+const prodTitle = (c, it, i) => { const nm = LABEL.get(c.slug + '/' + i), t = tight(nm); return fit(nm + ' Supplier in Dubai, UAE | Fakhri Tools', nm + ' Supplier in Dubai | Fakhri Tools', nm + ' in Dubai, UAE | Fakhri Tools', nm + ' in Dubai | Fakhri Tools', nm + ' Dubai | Fakhri Tools', nm + ' | Fakhri Tools', nm + ' | Fakhri', t + ' in Dubai | Fakhri', t + ' | Fakhri', cut(t, 50) + ' | Fakhri'); };
 
 const COPY = require('./product-copy.js');
+const PICK_V = require('crypto').createHash('md5').update(fs.readFileSync('js/pick.js')).digest('hex').slice(0, 6);
 // Size table, plain explanation and buyer questions on each product page (text rules in tools/product-copy.js)
 function prodExtra(c, it, nm, specs, mat) {
   const list = COPY.sizeList(it[2]), dn = c.fam === 'valves' || c.fam === 'fittings';
@@ -262,6 +263,33 @@ function prodExtra(c, it, nm, specs, mat) {
   const q = COPY.faq(nm, (it[2] || '').split(' · ')[0], specs, '../../');
   return tbl + about + '<section class="faq"><h2>Questions buyers ask</h2>' + q.map(([k, v]) => '<details><summary>' + esc(k) + '</summary><p>' + fmt(v, 'en', true) + '</p></details>').join('') + '</section>';
 }
+// "Build your quote" on each product page (from the 2026-11-23 competitor audit: the top pages let the buyer pick
+// size, rating and material and carry that choice into the enquiry). Only the owner's own choices are offered;
+// "Not sure" sends the same "to confirm (…)" line as before. Hidden until js/pick.js runs; without it the
+// WhatsApp button keeps its default message.
+function picker(c, it, specs) {
+  const base = (it[2] || '').split(' · ')[0], list = COPY.sizeList(it[2]), m = CHO.matOpts(matText(it));
+  const sel = (k, lab, opts, unsure) => '<label><span>' + lab + '</span><select data-k="' + esc(k) + '" data-unsure="' + esc(unsure) + '"><option value="">Not sure</option>' +
+    opts.map(o => '<option>' + esc(o) + '</option>').join('') + '</select></label>';
+  const fixed = (k, v) => '<input type="hidden" data-k="' + esc(k) + '" value="' + esc(v) + '">';
+  const f = [];
+  if (base) {
+    const ranged = /–|TO|, | \/ /.test(base), opts = list.length > 1 ? list : / \/ |, /.test(base) && !/–/.test(base) ? base.split(/ \/ |, /) : [];
+    f.push(!ranged ? fixed('Size', base) : opts.length > 1 ? sel('Size', 'Size', opts, 'to confirm (we offer ' + base + ')')
+      : '<label><span>Size</span><input type="text" data-k="Size" data-unsure="' + esc('to confirm (we offer ' + base + ')') + '" placeholder="' + esc(base) + '" autocomplete="off"></label>');
+  }
+  if (specs.length) f.push(specs.length === 1 ? fixed('Specs & ratings', specs[0]) : sel('Specs & ratings', 'Rating / spec', specs, 'to confirm' + (specs.length <= 6 ? ' (' + specs.join(' / ') + ')' : '')));
+  if (m.opts.length) f.push(m.opts.length === 1 ? fixed('Material', m.full) : sel('Material', 'Material', m.opts, 'to confirm (' + m.opts.join(' / ') + ')'));
+  f.push('<label><span>Quantity</span><input type="number" data-k="Quantity" data-unsure="" min="1" step="1" inputmode="numeric" placeholder="e.g. 10"></label>');
+  return '<div class="pick" hidden data-name="' + esc(it[0]) + '" data-group="' + esc(c.name) + '"><p class="pick__h">Build your quote</p><div class="pick__f">' + f.join('') + '</div></div>';
+}
+// End connection and the standards the owner's material or specs name, for the facts list
+const ENDS = [[/Flanged|F\/T/i, 'Flanged'], [/Socket[- ]?Weld|\(SW\)/i, 'Socket-weld'], [/Butt[- ]?Weld|\bBW\b/i, 'Butt-weld'], [/Grooved/i, 'Grooved'],
+  [/Wafer/i, 'Wafer (between flanges)'], [/\bLug\b/i, 'Lug'], [/Threaded|Thread Type|\bScrewed\b/i, 'Threaded']];
+const endsOf = (nm, specs) => { const t = nm + ' ' + specs.join(' '); const e = ENDS.filter(([r]) => r.test(t)).map(x => x[1]);
+  const th = [/\bBSPT\b/.test(t) ? 'BSPT' : /\bBSP\b/.test(t) && 'BSP', /\bNPT\b/.test(t) && 'NPT'].filter(Boolean);
+  if (th.length && !e.includes('Threaded')) e.push('Threaded'); return e.map(x => x === 'Threaded' && th.length ? 'Threaded (' + th.join(' / ') + ')' : x).join(' / '); };
+const stdOf = (mat, specs) => [...new Set(((mat || '') + ' ' + specs.join(' ')).match(/\b(?:ASTM|ASME|ANSI|API|DIN|BS|EN|JIS) ?[A-Z]?\d+(?:\.\d+)?\b/g) || [])].join(', ');
 function prodPage(c, it, i) {
   const [, , size = '', img] = it, nm = LABEL.get(c.slug + '/' + i), here = PROD.get(c.slug + '/' + i);
   const specs = prodSpecs(it), mat = nice(matText(it));
@@ -269,7 +297,9 @@ function prodPage(c, it, i) {
   const trade = nice(it[0]);
   const rows = [['Product group', '<a href="../' + PG(c) + '.html">' + esc(NM(c)) + '</a>'],
     sizes[0] && ['Sizes', esc(sizes[0])], sizes[1] && ['Also', esc(sizes.slice(1).join(' · '))],
+    (() => { const l = COPY.sizeList(size); return l.length > 1 && COPY.DN[l[0]] && (c.fam === 'valves' || c.fam === 'fittings') && ['Nominal size', 'DN' + COPY.DN[l[0]] + ' – DN' + COPY.DN[l[l.length - 1]]]; })(),
     specs.length && ['Specs &amp; ratings', specs.map(esc).join(', ')], mat && ['Material', esc(mat)],
+    endsOf(nm, specs) && ['End connection', esc(endsOf(nm, specs))], stdOf(mat, specs) && ['Standard', esc(stdOf(mat, specs))],
     full(trade) !== trade && ['Also listed as', esc(trade)]].filter(Boolean);
   const sum = [sizes[0] && 'sizes ' + sizes[0], specs.length && specs.slice(0, 4).join(', ') + (specs.length > 4 ? ' and more' : ''), mat && mat.toLowerCase().replace(/\b(astm|cnaf|epdm|nbr|ss\d*|ci|cs|gi|ms|wcb|wpb|a\d+\w*|f\d+\w*)\b/g, m => m.toUpperCase())].filter(Boolean).join('; ');
   const others = c.items.map((o, k) => [o, k]).filter(([, k]) => k !== i);
@@ -278,9 +308,9 @@ function prodPage(c, it, i) {
     '<div class="prod">' +
       '<figure class="prod__img">' + (img ? '<img src="../../' + IMG + esc(img) + '" alt="' + esc(nm) + '" width="800" height="800" fetchpriority="high" decoding="async">' : '<span class="p__np">Photo on WhatsApp</span>') + '</figure>' +
       '<div class="prod__info"><p class="eyebrow">' + esc(NM(c)) + '</p><h1>' + esc(nm) + '</h1>' +
-        '<p class="lead">' + esc(nm) + (sum ? ': ' + esc(sum) + '.' : '.') + ' Ask Fakhri Tools for a price on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3, Dubai.</p>' +
-        '<dl class="specs">' + rows.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join('') + '</dl>' +
-        '<div class="prod__btns"><a class="btn btn--wa" href="' + wa(priceMessage(c, it)) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Ask the price on WhatsApp</span></a>' +
+        '<p class="lead">' + esc(nm) + (sum ? ': ' + esc(sum) + '.' : '.') + ' Ask Fakhri Tools for a price on WhatsApp, by phone or at our trade counter in Al Quoz Industrial Area 3, Dubai, UAE.</p>' +
+        '<dl class="specs">' + rows.map(([k, v]) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>').join('') + '</dl>' + picker(c, it, specs) +
+        '<div class="prod__btns"><a class="btn btn--wa" id="pickGo" href="' + wa(priceMessage(c, it)) + '" target="_blank" rel="noopener">' + WA_SVG + '<span>Ask the price on WhatsApp</span></a>' +
           '<a class="btn btn--dark" href="../../index.html#products/' + c.slug + '/' + i + '"><span>Choose size &amp; add to quote</span></a>' +
           '<a class="btn btn--line" href="' + CFG.phoneLink + '">Call ' + esc(CFG.phoneDisplay) + '</a></div>' +
         '<ul class="points"><li>Overnight WhatsApp messages answered by 7:30am</li><li>UAE-wide delivery on orders from AED 5,000</li></ul>' +
@@ -302,7 +332,7 @@ function prodPage(c, it, i) {
       { '@type': 'ListItem', position: 2, name: 'Products', item: SITE + 'products/index.html' },
       { '@type': 'ListItem', position: 3, name: NM(c), item: SITE + 'products/' + PG(c) + '.html' },
       { '@type': 'ListItem', position: 4, name: nm, item: SITE + here }] }] };
-  return shell({ title: prodTitle(c, it, i), desc, canon: here, body, ld, depth: 2 });
+  return shell({ title: prodTitle(c, it, i), desc, canon: here, body: body + '<script src="../../js/pick.js?v=' + PICK_V + '" defer></script>', ld, depth: 2 });
 }
 
 function hubPage() {
